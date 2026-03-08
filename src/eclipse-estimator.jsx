@@ -5907,8 +5907,8 @@ const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{const s=item.so||sp;const sm=SP[s]||
   const drc=item.drc||0;const dfS=item.dfs||gDrwF||"DF-HNVR";
   const dfI=DRW_FRONTS.find(d=>d.v===dfS);const dfgChg=dfI?.g?DG[dfI.g]||0:0;
   const dfChg=(itemSQ||item.t==="M")?0:dfgChg*drc;
-  const rotQ=(item.rot&&item.rotQ>0)?item.rotQ:0;const brot=item.brot||0;
-  const dbI=DRW_BOX.find(d=>d.v===(gDrwBox||"5/8-STD"));const dbChg=(drc+rotQ+brot)*(dbI?.price||0);
+  const rotQ=(item.rot&&item.rotQ>0)?item.rotQ:0;const rot2Q=(item.rot2&&item.rot2Q>0)?item.rot2Q:0;const brot=item.brot||0;
+  const dbI=DRW_BOX.find(d=>d.v===(gDrwBox||"5/8-STD"));const dbChg=(drc+rotQ+rot2Q+brot)*(dbI?.price||0);
   const rbsChg=item.rbs?87:0;
   const prePly=stockBase+doorChg+dfChg+dbChg+rbsChg;
   const u=prePly*(1+cm/100);
@@ -6024,7 +6024,8 @@ const calcModCost=(item,mods,baseUnitPrice)=>{
     if(m.pct){cost+=baseUnitPrice*(m.pct/100);}
     else{cost+=m.price*(m.input==="check"||m.input==="dims"||m.input==="width"?1:v);}
   });}
-  if(item.rot&&item.rotQ>0){const ro=ROT_OPTIONS.find(r=>r.v===item.rot);if(ro)cost+=ro.price*item.rotQ;}
+  if(item.rot&&item.rotQ>0){const ro=ROT_OPTIONS.find(r=>r.v===item.rot);if(ro){cost+=ro.price*item.rotQ;if(item.rotFeg)cost+=72*item.rotQ;}}
+  if(item.rot2&&item.rot2Q>0){const ro2=ROT_OPTIONS.find(r=>r.v===item.rot2);if(ro2){cost+=ro2.price*item.rot2Q;if(item.rot2Feg)cost+=72*item.rot2Q;}}
   return cost;
 };
 
@@ -6314,7 +6315,7 @@ export default function App(){
   const fl=useCallback(m=>{sNtf(m);setTimeout(()=>sNtf(null),2000)},[]);
 
   const addIt=useCallback((cat,q,z,len,sqin)=>{
-    sItems(p=>[...p,{id:uid(),s:cat.s,t:cat.t,r:cat.r,p:cat.p,q,z,so:null,len:len||0,hng:"",fe:"",ds:"",dc:guessDoors(cat.s,cat.t),drc:guessDrawers(cat.s,cat.t),brot:guessBuiltInROT(cat.s),sqin:sqin||0,rbs:false,mods:{},rot:"",rotQ:0}]);
+    sItems(p=>[...p,{id:uid(),s:cat.s,t:cat.t,r:cat.r,p:cat.p,q,z,so:null,len:len||0,hng:"",fe:"",ds:"",dc:guessDoors(cat.s,cat.t),drc:guessDrawers(cat.s,cat.t),brot:guessBuiltInROT(cat.s),sqin:sqin||0,rbs:false,mods:{},rot:"",rotQ:0,rotFeg:false,rot2:"",rot2Q:0,rot2Feg:false}]);
     fl(`Added ${q}× ${cat.s}${len?` (${len}ft)`:""}${sqin?` (${sqin} sq.in)`:""}`);if(mob)ssAd(false);
   },[fl,mob]);
 
@@ -6541,19 +6542,43 @@ upd(item.id,{mods:newMods});
             </div>}
             {!isMould&&doorChg>0&&<div style={{fontSize:10,color:C.gold,marginBottom:4}}>Door upcharge: {fm(doorChg)} ({item.dc} door{item.dc>1?"s":""} × ${(doorChg/item.dc).toFixed(0)}/door — {(item.ds||door)})</div>}
             {!isMould&&dfChg>0&&<div style={{fontSize:10,color:"#7c3aed",marginBottom:2}}>DF upcharge: {fm(dfChg)} ({item.drc} drw × {(dfChg/(item.drc||1)).toFixed(0)}/drw — {drwF})</div>}
-            {!isMould&&dbChg>0&&(()=>{const rQ=(item.rot&&item.rotQ>0)?item.rotQ:0;const br=item.brot||0;const dbP=DRW_BOX.find(d=>d.v===drwBox)?.price||0;const tot=(item.drc||0)+rQ+br;return<div style={{fontSize:10,color:"#0369a1",marginBottom:2}}>Drw box/guide: {fm(dbChg)} ({item.drc||0} drw{br>0?` + ${br} built-in ROT`:""}{rQ>0?` + ${rQ} mod ROT`:""} = {tot} × ${'{'}dbP}/ea — {drwBox})</div>})()}
+            {!isMould&&dbChg>0&&(()=>{const rQ=(item.rot&&item.rotQ>0)?item.rotQ:0;const r2Q=(item.rot2&&item.rot2Q>0)?item.rot2Q:0;const br=item.brot||0;const dbP=DRW_BOX.find(d=>d.v===drwBox)?.price||0;const tot=(item.drc||0)+rQ+r2Q+br;return<div style={{fontSize:10,color:"#0369a1",marginBottom:2}}>Drw box/guide: {fm(dbChg)} ({item.drc||0} drw{br>0?` + ${br} built-in ROT`:""}{rQ>0?` + ${rQ} ROT`:""}{r2Q>0?` + ${r2Q} FM-ROT`:""} = {tot} × ${'{'}dbP}/ea — {drwBox})</div>})()}
             {plyPct>0&&<div style={{fontSize:10,color:"#b45309",marginBottom:2}}>Plywood +{plyPct}% applied last → {fm(u)}/unit</div>}
-            {!isMould&&!itemSQ&&["B","V","T"].includes(item.t)&&<div style={{display:"flex",gap:6,marginBottom:5,flexWrap:"wrap",alignItems:"flex-end"}}>
-              <div style={{flex:"1 1 180px"}}><label className="lb" style={{color:"#b45309"}}>Roll Out Tray</label>
-                <select className="sel" value={item.rot||""} onChange={e=>{const v=e.target.value;upd(item.id,{rot:v,rotQ:v?Math.max(1,item.rotQ||0):0})}} style={{fontSize:11,...(item.rot?{border:"2px solid #b45309",fontWeight:600}:{})}}>
-                  <option value="">— None —</option>
-                  {ROT_OPTIONS.map(r=><option key={r.v} value={r.v}>{r.v}: {r.l} — ${r.price}/ea</option>)}
-                </select>
+            {!isMould&&!itemSQ&&["B","V","T"].includes(item.t)&&<div style={{marginBottom:5}}>
+              {/* ── Standard ROT ── */}
+              <div style={{display:"flex",gap:6,marginBottom:4,flexWrap:"wrap",alignItems:"flex-end"}}>
+                <div style={{flex:"1 1 180px"}}><label className="lb" style={{color:"#b45309"}}>Roll Out Tray (Standard)</label>
+                  <select className="sel" value={item.rot||""} onChange={e=>{const v=e.target.value;upd(item.id,{rot:v,rotQ:v?Math.max(1,item.rotQ||1):0,rotFeg:v?item.rotFeg:false})}} style={{fontSize:11,...(item.rot?{border:"2px solid #b45309",fontWeight:600}:{})}}>
+                    <option value="">— None —</option>
+                    {ROT_OPTIONS.filter(r=>!r.v.endsWith("-FM")).map(r=><option key={r.v} value={r.v}>{r.v}: {r.l} — ${r.price}/ea</option>)}
+                  </select>
+                </div>
+                {item.rot&&<div style={{flex:"0 0 55px"}}><label className="lb" style={{color:"#b45309"}}>Qty</label>
+                  <input type="number" className="inp" min={1} max={20} value={item.rotQ||1} onChange={e=>upd(item.id,{rotQ:Math.max(1,Math.min(20,+e.target.value))})} style={{textAlign:"center",padding:5,fontSize:12,border:"2px solid #b45309",fontWeight:600}}/>
+                </div>}
+                {item.rot&&item.rotQ>0&&(()=>{const ro=ROT_OPTIONS.find(r=>r.v===item.rot);const feg=item.rotFeg?item.rotQ*72:0;return ro?<div style={{fontSize:10,color:"#b45309",fontWeight:600,alignSelf:"center",padding:"4px 0"}}>{item.rotQ}× ${ro.price}{feg>0?` + $${feg} FEG`:""} = {fm(ro.price*item.rotQ+feg)}</div>:null})()}
               </div>
-              {item.rot&&<div style={{flex:"0 0 55px"}}><label className="lb" style={{color:"#b45309"}}>ROT Qty</label>
-                <input type="number" className="inp" min={1} max={20} value={item.rotQ||1} onChange={e=>upd(item.id,{rotQ:Math.max(1,Math.min(20,+e.target.value))})} style={{textAlign:"center",padding:5,fontSize:12,border:"2px solid #b45309",fontWeight:600}}/>
+              {item.rot&&<div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6,paddingLeft:2}}>
+                <input type="checkbox" id={`rotFeg-${item.id}`} checked={!!item.rotFeg} onChange={e=>upd(item.id,{rotFeg:e.target.checked})} style={{width:13,height:13,cursor:"pointer",accentColor:"#b45309"}}/>
+                <label htmlFor={`rotFeg-${item.id}`} style={{fontSize:10.5,color:"#b45309",cursor:"pointer",fontWeight:item.rotFeg?700:400}}>FEG Upcharge — ${72}/tray{item.rotFeg&&item.rotQ>1?` × ${item.rotQ} = $${72*item.rotQ}`:""}</label>
               </div>}
-              {item.rot&&item.rotQ>0&&(()=>{const ro=ROT_OPTIONS.find(r=>r.v===item.rot);return ro?<div style={{fontSize:10,color:"#b45309",fontWeight:600,alignSelf:"center",padding:"4px 0"}}>{item.rotQ}× ${ro.price} = {fm(ro.price*item.rotQ)}/unit</div>:null})()}
+              {/* ── Floor Mounted ROT ── */}
+              <div style={{display:"flex",gap:6,marginBottom:4,flexWrap:"wrap",alignItems:"flex-end"}}>
+                <div style={{flex:"1 1 180px"}}><label className="lb" style={{color:"#7c5c2e"}}>Roll Out Tray (Floor Mounted)</label>
+                  <select className="sel" value={item.rot2||""} onChange={e=>{const v=e.target.value;upd(item.id,{rot2:v,rot2Q:v?Math.max(1,item.rot2Q||1):0,rot2Feg:v?item.rot2Feg:false})}} style={{fontSize:11,...(item.rot2?{border:"2px solid #7c5c2e",fontWeight:600}:{})}}>
+                    <option value="">— None —</option>
+                    {ROT_OPTIONS.filter(r=>r.v.endsWith("-FM")).map(r=><option key={r.v} value={r.v}>{r.v}: {r.l} — ${r.price}/ea</option>)}
+                  </select>
+                </div>
+                {item.rot2&&<div style={{flex:"0 0 55px"}}><label className="lb" style={{color:"#7c5c2e"}}>Qty</label>
+                  <input type="number" className="inp" min={1} max={20} value={item.rot2Q||1} onChange={e=>upd(item.id,{rot2Q:Math.max(1,Math.min(20,+e.target.value))})} style={{textAlign:"center",padding:5,fontSize:12,border:"2px solid #7c5c2e",fontWeight:600}}/>
+                </div>}
+                {item.rot2&&item.rot2Q>0&&(()=>{const ro2=ROT_OPTIONS.find(r=>r.v===item.rot2);const feg2=item.rot2Feg?item.rot2Q*72:0;return ro2?<div style={{fontSize:10,color:"#7c5c2e",fontWeight:600,alignSelf:"center",padding:"4px 0"}}>{item.rot2Q}× ${ro2.price}{feg2>0?` + $${feg2} FEG`:""} = {fm(ro2.price*item.rot2Q+feg2)}</div>:null})()}
+              </div>
+              {item.rot2&&<div style={{display:"flex",alignItems:"center",gap:5,marginBottom:2,paddingLeft:2}}>
+                <input type="checkbox" id={`rot2Feg-${item.id}`} checked={!!item.rot2Feg} onChange={e=>upd(item.id,{rot2Feg:e.target.checked})} style={{width:13,height:13,cursor:"pointer",accentColor:"#7c5c2e"}}/>
+                <label htmlFor={`rot2Feg-${item.id}`} style={{fontSize:10.5,color:"#7c5c2e",cursor:"pointer",fontWeight:item.rot2Feg?700:400}}>FEG Upcharge — ${72}/tray{item.rot2Feg&&item.rot2Q>1?` × ${item.rot2Q} = $${72*item.rot2Q}`:""}</label>
+              </div>}
             </div>}
             {/* ─── MODIFICATIONS PANEL ─── */}
             {!isMould&&!itemSQ&&applicableMods.length>0&&<div style={{marginBottom:5}}>
