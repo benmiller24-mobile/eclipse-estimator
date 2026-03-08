@@ -5872,10 +5872,10 @@ const SP = {
   "Acrylic HG": 0, "Acrylic Matte": 0, "Recon White Oak": 4,
   "Recon Walnut": 4, "Rustic Hickory": 5,
   "Rustic White Oak": 5, "Rustic Red Oak": 3, "Alder": 12, "Rustic Alder": 17, "Maple": 8,
-  "Select Poplar": 8, "Paint (Std SW)": 10, "Paint (Trend)": 10,
+  "Select Poplar": 8, "Paint (Std SW)": 18, "Paint (Trend)": 18,
   "Cherry": 10, "Rustic Maple": 13, "Rustic Cherry": 15,
   "QS White Oak": 16, "Rift White Oak": 19, "Walnut": 20,
-  "Custom Paint (SW)": 20, "Rustic Walnut": 25,
+  "Custom Paint (SW)": 28, "Rustic Walnut": 25,
 };
 const CX = { "Standard": 0, "Plywood": 10 };
 const TN = { B:"Base", W:"Wall", T:"Tall", V:"Vanity", A:"Accessory", G:"GOLA", M:"Moulding", X:"Other" };
@@ -5973,7 +5973,7 @@ const CABINET_MODS=[
   {code:"RMK",label:"Removable Toe Kick",price:146,unit:"/cab",types:["B","V","T"],group:"Toe Kick",input:"check",excGroup:"tk"},
   {code:"FTK",label:"Flush Toe Kick",price:89,unit:"/face",types:["B","V","T"],group:"Toe Kick",input:"qty",max:4,excGroup:"tk"},
   {code:"NTK",label:"No Toe Kick (box reduced 4\")",price:89,unit:"/cab",types:["B","V","T"],group:"Toe Kick",input:"check",excGroup:"tk"},
-  {code:"RCK",label:"Custom Recessed Toe Kick",price:146,unit:"/side",types:["B","V","T"],group:"Toe Kick",input:"qty",max:4,excGroup:"tk"},
+  {code:"RCK",label:"Custom Recessed Toe Kick",price:146,unit:"/side",types:["B","V","T"],group:"Toe Kick",input:"side",excGroup:"tk"},
   {code:"FWBA",label:"Fill Wall Blind Area",price:146,unit:"/cab",types:["W"],group:"Blind Area",input:"check",skuMatch:/BL|BC/i},
   {code:"FBBA",label:"Fill Base Blind Area",price:232,unit:"/cab",types:["B"],group:"Blind Area",input:"check",skuMatch:/BL|BC/i},
   {code:"FDS",label:"Upgrade to Full Depth Shelves",price:89,unit:"/cab",types:["B","V","T"],group:"Shelves & ROT",input:"check"},
@@ -6022,6 +6022,7 @@ const calcModCost=(item,mods,baseUnitPrice)=>{
   let cost=0;
   if(mods){CABINET_MODS.forEach(m=>{const v=mods[m.code];if(!v)return;
     if(m.pct){cost+=baseUnitPrice*(m.pct/100);}
+    else if(m.input==="side"){const sides=v==="B"?2:1;cost+=m.price*sides;}
     else{cost+=m.price*(m.input==="check"||m.input==="dims"||m.input==="width"?1:v);}
   });}
   if(item.rot&&item.rotQ>0){const ro=ROT_OPTIONS.find(r=>r.v===item.rot);if(ro){cost+=ro.price*item.rotQ;if(item.rotFeg)cost+=72*item.rotQ;}}
@@ -6593,13 +6594,17 @@ upd(item.id,{mods:newMods});
                     <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:4}}>
                       {gMods.map(m=>{const val=item.mods?.[m.code]||0;const isOn=val;
                         return(<div key={m.code} style={{display:"flex",alignItems:"center",gap:5,padding:"3px 6px",borderRadius:4,background:isOn?"#7c3aed14":"transparent",border:`1px solid ${isOn?"#7c3aed44":"transparent"}`}}>
-                          {m.input==="dims"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked){setMod(m.code,{w:"",h:"",d:""})}else{setMod(m.code,false)}}} style={{accentColor:"#1c3aed",margin:0,cursor:"pointer"}}/><span style={{fontSize:"0.8rem",color:isOn?"#1c3aed":"#888"}}>Enabled</span></div>{isOn&&typeof isOn==="object"?<div style={{display:"flex",gap:"4px",marginTop:"4px"}}>{["W","H","D"].map(dim=><label key={dim} style={{display:"flex",flexDirection:"column",alignItems:"center",fontSize:"0.65rem",color:"#666"}}>{dim}<input type="text" value={isOn[dim.toLowerCase()]||""} onChange={e=>{const nv={...isOn};nv[dim.toLowerCase()]=e.target.value;setMod(m.code,nv)}} style={{width:"44px",textAlign:"center",padding:"2px",fontSize:"0.75rem",borderRadius:"3px",border:"1px solid #a6b4a6"}}/></label>)}</div>:null}</div>:m.input==="width"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked)setMod(m.code,true);else setMod(m.code,false)}} style={{accentColor:"#c3aed1"}}/><span style={{fontSize:".85rem",color:isOn?"#c3aed1":"#888"}}>Enabled</span>{isOn!==false&&isOn!==0&&isOn!==undefined?<input type="text" value={typeof isOn==="string"?isOn:""} onChange={e=>setMod(m.code,e.target.value||true)} style={{width:"52px",padding:"2px 4px",border:"1px solid #ccc",borderRadius:"3px",fontSize:".85rem",marginLeft:"4px"}} placeholder="W"/>:null}</div>{m.note?<div style={{fontSize:".7rem",color:"#b08000",marginTop:"2px",fontStyle:"italic"}}>{m.note}</div>:null}</div>:m.input==="check"?
+                          {m.input==="dims"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked){setMod(m.code,{w:"",h:"",d:""})}else{setMod(m.code,false)}}} style={{accentColor:"#1c3aed",margin:0,cursor:"pointer"}}/><span style={{fontSize:"0.8rem",color:isOn?"#1c3aed":"#888"}}>Enabled</span></div>{isOn&&typeof isOn==="object"?<div style={{display:"flex",gap:"4px",marginTop:"4px"}}>{["W","H","D"].map(dim=><label key={dim} style={{display:"flex",flexDirection:"column",alignItems:"center",fontSize:"0.65rem",color:"#666"}}>{dim}<input type="text" value={isOn[dim.toLowerCase()]||""} onChange={e=>{const nv={...isOn};nv[dim.toLowerCase()]=e.target.value;setMod(m.code,nv)}} style={{width:"44px",textAlign:"center",padding:"2px",fontSize:"0.75rem",borderRadius:"3px",border:"1px solid #a6b4a6"}}/></label>)}</div>:null}</div>:m.input==="width"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked)setMod(m.code,true);else setMod(m.code,false)}} style={{accentColor:"#c3aed1"}}/><span style={{fontSize:".85rem",color:isOn?"#c3aed1":"#888"}}>Enabled</span>{isOn!==false&&isOn!==0&&isOn!==undefined?<input type="text" value={typeof isOn==="string"?isOn:""} onChange={e=>setMod(m.code,e.target.value||true)} style={{width:"52px",padding:"2px 4px",border:"1px solid #ccc",borderRadius:"3px",fontSize:".85rem",marginLeft:"4px"}} placeholder="W"/>:null}</div>{m.note?<div style={{fontSize:".7rem",color:"#b08000",marginTop:"2px",fontStyle:"italic"}}>{m.note}</div>:null}</div>:m.input==="side"?
+                            <div style={{display:"flex",gap:3}}>
+                              {[["","—"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} className={`ch2 ${val===v?"on":""}`} onClick={()=>setMod(m.code,v||0)} style={{fontSize:10,padding:"2px 6px",...(val===v&&v?{borderColor:"#7c3aed",color:"#7c3aed",background:"#7c3aed14"}:{})}}>{l}</button>)}
+                            </div>:
+                          m.input==="check"?
                             <input type="checkbox" checked={isOn} onChange={e=>setMod(m.code,e.target.checked?1:0)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
                             <input type="number" min={0} max={m.max||10} value={val} onChange={e=>setMod(m.code,Math.max(0,Math.min(m.max||10,+e.target.value)))} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
                           }
                           <div style={{flex:1,minWidth:0}}>
                             <div style={{fontSize:10,fontWeight:isOn?600:400,color:isOn?"#7c3aed":C.ink,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.code}: {m.label}</div>
-                            <div style={{fontSize:9,color:C.stone}}>{m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.price*(m.input==="check"?1:val))}`:""}</div>
+                            <div style={{fontSize:9,color:C.stone}}>{m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.input==="side"?m.price*(val==="B"?2:1):m.price*(m.input==="check"?1:val))}`:""}</div>
                           </div>
                         </div>);
                       })}
@@ -6614,7 +6619,7 @@ upd(item.id,{mods:newMods});
             </div>}
             {!modsExpanded&&activeMods.length>0&&<div style={{display:"flex",gap:3,flexWrap:"wrap",marginBottom:4}}>
               {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
-                return(<span key={code} className="pl" style={{background:"#7c3aed14",color:"#7c3aed"}}>{m.code}{qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:m.price>0?`+$${m.price*(m.input==="check"?1:qty)}`:""}{typeof qty==="object"?` W:${qty.w||"?"} H:${qty.h||"?"} D:${qty.d||"?"}`:null}</span>);
+                return(<span key={code} className="pl" style={{background:"#7c3aed14",color:"#7c3aed"}}>{m.code}{m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:""}{typeof qty==="object"?` W:${qty.w||"?"} H:${qty.h||"?"} D:${qty.d||"?"}`:null}</span>);
               })}
             </div>}
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
