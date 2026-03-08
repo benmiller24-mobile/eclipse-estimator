@@ -5987,7 +5987,8 @@ const CABINET_MODS=[
   {code:"TIP_ONDR",label:"Tip-On for Drawers (15\"+ wide/deep)",price:189,unit:"/drw",types:["B","V","T"],group:"Drawer Mods",input:"qty",max:10},
   {code:"BBP",label:"Beaded Back Panel (req. FI, not TFL/HPL)",price:100,unit:"/cab",types:["B","V","T","W"],group:"Structure",input:"check"},
   {code:"MOD_SQ",label:"Square Cabinet Mod (h,d) — 30% min",price:0,unit:"%",types:["B","V","T","W"],group:"Structure",input:"dims",pct:30,excGroup:"mod"},
-  {code:"MOD_ANG",label:"Angle Cabinet Mod (h,d,w) — 50% min",price:0,unit:"%",types:["B","V","T","W"],group:"Structure",input:"dims",pct:50,excGroup:"mod"},
+  {code:"MOD_ANG",label:"Angle Cabinet Mod (h,d,w) — 50% min",price:0,unit:"%",types:["B","V","T","W"],group:"Structure",input:"dims",pct:50,excGroup:"mod"},  {code:"FREE_W",label:"Free Width Modification",price:0,unit:"",types:["B","V","T","W"],group:"Structure",input:"width",note:"Only available on approx. 30% of cabinets"},
+
   {code:"ESFL",label:"Extended Side to Floor — Left",price:89,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
   {code:"ESFR",label:"Extended Side to Floor — Right",price:89,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
   {code:"WSL",label:"Wide Stile Left (up to 6\")",price:290,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
@@ -6021,7 +6022,7 @@ const calcModCost=(item,mods,baseUnitPrice)=>{
   let cost=0;
   if(mods){CABINET_MODS.forEach(m=>{const v=mods[m.code];if(!v)return;
     if(m.pct){cost+=baseUnitPrice*(m.pct/100);}
-    else{cost+=m.price*(m.input==="check"||m.input==="dims"?1:v);}
+    else{cost+=m.price*(m.input==="check"||m.input==="dims"||m.input==="width"?1:v);}
   });}
   if(item.rot&&item.rotQ>0){const ro=ROT_OPTIONS.find(r=>r.v===item.rot);if(ro)cost+=ro.price*item.rotQ;}
   return cost;
@@ -6564,7 +6565,7 @@ upd(item.id,{mods:newMods});
                     <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:4}}>
                       {gMods.map(m=>{const val=item.mods?.[m.code]||0;const isOn=val;
                         return(<div key={m.code} style={{display:"flex",alignItems:"center",gap:5,padding:"3px 6px",borderRadius:4,background:isOn?"#7c3aed14":"transparent",border:`1px solid ${isOn?"#7c3aed44":"transparent"}`}}>
-                          {m.input==="dims"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked){setMod(m.code,{w:"",h:"",d:""})}else{setMod(m.code,false)}}} style={{accentColor:"#1c3aed",margin:0,cursor:"pointer"}}/><span style={{fontSize:"0.8rem",color:isOn?"#1c3aed":"#888"}}>Enabled</span></div>{isOn&&typeof isOn==="object"?<div style={{display:"flex",gap:"4px",marginTop:"4px"}}>{["W","H","D"].map(dim=><label key={dim} style={{display:"flex",flexDirection:"column",alignItems:"center",fontSize:"0.65rem",color:"#666"}}>{dim}<input type="text" value={isOn[dim.toLowerCase()]||""} onChange={e=>{const nv={...isOn};nv[dim.toLowerCase()]=e.target.value;setMod(m.code,nv)}} style={{width:"44px",textAlign:"center",padding:"2px",fontSize:"0.75rem",borderRadius:"3px",border:"1px solid #a6b4a6"}}/></label>)}</div>:null}</div>:m.input==="check"?
+                          {m.input==="dims"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked){setMod(m.code,{w:"",h:"",d:""})}else{setMod(m.code,false)}}} style={{accentColor:"#1c3aed",margin:0,cursor:"pointer"}}/><span style={{fontSize:"0.8rem",color:isOn?"#1c3aed":"#888"}}>Enabled</span></div>{isOn&&typeof isOn==="object"?<div style={{display:"flex",gap:"4px",marginTop:"4px"}}>{["W","H","D"].map(dim=><label key={dim} style={{display:"flex",flexDirection:"column",alignItems:"center",fontSize:"0.65rem",color:"#666"}}>{dim}<input type="text" value={isOn[dim.toLowerCase()]||""} onChange={e=>{const nv={...isOn};nv[dim.toLowerCase()]=e.target.value;setMod(m.code,nv)}} style={{width:"44px",textAlign:"center",padding:"2px",fontSize:"0.75rem",borderRadius:"3px",border:"1px solid #a6b4a6"}}/></label>)}</div>:null}</div>:m.input==="width"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked)setMod(m.code,"");else setMod(m.code,false)}} style={{accentColor:"#c3aed1"}}/><span style={{fontSize:".85rem",color:isOn?"#c3aed1":"#888"}}>Enabled</span>{isOn!==false&&isOn!==0&&isOn!==undefined?<input type="text" value={isOn||""} onChange={e=>setMod(m.code,e.target.value||"")} style={{width:"52px",padding:"2px 4px",border:"1px solid #ccc",borderRadius:"3px",fontSize:".85rem",marginLeft:"4px"}} placeholder="W"/>:null}</div>{m.note?<div style={{fontSize:".7rem",color:"#b08000",marginTop:"2px",fontStyle:"italic"}}>{m.note}</div>:null}</div>:m.input==="check"?
                             <input type="checkbox" checked={isOn} onChange={e=>setMod(m.code,e.target.checked?1:0)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
                             <input type="number" min={0} max={m.max||10} value={val} onChange={e=>setMod(m.code,Math.max(0,Math.min(m.max||10,+e.target.value)))} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
                           }
