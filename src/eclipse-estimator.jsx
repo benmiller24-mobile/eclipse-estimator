@@ -5986,10 +5986,10 @@ const CABINET_MODS=[
   {code:"LPDD",label:"Legrabox Plumbing Divided Drawer",price:874,unit:"/drw",types:["B","V"],group:"Drawer Mods",input:"qty",max:6},
   {code:"TIP_ONDR",label:"Tip-On for Drawers (15\"+ wide/deep)",price:189,unit:"/drw",types:["B","V","T"],group:"Drawer Mods",input:"qty",max:10},
   {code:"BBP",label:"Beaded Back Panel (req. FI, not TFL/HPL)",price:100,unit:"/cab",types:["B","V","T","W"],group:"Structure",input:"check"},
-  {code:"MOD_SQ",label:"Square Cabinet Mod (h,d) \u2014 30% min",price:0,unit:"%",types:["B","V","T","W"],group:"Structure",input:"check",pct:30,excGroup:"mod"},
-  {code:"MOD_ANG",label:"Angle Cabinet Mod (h,d,w) \u2014 50% min",price:0,unit:"%",types:["B","V","T","W"],group:"Structure",input:"check",pct:50,excGroup:"mod"},
-  {code:"ESFL",label:"Extended Side to Floor \u2014 Left",price:89,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
-  {code:"ESFR",label:"Extended Side to Floor \u2014 Right",price:89,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
+  {code:"MOD_SQ",label:"Square Cabinet Mod (h,d) — 30% min",price:0,unit:"%",types:["B","V","T","W"],group:"Structure",input:"check",pct:30,excGroup:"mod"},
+  {code:"MOD_ANG",label:"Angle Cabinet Mod (h,d,w) — 50% min",price:0,unit:"%",types:["B","V","T","W"],group:"Structure",input:"check",pct:50,excGroup:"mod"},
+  {code:"ESFL",label:"Extended Side to Floor — Left",price:89,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
+  {code:"ESFR",label:"Extended Side to Floor — Right",price:89,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
   {code:"WSL",label:"Wide Stile Left (up to 6\")",price:290,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
   {code:"WSR",label:"Wide Stile Right (up to 6\")",price:290,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
   {code:"CENTER_STILE",label:"Add Center Stile (3\")",price:200,unit:"/cab",types:["B","V","T","W"],group:"Side Mods",input:"check"},
@@ -6147,15 +6147,42 @@ function guessBuiltInROT(sku){
   return 0;
 }
 const DRW_FRONTS=[
-  {v:"DF-MET",l:"Metropolitan (Slab)"},{v:"DF-S",l:"Slab"},{v:"DF-SCLPT",l:"Sculpted"},
-  {v:"DF-FP",l:"Flat Panel"},{v:"DF-HNVR",l:"Hanover"},{v:"DF-NHVN",l:"New Haven"},
-  {v:"DF-OXRP",l:"Oxford Raised Panel"},{v:"DF-RCMD",l:"Richmond Raised Panel"},
-  {v:"DF-RP",l:"Raised Panel"},{v:"DF-SRP",l:"Shaker Raised Panel"},
-  {v:"DF-SMST",l:"Somerset"},{v:"DF-BCP",l:"Beaded Century"},
-  {v:"DF-CHRS",l:"Charleston"},{v:"DF-MNTG",l:"Montgomery"},
-  {v:"DF-NAPA-V",l:"Napa 5-Piece (Vertical Grain)"},{v:"DF-NAPA-H",l:"Napa 5-Piece (Horizontal Grain)"},
-  {v:"DF-MLBU",l:"Malibu 5-Piece"},
-  {v:"DFS-OXRP",l:"Shaped Oxford"},{v:"DFS-RCMD",l:"Shaped Richmond"},{v:"DFS-SRP",l:"Shaped Shaker"},
+  // One Piece — Group A
+  {v:"DF-MET",l:"Metropolitan (Slab)",g:"A"},{v:"DF-S",l:"Slab",g:"A"},{v:"DF-SCLPT",l:"Sculpted",g:"A"},
+  // 2 1/2" Rail — Group B
+  {v:"DF-BCP",l:"Beaded Century",g:"B"},{v:"DF2.5-BCP",l:"Beaded Century (2.5 rail)",g:"B"},
+  {v:"DF-CHRS",l:"Charleston",g:"B"},
+  {v:"DF-FP",l:"Flat Panel",g:"B"},{v:"DF2.5-SFP",l:"Square Flat Panel (2.5 rail)",g:"B"},
+  {v:"DF-GRNS",l:"Greensboro",g:"B"},{v:"DF2.5-GRNS",l:"Greensboro (2.5 rail)",g:"B"},
+  {v:"DF-HNVR",l:"Hanover",g:"B"},{v:"DF2.5-HNVR",l:"Hanover (2.5 rail)",g:"B"},
+  {v:"DF-MNTG",l:"Montgomery",g:"B"},
+  {v:"DF-NHVN",l:"New Haven",g:"B"},{v:"DF2.5-NHVN",l:"New Haven (2.5 rail)",g:"B"},
+  {v:"DF-OXRP",l:"Oxford Raised Panel",g:"B"},{v:"DF-RCMD",l:"Richmond",g:"B"},
+  {v:"DF-RP",l:"Raised Panel",g:"B"},{v:"DF-SRP",l:"Shaker Raised Panel",g:"B"},
+  {v:"DF-SCDL",l:"Scottsdale",g:"B"},{v:"DF2.5-SCDL",l:"Scottsdale (2.5 rail)",g:"B"},
+  {v:"DF-SFP",l:"Square Flat Panel",g:"B"},
+  {v:"DF-SMST",l:"Somerset",g:"B"},{v:"DF2.5-SMST",l:"Somerset (2.5 rail)",g:"B"},
+  {v:"DF-WARD",l:"Ward",g:"B"},{v:"DF2.5-WARD",l:"Ward (2.5 rail)",g:"B"},
+  {v:"DF-WMTN",l:"Wilmington",g:"B"},{v:"DF2.5-WMTN",l:"Wilmington (2.5 rail)",g:"B"},
+  {v:"DF-AFP",l:"Arch Flat Panel",g:"B"},{v:"DF-ARP",l:"Arch Raised Panel",g:"B"},
+  {v:"DF-CFP",l:"Crown Flat Panel",g:"B"},{v:"DF-CRP",l:"Crown Raised Panel",g:"B"},
+  // 3 1/4" Rail — Group B
+  {v:"DF-ASPN",l:"Aspen",g:"B"},{v:"DF-BRST",l:"Bristol",g:"B"},{v:"DF-HMLN",l:"Hamlin",g:"B"},
+  {v:"DF-HRTG",l:"Heritage",g:"B"},{v:"DF-HTFD",l:"Hartford",g:"B"},{v:"DF-LNCR",l:"Lancaster",g:"B"},
+  {v:"DF-TAHOE",l:"Tahoe",g:"B"},{v:"DF-SUMT",l:"Summit",g:"B"},{v:"DF-STSVL",l:"Statesville",g:"B"},
+  // Narrow Rail — Group B
+  {v:"DF-CNCD",l:"Concord",g:"B"},{v:"DF-RMLB",l:"Reeded Malibu",g:"B"},
+  {v:"DF-NAPA-V",l:"Napa 5-Piece (Vertical)",g:"B"},{v:"DF-NAPA-H",l:"Napa 5-Piece (Horizontal)",g:"B"},
+  {v:"DF-MLBU",l:"Malibu 5-Piece",g:"B"},
+  // Mitered — Group B
+  {v:"DF-ASVL",l:"Asherville Miter",g:"B"},{v:"DF-BDFD",l:"Bradford Miter",g:"B"},
+  {v:"DF-DLTN",l:"Dalton Miter",g:"B"},{v:"DF-ESSX",l:"Essex Miter",g:"B"},
+  {v:"DF-GLBK",l:"Glenbrook Miter",g:"B"},{v:"DF-KNDL",l:"Kendall Miter",g:"B"},
+  {v:"DF-LNDS",l:"Landes Miter",g:"B"},{v:"DF-PTLN",l:"Portland Miter",g:"B"},
+  {v:"DF-MNCH",l:"Manchester Miter",g:"B"},{v:"DF-SVNH",l:"Savannah Miter",g:"B"},
+  {v:"DF-WNSR",l:"Windsor Miter",g:"B"},{v:"DF-SHBY",l:"Shelby Miter",g:"B"},
+  // Shaped — Group A
+  {v:"DFS-OXRP",l:"Shaped Oxford",g:"A"},{v:"DFS-RCMD",l:"Shaped Richmond",g:"A"},{v:"DFS-SRP",l:"Shaped Shaker",g:"A"},
 ];
 const GLAZES=[
   {v:"NONE",l:"No Glazes"},{v:"BLK-GL",l:"Black Glaze"},{v:"MCH-GL",l:"Mocha Glaze"},
@@ -6389,7 +6416,7 @@ export default function App(){
                 {DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} — Grp {d.g} ${DG[d.g]||0}/dr{d.x?` +$${d.x}/dr`:""}</option>)}
               </select></div>
               <div><label className="lb">Drawer Front</label><select className="sel" value={drwF} onChange={e=>sDrwF(e.target.value)}>
-                {DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}</option>)}
+                {DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}{d.g!=="A"?` — $${DG[d.g]||0}/drw`:""}</option>)}
               </select></div>
               <div><label className="lb">Finish / Glaze</label><select className="sel" value={glaze} onChange={e=>sGlaze(e.target.value)}>
                 {GLAZES.map(g=><option key={g.v} value={g.v}>{g.l}</option>)}
@@ -6655,7 +6682,7 @@ upd(item.id,{mods:newMods});
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
         <div><label className="lb">Species / Material</label><select className="sel" value={sp} onChange={e=>sSp(e.target.value)}>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}</select></div>
         <div><label className="lb">Door Style</label><select className="sel" value={door} onChange={e=>sDoor(e.target.value)}>{DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} — Grp {d.g} ${DG[d.g]||0}/dr{d.x?` +$${d.x}/dr`:""}</option>)}</select></div>
-        <div><label className="lb">Drawer Front</label><select className="sel" value={drwF} onChange={e=>sDrwF(e.target.value)}>{DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}</option>)}</select></div>
+        <div><label className="lb">Drawer Front</label><select className="sel" value={drwF} onChange={e=>sDrwF(e.target.value)}>{DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}{d.g!=="A"?` — $${DG[d.g]||0}/drw`:""}</option>)}</select></div>
         <div><label className="lb">Glaze</label><select className="sel" value={glaze} onChange={e=>sGlaze(e.target.value)}>{GLAZES.map(g=><option key={g.v} value={g.v}>{g.l}</option>)}</select></div>
         <div><label className="lb">Highlight</label><select className="sel" value={highlight} onChange={e=>sHL(e.target.value)}>{HIGHLIGHTS.map(h=><option key={h.v} value={h.v}>{h.l}</option>)}</select></div>
         <div><label className="lb">Character Technique 1</label><select className="sel" value={charT1} onChange={e=>sCT1(e.target.value)}>{CHAR_TECH.map(c=><option key={c.v} value={c.v}>{c.l}</option>)}</select></div>
