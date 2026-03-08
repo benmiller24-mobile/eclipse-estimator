@@ -5969,6 +5969,37 @@ const DOORS=[
   {v:"BD1",l:"Bridged - Drawer+Door",g:"A"},{v:"BD2",l:"Bridged - 2 Drawer Stack",g:"A"},
   {v:"BD3",l:"Bridged - 3 Drawer Stack",g:"A"},{v:"BD4",l:"Bridged - 4 Drawer Stack",g:"A"},
 ];
+const CABINET_MODS=[
+  {code:"RMK",label:"Removable Toe Kick",price:146,unit:"/cab",types:["B","V","T"],group:"Toe Kick",input:"check",excGroup:"tk"},
+  {code:"FTK",label:"Flush Toe Kick",price:89,unit:"/face",types:["B","V","T"],group:"Toe Kick",input:"qty",max:4,excGroup:"tk"},
+  {code:"NTK",label:"No Toe Kick (box reduced 4\")",price:89,unit:"/cab",types:["B","V","T"],group:"Toe Kick",input:"check",excGroup:"tk"},
+  {code:"RCK",label:"Custom Recessed Toe Kick",price:146,unit:"/side",types:["B","V","T"],group:"Toe Kick",input:"qty",max:4,excGroup:"tk"},
+  {code:"FWBA",label:"Fill Wall Blind Area",price:146,unit:"/cab",types:["W"],group:"Blind Area",input:"check",skuMatch:/BL|BC/i},
+  {code:"FBBA",label:"Fill Base Blind Area",price:232,unit:"/cab",types:["B"],group:"Blind Area",input:"check",skuMatch:/BL|BC/i},
+  {code:"FDS",label:"Upgrade to Full Depth Shelves",price:89,unit:"/cab",types:["B","V","T"],group:"Shelves & ROT",input:"check"},
+  {code:"CROT",label:"Custom Height ROT (4\" & 7\")",price:42,unit:"/ROT",types:["B","V","T"],group:"Shelves & ROT",input:"qty",max:10},
+  {code:"FHD",label:"Full Height Door",price:0,unit:"",types:["B","V","T","W"],group:"Door Mods",input:"check"},
+  {code:"SEND_LOOSE",label:"Ship Doors/Drawer Fronts Loose",price:100,unit:"/ea",types:["B","V","T","W"],group:"Door Mods",input:"qty",max:20},
+  {code:"TIP_OND",label:"Tip-On for Doors",price:42,unit:"/door",types:["B","V","T","W"],group:"Door Mods",input:"qty",max:10},
+  {code:"PAD",label:"Plumbing Access Drawer (24\"-42\" wide)",price:130,unit:"/drw",types:["B","V"],group:"Drawer Mods",input:"qty",max:6},
+  {code:"SMPDD",label:"Sim Metal Plumbing Divided Drawer",price:130,unit:"/drw",types:["B","V"],group:"Drawer Mods",input:"qty",max:6},
+  {code:"LPDD",label:"Legrabox Plumbing Divided Drawer",price:874,unit:"/drw",types:["B","V"],group:"Drawer Mods",input:"qty",max:6},
+  {code:"TIP_ONDR",label:"Tip-On for Drawers (15\"+ wide/deep)",price:189,unit:"/drw",types:["B","V","T"],group:"Drawer Mods",input:"qty",max:10},
+  {code:"BBP",label:"Beaded Back Panel (req. FI, not TFL/HPL)",price:100,unit:"/cab",types:["B","V","T","W"],group:"Structure",input:"check"},
+  {code:"MOD_SQ",label:"Square Cabinet Mod (h,d) \u2014 30% min",price:0,unit:"%",types:["B","V","T","W"],group:"Structure",input:"check",pct:30,excGroup:"mod"},
+  {code:"MOD_ANG",label:"Angle Cabinet Mod (h,d,w) \u2014 50% min",price:0,unit:"%",types:["B","V","T","W"],group:"Structure",input:"check",pct:50,excGroup:"mod"},
+  {code:"ESFL",label:"Extended Side to Floor \u2014 Left",price:89,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
+  {code:"ESFR",label:"Extended Side to Floor \u2014 Right",price:89,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
+  {code:"WSL",label:"Wide Stile Left (up to 6\")",price:290,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
+  {code:"WSR",label:"Wide Stile Right (up to 6\")",price:290,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
+  {code:"CENTER_STILE",label:"Add Center Stile (3\")",price:200,unit:"/cab",types:["B","V","T","W"],group:"Side Mods",input:"check"},
+  {code:"PTKL",label:"Prep Toe Kick Lighting",price:60,unit:"/cab",types:["B","V","T"],group:"Lighting Prep",input:"check"},
+  {code:"PFSL",label:"Prep Floating Shelf Lighting",price:100,unit:"/shelf",types:["W"],group:"Lighting Prep",input:"check",skuMatch:/FL/i},
+  {code:"PWL",label:"Prep Wall Cabinet Lighting",price:60,unit:"/cab",types:["W"],group:"Lighting Prep",input:"check"},
+  {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/cab",types:["W"],group:"Lighting Prep",input:"check"},
+  {code:"FF_TOP",label:"False Front Top (removes top drawer)",price:100,unit:"/cab",types:["B","V","T"],group:"Other",input:"check"},
+];
+
 const ROT_OPTIONS=[
   {v:"DROT5/8",l:'5/8" Hardwood Dovetail',price:268},
   {v:"DROT3/4",l:'3/4" Premium Dovetail',price:325},
@@ -5981,6 +6012,21 @@ const ROT_OPTIONS=[
   {v:"LROT-FM",l:'Legrabox Floor Mounted',price:552},
   {v:"SROT5/8-FM",l:'5/8" Sim Metal Floor Mounted',price:388},
 ];
+const getApplicableMods=(item)=>CABINET_MODS.filter(m=>{
+  if(!m.types.includes(item.t))return false;
+  if(m.skuMatch&&!m.skuMatch.test(item.s))return false;
+  return true;
+});
+const calcModCost=(item,mods,baseUnitPrice)=>{
+  let cost=0;
+  if(mods){CABINET_MODS.forEach(m=>{const v=mods[m.code];if(!v)return;
+    if(m.pct){cost+=baseUnitPrice*(m.pct/100);}
+    else{cost+=m.price*(m.input==="check"?1:v);}
+  });}
+  if(item.rot&&item.rotQ>0){const ro=ROT_OPTIONS.find(r=>r.v===item.rot);if(ro)cost+=ro.price*item.rotQ;}
+  return cost;
+};
+
 
 /* ── Cabinet width extractor ─────────────────────────────────
    Strips suffixes (-RT, -FHD, -2D, -1DR, -WS, -MC, -S, -PH, -SS)
@@ -6232,6 +6278,7 @@ export default function App(){
   const[items,sItems]=useState([]),[vw,sVw]=useState("list");
   const[sMg,ssMg]=useState(false),[sSv,ssSv]=useState(false),[sAd,ssAd]=useState(false),[sCf,ssCf]=useState(false);
   const[tf,sTf]=useState("all"),[ntf,sNtf]=useState(null),[mob,sMob]=useState(false);
+  const[modOpen,sModOpen]=useState(null);
 
   useEffect(()=>{const c=()=>sMob(window.innerWidth<=768);c();window.addEventListener("resize",c);return()=>window.removeEventListener("resize",c)},[]);
   const fl=useCallback(m=>{sNtf(m);setTimeout(()=>sNtf(null),2000)},[]);
@@ -6247,8 +6294,8 @@ export default function App(){
 
   const comp=useMemo(()=>{
     let tot=0,un=0,ov=0;const zm={},tm={};
-    items.forEach(it=>{const{t:total}=cp(it,sp,cx,door,drwF,drwBox);tot+=total;un+=it.q;tm[it.t]=(tm[it.t]||0)+it.q;
-    if(!zm[it.z])zm[it.z]={c:0,n:0};zm[it.z].c+=total;zm[it.z].n+=it.q;if(it.so)ov++});
+    items.forEach(it=>{const{u,t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);const mc=mcRaw*(1+plyPct/100)*it.q;const itemTotal=total+mc;tot+=itemTotal;un+=it.q;tm[it.t]=(tm[it.t]||0)+it.q;
+    if(!zm[it.z])zm[it.z]={c:0,n:0};zm[it.z].c+=itemTotal;zm[it.z].n+=it.q;if(it.so)ov++});
     return{tot,un,n:items.length,zm,tm,zc:Object.keys(zm).length,ov};
   },[items,sp,cx,door]);
 
@@ -6392,6 +6439,15 @@ export default function App(){
       </div>):(
         <div>{fi.map(item=>{
           const{u,t:total,stockBase,prePly,doorChg,dfChg,dbChg,itemSQ,rbsChg,plyPct}=cp(item,sp,cx,door,drwF,drwBox);const ov=!!item.so;const isMould=item.t==="M";const isWall=item.t==="W";
+const mcRaw=calcModCost(item,item.mods,stockBase);const modCost=mcRaw*(1+plyPct/100);const modTotal=modCost*item.q;const grandTotal=total+modTotal;
+const activeMods=item.mods?Object.entries(item.mods).filter(([,v])=>v>0):[];
+const applicableMods=getApplicableMods(item);const modsExpanded=modOpen===item.id;
+const setMod=(code,val)=>{const newMods={...(item.mods||{})};
+const modDef=CABINET_MODS.find(m=>m.code===code);
+if(modDef?.excGroup&&val){CABINET_MODS.filter(m=>m.excGroup===modDef.excGroup&&m.code!==code).forEach(m=>{delete newMods[m.code]});}
+if(val)newMods[code]=val;else delete newMods[code];
+upd(item.id,{mods:newMods});
+};
           return(<div key={item.id} className={`ic${ov?" ov":""}`}>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
               <div>
@@ -6468,12 +6524,49 @@ export default function App(){
               </div>}
               {item.rot&&item.rotQ>0&&(()=>{const ro=ROT_OPTIONS.find(r=>r.v===item.rot);return ro?<div style={{fontSize:10,color:"#b45309",fontWeight:600,alignSelf:"center",padding:"4px 0"}}>{item.rotQ}× ${ro.price} = {fm(ro.price*item.rotQ)}/unit</div>:null})()}
             </div>}
+            {/* MODIFICATIONS PANEL */}
+            {!isMould&&!itemSQ&&applicableMods.length>0&&<div style={{marginBottom:5}}>
+              <button onClick={()=>sModOpen(modsExpanded?null:item.id)} style={{background:activeMods.length>0?"#7c3aed14":"transparent",border:`1px solid ${activeMods.length>0?"#7c3aed44":C.bdr}`,borderRadius:6,padding:"4px 10px",cursor:"pointer",fontSize:10,fontWeight:600,color:activeMods.length>0?"#7c3aed":C.stone,display:"flex",alignItems:"center",gap:4,width:"100%",justifyContent:"space-between"}}>
+                <span>{modsExpanded?"\u25be":"\u25b8"} Modifications ({applicableMods.length} available{activeMods.length>0?` \u00b7 ${activeMods.length} active`:""}{modCost>0?` \u00b7 +${fm(modCost)}/ea`:""})</span>
+                {modCost>0&&<span style={{fontFamily:F.m,fontWeight:700,color:"#7c3aed"}}>+{fm(modTotal)}</span>
+              {modsExpanded&&<div style={{border:`1px solid #7c3aed33`,borderTop:"none",borderRadius:"0 0 6px 6px",padding:"8px 10px",background:"#f8f5ff"}}>
+                {(()=>{const groups={};applicableMods.forEach(m=>{if(!groups[m.group])groups[m.group]=[];groups[m.group].push(m)});
+                  return Object.entries(groups).map(([gName,gMods])=><div key={gName} style={{marginBottom:8}}>
+                    <div style={{fontSize:8.5,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:"#7c3aed",marginBottom:4}}>{gName}</div>
+                    <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:4}}>
+                      {gMods.map(m=>{const val=item.mods?.[m.code]||0;const isOn=val>0;
+                        return(<div key={m.code} style={{display:"flex",alignItems:"center",gap:5,padding:"3px 6px",borderRadius:4,background:isOn?"#7c3aed14":"transparent",border:`1px solid ${isOn?"#7c3aed44":"transparent"}`}}>
+                          {m.input==="check"?
+                            <input type="checkbox" checked={isOn} onChange={e=>setMod(m.code,e.target.checked?1:0)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
+                            <input type="number" min={0} max={m.max||10} value={val} onChange={e=>setMod(m.code,Math.max(0,Math.min(m.max||10,+e.target.value)))} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
+                          }
+                          <div style={{flex:1,minWidth:0}}>
+                            <div style={{fontSize:10,fontWeight:isOn?600:400,color:isOn?"#7c3aed":C.ink,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.code}: {m.label}</div>
+                            <div style={{fontSize:9,color:C.stone}}>{m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.price*(m.input==="check"?1:val))}`:""}</div>
+                          </div>
+                        </div>);
+                      })}
+                    </div>
+                  </div>);
+                })()}
+                {activeMods.length>0&&<div style={{borderTop:"1px solid #7c3aed33",paddingTop:6,marginTop:4,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span style={{fontSize:10,color:"#7c3aed",fontWeight:600}}>Mod total per unit: {fm(modCost)}</span>
+                  <button onClick={()=>upd(item.id,{mods:{}})} style={{background:"none",border:"1px solid #dc262622",borderRadius:4,padding:"2px 8px",fontSize:9,color:C.red,cursor:"pointer",fontWeight:600}}>Clear All</button>
+                </div>}
+              </div>}
+            </div>}
+            {!modsExpanded&&activeMods.length>0&&<div style={{display:"flex",gap:3,flexWrap:"wrap",marginBottom:4}}>
+              {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
+                return(<span key={code} className="pl" style={{background:"#7c3aed14",color:"#7c3aed"}}>{m.code}{qty>1?` \u00d7${qty}`:""} {m.pct?`+${m.pct}%`:m.price>0?`+$${m.price*(m.input==="check"?1:qty)}`:""}</span>);
+              })}
+            </div>}}
+              </button>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div style={{display:"flex",alignItems:"center",gap:6}}>
                 <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                <span style={{fontSize:10.5,color:C.stone}}>{isMould?`pcs × ${fm(u)}/pc`:itemSQ?`pcs × ${fm(u)}/pc`:`× ${fm(u)}${doorChg>0||rbsChg>0?` (base ${fm(u-doorChg-rbsChg)}${doorChg>0?` + doors ${fm(doorChg)}`:""}${rbsChg>0?" + RBS $87":""})`:" (stock "+fm(item.p)+")"}`}</span>
+                <span style={{fontSize:10.5,color:C.stone}}>{isMould?`pcs \u00d7 ${fm(u)}/pc`:itemSQ?`pcs \u00d7 ${fm(u)}/pc`:`\u00d7 ${fm(u+modCost)}${doorChg>0||rbsChg>0||modCost>0?` (base ${fm(u-doorChg-rbsChg)}${doorChg>0?` + doors ${fm(doorChg)}`:""}${rbsChg>0?" + RBS $87":""}${modCost>0?` + mods ${fm(modCost)}`:""})`:" (stock "+fm(item.p)+")"}`}</span>
               </div>
-              <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(total)}</span>
+              <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
             </div>
           </div>);
         })}
@@ -6492,7 +6585,7 @@ export default function App(){
         return(<div style={{marginTop:12}}>
           {zoneEntries.map(([zid,zItems],zi)=>{
             const zInfo=ZN.find(z=>z.id===zid)||{l:zid,i:"📦"};
-            let zTotal=0;zItems.forEach(it=>{const{t}=cp(it,sp,cx,door,drwF,drwBox);zTotal+=t});
+            let zTotal=0;zItems.forEach(it=>{const{u,t,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);zTotal+=t+mcR*(1+plyPct/100)*it.q});
             return(<div key={zid} className="c" style={{marginBottom:10,overflow:"hidden"}}>
               <div style={{background:C.ink,padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
