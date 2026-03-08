@@ -6527,8 +6527,9 @@ upd(item.id,{mods:newMods});
             {/* MODIFICATIONS PANEL */}
             {!isMould&&!itemSQ&&applicableMods.length>0&&<div style={{marginBottom:5}}>
               <button onClick={()=>sModOpen(modsExpanded?null:item.id)} style={{background:activeMods.length>0?"#7c3aed14":"transparent",border:`1px solid ${activeMods.length>0?"#7c3aed44":C.bdr}`,borderRadius:6,padding:"4px 10px",cursor:"pointer",fontSize:10,fontWeight:600,color:activeMods.length>0?"#7c3aed":C.stone,display:"flex",alignItems:"center",gap:4,width:"100%",justifyContent:"space-between"}}>
-                <span>{modsExpanded?"\u25be":"\u25b8"} Modifications ({applicableMods.length} available{activeMods.length>0?` \u00b7 ${activeMods.length} active`:""}{modCost>0?` \u00b7 +${fm(modCost)}/ea`:""})</span>
+                <span>{modsExpanded?"▾":"▸"} Modifications ({applicableMods.length} available{activeMods.length>0?` · ${activeMods.length} active`:""}{modCost>0?` · +${fm(modCost)}/ea`:""})</span>
                 {modCost>0&&<span style={{fontFamily:F.m,fontWeight:700,color:"#7c3aed"}}>+{fm(modTotal)}</span>
+              </button>
               {modsExpanded&&<div style={{border:`1px solid #7c3aed33`,borderTop:"none",borderRadius:"0 0 6px 6px",padding:"8px 10px",background:"#f8f5ff"}}>
                 {(()=>{const groups={};applicableMods.forEach(m=>{if(!groups[m.group])groups[m.group]=[];groups[m.group].push(m)});
                   return Object.entries(groups).map(([gName,gMods])=><div key={gName} style={{marginBottom:8}}>
@@ -6557,14 +6558,13 @@ upd(item.id,{mods:newMods});
             </div>}
             {!modsExpanded&&activeMods.length>0&&<div style={{display:"flex",gap:3,flexWrap:"wrap",marginBottom:4}}>
               {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
-                return(<span key={code} className="pl" style={{background:"#7c3aed14",color:"#7c3aed"}}>{m.code}{qty>1?` \u00d7${qty}`:""} {m.pct?`+${m.pct}%`:m.price>0?`+$${m.price*(m.input==="check"?1:qty)}`:""}</span>);
+                return(<span key={code} className="pl" style={{background:"#7c3aed14",color:"#7c3aed"}}>{m.code}{qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:m.price>0?`+$${m.price*(m.input==="check"?1:qty)}`:""}</span>);
               })}
-            </div>}}
-              </button>
+            </div>}
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div style={{display:"flex",alignItems:"center",gap:6}}>
                 <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                <span style={{fontSize:10.5,color:C.stone}}>{isMould?`pcs \u00d7 ${fm(u)}/pc`:itemSQ?`pcs \u00d7 ${fm(u)}/pc`:`\u00d7 ${fm(u+modCost)}${doorChg>0||rbsChg>0||modCost>0?` (base ${fm(u-doorChg-rbsChg)}${doorChg>0?` + doors ${fm(doorChg)}`:""}${rbsChg>0?" + RBS $87":""}${modCost>0?` + mods ${fm(modCost)}`:""})`:" (stock "+fm(item.p)+")"}`}</span>
+                <span style={{fontSize:10.5,color:C.stone}}>{isMould?`pcs × ${fm(u)}/pc`:itemSQ?`pcs × ${fm(u)}/pc`:`× ${fm(u+modCost)}${doorChg>0||rbsChg>0||modCost>0?` (base ${fm(u-doorChg-rbsChg)}${doorChg>0?` + doors ${fm(doorChg)}`:""}${rbsChg>0?" + RBS $87":""}${modCost>0?` + mods ${fm(modCost)}`:""})`:" (stock "+fm(item.p)+")"}`}</span>
               </div>
               <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
             </div>
