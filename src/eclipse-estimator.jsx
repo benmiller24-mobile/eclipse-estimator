@@ -5962,31 +5962,123 @@ const DOORS=[
   {v:"BD3",l:"Bridged - 3 Drawer Stack",g:"A"},{v:"BD4",l:"Bridged - 4 Drawer Stack",g:"A"},
 ];
 
-// Guess number of doors from SKU pattern
-function guessDoors(sku){
-  const s=sku.toUpperCase();
-  // Drawer bases, moulding, accessories, fillers — 0 doors
-  if(/^(B[2-5]D|B2TD|STB4D|F[36]|EFIL|ECROWN|ETOEKICK|RBS|BNFT|FRLG|TL$|SMF|SBAF|EDIK|SMP)/.test(s))return 0;
-  // FHD, talls, some walls with -2D — 2 doors
-  if(s.includes("-2D")||s.includes("FHD"))return 2;
-  // Standard widths: 27"+ base/sink typically 2 doors
-  const wm=s.match(/^(?:B|SB|SBR|BA|SBA|VB|VSB|VSBR)(\d+)/);
+/* ── Cabinet width extractor ─────────────────────────────────
+   Strips suffixes (-RT, -FHD, -2D, -1DR, -WS, -MC, -S, -PH, -SS)
+   then reads trailing digits as the width. */
+function _cabW(sku){
+  let s=sku.toUpperCase().replace(/\s+/g,'');
+  for(let i=0;i<3;i++)s=s.replace(/-(RT|FHD|2D|1DR|WS|MC|SS|PH|S)$/,'');
+  const m=s.match(/(\d+)$/);if(!m)return 0;
+  const w=parseInt(m[1]);return(w>=9&&w<=84)?w:0;
+}
+
+/* ── guessDoors ────────────────────────────────────────────── */
+function guessDoors(sku,typeCode){
+  const s=sku.toUpperCase().replace(/\s+/g,'');
+  // Non-cabinet types (A,G,M,S,X) — 0 doors
+  if(typeCode&&!'BVTW'.includes(typeCode))return 0;
+  // === Zero-door types ===
+  if(/^(BBBD\dD|BBD\dD|BBB\dD|B[2-5]D|STB4D)/.test(s))return 0;
+  if(/^(FLVB\dD|VTB\dD|VB\dD)/.test(s))return 0;
+  if(/^(F[36]|EFIL|ECROWN|ETOEKICK|RBS|BNFT|FRLG|SMF|SBAF|EDIK|SMP|LCEC|TKLC)/.test(s))return 0;
+  if(/^(RH|PRH)/.test(s))return 0;
+  // Drawer-only ADA types
+  if(/^(BA[2-5]D|BA2HD|VBA\dD)/.test(s))return 0;
+  if(/^FLVB\d+HD/.test(s))return 0;
+  if(/^SFDHD/.test(s))return 0;
+  // === Utility/Tall 2-section types ===
+  if(/^(UVTD|UVD)\d/.test(s)){if(s.includes('-2D'))return 2;const w=_cabW(sku);return(w>=27)?2:1;}
+  if(/^(UVTH|UVH)\d/.test(s))return 2;
+  if(/^(UVT|UV)\d/.test(s)){if(s.includes('-2D'))return 4;const w=_cabW(sku);return(w>=27)?4:2;}
+  // === Suffix-based ===
+  if(s.includes('-2D'))return 2;
+  if(s.includes('FHD')){const w=_cabW(sku);return w>=27?2:1;}
+  // === Specific types ===
+  if(/^(BBC|SBBC|PBBC)/.test(s))return 1;
+  if(/^(BLE|BLSBE|BLSB|BL)/.test(s))return 2;
+  if(/^TB\d/.test(s)){const w=_cabW(sku);return w>=27?2:1;}
+  if(/^(B2HD|B2TD)/.test(s)){const w=_cabW(sku);return w>=27?2:1;}
+  if(/^BBB\d/.test(s)&&!/^BBB\dD/.test(s)){const w=_cabW(sku);return w>=27?2:1;}
+  if(/^(VTSD|VSD)/.test(s))return 2;
+  // === Width-based for std bases/sink/vanity/peninsula ===
+  const wm=s.match(/^(?:BA|B|SBA|SBR|SBU|SB|PB|VBA|VB|VTB|FLVB|VSBR|VSB|VTSBR|VTSB|VCSD|VBW|VTBW|VBH|VTHB|VGO|VO)(\d+)/);
   if(wm){const w=parseInt(wm[1]);return w>=27?2:1;}
-  // Utility talls — 2 doors (upper+lower)
-  if(/^(U\d|UT\d)/.test(s))return 2;
-  // Wall cabinets: W27+ = 2 doors, W9-W24 = 1
+  // Utility / Tall — 2 sections, width-based
+  if(/^(U\d|UT\d|CP)/.test(s)){if(s.includes('-2D'))return 4;const w=_cabW(sku);return(w>=27)?4:2;}
+  // === Dressing Room (all TypeCode V) ===
+  if(/^VTC/.test(s))return 0;
+  if(/^(DRBOS|PDRBOS|DRUS|DRSU|DRSSU|DRAUS|DRARUS|DRCSU|DRSCSU|DRCR|DRFL|DRM-|DRSH|DREP|CBSK|PDCR)/.test(s))return 0;
+  if(/^DRB3D/.test(s))return 0;
+  if(/^(DRU5D|DRU5TO|DRU5JO|DRU3CR|DRU4D)/.test(s))return 1;
+  if(/^(DRTRU|DRDHU|DRMHU|DRTHU|DRPDRU)/.test(s))return 2;
+  if(/^DRLDU/.test(s)){if(s.includes('-2D'))return 4;return 2;}
+  if(/^DRTRB/.test(s))return 1;
+  if(/^(PDRBD|DRBD)/.test(s)){const w=_cabW(sku);return w>=27?2:1;}
+  if(/^(PDRBDO|DRBDO|DRSB)/.test(s)){const w=_cabW(sku);return w>=27?2:1;}
+  // Wall cabinets — width-based
   const ww=s.match(/^W(\d+)/);
   if(ww){const w=parseInt(ww[1]);return w>=27?2:1;}
-  // WBC blind corners — 1 door
-  if(s.startsWith("WBC"))return 1;
-  // BBC blind corner bases — 1 door
-  if(s.startsWith("BBC")||s.startsWith("SBBC"))return 1;
-  // BL right angle — 2 doors (bi-fold)
-  if(s.startsWith("BL"))return 2;
-  // Range hoods — 0
-  if(s.startsWith("RH"))return 0;
-  // Default: 1 door
+  if(s.startsWith('WBC'))return 1;
   return 1;
+}
+
+/* ── guessDrawers ──────────────────────────────────────────── */
+function guessDrawers(sku,typeCode){
+  const s=sku.toUpperCase().replace(/\s+/g,'');
+  if(!'BVT'.includes(typeCode))return 0;
+  if(typeCode==='T')return 0;
+  // === Utility vanity types (TypeCode V) ===
+  if(/^(UVTD|UVD)\d/.test(s))return 3;
+  if(/^(UVTH|UVH|UVT|UV)\d/.test(s))return 0;
+  if(/^SFDHD/.test(s))return 2;
+  // === Dressing Room (all TypeCode V) ===
+  if(/^VTC/.test(s))return 0;
+  if(/^(DRU5D|DRU5TO|DRU5JO)/.test(s))return 5;
+  if(/^DRU4D/.test(s))return 4;
+  if(/^DRU3CR/.test(s))return 3;
+  if(/^DRB3D/.test(s))return 3;
+  if(/^(PDRBD|DRBD)/.test(s))return 1;
+  if(/^DR/.test(s))return 0;
+  // === Zero-drawer base/vanity types ===
+  if(s.includes('FHD'))return 0;
+  if(/^TB\d/.test(s))return 0;
+  if(/^(BLE|BLSBE|BLSB|BL)/.test(s))return 0;
+  if(/^(VSB|VSBR)\d/.test(s))return 1;
+  if(/^(VGO|VO)\d/.test(s))return 0;
+  // === Multi-drawer extraction ===
+  const bbbd=s.match(/^BBBD(\d)D/);if(bbbd)return parseInt(bbbd[1]);
+  const bbd=s.match(/^BBD(\d)D/);if(bbd)return parseInt(bbd[1]);
+  const bbb=s.match(/^BBB(\d)D/);if(bbb)return parseInt(bbb[1]);
+  const bd=s.match(/^B(\d)D/);if(bd)return parseInt(bd[1]);
+  if(s.startsWith('STB4D'))return 4;
+  if(s.startsWith('B2TD'))return 2;
+  if(s.startsWith('B2HD'))return 2;
+  const bad=s.match(/^(?:VBA|BA)(\d)D/);if(bad)return parseInt(bad[1]);
+  if(s.startsWith('BA2HD'))return 2;
+  const flvbhd=s.match(/^FLVB(\d+)HD/);if(flvbhd)return parseInt(flvbhd[1]);
+  const flvb=s.match(/^FLVB(\d)D/);if(flvb)return parseInt(flvb[1]);
+  const vtb=s.match(/^VTB(\d)D/);if(vtb)return parseInt(vtb[1]);
+  const vb=s.match(/^VB(\d)D/);if(vb)return parseInt(vb[1]);
+  if(s.startsWith('VTSD'))return 2;
+  if(s.startsWith('VSD'))return 2;
+  if(/-1DR/.test(s))return 1;
+  if(/^(BBC|SBBC|PBBC)/.test(s))return 1;
+  const w=_cabW(sku);
+  if(w>0){if(/^(BA|B|SBA|SBR|SBU|SB|PB|BBB)/.test(s)){return w>36?2:1;}}
+  if(/^(VB|VTB|VTSB|FLVB|VBW|VTBW|VBH|VTHB|VCSD)/.test(s))return 1;
+  if(typeCode==='B'||typeCode==='V')return 1;
+  return 0;
+}
+
+/* ── guessBuiltInROT ─── built-in roll-out trays from SKU ── */
+function guessBuiltInROT(sku){
+  const s=sku.toUpperCase().replace(/\s+/g,'');
+  if(/-RT/.test(s)){
+    if(/^SB/.test(s))return 1;
+    if(/^B/.test(s))return 2;
+  }
+  if(/^SBU\d/.test(s))return 1;
+  return 0;
 }
 const DRW_FRONTS=[
   {v:"DF-MET",l:"Metropolitan (Slab)"},{v:"DF-S",l:"Slab"},{v:"DF-SCLPT",l:"Sculpted"},
