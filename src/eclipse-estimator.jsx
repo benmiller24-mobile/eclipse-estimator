@@ -5898,13 +5898,21 @@ const SQI_REFS=new Set(["S3","S4","S5","S33","S34","S35","S36","S37","S38","S42"
 const SQI_FIXED=new Set(["BB1/4","BB1/4-CMP","BB1/4-CMP-Beaded","BB1/2-CMP","TKMSBB","TKMSLBB","DROT5/8","DROT3/4","LROT","SROT5/8","DROT5/8-PAD","DROT3/4-PAD","DROT5/8-FM","DROT3/4-FM","LROT-FM","SROT5/8-FM","DIRF","CNRLG","VAL","BLLG","BRLG","SDI-W","CLC","LCEC"]);
 const isSqIn=(s,r)=>SQI_REFS.has(r)&&!SQI_FIXED.has(s);
 
-const cp=(item,sp,cx,gDoor)=>{const s=item.so||sp;const sm=SP[s]||0;const cm=CX[cx]||0;const len=item.len||1;
+const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{const s=item.so||sp;const sm=SP[s]||0;const cm=CX[cx]||0;const len=item.len||1;
   const sqin=item.sqin||0;const itemSQ=isSqIn(item.s,item.r);
-  const base=itemSQ?(item.p*sqin*(1+sm/100)*(1+cm/100)):(item.p*len*(1+sm/100)*(1+cm/100));
+  const stockBase=itemSQ?(item.p*sqin*(1+sm/100)):(item.p*len*(1+sm/100));
   const ds=item.ds||gDoor||"HNVR";const dInfo=DOORS.find(d=>d.v===ds);
   const dgCharge=dInfo?DG[dInfo.g]||0:0;const dxCharge=dInfo?.x||0;
   const doorChg=(itemSQ||item.t==="M")?0:(dgCharge+dxCharge)*(item.dc||0);
-  const rbsChg=item.rbs?87:0;const u=base+doorChg+rbsChg;return{u,t:u*item.q,plf:item.p*(1+sm/100)*(1+cm/100),doorChg,itemSQ,rbsChg}};
+  const drc=item.drc||0;const dfS=item.dfs||gDrwF||"DF-HNVR";
+  const dfI=DRW_FRONTS.find(d=>d.v===dfS);const dfgChg=dfI?.g?DG[dfI.g]||0:0;
+  const dfChg=(itemSQ||item.t==="M")?0:dfgChg*drc;
+  const rotQ=(item.rot&&item.rotQ>0)?item.rotQ:0;const brot=item.brot||0;
+  const dbI=DRW_BOX.find(d=>d.v===(gDrwBox||"5/8-STD"));const dbChg=(drc+rotQ+brot)*(dbI?.price||0);
+  const rbsChg=item.rbs?87:0;
+  const prePly=stockBase+doorChg+dfChg+dbChg+rbsChg;
+  const u=prePly*(1+cm/100);
+  return{u,t:u*item.q,stockBase,prePly,doorChg,dfChg,dbChg,itemSQ,rbsChg,plyPct:cm}};
 
 // ─── ORDER SELECTION OPTIONS (from Eclipse order form, pages B1–B15, C3) ──
 // Door Group Charges (C3): A=$0, B=$44, C=$88, D=$150 PER DOOR
@@ -5960,6 +5968,18 @@ const DOORS=[
   // Bridged (B16) — no upcharge
   {v:"BD1",l:"Bridged - Drawer+Door",g:"A"},{v:"BD2",l:"Bridged - 2 Drawer Stack",g:"A"},
   {v:"BD3",l:"Bridged - 3 Drawer Stack",g:"A"},{v:"BD4",l:"Bridged - 4 Drawer Stack",g:"A"},
+];
+const ROT_OPTIONS=[
+  {v:"DROT5/8",l:'5/8" Hardwood Dovetail',price:268},
+  {v:"DROT3/4",l:'3/4" Premium Dovetail',price:325},
+  {v:"SROT5/8",l:'5/8" Simulated Metal',price:268},
+  {v:"LROT",l:'Legrabox Stainless Steel',price:432},
+  {v:"DROT5/8-PAD",l:'5/8" Plumbing Access',price:398},
+  {v:"DROT3/4-PAD",l:'3/4" Plumbing Access',price:455},
+  {v:"DROT5/8-FM",l:'5/8" Floor Mounted',price:388},
+  {v:"DROT3/4-FM",l:'3/4" Floor Mounted',price:445},
+  {v:"LROT-FM",l:'Legrabox Floor Mounted',price:552},
+  {v:"SROT5/8-FM",l:'5/8" Sim Metal Floor Mounted',price:388},
 ];
 
 /* ── Cabinet width extractor ─────────────────────────────────
@@ -6217,7 +6237,7 @@ export default function App(){
   const fl=useCallback(m=>{sNtf(m);setTimeout(()=>sNtf(null),2000)},[]);
 
   const addIt=useCallback((cat,q,z,len,sqin)=>{
-    sItems(p=>[...p,{id:uid(),s:cat.s,t:cat.t,r:cat.r,p:cat.p,q,z,so:null,len:len||0,hng:"",fe:"",ds:"",dc:guessDoors(cat.s),sqin:sqin||0,rbs:false}]);
+    sItems(p=>[...p,{id:uid(),s:cat.s,t:cat.t,r:cat.r,p:cat.p,q,z,so:null,len:len||0,hng:"",fe:"",ds:"",dc:guessDoors(cat.s,cat.t),drc:guessDrawers(cat.s,cat.t),brot:guessBuiltInROT(cat.s),sqin:sqin||0,rbs:false,mods:{},rot:"",rotQ:0}]);
     fl(`Added ${q}× ${cat.s}${len?` (${len}ft)`:""}${sqin?` (${sqin} sq.in)`:""}`);if(mob)ssAd(false);
   },[fl,mob]);
 
@@ -6227,7 +6247,7 @@ export default function App(){
 
   const comp=useMemo(()=>{
     let tot=0,un=0,ov=0;const zm={},tm={};
-    items.forEach(it=>{const{t:total}=cp(it,sp,cx,door);tot+=total;un+=it.q;tm[it.t]=(tm[it.t]||0)+it.q;
+    items.forEach(it=>{const{t:total}=cp(it,sp,cx,door,drwF,drwBox);tot+=total;un+=it.q;tm[it.t]=(tm[it.t]||0)+it.q;
     if(!zm[it.z])zm[it.z]={c:0,n:0};zm[it.z].c+=total;zm[it.z].n+=it.q;if(it.so)ov++});
     return{tot,un,n:items.length,zm,tm,zc:Object.keys(zm).length,ov};
   },[items,sp,cx,door]);
@@ -6251,14 +6271,14 @@ export default function App(){
     const r=[["Eclipse Estimator v8.8.0 — "+nm],["Door: "+dl,"Drawer Front: "+dfl,"Species: "+sp,"Construction: "+(cx==="Standard"?"Std":"Plywood")],
       ["Glaze: "+(GLAZES.find(g=>g.v===glaze)?.l||"None"),"Highlight: "+(HIGHLIGHTS.find(h=>h.v===highlight)?.l||"None"),"Drawer Box: "+(DRW_BOX.find(d=>d.v===drwBox)?.l||drwBox)],
       [],["SKU","Room","Qty","Door","Hinge","Fin.End","Length","Stock","Species Ovr","Unit","Total"]];
-    items.forEach(it=>{const{u,t}=cp(it,sp,cx,door);const iM=it.t==="M";r.push([it.s,ZN.find(z=>z.id===it.z)?.l||it.z,it.q,it.ds||"",it.hng||"",it.fe||"",iM?`${it.len}ft`:"",(iM?`$${it.p}/LF`:it.p),it.so||"",Math.round(u),Math.round(t)])});
+    items.forEach(it=>{const{u,t}=cp(it,sp,cx,door,drwF,drwBox);const iM=it.t==="M";r.push([it.s,ZN.find(z=>z.id===it.z)?.l||it.z,it.q,it.ds||"",it.hng||"",it.fe||"",iM?`${it.len}ft`:"",(iM?`$${it.p}/LF`:it.p),it.so||"",Math.round(u),Math.round(t)])});
     r.push([]);r.push(["","","","","","","","","","TOTAL",Math.round(comp.tot)]);
     const b=new Blob([r.map(x=>x.join(",")).join("\n")],{type:"text/csv"});
     const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`${nm.replace(/\s+/g,"_")}_v880.csv`;a.click();fl("Exported");
   },[items,sp,cx,door,comp.tot,nm,fl]);
 
   const genOrder=useCallback(()=>{
-    const orderItems=items.map((it,i)=>{const{u,t}=cp(it,sp,cx,door);const iM=it.t==="M";const isSQ=isSqIn(it.s,it.r);
+    const orderItems=items.map((it,i)=>{const{u,t}=cp(it,sp,cx,door,drwF,drwBox);const iM=it.t==="M";const isSQ=isSqIn(it.s,it.r);
       return{sku:it.s,zone:it.z,zoneName:ZN.find(z=>z.id===it.z)?.l||it.z,description:`${it.s}${it.ds?` (${it.ds})`:""}`+(iM?` ${it.len}ft`:"")+(isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":""),qty:it.q,finishedEnd:it.fe==="B"?"Both":it.fe==="L"?"L":it.fe==="R"?"R":"",hinge:it.hng||"",price:Math.round(t).toLocaleString()};
     });
     const order={
@@ -6371,7 +6391,7 @@ export default function App(){
         {mob&&<button className="bt bp" onClick={()=>ssAd(true)} style={{fontSize:13,padding:"9px 22px"}}>+ Add Cabinets</button>}
       </div>):(
         <div>{fi.map(item=>{
-          const{u,t:total,plf,doorChg,itemSQ,rbsChg}=cp(item,sp,cx,door);const ov=!!item.so;const isMould=item.t==="M";const isWall=item.t==="W";
+          const{u,t:total,stockBase,prePly,doorChg,dfChg,dbChg,itemSQ,rbsChg,plyPct}=cp(item,sp,cx,door,drwF,drwBox);const ov=!!item.so;const isMould=item.t==="M";const isWall=item.t==="W";
           return(<div key={item.id} className={`ic${ov?" ov":""}`}>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
               <div>
@@ -6413,6 +6433,9 @@ export default function App(){
               <div style={{flex:"0 0 55px"}}><label className="lb">Doors</label>
                 <input type="number" className="inp" min={0} max={6} value={item.dc} onChange={e=>upd(item.id,{dc:Math.max(0,+e.target.value)})} style={{textAlign:"center",padding:5,fontSize:12,...(item.dc>0&&doorChg>0?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}/>
               </div>
+              <div style={{flex:"0 0 55px"}}><label className="lb">Drawers</label>
+                <input type="number" className="inp" min={0} max={10} value={item.drc||0} onChange={e=>upd(item.id,{drc:Math.max(0,+e.target.value)})} style={{textAlign:"center",padding:5,fontSize:12,...(item.drc>0&&(dfChg>0||dbChg>0)?{border:"2px solid #7c3aed",fontWeight:600}:{})}}/>
+              </div>
               {isWall&&<div style={{flex:"0 0 55px"}}><label className="lb">RBS</label>
                 <button className={`ch2 ${item.rbs?"on":""}`} onClick={()=>upd(item.id,{rbs:!item.rbs})} style={{width:"100%",justifyContent:"center",fontSize:10,...(item.rbs?{borderColor:"#4a6178",color:"#4a6178",background:"#4a617814"}:{})}}>{item.rbs?"Yes":"No"}</button>
               </div>}
@@ -6430,6 +6453,21 @@ export default function App(){
               </div>}
             </div>}
             {!isMould&&doorChg>0&&<div style={{fontSize:10,color:C.gold,marginBottom:4}}>Door upcharge: {fm(doorChg)} ({item.dc} door{item.dc>1?"s":""} × ${(doorChg/item.dc).toFixed(0)}/door — {(item.ds||door)})</div>}
+            {!isMould&&dfChg>0&&<div style={{fontSize:10,color:"#7c3aed",marginBottom:2}}>DF upcharge: {fm(dfChg)} ({item.drc} drw × {(dfChg/(item.drc||1)).toFixed(0)}/drw — {drwF})</div>}
+            {!isMould&&dbChg>0&&(()=>{const rQ=(item.rot&&item.rotQ>0)?item.rotQ:0;const br=item.brot||0;const dbP=DRW_BOX.find(d=>d.v===drwBox)?.price||0;const tot=(item.drc||0)+rQ+br;return<div style={{fontSize:10,color:"#0369a1",marginBottom:2}}>Drw box/guide: {fm(dbChg)} ({item.drc||0} drw{br>0?` + ${br} built-in ROT`:""}{rQ>0?` + ${rQ} mod ROT`:""} = {tot} × ${'{'}dbP}/ea — {drwBox})</div>})()}
+            {plyPct>0&&<div style={{fontSize:10,color:"#b45309",marginBottom:2}}>Plywood +{plyPct}% applied last → {fm(u)}/unit</div>}
+            {!isMould&&!itemSQ&&["B","V","T"].includes(item.t)&&<div style={{display:"flex",gap:6,marginBottom:5,flexWrap:"wrap",alignItems:"flex-end"}}>
+              <div style={{flex:"1 1 180px"}}><label className="lb" style={{color:"#b45309"}}>Roll Out Tray</label>
+                <select className="sel" value={item.rot||""} onChange={e=>{const v=e.target.value;upd(item.id,{rot:v,rotQ:v?Math.max(1,item.rotQ||0):0})}} style={{fontSize:11,...(item.rot?{border:"2px solid #b45309",fontWeight:600}:{})}}>
+                  <option value="">— None —</option>
+                  {ROT_OPTIONS.map(r=><option key={r.v} value={r.v}>{r.v}: {r.l} — ${r.price}/ea</option>)}
+                </select>
+              </div>
+              {item.rot&&<div style={{flex:"0 0 55px"}}><label className="lb" style={{color:"#b45309"}}>ROT Qty</label>
+                <input type="number" className="inp" min={1} max={20} value={item.rotQ||1} onChange={e=>upd(item.id,{rotQ:Math.max(1,Math.min(20,+e.target.value))})} style={{textAlign:"center",padding:5,fontSize:12,border:"2px solid #b45309",fontWeight:600}}/>
+              </div>}
+              {item.rot&&item.rotQ>0&&(()=>{const ro=ROT_OPTIONS.find(r=>r.v===item.rot);return ro?<div style={{fontSize:10,color:"#b45309",fontWeight:600,alignSelf:"center",padding:"4px 0"}}>{item.rotQ}× ${ro.price} = {fm(ro.price*item.rotQ)}/unit</div>:null})()}
+            </div>}
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div style={{display:"flex",alignItems:"center",gap:6}}>
                 <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
@@ -6454,7 +6492,7 @@ export default function App(){
         return(<div style={{marginTop:12}}>
           {zoneEntries.map(([zid,zItems],zi)=>{
             const zInfo=ZN.find(z=>z.id===zid)||{l:zid,i:"📦"};
-            let zTotal=0;zItems.forEach(it=>{const{t}=cp(it,sp,cx,door);zTotal+=t});
+            let zTotal=0;zItems.forEach(it=>{const{t}=cp(it,sp,cx,door,drwF,drwBox);zTotal+=t});
             return(<div key={zid} className="c" style={{marginBottom:10,overflow:"hidden"}}>
               <div style={{background:C.ink,padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -6483,7 +6521,7 @@ export default function App(){
                     <th style={{...thS,textAlign:"right",width:70}}>Price</th>
                   </tr></thead>
                   <tbody>
-                    {zItems.map((item,idx)=>{const{u,t:total,itemSQ}=cp(item,sp,cx,door);const iM=item.t==="M";
+                    {zItems.map((item,idx)=>{const{u,t:total,itemSQ}=cp(item,sp,cx,door,drwF,drwBox);const iM=item.t==="M";
                       const desc=`${item.s}${item.ds&&item.ds!==door?` (${item.ds})`:""}`+(iM?` ${item.len}ft`:"")+(itemSQ?` ${item.sqin}sq.in`:"")+(item.rbs?" +RBS":"");
                       const feLabel=item.fe==="B"?"Both":item.fe==="L"?"L":item.fe==="R"?"R":"";
                       return(<tr key={item.id} style={{borderBottom:`1px solid ${C.bdr}`,background:idx%2===0?"transparent":C.cream}}>
