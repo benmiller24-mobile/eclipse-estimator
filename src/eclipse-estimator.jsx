@@ -6527,7 +6527,7 @@ upd(item.id,{mods:newMods});
             {/* MODIFICATIONS PANEL */}
             {!isMould&&!itemSQ&&applicableMods.length>0&&<div style={{marginBottom:5}}>
               <button onClick={()=>sModOpen(modsExpanded?null:item.id)} style={{background:activeMods.length>0?"#7c3aed14":"transparent",border:`1px solid ${activeMods.length>0?"#7c3aed44":C.bdr}`,borderRadius:6,padding:"4px 10px",cursor:"pointer",fontSize:10,fontWeight:600,color:activeMods.length>0?"#7c3aed":C.stone,display:"flex",alignItems:"center",gap:4,width:"100%",justifyContent:"space-between"}}>
-                <span>{modsExpanded?"▾":"▸"} Modifications ({applicableMods.length} available{activeMods.length>0?` · ${activeMods.length} active`:""}{modCost>0?` · +${fm(modCost)}/ea`:""})</span>
+                <span>{modsExpanded?"▾":"▸"} Modifications ({applicableMods.length} available{activeMods.length>0?" · "+activeMods.length+" active":""}{modCost>0?" · +"+fm(modCost)+"/ea":""})</span>
                 {modCost>0&&<span style={{fontFamily:F.m,fontWeight:700,color:"#7c3aed"}}>+{fm(modTotal)}</span>
               </button>
               {modsExpanded&&<div style={{border:`1px solid #7c3aed33`,borderTop:"none",borderRadius:"0 0 6px 6px",padding:"8px 10px",background:"#f8f5ff"}}>
@@ -6543,7 +6543,7 @@ upd(item.id,{mods:newMods});
                           }
                           <div style={{flex:1,minWidth:0}}>
                             <div style={{fontSize:10,fontWeight:isOn?600:400,color:isOn?"#7c3aed":C.ink,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.code}: {m.label}</div>
-                            <div style={{fontSize:9,color:C.stone}}>{m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.price*(m.input==="check"?1:val))}`:""}</div>
+                            <div style={{fontSize:9,color:C.stone}}>{m.pct?(m.pct+"% of base"):m.price>0?("$"+m.price+m.unit):m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?(" = "+fm(m.price*(m.input==="check"?1:val))):""}</div>
                           </div>
                         </div>);
                       })}
@@ -6558,7 +6558,7 @@ upd(item.id,{mods:newMods});
             </div>}
             {!modsExpanded&&activeMods.length>0&&<div style={{display:"flex",gap:3,flexWrap:"wrap",marginBottom:4}}>
               {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
-                return(<span key={code} className="pl" style={{background:"#7c3aed14",color:"#7c3aed"}}>{m.code}{qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:m.price>0?`+$${m.price*(m.input==="check"?1:qty)}`:""}</span>);
+                return(<span key={code} className="pl" style={{background:"#7c3aed14",color:"#7c3aed"}}>{m.code}{qty>1?(" ×"+qty):""} {m.pct?("+"+m.pct+"%"):m.price>0?("+$"+m.price*(m.input==="check"?1:qty)):""}</span>);
               })}
             </div>}
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
