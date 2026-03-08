@@ -6641,7 +6641,7 @@ upd(item.id,{mods:newMods});
                     <th style={{...thS,textAlign:"right",width:70}}>Price</th>
                   </tr></thead>
                   <tbody>
-                    {zItems.map((item,idx)=>{const{u,t:total,itemSQ}=cp(item,sp,cx,door,drwF,drwBox);const iM=item.t==="M";
+                    {zItems.map((item,idx)=>{const{u,t,itemSQ,stockBase,plyPct}=cp(item,sp,cx,door,drwF,drwBox);const mcR=calcModCost(item,item.mods,stockBase);const total=t+mcR*(1+plyPct/100)*item.q;const iM=item.t==="M";
                       const desc=`${item.s}${item.ds&&item.ds!==door?` (${item.ds})`:""}`+(iM?` ${item.len}ft`:"")+(itemSQ?` ${item.sqin}sq.in`:"")+(item.rbs?" +RBS":"");
                       const feLabel=item.fe==="B"?"Both":item.fe==="L"?"L":item.fe==="R"?"R":"";
                       return(<tr key={item.id} style={{borderBottom:`1px solid ${C.bdr}`,background:idx%2===0?"transparent":C.cream}}>
