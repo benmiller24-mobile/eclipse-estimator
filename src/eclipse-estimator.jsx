@@ -6197,6 +6197,7 @@ const CHAR_TECH=[
   {v:"NONE",l:"No Character Technique"},{v:"AGED",l:"Aged"},{v:"SNDTHRU",l:"Sand-Through"},
   {v:"WEAR",l:"Wearing"},{v:"WTHR",l:"Weathered Collection"},{v:"OLDE",l:"Olde World"},
 ];
+const FINISH_COLORS=(()=>{const o={},OW=["OW-Beige","OW-Black","OW-Clary Sage","OW-Dovetail Gray","OW-Iron Ore","OW-Mindful Gray","OW-Naval","OW-Polar","OW-Pure White","OW-Repose Gray","OW-Unusual Gray"],NE=["Clay","Creekside","Dusk","Flagstone","Mineral","Morel"],oakS=["Natural","Almond","Aqua","Autumn","Braun","Cadet","Cotton","Espresso","Harbor","Hudson","Ink","Medium","Moss","Sandrift","Silas","Sky","Sterling","Stratus","Straw","Thyme","Whitewash","Yosemite Brown"];o["Alder"]=o["Rustic Alder"]=["Natural","Aqua","Bistre","Caramel","Caviar","Cola","Cotton","Dusty Road","Espresso","Sierra","Silas","Stonehenge","Thyme","Umber","Walnut","White Sands","Barnwood",...OW];o["Hickory"]=o["Rustic Hickory"]=["Natural","Aqua","Burnt Sugar","Cadet","Chestnut","Cotton","Harbor","Hudson","Medium","Moss","Silas","Sky","Sterling","Stratus","Thyme",...OW];o["Cherry"]=o["Rustic Cherry"]=["Natural","Bourbon","Carob","Coffee","Espresso","Medium","Red","Silas","Thyme","Rosewood","Tobacco",...OW];o["Maple"]=o["Rustic Maple"]=["Natural","Acorn","Cashmere","Cayenne","Cocoa","Espresso","Golden","Pebble","Perfect Brown","Rockbridge","Sable","Silas","Spice","Thyme","Gunstock","Oatmeal","Roasted Pepper",...OW];o["Paint (Std SW)"]=["Amazing Gray","Arctic","Beige","Black","Clary Sage","Dovetail Gray","Eggshell","Evergreen Fog","Hale Navy","Iron Ore","Light French Gray","Mindful Gray","Naval","Niebla Azul","Outerspace","Pewter Green","Polar","Pure White","Repose Gray","Soft White","Shoji White","Slate Tile","Unusual Gray"];o["Paint (Trend)"]=["Plum Brown","Studio Clay","Taiga"];o["Custom Paint (SW)"]=["Custom"];o["Red Oak"]=o["Rustic Red Oak"]=["Natural","Aqua","Autumn","Braun","Cadet","Espresso","Harbor","Harvest","Hudson","Medium","Moss","Silas","Sterling","Thyme","Wiley",...NE,...OW];o["QS White Oak"]=[...oakS,...NE];o["Rift White Oak"]=[...oakS,...NE];o["White Oak"]=o["Rustic White Oak"]=[...oakS,...NE,...OW];o["Select Poplar"]=["Carbon","Heatherstone","River Rock","Seagull"];o["American Poplar"]=["Cadet","Harbor","Hudson","Moss","Sky","Sterling","Stratus","Thyme"];o["Recon White Oak"]=["Natural","Ashfall","Meadow"];o["Recon Walnut"]=["Natural","Dakota","Mountain Haze"];o["Walnut"]=o["Rustic Walnut"]=["Natural","Bison","Cadet","Rye","Seagull","Stratus","Thyme"];o["TFL"]=["Arizona Cypress","Battle Creek Oak","Canella Rustik","Dark Walnut","Door County Oak","Evening Notte","Gregio Pine","Grey Echo","Kirsche","Morning Fog","Natural Elm","Natural Rustik","Outer Bank Oak","Pearl White","Serotina","Takase Teak","White Nebbia"];o["Rauvisio noir Matte HPL"]=["After Dark","Boxcar Blonde","Capital Starlit","Casa Blanca","Gaslit Alley","High Low","Maltese Mist","Midnight Dash","Olive Detour","Silver Lake","Smoke Stack","Trench Coat"];o["Acrylic HG"]=["Bianco","Bigio","Cubanite","Gabbiano"];o["Acrylic Matte"]=["White Velvet","Ash Velvet","Carbon Velvet","Charcoal Velvet"];o["PV"]=["American Oak","Classic Walnut","Hazelnut Oak","Natural Oak","Tropic Walnut"];return o;})();
 const MATERIAL=[
   {v:"PB",l:"Particle Board (Standard)"},{v:"PLY",l:"Plywood (+10%)"},
 ];
@@ -6302,6 +6303,7 @@ export default function App(){
   const[sp,sSp]=useState("White Oak"),[cx,sCx]=useState("Standard");
   const[door,sDoor]=useState("HNVR"),[drwF,sDrwF]=useState("DF-HNVR"),[glaze,sGlaze]=useState("NONE");
   const[highlight,sHL]=useState("NONE"),[charT1,sCT1]=useState("NONE"),[charT2,sCT2]=useState("NONE");
+  const[color,sColor]=useState("");
   const[mat,sMat]=useState("PB"),[intF,sIntF]=useState("STD-MAPL"),[drwBox,sDrwBox]=useState("5/8-STD");
   const[items,sItems]=useState([]),[vw,sVw]=useState("list");
   const[sMg,ssMg]=useState(false),[sSv,ssSv]=useState(false),[sAd,ssAd]=useState(false),[sCf,ssCf]=useState(false);
@@ -6343,7 +6345,7 @@ export default function App(){
 
   const csv=useCallback(()=>{
     const dl=DOORS.find(d=>d.v===door)?.l||door;const dfl=DRW_FRONTS.find(d=>d.v===drwF)?.l||drwF;
-    const r=[["Eclipse Estimator v8.8.0 — "+nm],["Door: "+dl,"Drawer Front: "+dfl,"Species: "+sp,"Construction: "+(cx==="Standard"?"Std":"Plywood")],
+    const r=[["Eclipse Estimator v8.8.0 — "+nm],["Door: "+dl,"Drawer Front: "+dfl,"Species: "+sp,"Color: "+color,"Construction: "+(cx==="Standard"?"Std":"Plywood")],
       ["Glaze: "+(GLAZES.find(g=>g.v===glaze)?.l||"None"),"Highlight: "+(HIGHLIGHTS.find(h=>h.v===highlight)?.l||"None"),"Drawer Box: "+(DRW_BOX.find(d=>d.v===drwBox)?.l||drwBox)],
       [],["SKU","Room","Qty","Door","Hinge","Fin.End","Length","Stock","Species Ovr","Unit","Total"]];
     items.forEach(it=>{const{u,t}=cp(it,sp,cx,door,drwF,drwBox);const iM=it.t==="M";r.push([it.s,ZN.find(z=>z.id===it.z)?.l||it.z,it.q,it.ds||"",it.hng||"",it.fe||"",iM?`${it.len}ft`:"",(iM?`$${it.p}/LF`:it.p),it.so||"",Math.round(u),Math.round(t)])});
@@ -6358,7 +6360,7 @@ export default function App(){
     });
     const order={
       businessName:"",customerNumber:"",poNumber:"",jobName:nm,
-      species:sp,color:"",glaze,highlight,
+      species:sp,color,glaze,highlight,
       doorStyle:door,lowerDoorStyle:door,drawerFront:drwF,
       edgeProfile:"750",drawerBox:drwBox,drawerGuide:drwBox.includes("FE")?"full":"edge",
       tipOn:false,material:mat,interior:intF,
@@ -6410,9 +6412,10 @@ export default function App(){
         {!mob&&<div className="c"><div className="ch">Order Selections{comp.ov>0&&<span className="pl" style={{background:C.goldS,color:C.gold}}>{comp.ov} override{comp.ov>1?"s":""}</span>}</div>
           <div className="cb" style={{maxHeight:320,overflowY:"auto"}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
-              <div><label className="lb">Species / Material</label><select className="sel" value={sp} onChange={e=>sSp(e.target.value)}>
+              <div><label className="lb">Species / Material</label><select className="sel" value={sp} onChange={e=>{sSp(e.target.value);sColor("")}}>
                 {Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
               </select></div>
+              <div><label className="lb">Finish Color</label><select className="sel" value={color} onChange={e=>sColor(e.target.value)}><option value="">-- Select --</option>{(FINISH_COLORS[sp]||[]).map(c=><option key={c} value={c}>{c}</option>)}</select></div>
               <div><label className="lb">Door Style</label><select className="sel" value={door} onChange={e=>sDoor(e.target.value)}>
                 {DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} — Grp {d.g} ${DG[d.g]||0}/dr{d.x?` +$${d.x}/dr`:""}</option>)}
               </select></div>
