@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './eclipse-estimator (2).jsx'
+import App from './eclipse-estimator .jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
