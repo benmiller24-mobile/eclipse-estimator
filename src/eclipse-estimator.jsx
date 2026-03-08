@@ -5986,8 +5986,8 @@ const CABINET_MODS=[
   {code:"LPDD",label:"Legrabox Plumbing Divided Drawer",price:874,unit:"/drw",types:["B","V"],group:"Drawer Mods",input:"qty",max:6},
   {code:"TIP_ONDR",label:"Tip-On for Drawers (15\"+ wide/deep)",price:189,unit:"/drw",types:["B","V","T"],group:"Drawer Mods",input:"qty",max:10},
   {code:"BBP",label:"Beaded Back Panel (req. FI, not TFL/HPL)",price:100,unit:"/cab",types:["B","V","T","W"],group:"Structure",input:"check"},
-  {code:"MOD_SQ",label:"Square Cabinet Mod (h,d) — 30% min",price:0,unit:"%",types:["B","V","T","W"],group:"Structure",input:"check",pct:30,excGroup:"mod"},
-  {code:"MOD_ANG",label:"Angle Cabinet Mod (h,d,w) — 50% min",price:0,unit:"%",types:["B","V","T","W"],group:"Structure",input:"check",pct:50,excGroup:"mod"},
+  {code:"MOD_SQ",label:"Square Cabinet Mod (h,d) — 30% min",price:0,unit:"%",types:["B","V","T","W"],group:"Structure",input:"dims",pct:30,excGroup:"mod"},
+  {code:"MOD_ANG",label:"Angle Cabinet Mod (h,d,w) — 50% min",price:0,unit:"%",types:["B","V","T","W"],group:"Structure",input:"dims",pct:50,excGroup:"mod"},
   {code:"ESFL",label:"Extended Side to Floor — Left",price:89,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
   {code:"ESFR",label:"Extended Side to Floor — Right",price:89,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
   {code:"WSL",label:"Wide Stile Left (up to 6\")",price:290,unit:"/side",types:["B","V","T","W"],group:"Side Mods",input:"check"},
@@ -6021,7 +6021,7 @@ const calcModCost=(item,mods,baseUnitPrice)=>{
   let cost=0;
   if(mods){CABINET_MODS.forEach(m=>{const v=mods[m.code];if(!v)return;
     if(m.pct){cost+=baseUnitPrice*(m.pct/100);}
-    else{cost+=m.price*(m.input==="check"?1:v);}
+    else{cost+=m.price*(m.input==="check"||m.input==="dims"?1:v);}
   });}
   if(item.rot&&item.rotQ>0){const ro=ROT_OPTIONS.find(r=>r.v===item.rot);if(ro)cost+=ro.price*item.rotQ;}
   return cost;
@@ -6564,7 +6564,7 @@ upd(item.id,{mods:newMods});
                     <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:4}}>
                       {gMods.map(m=>{const val=item.mods?.[m.code]||0;const isOn=val>0;
                         return(<div key={m.code} style={{display:"flex",alignItems:"center",gap:5,padding:"3px 6px",borderRadius:4,background:isOn?"#7c3aed14":"transparent",border:`1px solid ${isOn?"#7c3aed44":"transparent"}`}}>
-                          {m.input==="check"?
+                          {m.input==="dims"?<div style={{display:"flex",flexDirection:"column",gap:"4px",width:"100%"}}><div style={{display:"flex",alignItems:"center",gap:"6px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked){setMod(m.code,{w:"",h:"",d:""})}else{setMod(m.code,false)}}} style={{accentColor:"#1c3aed",margin:0,cursor:"pointer"}}/><span style={{fontSize:"0.85rem",color:isOn?"#1c3aed":"#888"}}>Enabled</span></div>{isOn&&typeof isOn==="object"?<div style={{display:"flex",gap:"6px",marginTop:"2px"}}>{["W","H","D"].map(dim=><label key={dim} style={{display:"flex",flexDirection:"column",alignItems:"center",fontSize:"0.7rem",color:"#666"}}>{dim}<input type="text" value={isOn[dim.toLowerCase()]||""} onChange={e=>{const nv={...isOn};nv[dim.toLowerCase()]=e.target.value;setMod(m.code,nv)}} style={{width:"52px",textAlign:"center",padding:"2px 4px",fontSize:"0.8rem",borderRadius:"4px",border:"1px solid #a6b4a6"}}/></label>)}</div>:null}</div>:m.input==="check"?
                             <input type="checkbox" checked={isOn} onChange={e=>setMod(m.code,e.target.checked?1:0)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
                             <input type="number" min={0} max={m.max||10} value={val} onChange={e=>setMod(m.code,Math.max(0,Math.min(m.max||10,+e.target.value)))} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
                           }
@@ -6585,7 +6585,7 @@ upd(item.id,{mods:newMods});
             </div>}
             {!modsExpanded&&activeMods.length>0&&<div style={{display:"flex",gap:3,flexWrap:"wrap",marginBottom:4}}>
               {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
-                return(<span key={code} className="pl" style={{background:"#7c3aed14",color:"#7c3aed"}}>{m.code}{qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:m.price>0?`+$${m.price*(m.input==="check"?1:qty)}`:""}</span>);
+                return(<span key={code} className="pl" style={{background:"#7c3aed14",color:"#7c3aed"}}>{m.code}{qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:m.price>0?`+$${m.price*(m.input==="check"?1:qty)}`:""}{typeof qty==="object"?` W:${qty.w||"?"} H:${qty.h||"?"} D:${qty.d||"?"}`:null}</span>);
               })}
             </div>}
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
