@@ -6369,7 +6369,7 @@ export default function App(){
       const zoneKeys=Object.keys(byZone);
       const multiZone=zoneKeys.length>1;
       fl(multiZone?`Generating ${zoneKeys.length} order forms (one per room)...`:"Generating order form PDF...");
-      // Helper: build one PDF for a set of items
+      // Helper: build one filled PDF for a set of items, returns PDFDocument instance
       const buildPdf=async(zoneItems,zoneLbl)=>{
         const orderItems=zoneItems.map(it=>{const{t}=cp(it,sp,cx,door,drwF,drwBox);const iM=it.t==="M";const isSQ=isSqIn(it.s,it.r);
           const mcRaw=calcModCost(it,it.mods,cp(it,sp,cx,door,drwF,drwBox).stockBase);
@@ -6382,7 +6382,6 @@ export default function App(){
         const form=pdfDoc.getForm();
         const setTF=(name,val)=>{try{form.getTextField(name).setText(val||"");}catch(e){}};
         const setCB=(name,on)=>{try{const f=form.getCheckBox(name);on?f.check():f.uncheck();}catch(e){}};
-        // ── Cover Sheet ──
         setTF("Wood Species",sp);
         setTF("Color",color||"");
         setTF("Upper Door Style",door);
@@ -6390,39 +6389,28 @@ export default function App(){
         setTF("Drawer Front Style",drwF||"");
         setTF("Order Date",new Date().toLocaleDateString());
         setTF("Special Instructions",`${zoneLbl} — List Price Total: $${Math.round(zoneTot).toLocaleString()}`);
-        // Glaze checkboxes
         const glazeMap={"BLK-GL":"Black","MCH-GL":"Mocha","VDK-GL":"Van Dyke","NKL-GL":"Nickel"};
         const hlMap={"GRPH-HL":"Graphite","CAFE-HL":"Café","SLATE-HL":"Slate"};
         ["Black","Mocha","Van Dyke","Nickel"].forEach(g=>setCB(`${g} ON`,glazeMap[glaze]===g));
         ["Graphite","Café","Slate"].forEach(h=>setCB(`${h} ON`,hlMap[highlight]===h));
         setCB("None ON",!glaze&&!highlight);
-        // Edge profile
         ["100","150","350","400","750","Matching"].forEach(e=>setCB(`${e} ON`,e==="750"));
-        // Drawer box
         const dbMap={"5/8-STD":"⅝\" Hardwood","3/4-STD":"¾\" Hardwood","5/8-SM":"⅝\" Sim. Metal","5/8-FE":"⅝\" Hardwood","3/4-FE":"¾\" Hardwood","LB":"Blum Legrabox"};
         ["⅝\" Hardwood","¾\" Hardwood","⅝\" Sim. Metal","Blum Legrabox"].forEach(d=>setCB(`${d} ON`,dbMap[drwBox]===d));
-        // Drawer guide
         setCB("Blum Tandem Edge ON",!drwBox.includes("FE")&&drwBox!=="LB");
         setCB("Blum Tandem Full Extension ON",drwBox.includes("FE"));
-        // Tip-on
         setCB("Yes ON",false);setCB("No ON",true);
-        // Material
         setCB("Particle Board ON",mat!=="PLY");
         setCB("Plywood ON",mat==="PLY");
-        // Interior
         const intMap={"WL":"White Laminate","ML":"Maple Laminate","NL":"Natural Linen"};
         ["White Laminate","Maple Laminate","Natural Linen"].forEach(i=>setCB(`${i} ON`,intMap[intF]===i));
-        // Construction type
         setCB("Standard ON",true);
-        // Character techniques
         if(charT1){const ctMap={"aged":"Aged†","wearing":"Wearing†","sand":"Sand-through‡"};
           Object.entries(ctMap).forEach(([k,v])=>setCB(`${v} ON`,charT1.toLowerCase().includes(k)||charT2?.toLowerCase().includes(k)));
         }
-        // Project type
         setCB("New ON",true);setCB("Remodel ON",false);
         const totalItemPages=Math.ceil(orderItems.length/20)||1;
         setTF("Number of Pages In Order",String(totalItemPages));
-        // ── Item List pages ──
         orderItems.forEach((it,i)=>{
           const n=i+1;
           setTF(`Cab No Line ${n}`,String(n));
@@ -6437,22 +6425,39 @@ export default function App(){
         setTF(`Price ${totalLine}`,`$${Math.round(zoneTot).toLocaleString()}`);
         setTF("Page Number 1","1");setTF("Page Number 2","2");setTF("Page Number 3","3");
         form.flatten();
-        return await pdfDoc.save();
+        return pdfDoc;
       };
-      // Generate and download one PDF per zone
-      for(let idx=0;idx<zoneKeys.length;idx++){
-        const zk=zoneKeys[idx];
-        const zInfo=ZN.find(z=>z.id===zk);
-        const zoneLbl=zInfo?zInfo.l:zk;
-        const filledBytes=await buildPdf(byZone[zk],zoneLbl);
+      if(!multiZone){
+        // Single zone — download directly
+        const zk=zoneKeys[0];const zInfo=ZN.find(z=>z.id===zk);const zoneLbl=zInfo?zInfo.l:zk;
+        const pdfDoc=await buildPdf(byZone[zk],zoneLbl);
+        const filledBytes=await pdfDoc.save();
         const blob=new Blob([filledBytes],{type:"application/pdf"});
         const a=document.createElement("a");a.href=URL.createObjectURL(blob);
-        const safeName=(nm||"Eclipse_Order").replace(/\s+/g,"_");
-        a.download=multiZone?`${safeName}_${zoneLbl.replace(/\s+/g,"_")}_order.pdf`:`${safeName}_order_form.pdf`;
+        a.download=`${(nm||"Eclipse_Order").replace(/\s+/g,"_")}_order_form.pdf`;
+        a.click();fl("Order form PDF downloaded!");
+      }else{
+        // Multiple zones — merge all into one PDF, each room gets its own order form section
+        const combined=await PDFDocument.create();
+        for(let idx=0;idx<zoneKeys.length;idx++){
+          const zk=zoneKeys[idx];
+          const zInfo=ZN.find(z=>z.id===zk);
+          const zoneLbl=zInfo?zInfo.l:zk;
+          const zonePdf=await buildPdf(byZone[zk],zoneLbl);
+          const zoneBytes=await zonePdf.save();
+          const srcDoc=await PDFDocument.load(zoneBytes);
+          const pageIndices=srcDoc.getPageIndices();
+          const copiedPages=await combined.copyPages(srcDoc,pageIndices);
+          copiedPages.forEach(p=>combined.addPage(p));
+        }
+        const finalBytes=await combined.save();
+        const blob=new Blob([finalBytes],{type:"application/pdf"});
+        const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+        a.download=`${(nm||"Eclipse_Order").replace(/\s+/g,"_")}_order_forms.pdf`;
         a.click();
-        if(multiZone&&idx<zoneKeys.length-1)await new Promise(r=>setTimeout(r,500));
+        const roomList=zoneKeys.map(zk=>{const zi=ZN.find(z=>z.id===zk);return zi?zi.l:zk}).join(", ");
+        fl(`Order forms downloaded! Rooms: ${roomList}`);
       }
-      fl(multiZone?`${zoneKeys.length} order forms downloaded!`:"Order form PDF downloaded!");
     }catch(err){console.error(err);fl("Error generating PDF — check console");}
   },[items,sp,cx,door,drwF,drwBox,mat,intF,glaze,highlight,charT1,charT2,color,comp.tot,nm,fl]);
 
