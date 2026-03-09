@@ -6362,87 +6362,99 @@ export default function App(){
 
   const genOrder=useCallback(async()=>{
     try{
-      fl("Generating order form PDF...");
-      // Build item list
-      const orderItems=items.map(it=>{const{t}=cp(it,sp,cx,door,drwF,drwBox);const iM=it.t==="M";const isSQ=isSqIn(it.s,it.r);
-        const mcRaw=calcModCost(it,it.mods,cp(it,sp,cx,door,drwF,drwBox).stockBase);
-        const total=t+mcRaw*(1+((it.mods&&cx==="Plywood")?10:0)/100)*it.q;
-        return{description:`${it.s}${it.ds?` (${it.ds})`:""}`+(iM?` ${it.len}ft`:"")+(isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":""),qty:String(it.q),finishedEnd:it.fe==="B"?"Both":it.fe||"",hinge:it.hng||"",price:`$${Math.round(total).toLocaleString()}`};
-      });
-      // Load blank form
-      const pdfBytes=Uint8Array.from(atob(BLANK_ORDER_FORM_B64),c=>c.charCodeAt(0));
-      const pdfDoc=await PDFDocument.load(pdfBytes,{ignoreEncryption:true});
-      const form=pdfDoc.getForm();
-      const setTF=(name,val)=>{try{form.getTextField(name).setText(val||"");}catch(e){}};
-      const setCB=(name,on)=>{try{const f=form.getCheckBox(name);on?f.check():f.uncheck();}catch(e){}};
-      // ── Cover Sheet ──
-      setTF("Wood Species",sp);
-      setTF("Color",color||"");
-      setTF("Upper Door Style",door);
-      setTF("Lower Door Style",door);
-      setTF("Drawer Front Style",drwF||"");
-      setTF("Order Date",new Date().toLocaleDateString());
-      setTF("Special Instructions",`List Price Total: $${Math.round(comp.tot).toLocaleString()}`);
-      // Glaze checkboxes
-      const glazeMap={"BLK-GL":"Black","MCH-GL":"Mocha","VDK-GL":"Van Dyke","NKL-GL":"Nickel"};
-      const hlMap={"GRPH-HL":"Graphite","CAFE-HL":"Café","SLATE-HL":"Slate"};
-      ["Black","Mocha","Van Dyke","Nickel"].forEach(g=>setCB(`${g} ON`,glazeMap[glaze]===g));
-      ["Graphite","Café","Slate"].forEach(h=>setCB(`${h} ON`,hlMap[highlight]===h));
-      setCB("None ON",!glaze&&!highlight);
-      // Edge profile
-      ["100","150","350","400","750","Matching"].forEach(e=>setCB(`${e} ON`,e==="750"));
-      // Drawer box
-      const dbMap={"5/8-STD":"⅝\" Hardwood","3/4-STD":"¾\" Hardwood","5/8-SM":"⅝\" Sim. Metal","5/8-FE":"⅝\" Hardwood","3/4-FE":"¾\" Hardwood","LB":"Blum Legrabox"};
-      ["⅝\" Hardwood","¾\" Hardwood","⅝\" Sim. Metal","Blum Legrabox"].forEach(d=>setCB(`${d} ON`,dbMap[drwBox]===d));
-      // Drawer guide
-      setCB("Blum Tandem Edge ON",!drwBox.includes("FE")&&drwBox!=="LB");
-      setCB("Blum Tandem Full Extension ON",drwBox.includes("FE"));
-      // Tip-on
-      setCB("Yes ON",false);setCB("No ON",true);
-      // Material
-      setCB("Particle Board ON",mat!=="PLY");
-      setCB("Plywood ON",mat==="PLY");
-      // Interior
-      const intMap={"WL":"White Laminate","ML":"Maple Laminate","NL":"Natural Linen"};
-      ["White Laminate","Maple Laminate","Natural Linen"].forEach(i=>setCB(`${i} ON`,intMap[intF]===i));
-      // Construction type
-      setCB("Standard ON",true);
-      // Character techniques
-      if(charT1){const ctMap={"aged":"Aged†","wearing":"Wearing†","sand":"Sand-through‡"};
-        Object.entries(ctMap).forEach(([k,v])=>setCB(`${v} ON`,charT1.toLowerCase().includes(k)||charT2?.toLowerCase().includes(k)));
+      if(items.length===0){fl("No items to generate order form");return;}
+      // Group items by zone
+      const byZone={};
+      items.forEach(it=>{const z=it.z||"other";if(!byZone[z])byZone[z]=[];byZone[z].push(it)});
+      const zoneKeys=Object.keys(byZone);
+      const multiZone=zoneKeys.length>1;
+      fl(multiZone?`Generating ${zoneKeys.length} order forms (one per room)...`:"Generating order form PDF...");
+      // Helper: build one PDF for a set of items
+      const buildPdf=async(zoneItems,zoneLbl)=>{
+        const orderItems=zoneItems.map(it=>{const{t}=cp(it,sp,cx,door,drwF,drwBox);const iM=it.t==="M";const isSQ=isSqIn(it.s,it.r);
+          const mcRaw=calcModCost(it,it.mods,cp(it,sp,cx,door,drwF,drwBox).stockBase);
+          const total=t+mcRaw*(1+((it.mods&&cx==="Plywood")?10:0)/100)*it.q;
+          return{description:`${it.s}${it.ds?` (${it.ds})`:""}`+(iM?` ${it.len}ft`:"")+(isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":""),qty:String(it.q),finishedEnd:it.fe==="B"?"Both":it.fe||"",hinge:it.hng||"",price:`$${Math.round(total).toLocaleString()}`};
+        });
+        const zoneTot=zoneItems.reduce((s,it)=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);return s+total+mcRaw*(1+plyPct/100)*it.q},0);
+        const pdfBytes=Uint8Array.from(atob(BLANK_ORDER_FORM_B64),c=>c.charCodeAt(0));
+        const pdfDoc=await PDFDocument.load(pdfBytes,{ignoreEncryption:true});
+        const form=pdfDoc.getForm();
+        const setTF=(name,val)=>{try{form.getTextField(name).setText(val||"");}catch(e){}};
+        const setCB=(name,on)=>{try{const f=form.getCheckBox(name);on?f.check():f.uncheck();}catch(e){}};
+        // ── Cover Sheet ──
+        setTF("Wood Species",sp);
+        setTF("Color",color||"");
+        setTF("Upper Door Style",door);
+        setTF("Lower Door Style",door);
+        setTF("Drawer Front Style",drwF||"");
+        setTF("Order Date",new Date().toLocaleDateString());
+        setTF("Special Instructions",`${zoneLbl} — List Price Total: $${Math.round(zoneTot).toLocaleString()}`);
+        // Glaze checkboxes
+        const glazeMap={"BLK-GL":"Black","MCH-GL":"Mocha","VDK-GL":"Van Dyke","NKL-GL":"Nickel"};
+        const hlMap={"GRPH-HL":"Graphite","CAFE-HL":"Café","SLATE-HL":"Slate"};
+        ["Black","Mocha","Van Dyke","Nickel"].forEach(g=>setCB(`${g} ON`,glazeMap[glaze]===g));
+        ["Graphite","Café","Slate"].forEach(h=>setCB(`${h} ON`,hlMap[highlight]===h));
+        setCB("None ON",!glaze&&!highlight);
+        // Edge profile
+        ["100","150","350","400","750","Matching"].forEach(e=>setCB(`${e} ON`,e==="750"));
+        // Drawer box
+        const dbMap={"5/8-STD":"⅝\" Hardwood","3/4-STD":"¾\" Hardwood","5/8-SM":"⅝\" Sim. Metal","5/8-FE":"⅝\" Hardwood","3/4-FE":"¾\" Hardwood","LB":"Blum Legrabox"};
+        ["⅝\" Hardwood","¾\" Hardwood","⅝\" Sim. Metal","Blum Legrabox"].forEach(d=>setCB(`${d} ON`,dbMap[drwBox]===d));
+        // Drawer guide
+        setCB("Blum Tandem Edge ON",!drwBox.includes("FE")&&drwBox!=="LB");
+        setCB("Blum Tandem Full Extension ON",drwBox.includes("FE"));
+        // Tip-on
+        setCB("Yes ON",false);setCB("No ON",true);
+        // Material
+        setCB("Particle Board ON",mat!=="PLY");
+        setCB("Plywood ON",mat==="PLY");
+        // Interior
+        const intMap={"WL":"White Laminate","ML":"Maple Laminate","NL":"Natural Linen"};
+        ["White Laminate","Maple Laminate","Natural Linen"].forEach(i=>setCB(`${i} ON`,intMap[intF]===i));
+        // Construction type
+        setCB("Standard ON",true);
+        // Character techniques
+        if(charT1){const ctMap={"aged":"Aged†","wearing":"Wearing†","sand":"Sand-through‡"};
+          Object.entries(ctMap).forEach(([k,v])=>setCB(`${v} ON`,charT1.toLowerCase().includes(k)||charT2?.toLowerCase().includes(k)));
+        }
+        // Project type
+        setCB("New ON",true);setCB("Remodel ON",false);
+        const totalItemPages=Math.ceil(orderItems.length/20)||1;
+        setTF("Number of Pages In Order",String(totalItemPages));
+        // ── Item List pages ──
+        orderItems.forEach((it,i)=>{
+          const n=i+1;
+          setTF(`Cab No Line ${n}`,String(n));
+          setTF(`Quantity ${n}`,it.qty);
+          setTF(`Description ${n}`,it.description);
+          setTF(`Finished Ends ${n}`,it.finishedEnd);
+          setTF(`Hinge ${n}`,it.hinge);
+          setTF(`Price ${n}`,it.price);
+        });
+        const totalLine=Math.min(orderItems.length+1,60);
+        setTF(`Description ${totalLine}`,"LIST PRICE TOTAL");
+        setTF(`Price ${totalLine}`,`$${Math.round(zoneTot).toLocaleString()}`);
+        setTF("Page Number 1","1");setTF("Page Number 2","2");setTF("Page Number 3","3");
+        form.flatten();
+        return await pdfDoc.save();
+      };
+      // Generate and download one PDF per zone
+      for(let idx=0;idx<zoneKeys.length;idx++){
+        const zk=zoneKeys[idx];
+        const zInfo=ZN.find(z=>z.id===zk);
+        const zoneLbl=zInfo?zInfo.l:zk;
+        const filledBytes=await buildPdf(byZone[zk],zoneLbl);
+        const blob=new Blob([filledBytes],{type:"application/pdf"});
+        const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+        const safeName=(nm||"Eclipse_Order").replace(/\s+/g,"_");
+        a.download=multiZone?`${safeName}_${zoneLbl.replace(/\s+/g,"_")}_order.pdf`:`${safeName}_order_form.pdf`;
+        a.click();
+        if(multiZone&&idx<zoneKeys.length-1)await new Promise(r=>setTimeout(r,500));
       }
-      // Project type
-      setCB("New ON",true);setCB("Remodel ON",false);
-      // Total item pages needed
-      const totalItemPages=Math.ceil(orderItems.length/20)||1;
-      setTF("Number of Pages In Order",String(totalItemPages));  // this field may not exist but try
-      // ── Item List pages ──
-      orderItems.forEach((it,i)=>{
-        const n=i+1;
-        setTF(`Cab No Line ${n}`,String(n));
-        setTF(`Quantity ${n}`,it.qty);
-        setTF(`Description ${n}`,it.description);
-        setTF(`Finished Ends ${n}`,it.finishedEnd);
-        setTF(`Hinge ${n}`,it.hinge);
-        setTF(`Price ${n}`,it.price);
-      });
-      // Total line — put on the line after last item if space, otherwise last line
-      const totalLine=Math.min(orderItems.length+1,60);
-      setTF(`Description ${totalLine}`,"LIST PRICE TOTAL");
-      setTF(`Price ${totalLine}`,`$${Math.round(comp.tot).toLocaleString()}`);
-      // Page numbers
-      setTF("Page Number 1","1");
-      setTF("Page Number 2","2");
-      setTF("Page Number 3","3");
-      // Flatten and download
-      form.flatten();
-      const filledBytes=await pdfDoc.save();
-      const blob=new Blob([filledBytes],{type:"application/pdf"});
-      const a=document.createElement("a");a.href=URL.createObjectURL(blob);
-      a.download=`${(nm||"Eclipse_Order").replace(/\s+/g,"_")}_order_form.pdf`;
-      a.click();fl("Order form PDF downloaded!");
+      fl(multiZone?`${zoneKeys.length} order forms downloaded!`:"Order form PDF downloaded!");
     }catch(err){console.error(err);fl("Error generating PDF — check console");}
-  },[items,sp,cx,door,drwF,drwBox,mat,intF,glaze,highlight,charT1,charT2,comp.tot,nm,fl]);
+  },[items,sp,cx,door,drwF,drwBox,mat,intF,glaze,highlight,charT1,charT2,color,comp.tot,nm,fl]);
 
   const spp=SP[sp]||0,cxp=CX[cx]||0;
 
