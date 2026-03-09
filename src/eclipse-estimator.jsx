@@ -6460,6 +6460,7 @@ export default function App(){
         {!mob&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={newP}>+ New</button>}
         <button className="bt bp" onClick={save} style={{fontSize:11}}>💾{!mob&&" Save"}</button>
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>ssSv(true)}>📂</button>
+        {mob&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream,fontSize:11,padding:"4px 8px"}} onClick={genOrder}>📋 Order</button>}
         {mob&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream,fontSize:13}} onClick={()=>ssCf(true)}>⚙</button>}
       </div>
     </div>
