@@ -6003,6 +6003,13 @@ const CABINET_MODS=[
   {code:"PWL",label:"Prep Wall Cabinet Lighting",price:60,unit:"/cab",types:["W"],group:"Lighting Prep",input:"check"},
   {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/cab",types:["W"],group:"Lighting Prep",input:"check"},
   {code:"FF_TOP",label:"False Front Top (removes top drawer)",price:100,unit:"/cab",types:["B","V","T"],group:"Other",input:"check"},
+  // Aventos Top Hinge Modifications (E3) — Wall cabinets only
+  {code:"AVENTOS_HK",label:"Aventos HK Stay Lift Door",price:435,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
+  {code:"AVENTOS_HKSD",label:"Aventos HK w/ Servo-Drive",price:1695,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
+  {code:"AVENTOS_HL",label:"Aventos HL Lift Up Door",price:680,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
+  {code:"AVENTOS_HLSD",label:"Aventos HL w/ Servo-Drive",price:1940,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
+  {code:"AVENTOS_HF",label:"Aventos HF Bi-Fold Door",price:782,unit:"/cab",types:["W"],group:"Aventos Top Hinge",input:"check",excGroup:"aventos"},
+  {code:"AVENTOS_HFSD",label:"Aventos HF w/ Servo-Drive",price:2042,unit:"/cab",types:["W"],group:"Aventos Top Hinge",input:"check",excGroup:"aventos"},
 ];
 
 const ROT_OPTIONS=[
