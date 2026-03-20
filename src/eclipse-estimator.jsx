@@ -6465,7 +6465,6 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     persistSession: true,
     detectSessionInUrl: false,
     autoRefreshToken: true,
-    lock: { enabled: false },
   },
 });
 
