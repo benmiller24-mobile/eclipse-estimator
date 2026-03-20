@@ -6897,6 +6897,7 @@ function LoginForm({onLoginSuccess}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [businessName, setBusinessName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -6926,12 +6927,13 @@ function LoginForm({onLoginSuccess}) {
       const { data, error: authError } = await supabaseClient.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName } },
+        options: { data: { full_name: fullName, business_name: businessName } },
       });
       if (authError) throw authError;
       setEmail("");
       setPassword("");
       setFullName("");
+      setBusinessName("");
       setIsSignup(false);
       setError("Check your email to confirm your account");
     } catch (err) {
@@ -6973,7 +6975,7 @@ function LoginForm({onLoginSuccess}) {
         }}>{isSignup ? "Create an account" : "Sign in to continue"}</p>
 
         <form onSubmit={isSignup ? handleSignup : handleLogin} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {isSignup && (
+          {isSignup && (<>
             <div>
               <label className="lb">Full Name</label>
               <input
@@ -6984,7 +6986,18 @@ function LoginForm({onLoginSuccess}) {
                 required
               />
             </div>
-          )}
+            <div>
+              <label className="lb">Business Name</label>
+              <input
+                type="text"
+                className="inp"
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
+                required
+                placeholder="Your company or dealership name"
+              />
+            </div>
+          </>)}
           <div>
             <label className="lb">Email</label>
             <input
@@ -7628,7 +7641,10 @@ function App({user, profile, supabase, onLogout}){
         setTF("Lower Door Style",door);
         setTF("Drawer Front Style",drwF||"");
         setTF("Order Date",new Date().toLocaleDateString());
-        setTF("Special Instructions",`${zoneLbl} — List Price Total: $${Math.round(zoneTot).toLocaleString()}`);
+        setTF("Special Instructions",zoneLbl);
+        setTF("Business Name",profile?.business_name||"");
+        setTF("Salesperson/Contact",profile?.full_name||"");
+        setTF("Job Name",nm||"");
         const glazeMap={"BLK-GL":"Black","MCH-GL":"Mocha","VDK-GL":"Van Dyke","NKL-GL":"Nickel"};
         const hlMap={"GRPH-HL":"Graphite","CAFE-HL":"Café","SLATE-HL":"Slate"};
         ["Black","Mocha","Van Dyke","Nickel"].forEach(g=>setCB(`${g} ON`,glazeMap[glaze]===g));
