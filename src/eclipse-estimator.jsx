@@ -6494,7 +6494,9 @@ const BCFT_SKUS=new Set(["BCFTA","BCFTBL","BCFTMB"]);
 const isBCFT=(s)=>BCFT_SKUS.has(s);
 const BCFT_LABELS={"BCFTA":"Natural Aluminum","BCFTBL":"Matte Black Aluminum","BCFTMB":"Matte Brass"};
 const BCFT_NOTE="• Door frame for use on front of glass front beverage coolers\n• BCFT required with all Beverage Center Fronts except painted METRO\n• Available up to 24\" wide and 80\" tall. Specify width and height when ordering\n• Custom rail widths available on all except mitered door styles\n• No custom grooving, notching, or drilling available";
-const SKU_LABELS={"LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts","CUSTOM":"Custom Quote","REF":"Custom Refrigerator Panel","DP":"Dishwasher Panel","BCFTA":"Bev Center Front (Natural Aluminum)","BCFTBL":"Bev Center Front (Matte Black Aluminum)","BCFTMB":"Bev Center Front (Matte Brass)"};
+const isBCF=(s)=>s==="BCF";
+const BCF_NOTE="• Door frame for use on front of glass front beverage coolers\n• Cut for glass will be filled with trim of same wood species\n• BCF available in Cherry, Maple, Red Oak, Select American Poplar, Hickory & Alder & are solid wood construction. No vertical or horizontal grain orientation available. Solid wood color tones may vary from veneer doors.\n• BCF will match those of the lower cabinet door style of adjoining components\n• Lower door style required if not ordered with adjoining components.\n• BCF with painted finishes as Metro will be MDF\n• Available up to 24\" wide and 80\" tall. Specify width and height when ordering\n• Custom rail widths available on all except mitered door styles\n• No custom grooving, notching, or drilling available";
+const SKU_LABELS={"LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts","CUSTOM":"Custom Quote","REF":"Custom Refrigerator Panel","DP":"Dishwasher Panel","BCFTA":"Bev Center Front (Natural Aluminum)","BCFTBL":"Bev Center Front (Matte Black Aluminum)","BCFTMB":"Bev Center Front (Matte Brass)","BCF":"Beverage Center Front"};
 const isCustom=(s)=>s==="CUSTOM";
 
 const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{
@@ -7813,6 +7815,7 @@ function App({user, profile, supabase, onLogout}){
           if(isREF(it.s)){return{description:`REF PANEL ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)${it.refIce?" +ICE CUTOUT":""}`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
           if(isDP(it.s)){return{description:`DW PANEL ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
           if(isBCFT(it.s)){return{description:`${it.s} (${BCFT_LABELS[it.s]||""}) ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
+          if(isBCF(it.s)){return{description:`BCF ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
           return{description:`${it.s}${it.ds?` (${it.ds})`:""}`+(iM?` ${it.len}ft`:"")+(isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":""),qty:String(it.q),finishedEnd:it.fe==="B"?"Both":it.fe||"",hinge:it.hng||"",price:`$${Math.round(total).toLocaleString()}`};
         });
         const zoneTot=zoneItems.reduce((s,it)=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);return s+total+mcRaw*(1+plyPct/100)*it.q},0);
@@ -8224,6 +8227,61 @@ upd(item.id,{mods:newMods});
               </div>
             </div>);
           }
+          /* ─── BEVERAGE CENTER FRONT (BCF) — special inline editor ─── */
+          if(isBCF(item.s)){
+            return(<div key={item.id} className="ic" style={{borderLeft:"4px solid #0d9488"}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                <div>
+                  <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#0d9488"}}>Beverage Center Front</span>
+                  <span className="pl" style={{marginLeft:5,background:"#ccfbf1",color:"#0d9488"}}>BCF</span>
+                </div>
+                <div style={{display:"flex",gap:4,alignItems:"center"}}>
+                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                  <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                </div>
+              </div>
+              {/* ── Dimensions (1/16" precision, max 24"W × 80"H) ── */}
+              <div style={{display:"flex",gap:6,marginBottom:6,alignItems:"center",padding:"8px 10px",background:"#ccfbf1",borderRadius:6,flexWrap:"wrap"}}>
+                <span className="lb" style={{marginBottom:0,color:"#0d9488",fontWeight:700}}>Width:</span>
+                <input type="number" className="inp" min={0.0625} max={24} step={0.0625} value={item.sqW||0} onChange={e=>{const w=Math.max(0,Math.min(24,+e.target.value));upd(item.id,{sqW:w,sqin:w*(item.sqH||0)})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}}/>
+                <span style={{color:C.stone,fontSize:11}}>″ (max 24″)</span>
+                <span style={{color:C.stone,fontSize:14}}>×</span>
+                <span className="lb" style={{marginBottom:0,color:"#0d9488",fontWeight:700}}>Height:</span>
+                <input type="number" className="inp" min={0.0625} max={80} step={0.0625} value={item.sqH||0} onChange={e=>{const h=Math.max(0,Math.min(80,+e.target.value));upd(item.id,{sqH:h,sqin:(item.sqW||0)*h})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}}/>
+                <span style={{color:C.stone,fontSize:11}}>″ (max 80″)</span>
+                <span style={{fontSize:11,color:"#0d9488",fontWeight:600}}>= {(item.sqin||0).toLocaleString(undefined,{maximumFractionDigits:2})} sq.in · ${item.p}/sq.in = {fm(item.p*(item.sqin||0))}</span>
+              </div>
+              {/* ── Room & Species ── */}
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
+                <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
+                <div><label className="lb">Species Override</label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
+                  <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
+                </select></div>
+              </div>
+              {/* ── PDF Upload: Beverage Cooler Specs ── */}
+              <div style={{marginBottom:6,padding:"6px 8px",background:"#f8fafc",borderRadius:6,border:"1px solid #e2e8f0"}}>
+                <label className="lb" style={{color:"#0369a1"}}>📄 Beverage Cooler Spec Sheet (PDF)</label>
+                {item.bcfSpecPdf?<div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
+                  <span style={{fontSize:10,color:"#0369a1",fontWeight:600}}>{item.bcfSpecPdfName||"Spec PDF"}</span>
+                  <a href={item.bcfSpecPdf} download={item.bcfSpecPdfName||"bev-cooler-specs.pdf"} style={{fontSize:9.5,color:"#0369a1",textDecoration:"underline"}}>Download</a>
+                  <button onClick={()=>upd(item.id,{bcfSpecPdf:null,bcfSpecPdfName:""})} style={{fontSize:9.5,color:C.red,background:"none",border:"none",cursor:"pointer"}}>Remove</button>
+                </div>:<input type="file" accept=".pdf" onChange={e=>{const f=e.target.files?.[0];if(f){const r=new FileReader();r.onload=ev=>upd(item.id,{bcfSpecPdf:ev.target.result,bcfSpecPdfName:f.name});r.readAsDataURL(f)}}} style={{fontSize:10}}/>}
+              </div>
+              {/* ── Notes ── */}
+              <div style={{marginBottom:6,padding:"8px 10px",background:"#fffbeb",borderRadius:6,border:"1px solid #fcd34d"}}>
+                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}>⚠ Important Notes — Beverage Center Fronts</div>
+                <div style={{fontSize:9.5,color:"#92400e",lineHeight:1.6,whiteSpace:"pre-line"}}>{BCF_NOTE}</div>
+              </div>
+              {/* ── Qty & Total ── */}
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
+                  <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
+                </div>
+                <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
+              </div>
+            </div>);
+          }
           /* ─── CUSTOM QUOTE ITEM — special inline editor ─── */
           if(isCustom(item.s)){
             return(<div key={item.id} className="ic" style={{borderLeft:"4px solid #0ea5e9"}}>
@@ -8538,6 +8596,24 @@ upd(item.id,{mods:newMods});
                 return(<div key={item.id} className="ic" style={{margin:"8px",marginBottom:"0",borderLeft:"4px solid #b45309"}}>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
                     <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#b45309"}}>Bev Center Front</span><span className="pl" style={{marginLeft:5,background:"#fef3c7",color:"#92400e"}}>{item.s}</span><span className="pl" style={{marginLeft:3,background:"#f5f0e6",color:"#78716c"}}>{BCFT_LABELS[item.s]||""}</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}″×{(item.sqH||0)}″</span></div>
+                    <div style={{display:"flex",gap:4,alignItems:"center"}}>
+                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                      <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                    </div>
+                  </div>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6}}>
+                      <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
+                      <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
+                    </div>
+                    <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
+                  </div>
+                </div>);
+              }
+              if(isBCF(item.s)){
+                return(<div key={item.id} className="ic" style={{margin:"8px",marginBottom:"0",borderLeft:"4px solid #0d9488"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
+                    <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#0d9488"}}>Bev Center Front</span><span className="pl" style={{marginLeft:5,background:"#ccfbf1",color:"#0d9488"}}>BCF</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}″×{(item.sqH||0)}″</span></div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
                       <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
                       <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
