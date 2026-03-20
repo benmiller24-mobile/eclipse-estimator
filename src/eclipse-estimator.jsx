@@ -7124,20 +7124,32 @@ function PendingApproval({user, onLogout}) {
 }
 
 // ── QuotesList Component ──
-function QuotesList({user, onLoadQuote, onClose}) {
+function QuotesList({user, profile, onLoadQuote, onClose}) {
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [viewAll, setViewAll] = useState(false);
+  const isAdmin = profile?.role === "admin";
 
+  const [userMap, setUserMap] = useState({});
   useEffect(() => {
     const loadQuotes = async () => {
+      setLoading(true);
       try {
-        const { data, error } = await supabaseClient
-          .from("quotes")
-          .select("id,name,updated_at")
-          .eq("user_id", user.id)
-          .order("updated_at", { ascending: false });
+        let query = supabaseClient.from("quotes").select("id,name,updated_at,user_id").order("updated_at", { ascending: false });
+        if (!viewAll || !isAdmin) query = query.eq("user_id", user.id);
+        const { data, error } = await query;
         if (error) throw error;
         setQuotes(data || []);
+        // For admin view, also fetch user profiles
+        if (viewAll && isAdmin && data?.length) {
+          const uids = [...new Set(data.map(q => q.user_id))];
+          const { data: profiles } = await supabaseClient.from("profiles").select("id,email,full_name,business_name").in("id", uids);
+          if (profiles) {
+            const m = {};
+            profiles.forEach(p => { m[p.id] = p; });
+            setUserMap(m);
+          }
+        }
       } catch (err) {
         console.error("Error loading quotes:", err);
       } finally {
@@ -7145,7 +7157,21 @@ function QuotesList({user, onLoadQuote, onClose}) {
       }
     };
     loadQuotes();
-  }, [user.id]);
+  }, [user.id, viewAll, isAdmin]);
+
+  // Group quotes by user when viewing all
+  const grouped = useMemo(() => {
+    if (!viewAll || !isAdmin) return null;
+    const g = {};
+    quotes.forEach(q => {
+      const uid = q.user_id;
+      const p = userMap[uid];
+      const uLabel = p?.email || p?.full_name || uid?.slice(0, 8);
+      if (!g[uid]) g[uid] = { label: uLabel, business: p?.business_name || "", quotes: [] };
+      g[uid].quotes.push(q);
+    });
+    return Object.values(g);
+  }, [quotes, viewAll, isAdmin, userMap]);
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(3px)", padding: "14px" }}>
@@ -7154,8 +7180,8 @@ function QuotesList({user, onLoadQuote, onClose}) {
         borderRadius: "12px",
         padding: "20px",
         width: "100%",
-        maxWidth: "450px",
-        maxHeight: "70vh",
+        maxWidth: "500px",
+        maxHeight: "80vh",
         overflowY: "auto",
         boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
       }}>
@@ -7172,23 +7198,60 @@ function QuotesList({user, onLoadQuote, onClose}) {
             fontSize: "18px",
             fontWeight: "700",
             color: C.ink,
-          }}>My Quotes</h3>
-          <button
-            onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              fontSize: "20px",
-              cursor: "pointer",
-              color: C.stone,
-            }}
-          >×</button>
+          }}>{viewAll ? "All Quotes" : "My Quotes"}</h3>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {isAdmin && <button onClick={() => setViewAll(!viewAll)} className="bt" style={{ fontSize: 11, padding: "4px 10px", background: viewAll ? C.accS : C.warm, border: `1px solid ${viewAll ? C.acc : C.bdr}`, color: viewAll ? C.acc : C.stone, borderRadius: 6, cursor: "pointer" }}>{viewAll ? "My Quotes" : "All Users"}</button>}
+            <button
+              onClick={onClose}
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: "20px",
+                cursor: "pointer",
+                color: C.stone,
+              }}
+            >×</button>
+          </div>
         </div>
 
         {loading ? (
           <div style={{ textAlign: "center", color: C.stone, padding: "20px" }}>Loading quotes...</div>
         ) : quotes.length === 0 ? (
           <div style={{ textAlign: "center", color: C.stone, padding: "20px" }}>No quotes yet</div>
+        ) : viewAll && grouped ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {grouped.map((group, gi) => (
+              <div key={gi}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: C.stone, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 6, padding: "4px 0", borderBottom: `1px solid ${C.bdr}` }}>
+                  {group.label}{group.business ? ` · ${group.business}` : ""} <span style={{ fontWeight: 400 }}>({group.quotes.length})</span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  {group.quotes.map((quote) => (
+                    <button
+                      key={quote.id}
+                      onClick={() => onLoadQuote(quote.id)}
+                      style={{
+                        background: C.cream,
+                        border: `1px solid ${C.bdr}`,
+                        borderRadius: "8px",
+                        padding: "10px 12px",
+                        textAlign: "left",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.acc; e.currentTarget.style.background = C.accS; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.background = C.cream; }}
+                    >
+                      <div style={{ fontSize: "13px", fontWeight: "600", color: C.ink }}>{quote.name}</div>
+                      <div style={{ fontSize: "11px", color: C.stone, marginTop: "3px" }}>
+                        {new Date(quote.updated_at).toLocaleDateString()}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {quotes.map((quote) => (
@@ -7204,14 +7267,8 @@ function QuotesList({user, onLoadQuote, onClose}) {
                   cursor: "pointer",
                   transition: "all 0.2s",
                 }}
-                onMouseEnter={(e) => {
-                  e.target.style.borderColor = C.acc;
-                  e.target.style.background = C.accS;
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.borderColor = C.bdr;
-                  e.target.style.background = C.cream;
-                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.acc; e.currentTarget.style.background = C.accS; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.background = C.cream; }}
               >
                 <div style={{ fontSize: "13px", fontWeight: "600", color: C.ink }}>{quote.name}</div>
                 <div style={{ fontSize: "11px", color: C.stone, marginTop: "4px" }}>
@@ -8212,7 +8269,7 @@ upd(item.id,{mods:newMods});
 
     {sMg&&<MarginCalc tot={comp.tot} onClose={()=>ssMg(false)}/>}
 
-    {showQuotesList&&<QuotesList user={user} onLoadQuote={loadQuoteFromList} onClose={()=>setShowQuotesList(false)}/>}
+    {showQuotesList&&<QuotesList user={user} profile={profile} onLoadQuote={loadQuoteFromList} onClose={()=>setShowQuotesList(false)}/>}
     {showAdminPanel&&profile?.role==="admin"&&<AdminPanel supabaseClient={supabase} onClose={()=>setShowAdminPanel(false)}/>}
 
     {showHistory&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,backdropFilter:"blur(3px)",padding:"14px",overflow:"auto"}}>
