@@ -7544,9 +7544,11 @@ function App({user, profile, supabase, onLogout}){
     const t=setTimeout(async()=>{
       try{
         const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items};
-        const lastVersion=versions[versions.length-1];const meaningfulChange=!lastVersion||items.length!==lastVersion.items||Math.abs(comp.tot-lastVersion.total)/Math.max(1,lastVersion.total)>0.05;
+        // Compute total inline to avoid referencing comp before it's defined
+        let tot=0;items.forEach(it=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);tot+=total+mcRaw*(1+plyPct/100)*it.q});
+        const lastVersion=versions[versions.length-1];const meaningfulChange=!lastVersion||items.length!==lastVersion.items||Math.abs(tot-lastVersion.total)/Math.max(1,lastVersion.total)>0.05;
         let newVersions=versions;
-        if(meaningfulChange){newVersions=[...versions,{at:new Date().toISOString(),items:items.length,total:comp.tot,snapshot:{nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items}}].slice(-10);}
+        if(meaningfulChange){newVersions=[...versions,{at:new Date().toISOString(),items:items.length,total:tot,snapshot:{nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items}}].slice(-10);}
         if(currentQuoteId){
           await supabase.from("quotes").update({name:nm,data:stateData,versions:newVersions,updated_at:new Date().toISOString()}).eq("id",currentQuoteId);
           if(meaningfulChange)setVersions(newVersions);
@@ -7557,7 +7559,7 @@ function App({user, profile, supabase, onLogout}){
       }catch(e){console.error("Auto-save error:",e)}
     },2000);
     return()=>clearTimeout(t);
-  },[nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,currentQuoteId,supabase,user,comp.tot,versions]);
+  },[nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,currentQuoteId,supabase,user,versions]);
 
   // ── Load most recent quote on mount ──
   useEffect(()=>{
