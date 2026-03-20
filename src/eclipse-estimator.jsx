@@ -7599,7 +7599,6 @@ function App({user, profile, supabase, onLogout}){
   const[showHistory,setShowHistory]=useState(false);
   const[groupByZone,setGroupByZone]=useState(false);
   const[collapsedZones,setCollapsedZones]=useState(new Set());
-  const[showShareModal,setShowShareModal]=useState(false);
 
   useEffect(()=>{const c=()=>sMob(window.innerWidth<=768);c();window.addEventListener("resize",c);return()=>window.removeEventListener("resize",c)},[]);
   const fl=useCallback(m=>{sNtf(m);setTimeout(()=>sNtf(null),2000)},[]);
@@ -7851,7 +7850,6 @@ function App({user, profile, supabase, onLogout}){
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>ssSv(true)}>📂</button>
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowQuotesList(true)}>📋{!mob&&" Quotes"}</button>
         {versions.length>0&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowHistory(true)}>📜{!mob&&" History"}</button>}
-        {items.length>0&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowShareModal(true)}>📤{!mob&&" Share"}</button>}
         {profile?.role==="admin"&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold}} onClick={()=>setShowAdminPanel(true)}>⚙{!mob&&" Admin"}</button>}
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={onLogout}>{!mob&&"Sign "}Out</button>
         {mob&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream,fontSize:11,padding:"4px 8px"}} onClick={genOrder}>📋 Order</button>}
@@ -8295,22 +8293,6 @@ upd(item.id,{mods:newMods});
       </div>
     </div>}
 
-    {showShareModal&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,backdropFilter:"blur(3px)",padding:"14px",overflow:"auto"}}>
-      <div style={{background:C.paper,borderRadius:"12px",padding:"20px",width:"100%",maxWidth:"480px",boxShadow:"0 20px 60px rgba(0,0,0,0.3)"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px",paddingBottom:"12px",borderBottom:`1px solid ${C.bdr}`}}>
-          <h3 style={{fontFamily:F.d,fontSize:"18px",fontWeight:"700",color:C.ink}}>Share Quote</h3>
-          <button onClick={()=>setShowShareModal(false)} style={{background:"none",border:"none",fontSize:"24px",cursor:"pointer",color:C.stone}}>×</button>
-        </div>
-        <div style={{marginBottom:16}}>
-          <div style={{fontSize:13,fontWeight:600,color:C.ink,marginBottom:6}}>Project: {nm}</div>
-          <div style={{fontSize:11,color:C.stone,lineHeight:1.6}}>Items: {comp.n} · Rooms: {comp.zc} · List Price: {fm(comp.tot)}</div>
-        </div>
-        <div style={{display:"flex",flexDirection:"column",gap:10}}>
-          <button onClick={()=>{const lines=[nm,`Items: ${comp.n}`,`Rooms: ${comp.zc}`,`List Price: ${fm(comp.tot)}`];if(dealerMult>0&&dealerMult<1)lines.push(`Dealer Cost (×${dealerMult}): ${fm(comp.tot*dealerMult)}`);lines.push(`Date: ${new Date().toLocaleDateString()}`);navigator.clipboard.writeText(lines.join("\n")).then(()=>fl("Summary copied!")).catch(e=>console.error(e));setShowShareModal(false);}} className="bt bp" style={{width:"100%",fontSize:12,padding:"10px"}}>📋 Copy Summary</button>
-          <button onClick={()=>{const lines=[nm,"",`Items: ${comp.n}`,`Rooms: ${comp.zc}`,`List Price: ${fm(comp.tot)}`];if(dealerMult>0&&dealerMult<1)lines.push(`Dealer Cost (×${dealerMult}): ${fm(comp.tot*dealerMult)}`);lines.push("",`Date: ${new Date().toLocaleDateString()}`,"","— Eclipse Cabinetry Estimator");const mailto=`mailto:?subject=${encodeURIComponent(nm + " - Quote")}&body=${encodeURIComponent(lines.join("\n"))}`;const a=document.createElement("a");a.href=mailto;a.click();setShowShareModal(false);}} className="bt bg" style={{width:"100%",fontSize:12,padding:"10px"}}>✉ Email Quote</button>
-        </div>
-      </div>
-    </div>}
   </div>);
 }
 
