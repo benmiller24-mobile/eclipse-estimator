@@ -7415,8 +7415,32 @@ function AuthWrapper() {
 
   useEffect(() => {
     let mounted = true;
+    const STORAGE_KEY = 'sb-rljpgudmvbaocomktone-auth-token';
+
     const checkAuth = async () => {
       try {
+        // Read session from localStorage directly to avoid Web Locks API hang
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (parsed?.user) {
+              if (!mounted) return;
+              setUser(parsed.user);
+              const prof = await fetchProfile(parsed.user.id);
+              if (mounted) setProfile(prof);
+              if (mounted) setLoading(false);
+              // Refresh session in background (non-blocking)
+              supabaseClient.auth.getSession().then(({ data: { session } }) => {
+                if (!mounted) return;
+                if (session?.user) { setUser(session.user); }
+                else { setUser(null); setProfile(null); localStorage.removeItem(STORAGE_KEY); }
+              }).catch(() => {});
+              return;
+            }
+          } catch (e) { /* invalid JSON, fall through */ }
+        }
+        // No stored session — try getSession (fast when no lock contention)
         const { data: { session } } = await supabaseClient.auth.getSession();
         const currentUser = session?.user || null;
         if (!mounted) return;
