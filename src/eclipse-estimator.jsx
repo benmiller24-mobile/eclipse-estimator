@@ -7823,9 +7823,9 @@ upd(item.id,{mods:newMods});
                 {item.rbs&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>RBS +$87</span>}
                 <div style={{fontSize:10.5,color:C.stone,marginTop:1}}>{item.r} · {SEC[item.r.charAt(0)]||""}{isMould?` · $${item.p}/LF`:""}</div>
               </div>
-              <div style={{display:"flex",gap:3}}>
-                <button onClick={()=>dup(item.id)} style={{background:"none",border:"none",cursor:"pointer",fontSize:15,color:C.stone}}>⧉</button>
-                <button onClick={()=>rem(item.id)} style={{background:"none",border:"none",cursor:"pointer",fontSize:15,color:C.red}}>✕</button>
+              <div style={{display:"flex",gap:4,alignItems:"center"}}>
+                <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
               </div>
             </div>
             {isMould&&<div style={{display:"flex",gap:4,marginBottom:5}}>
