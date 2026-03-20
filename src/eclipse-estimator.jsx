@@ -6890,13 +6890,15 @@ export default function App(){
   const[items,sItems]=useState([]),[vw,sVw]=useState("list");
   const[sMg,ssMg]=useState(false),[sSv,ssSv]=useState(false),[sAd,ssAd]=useState(false),[sCf,ssCf]=useState(false);
   const[tf,sTf]=useState("all"),[ntf,sNtf]=useState(null),[mob,sMob]=useState(false);
-  const[modOpen,sModOpen]=useState(null);
+  const[modOpen,sModOpen]=useState(()=>new Set());
 
   useEffect(()=>{const c=()=>sMob(window.innerWidth<=768);c();window.addEventListener("resize",c);return()=>window.removeEventListener("resize",c)},[]);
   const fl=useCallback(m=>{sNtf(m);setTimeout(()=>sNtf(null),2000)},[]);
 
   const addIt=useCallback((cat,q,z,len,sqin)=>{
-    sItems(p=>[...p,{id:uid(),s:cat.s,t:cat.t,r:cat.r,p:cat.p,q,z,so:null,len:len||0,hng:"",fe:"",ds:"",dc:guessDoors(cat.s,cat.t),drc:guessDrawers(cat.s,cat.t),brot:guessBuiltInROT(cat.s),sqin:sqin||0,rbs:false,mods:{},rot:"",rotQ:0,rotFeg:false,rot2:"",rot2Q:0,rot2Feg:false}]);
+    const newId=uid();
+    sItems(p=>[...p,{id:newId,s:cat.s,t:cat.t,r:cat.r,p:cat.p,q,z,so:null,len:len||0,hng:"",fe:"",ds:"",dc:guessDoors(cat.s,cat.t),drc:guessDrawers(cat.s,cat.t),brot:guessBuiltInROT(cat.s),sqin:sqin||0,rbs:false,mods:{},rot:"",rotQ:0,rotFeg:false,rot2:"",rot2Q:0,rot2Feg:false}]);
+    const isMod=cat.t!=="M"&&!isSqIn(cat.s,cat.r);if(isMod)sModOpen(prev=>{const n=new Set(prev);n.add(newId);return n});
     fl(`Added ${q}× ${cat.s}${len?` (${len}ft)`:""}${sqin?` (${sqin} sq.in)`:""}`);if(mob)ssAd(false);
   },[fl,mob]);
 
@@ -7136,7 +7138,7 @@ export default function App(){
           const{u,t:total,stockBase,prePly,doorChg,dfChg,dbChg,itemSQ,rbsChg,plyPct}=cp(item,sp,cx,door,drwF,drwBox);const ov=!!item.so;const isMould=item.t==="M";const isWall=item.t==="W";
 const mcRaw=calcModCost(item,item.mods,stockBase);const modCost=mcRaw*(1+plyPct/100);const modTotal=modCost*item.q;const grandTotal=total+modTotal;
 const activeMods=item.mods?Object.entries(item.mods).filter(([,v])=>v>0):[];
-const applicableMods=getApplicableMods(item);const modsExpanded=modOpen===item.id;
+const applicableMods=getApplicableMods(item);const modsExpanded=modOpen.has(item.id);
 const setMod=(code,val)=>{const newMods={...(item.mods||{})};
 const modDef=CABINET_MODS.find(m=>m.code===code);
 if(modDef?.excGroup&&val){CABINET_MODS.filter(m=>m.excGroup===modDef.excGroup&&m.code!==code).forEach(m=>{delete newMods[m.code]});}
@@ -7245,17 +7247,17 @@ upd(item.id,{mods:newMods});
             </div>}
             {/* ─── MODIFICATIONS PANEL ─── */}
             {!isMould&&!itemSQ&&applicableMods.length>0&&<div style={{marginBottom:5}}>
-              <button onClick={()=>sModOpen(modsExpanded?null:item.id)} style={{background:activeMods.length>0?"#7c3aed14":"transparent",border:`1px solid ${activeMods.length>0?"#7c3aed44":C.bdr}`,borderRadius:6,padding:"4px 10px",cursor:"pointer",fontSize:10,fontWeight:600,color:activeMods.length>0?"#7c3aed":C.stone,display:"flex",alignItems:"center",gap:4,width:"100%",justifyContent:"space-between"}}>
-                <span>{modsExpanded?"▾":"▸"} Modifications ({applicableMods.length} available{activeMods.length>0?` · ${activeMods.length} active`:""}{modCost>0?` · +${fm(modCost)}/ea`:""})</span>
-                {modCost>0&&<span style={{fontFamily:F.m,fontWeight:700,color:"#7c3aed"}}>+{fm(modTotal)}</span>}
+              <button onClick={()=>sModOpen(prev=>{const n=new Set(prev);if(modsExpanded)n.delete(item.id);else n.add(item.id);return n})} style={{background:activeMods.length>0?"#7c3aed18":"#f0edff",border:`2px solid ${activeMods.length>0?"#7c3aed":"#c4b5fd"}`,borderRadius:8,padding:"8px 12px",cursor:"pointer",fontSize:12,fontWeight:700,color:activeMods.length>0?"#7c3aed":"#6d28d9",display:"flex",alignItems:"center",gap:6,width:"100%",justifyContent:"space-between",transition:"all .15s"}}>
+                <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:16}}>{modsExpanded?"▾":"▸"}</span><span>⚙ Modifications</span><span style={{background:activeMods.length>0?"#7c3aed":"#a78bfa",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:10,fontWeight:700}}>{activeMods.length>0?`${activeMods.length} active`:`${applicableMods.length} available`}</span></span>
+                {modCost>0&&<span style={{fontFamily:F.m,fontWeight:700,color:"#7c3aed",fontSize:13}}>+{fm(modTotal)}</span>}
               </button>
-              {modsExpanded&&<div style={{border:`1px solid #7c3aed33`,borderTop:"none",borderRadius:"0 0 6px 6px",padding:"8px 10px",background:"#f8f5ff"}}>
+              {modsExpanded&&<div style={{borderLeft:"4px solid #7c3aed",borderRight:`1px solid #7c3aed33`,borderBottom:`1px solid #7c3aed33`,borderTop:"none",borderRadius:"0 0 8px 8px",padding:"10px 12px",marginTop:-1,background:"linear-gradient(135deg,#f8f5ff,#f0edff)"}}>
                 {(()=>{const groups={};applicableMods.forEach(m=>{if(!groups[m.group])groups[m.group]=[];groups[m.group].push(m)});
-                  return Object.entries(groups).map(([gName,gMods])=><div key={gName} style={{marginBottom:8}}>
-                    <div style={{fontSize:8.5,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:"#7c3aed",marginBottom:4}}>{gName}</div>
-                    <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:4}}>
+                  return Object.entries(groups).map(([gName,gMods])=><div key={gName} style={{marginBottom:10}}>
+                    <div style={{fontSize:9.5,fontWeight:700,textTransform:"uppercase",letterSpacing:".08em",color:"#6d28d9",marginBottom:5,paddingBottom:3,borderBottom:"1px solid #7c3aed22"}}>{gName}</div>
+                    <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:5}}>
                       {gMods.map(m=>{const val=item.mods?.[m.code]||0;const isOn=val;
-                        return(<div key={m.code} style={{display:"flex",alignItems:"center",gap:5,padding:"3px 6px",borderRadius:4,background:isOn?"#7c3aed14":"transparent",border:`1px solid ${isOn?"#7c3aed44":"transparent"}`}}>
+                        return(<div key={m.code} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 8px",borderRadius:6,background:isOn?"#7c3aed18":"#fff",border:`1.5px solid ${isOn?"#7c3aed":"#e2ddf5"}`,cursor:"pointer",transition:"all .1s"}}>
                           {m.input==="dims"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked){setMod(m.code,{w:"",h:"",d:""})}else{setMod(m.code,false)}}} style={{accentColor:"#1c3aed",margin:0,cursor:"pointer"}}/><span style={{fontSize:"0.8rem",color:isOn?"#1c3aed":"#888"}}>Enabled</span></div>{isOn&&typeof isOn==="object"?<div style={{display:"flex",gap:"4px",marginTop:"4px"}}>{["W","H","D"].map(dim=><label key={dim} style={{display:"flex",flexDirection:"column",alignItems:"center",fontSize:"0.65rem",color:"#666"}}>{dim}<input type="text" value={isOn[dim.toLowerCase()]||""} onChange={e=>{const nv={...isOn};nv[dim.toLowerCase()]=e.target.value;setMod(m.code,nv)}} style={{width:"44px",textAlign:"center",padding:"2px",fontSize:"0.75rem",borderRadius:"3px",border:"1px solid #a6b4a6"}}/></label>)}</div>:null}</div>:m.input==="width"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked)setMod(m.code,true);else setMod(m.code,false)}} style={{accentColor:"#c3aed1"}}/><span style={{fontSize:".85rem",color:isOn?"#c3aed1":"#888"}}>Enabled</span>{isOn!==false&&isOn!==0&&isOn!==undefined?<input type="text" value={typeof isOn==="string"?isOn:""} onChange={e=>setMod(m.code,e.target.value||true)} style={{width:"52px",padding:"2px 4px",border:"1px solid #ccc",borderRadius:"3px",fontSize:".85rem",marginLeft:"4px"}} placeholder="W"/>:null}</div>{m.note?<div style={{fontSize:".7rem",color:"#b08000",marginTop:"2px",fontStyle:"italic"}}>{m.note}</div>:null}</div>:m.input==="side"?
                             <div style={{display:"flex",gap:3}}>
                               {[["","—"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} className={`ch2 ${val===v?"on":""}`} onClick={()=>setMod(m.code,v||0)} style={{fontSize:10,padding:"2px 6px",...(val===v&&v?{borderColor:"#7c3aed",color:"#7c3aed",background:"#7c3aed14"}:{})}}>{l}</button>)}
@@ -7265,24 +7267,27 @@ upd(item.id,{mods:newMods});
                             <input type="number" min={0} max={m.max||10} value={val} onChange={e=>setMod(m.code,Math.max(0,Math.min(m.max||10,+e.target.value)))} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
                           }
                           <div style={{flex:1,minWidth:0}}>
-                            <div style={{fontSize:10,fontWeight:isOn?600:400,color:isOn?"#7c3aed":C.ink,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.code}: {m.label}</div>
-                            <div style={{fontSize:9,color:C.stone}}>{m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.input==="side"?m.price*(val==="B"?2:1):m.price*(m.input==="check"?1:val))}`:""}</div>
+                            <div style={{fontSize:11,fontWeight:isOn?700:500,color:isOn?"#6d28d9":C.ink,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.label}</div>
+                            <div style={{fontSize:9.5,color:isOn?"#7c3aed":C.stone,fontWeight:isOn?600:400}}>{m.code} · {m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.input==="side"?m.price*(val==="B"?2:1):m.price*(m.input==="check"?1:val))}`:""}</div>
                           </div>
                         </div>);
                       })}
                     </div>
                   </div>);
                 })()}
-                {activeMods.length>0&&<div style={{borderTop:"1px solid #7c3aed33",paddingTop:6,marginTop:4,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <span style={{fontSize:10,color:"#7c3aed",fontWeight:600}}>Mod total per unit: {fm(modCost)}</span>
-                  <button onClick={()=>upd(item.id,{mods:{}})} style={{background:"none",border:"1px solid #dc262622",borderRadius:4,padding:"2px 8px",fontSize:9,color:C.red,cursor:"pointer",fontWeight:600}}>Clear All</button>
+                {activeMods.length>0&&<div style={{borderTop:"2px solid #7c3aed33",paddingTop:8,marginTop:6,display:"flex",justifyContent:"space-between",alignItems:"center",background:"#7c3aed0a",margin:"6px -12px -10px",padding:"8px 12px",borderRadius:"0 0 4px 4px"}}>
+                  <span style={{fontSize:11,color:"#6d28d9",fontWeight:700}}>⚙ {activeMods.length} mod{activeMods.length>1?"s":""} · +{fm(modCost)}/unit</span>
+                  <button onClick={()=>upd(item.id,{mods:{}})} style={{background:"#fff",border:"1px solid #dc262644",borderRadius:5,padding:"3px 10px",fontSize:10,color:C.red,cursor:"pointer",fontWeight:600}}>Clear All</button>
                 </div>}
               </div>}
             </div>}
-            {!modsExpanded&&activeMods.length>0&&<div style={{display:"flex",gap:3,flexWrap:"wrap",marginBottom:4}}>
+            {!modsExpanded&&activeMods.length>0&&<div style={{borderLeft:"4px solid #7c3aed",paddingLeft:8,marginBottom:5,marginTop:2}}>
+              <div style={{fontSize:9.5,fontWeight:700,color:"#6d28d9",marginBottom:3}}>Active Modifications (+{fm(modCost)}/unit)</div>
+              <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
               {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
-                return(<span key={code} className="pl" style={{background:"#7c3aed14",color:"#7c3aed"}}>{m.code}{m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:""}{typeof qty==="object"?` W:${qty.w||"?"} H:${qty.h||"?"} D:${qty.d||"?"}`:null}</span>);
+                return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}>⚙ {m.label}{m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:""}</span></span>);
               })}
+              </div>
             </div>}
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div style={{display:"flex",alignItems:"center",gap:6}}>
