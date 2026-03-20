@@ -6558,6 +6558,7 @@ const CABINET_MODS=[
   {code:"MOD_SQ",label:"Square Cabinet Mod (h,d) — 30% min",price:0,unit:"%",types:["B","V","C","D","T","W"],group:"Structure",input:"dims",pct:30,excGroup:"mod"},
   {code:"MOD_ANG",label:"Angle Cabinet Mod (h,d,w) — 50% min",price:0,unit:"%",types:["B","V","C","D","T","W"],group:"Structure",input:"dims",pct:50,excGroup:"mod"},  {code:"FREE_W",label:"Free Width Modification",price:0,unit:"",types:["B","V","C","D","T","W"],group:"Structure",input:"width",note:"Only available on approx. 30% of cabinets"},
 
+  {code:"FREE_D",label:"Free Depth Modification",price:0,unit:"",types:["B","T"],group:"Structure",input:"select",options:["13\"","15\"","18\"","21\""]},
   {code:"ESFL",label:"Extended Side to Floor — Left",price:89,unit:"/side",types:["B","V","C","D","T"],group:"Side Mods",input:"check"},
   {code:"ESFR",label:"Extended Side to Floor — Right",price:89,unit:"/side",types:["B","V","C","D","T"],group:"Side Mods",input:"check"},
   {code:"WSL",label:"Wide Stile Left (up to 6\")",price:290,unit:"/side",types:["B","V","C","D","T","W"],group:"Side Mods",input:"check"},
@@ -7262,6 +7263,10 @@ upd(item.id,{mods:newMods});
                             <div style={{display:"flex",gap:3}}>
                               {[["","—"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} className={`ch2 ${val===v?"on":""}`} onClick={()=>setMod(m.code,v||0)} style={{fontSize:10,padding:"2px 6px",...(val===v&&v?{borderColor:"#7c3aed",color:"#7c3aed",background:"#7c3aed14"}:{})}}>{l}</button>)}
                             </div>:
+                          m.input==="select"?
+                            <select value={val||""} onChange={e=>setMod(m.code,e.target.value||0)} style={{fontSize:10,padding:"2px 4px",borderRadius:4,border:`1px solid ${isOn?"#7c3aed":C.bdr}`,background:isOn?"#7c3aed0a":"#fff",fontFamily:F.m,cursor:"pointer"}}>
+                              <option value="">— None —</option>{(m.options||[]).map(o=><option key={o} value={o}>{o}</option>)}
+                            </select>:
                           m.input==="check"?
                             <input type="checkbox" checked={isOn} onChange={e=>setMod(m.code,e.target.checked?1:0)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
                             <input type="number" min={0} max={m.max||10} value={val} onChange={e=>setMod(m.code,Math.max(0,Math.min(m.max||10,+e.target.value)))} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
@@ -7285,7 +7290,7 @@ upd(item.id,{mods:newMods});
               <div style={{fontSize:9.5,fontWeight:700,color:"#6d28d9",marginBottom:3}}>Active Modifications (+{fm(modCost)}/unit)</div>
               <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
               {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
-                return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}>⚙ {m.label}{m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:""}</span></span>);
+                return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}>⚙ {m.label}{m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
               })}
               </div>
             </div>}
