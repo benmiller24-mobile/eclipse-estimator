@@ -7232,7 +7232,7 @@ function AdminPanel({supabaseClient: sb, onClose}) {
 
   const loadUsers = async () => {
     try {
-      const { data, error } = await sb.from("profiles").select("id,email,role,dealer_id");
+      const { data, error } = await sb.from("profiles").select("id,email,role,dealer_id,discount_pct");
       if (error) throw error;
       setUsers(data || []);
     } catch (err) {
@@ -7260,6 +7260,19 @@ function AdminPanel({supabaseClient: sb, onClose}) {
       loadUsers();
     } catch (err) {
       console.error("Error updating role:", err);
+    }
+  };
+
+  const updateUserMultiplier = async (userId, mult) => {
+    try {
+      const { error } = await sb
+        .from("profiles")
+        .update({ discount_pct: mult })
+        .eq("id", userId);
+      if (error) throw error;
+      loadUsers();
+    } catch (err) {
+      console.error("Error updating multiplier:", err);
     }
   };
 
@@ -7335,25 +7348,29 @@ function AdminPanel({supabaseClient: sb, onClose}) {
                 border: `1px solid ${C.bdr}`,
                 borderRadius: "8px",
                 padding: "12px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
               }}>
-                <div>
-                  <div style={{ fontSize: "13px", fontWeight: "600", color: C.ink }}>{u.email}</div>
-                  <div style={{ fontSize: "11px", color: C.stone, marginTop: "2px" }}>Role: {u.role}</div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:u.role==="dealer"?"8px":"0"}}>
+                  <div>
+                    <div style={{ fontSize: "13px", fontWeight: "600", color: C.ink }}>{u.email}</div>
+                    <div style={{ fontSize: "11px", color: C.stone, marginTop: "2px" }}>Role: {u.role}</div>
+                  </div>
+                  <select
+                    value={u.role}
+                    onChange={(e) => updateUserRole(u.id, e.target.value)}
+                    className="sel"
+                    style={{ width: "120px" }}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="designer">Designer</option>
+                    <option value="dealer">Dealer</option>
+                    <option value="admin">Admin</option>
+                  </select>
                 </div>
-                <select
-                  value={u.role}
-                  onChange={(e) => updateUserRole(u.id, e.target.value)}
-                  className="sel"
-                  style={{ width: "120px" }}
-                >
-                  <option value="pending">Pending</option>
-                  <option value="designer">Designer</option>
-                  <option value="dealer">Dealer</option>
-                  <option value="admin">Admin</option>
-                </select>
+                {u.role==="dealer"&&<div style={{display:"flex",gap:8,alignItems:"center"}}>
+                  <label style={{fontSize:"11px",fontWeight:600,color:C.ink}}>Multiplier:</label>
+                  <input type="number" className="inp" min={0} max={1} step={0.001} value={u.discount_pct||0} onChange={(e)=>updateUserMultiplier(u.id,Math.max(0,Math.min(1,+e.target.value)))} style={{width:80,padding:"4px 6px",fontSize:11}}/>
+                  <span style={{fontSize:10,color:C.stone}}>e.g. 0.539</span>
+                </div>}
               </div>
             ))}
           </div>
@@ -7506,11 +7523,17 @@ function App({user, profile, supabase, onLogout}){
   const[mat,sMat]=useState("PB"),[intF,sIntF]=useState("STD-MAPL"),[drwBox,sDrwBox]=useState("5/8-STD");
   const[items,sItems]=useState([]),[vw,sVw]=useState("list");
   const[sMg,ssMg]=useState(false),[sSv,ssSv]=useState(false),[sAd,ssAd]=useState(false),[sCf,ssCf]=useState(false);
+  const[dealerMult,setDealerMult]=useState(profile?.discount_pct||0);
   const[tf,sTf]=useState("all"),[ntf,sNtf]=useState(null),[mob,sMob]=useState(false);
   const[modOpen,sModOpen]=useState(()=>new Set());
   const[showQuotesList,setShowQuotesList]=useState(false);
   const[showAdminPanel,setShowAdminPanel]=useState(false);
   const[currentQuoteId,setCurrentQuoteId]=useState(null);
+  const[versions,setVersions]=useState([]);
+  const[showHistory,setShowHistory]=useState(false);
+  const[groupByZone,setGroupByZone]=useState(true);
+  const[collapsedZones,setCollapsedZones]=useState(new Set());
+  const[showShareModal,setShowShareModal]=useState(false);
 
   useEffect(()=>{const c=()=>sMob(window.innerWidth<=768);c();window.addEventListener("resize",c);return()=>window.removeEventListener("resize",c)},[]);
   const fl=useCallback(m=>{sNtf(m);setTimeout(()=>sNtf(null),2000)},[]);
@@ -7521,26 +7544,31 @@ function App({user, profile, supabase, onLogout}){
     const t=setTimeout(async()=>{
       try{
         const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items};
+        const lastVersion=versions[versions.length-1];const meaningfulChange=!lastVersion||items.length!==lastVersion.items||Math.abs(comp.tot-lastVersion.total)/Math.max(1,lastVersion.total)>0.05;
+        let newVersions=versions;
+        if(meaningfulChange){newVersions=[...versions,{at:new Date().toISOString(),items:items.length,total:comp.tot,snapshot:{nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items}}].slice(-10);}
         if(currentQuoteId){
-          await supabase.from("quotes").update({name:nm,data:stateData,updated_at:new Date().toISOString()}).eq("id",currentQuoteId);
+          await supabase.from("quotes").update({name:nm,data:stateData,versions:newVersions,updated_at:new Date().toISOString()}).eq("id",currentQuoteId);
+          if(meaningfulChange)setVersions(newVersions);
         }else{
-          const{data,error}=await supabase.from("quotes").insert({user_id:user.id,name:nm,data:stateData}).select("id").single();
-          if(data&&!error)setCurrentQuoteId(data.id);
+          const{data,error}=await supabase.from("quotes").insert({user_id:user.id,name:nm,data:stateData,versions:newVersions}).select("id").single();
+          if(data&&!error){setCurrentQuoteId(data.id);setVersions(newVersions);}
         }
       }catch(e){console.error("Auto-save error:",e)}
     },2000);
     return()=>clearTimeout(t);
-  },[nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,currentQuoteId,supabase,user]);
+  },[nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,currentQuoteId,supabase,user,comp.tot,versions]);
 
   // ── Load most recent quote on mount ──
   useEffect(()=>{
     if(!supabase||!user)return;
     (async()=>{
       try{
-        const{data}=await supabase.from("quotes").select("id,data,name").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1).single();
+        const{data}=await supabase.from("quotes").select("id,data,name,versions").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1).single();
         if(data&&data.data){
           const d=data.data;
           setCurrentQuoteId(data.id);
+          setVersions(data.versions||[]);
           if(d.nm)sNm(d.nm);if(d.pid)sPid(d.pid);if(d.sp)sSp(d.sp);if(d.cx)sCx(d.cx);
           if(d.door)sDoor(d.door);if(d.drwF)sDrwF(d.drwF);if(d.glaze)sGlaze(d.glaze);
           if(d.highlight)sHL(d.highlight);if(d.charT1)sCT1(d.charT1);if(d.charT2)sCT2(d.charT2);
@@ -7555,10 +7583,11 @@ function App({user, profile, supabase, onLogout}){
   const loadQuoteFromList=useCallback(async(quoteId)=>{
     if(!supabase)return;
     try{
-      const{data}=await supabase.from("quotes").select("id,data,name").eq("id",quoteId).single();
+      const{data}=await supabase.from("quotes").select("id,data,name,versions").eq("id",quoteId).single();
       if(data&&data.data){
         const d=data.data;
         setCurrentQuoteId(data.id);
+        setVersions(data.versions||[]);
         if(d.nm)sNm(d.nm);if(d.pid)sPid(d.pid);if(d.sp)sSp(d.sp);if(d.cx)sCx(d.cx);
         if(d.door)sDoor(d.door);if(d.drwF)sDrwF(d.drwF);if(d.glaze)sGlaze(d.glaze);
         if(d.highlight)sHL(d.highlight);if(d.charT1)sCT1(d.charT1);if(d.charT2)sCT2(d.charT2);
@@ -7604,14 +7633,14 @@ function App({user, profile, supabase, onLogout}){
 
   const csv=useCallback(()=>{
     const dl=DOORS.find(d=>d.v===door)?.l||door;const dfl=DRW_FRONTS.find(d=>d.v===drwF)?.l||drwF;
-    const r=[["Eclipse Estimator v8.8.0 — "+nm],["Door: "+dl,"Drawer Front: "+dfl,"Species: "+sp,"Color: "+color,"Construction: "+(cx==="Standard"?"Std":"Plywood")],
+    const r=[["Eclipse Estimator v8.8.0 — "+nm],...(dealerMult>0&&dealerMult<1?[["Dealer Multiplier: ×"+dealerMult]]:[]),["Door: "+dl,"Drawer Front: "+dfl,"Species: "+sp,"Color: "+color,"Construction: "+(cx==="Standard"?"Std":"Plywood")],
       ["Glaze: "+(GLAZES.find(g=>g.v===glaze)?.l||"None"),"Highlight: "+(HIGHLIGHTS.find(h=>h.v===highlight)?.l||"None"),"Drawer Box: "+(DRW_BOX.find(d=>d.v===drwBox)?.l||drwBox)],
-      [],["SKU","Room","Qty","Door","Hinge","Fin.End","Length","Stock","Species Ovr","Unit","Total"]];
-    items.forEach(it=>{const{u,t}=cp(it,sp,cx,door,drwF,drwBox);const iM=it.t==="M";r.push([it.s,ZN.find(z=>z.id===it.z)?.l||it.z,it.q,it.ds||"",it.hng||"",it.fe||"",iM?`${it.len}ft`:"",(iM?`$${it.p}/LF`:it.p),it.so||"",Math.round(u),Math.round(t)])});
-    r.push([]);r.push(["","","","","","","","","","TOTAL",Math.round(comp.tot)]);
+      [],["SKU","Room","Qty","Door","Hinge","Fin.End","Length","Stock","Species Ovr","Unit","List Total",...(dealerMult>0&&dealerMult<1?["Dealer Cost"]:[])]];
+    items.forEach(it=>{const{u,t}=cp(it,sp,cx,door,drwF,drwBox);const iM=it.t==="M";const row=[it.s,ZN.find(z=>z.id===it.z)?.l||it.z,it.q,it.ds||"",it.hng||"",it.fe||"",iM?`${it.len}ft`:"",(iM?`$${it.p}/LF`:it.p),it.so||"",Math.round(u),Math.round(t)];if(dealerMult>0&&dealerMult<1)row.push(Math.round(t*dealerMult));r.push(row)});
+    r.push([]);const totRow=["","","","","","","","","","TOTAL",Math.round(comp.tot)];if(dealerMult>0&&dealerMult<1)totRow.push(Math.round(comp.tot*dealerMult));r.push(totRow);
     const b=new Blob([r.map(x=>x.join(",")).join("\n")],{type:"text/csv"});
     const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`${nm.replace(/\s+/g,"_")}_v880.csv`;a.click();fl("Exported");
-  },[items,sp,cx,door,comp.tot,nm,fl]);
+  },[items,sp,cx,door,comp.tot,dealerMult,nm,fl]);
 
   const genOrder=useCallback(async()=>{
     try{
@@ -7641,10 +7670,11 @@ function App({user, profile, supabase, onLogout}){
         setTF("Lower Door Style",door);
         setTF("Drawer Front Style",drwF||"");
         setTF("Order Date",new Date().toLocaleDateString());
-        setTF("Special Instructions",zoneLbl);
         setTF("Business Name",profile?.business_name||"");
         setTF("Salesperson/Contact",profile?.full_name||"");
         setTF("Job Name",nm||"");
+        setTF("Contact Email",user?.email||"");
+        setTF("Contact Phone",profile?.phone||"");
         const glazeMap={"BLK-GL":"Black","MCH-GL":"Mocha","VDK-GL":"Van Dyke","NKL-GL":"Nickel"};
         const hlMap={"GRPH-HL":"Graphite","CAFE-HL":"Café","SLATE-HL":"Slate"};
         ["Black","Mocha","Van Dyke","Nickel"].forEach(g=>setCB(`${g} ON`,glazeMap[glaze]===g));
@@ -7665,18 +7695,22 @@ function App({user, profile, supabase, onLogout}){
           Object.entries(ctMap).forEach(([k,v])=>setCB(`${v} ON`,charT1.toLowerCase().includes(k)||charT2?.toLowerCase().includes(k)));
         }
         setCB("New ON",true);setCB("Remodel ON",false);
+        const itemsToShow=Math.min(orderItems.length,59);
         const totalItemPages=Math.ceil(orderItems.length/20)||1;
         setTF("Number of Pages In Order",String(totalItemPages));
-        orderItems.forEach((it,i)=>{
-          const n=i+1;
+        let specialInstr=zoneLbl;
+        if(orderItems.length>59){const overflow=orderItems.length-59;specialInstr+=` — ${overflow} additional items, see attached CSV`;}
+        setTF("Special Instructions",specialInstr);
+        for(let i=0;i<itemsToShow;i++){
+          const it=orderItems[i];const n=i+1;
           setTF(`Cab No Line ${n}`,String(n));
           setTF(`Quantity ${n}`,it.qty);
           setTF(`Description ${n}`,it.description);
           setTF(`Finished Ends ${n}`,it.finishedEnd);
           setTF(`Hinge ${n}`,it.hinge);
           setTF(`Price ${n}`,it.price);
-        });
-        const totalLine=Math.min(orderItems.length+1,60);
+        }
+        const totalLine=Math.min(itemsToShow+1,60);
         setTF(`Description ${totalLine}`,"LIST PRICE TOTAL");
         setTF(`Price ${totalLine}`,`$${Math.round(zoneTot).toLocaleString()}`);
         setTF("Page Number 1","1");setTF("Page Number 2","2");setTF("Page Number 3","3");
@@ -7734,6 +7768,8 @@ function App({user, profile, supabase, onLogout}){
         <button className="bt bp" onClick={save} style={{fontSize:11}}>💾{!mob&&" Save"}</button>
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>ssSv(true)}>📂</button>
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowQuotesList(true)}>📋{!mob&&" Quotes"}</button>
+        {versions.length>0&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowHistory(true)}>📜{!mob&&" History"}</button>}
+        {items.length>0&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowShareModal(true)}>📤{!mob&&" Share"}</button>}
         {profile?.role==="admin"&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold}} onClick={()=>setShowAdminPanel(true)}>⚙{!mob&&" Admin"}</button>}
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={onLogout}>{!mob&&"Sign "}Out</button>
         {mob&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream,fontSize:11,padding:"4px 8px"}} onClick={genOrder}>📋 Order</button>}
@@ -7750,8 +7786,9 @@ function App({user, profile, supabase, onLogout}){
               <input className="inp" value={nm} onChange={e=>sNm(e.target.value)} style={{fontFamily:F.d,fontSize:mob?14:16,fontWeight:600}}/>
             </div>
             <div style={{display:"flex",gap:12,justifyContent:mob?"center":"flex-end",flexWrap:"wrap"}}>
-              {[["Items",comp.n],["Units",comp.un],["Rooms",comp.zc],["List Price",fm(comp.tot)]].map(([l,v])=>
-                <div key={l} style={{textAlign:"center"}}><div className="lb">{l}</div><div className="mn" style={{fontSize:15,fontWeight:700,color:l==="List Price"?C.acc:C.ink}}>{v}</div></div>
+              {[["Items",comp.n],["Units",comp.un],["Rooms",comp.zc],["List Price",fm(comp.tot)],...(dealerMult>0&&dealerMult<1?[["Dealer Cost",fm(comp.tot*dealerMult)]]:[])]
+              .map(([l,v])=>
+                <div key={l} style={{textAlign:"center"}}><div className="lb">{l}</div><div className="mn" style={{fontSize:15,fontWeight:700,color:l==="List Price"||l==="Dealer Cost"?C.acc:C.ink}}>{v}</div></div>
               )}
             </div>
           </div>
@@ -7800,6 +7837,7 @@ function App({user, profile, supabase, onLogout}){
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,flexWrap:"wrap",gap:4}}>
         <div style={{display:"flex",gap:3,alignItems:"center",overflowX:"auto"}}>
           {[["all","All"],...Object.entries(TN)].map(([k,v])=><button key={k} className={`ch2 ${tf===k?"on":""}`} onClick={()=>sTf(k)} style={{flexShrink:0,...(k!=="all"&&tf===k?{borderColor:TC[k],color:TC[k],background:TC[k]+"14"}:{})}}>{v}</button>)}
+          {items.length>0&&<button className={`ch2 ${groupByZone?"on":""}`} onClick={()=>setGroupByZone(!groupByZone)} style={{flexShrink:0,...(groupByZone?{borderColor:C.acc,color:C.acc,background:C.acc+"14"}:{})}} title={groupByZone?"Grouped by zone":"Flat view"}>🏠{mob?"":" Zone"}</button>}
         </div>
         <div style={{display:"flex",gap:3}}>
           <button className="bt bgl" onClick={()=>ssMg(true)} style={{fontSize:11}}>💰{mob?"":" Margin"}</button>
@@ -7815,7 +7853,7 @@ function App({user, profile, supabase, onLogout}){
         <div style={{color:C.stone,fontSize:12.5,marginBottom:14}}>{mob?"Tap + below":"Use the catalog above"} to add Eclipse cabinets.</div>
         {mob&&<button className="bt bp" onClick={()=>ssAd(true)} style={{fontSize:13,padding:"9px 22px"}}>+ Add Cabinets</button>}
       </div>):(
-        <div>{fi.map(item=>{
+        <div>{!groupByZone?fi.map(item=>{
           const{u,t:total,stockBase,prePly,doorChg,dfChg,dbChg,itemSQ,rbsChg,plyPct}=cp(item,sp,cx,door,drwF,drwBox);const ov=!!item.so;const isMould=item.t==="M";const isWall=item.t==="W";
 const mcRaw=calcModCost(item,item.mods,stockBase);const modCost=mcRaw*(1+plyPct/100);const modTotal=modCost*item.q;const grandTotal=total+modTotal;
 const activeMods=item.mods?Object.entries(item.mods).filter(([,v])=>v>0):[];
@@ -7982,16 +8020,55 @@ upd(item.id,{mods:newMods});
               <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
             </div>
           </div>);
-        })}
-        <div style={{marginTop:6,background:C.ink,borderRadius:8,padding:"10px 12px",display:"flex",justifyContent:"space-between",alignItems:"center",color:C.cream}}>
+        }):(()=>{
+        // Grouped by zone view for fi filtered items
+        const zoneGroups={};fi.forEach(item=>{if(!zoneGroups[item.z])zoneGroups[item.z]=[];zoneGroups[item.z].push(item)});
+        const zoneEntries=Object.entries(zoneGroups);
+        return zoneEntries.map(([zid,zItems])=>{
+          const zInfo=ZN.find(z=>z.id===zid)||{l:zid,i:"📦"};
+          const isCollapsed=collapsedZones.has(zid);
+          let zTotal=0;zItems.forEach(it=>{const{u,t,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);zTotal+=t+mcR*(1+plyPct/100)*it.q});
+          return(<div key={zid} style={{marginBottom:8}}>
+            <button onClick={()=>{const nc=new Set(collapsedZones);nc.has(zid)?nc.delete(zid):nc.add(zid);setCollapsedZones(nc)}} style={{width:"100%",textAlign:"left",background:C.ink,color:C.cream,border:"none",borderRadius:8,padding:"10px 14px",cursor:"pointer",fontWeight:600,fontSize:13,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8}}><span>{isCollapsed?"▶":"▼"}</span><span style={{fontSize:16,marginRight:4}}>{zInfo.i}</span><span style={{fontFamily:F.d}}>{zInfo.l}</span></div>
+              <div style={{fontSize:11,color:C.stL}}>{zItems.length} items · {fm(zTotal)}{dealerMult>0&&dealerMult<1?` · Dealer ${fm(zTotal*dealerMult)}`:""}</div>
+            </button>
+            {!isCollapsed&&<div style={{border:`1px solid ${C.bdr}`,borderTop:"none",padding:"0"}}>{zItems.map(item=>{
+              const{u,t:total,stockBase,prePly,doorChg,dfChg,dbChg,itemSQ,rbsChg,plyPct}=cp(item,sp,cx,door,drwF,drwBox);const ov=!!item.so;const isMould=item.t==="M";const isWall=item.t==="W";
+              const mcRaw=calcModCost(item,item.mods,stockBase);const modCost=mcRaw*(1+plyPct/100);const modTotal=modCost*item.q;const grandTotal=total+modTotal;
+              const activeMods=item.mods?Object.entries(item.mods).filter(([,v])=>v>0):[];
+              return(<div key={item.id} className={`ic${ov?" ov":""}`} style={{margin:"8px",marginBottom:"0"}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
+                  <div><span className="mn" style={{fontWeight:700,fontSize:12.5}}>{item.s}</span><span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>{isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}{item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}{item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng}</span>}{item.fe&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe}</span>}{activeMods.length>0&&<span className="pl" style={{marginLeft:3,background:"#7c3aed18",color:"#6d28d9"}}>{activeMods.length} mod{activeMods.length>1?"s":""}</span>}</div>
+                  <div style={{display:"flex",gap:4,alignItems:"center"}}>
+                    <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                    <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                  </div>
+                </div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6}}>
+                    <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
+                    <span style={{fontSize:10.5,color:C.stone}}>{item.q>1?`× ${fm(grandTotal/item.q)}`:""}</span>
+                  </div>
+                  <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
+                </div>
+              </div>);
+            })}</div>}
+          </div>);
+        });
+      })()}
+        <div style={{marginTop:6,background:C.ink,borderRadius:8,padding:"10px 12px",display:"flex",justifyContent:"space-between",alignItems:"center",color:C.cream,flexWrap:"wrap",gap:16}}>
           <span style={{fontFamily:F.d,fontWeight:600,fontSize:13}}>Total List Price ({comp.un} units)</span>
-          <span className="mn" style={{fontSize:18,fontWeight:700,color:C.gold}}>{fm(comp.tot)}</span>
+          <div style={{display:"flex",gap:16}}>
+            <div style={{textAlign:"center"}}><div style={{fontSize:9.5,color:C.stL}}>List Price</div><div className="mn" style={{fontSize:16,fontWeight:700,color:C.gold}}>{fm(comp.tot)}</div></div>
+            {dealerMult>0&&dealerMult<1&&<div style={{textAlign:"center"}}><div style={{fontSize:9.5,color:C.stL}}>Dealer Cost (×{dealerMult})</div><div className="mn" style={{fontSize:16,fontWeight:700,color:C.acc}}>{fm(comp.tot*dealerMult)}</div></div>}
+          </div>
         </div>
         </div>
       )}
 
       {items.length>0&&(()=>{
-        // Group items by zone
+        // Zone summary table view
         const zoneGroups={};items.forEach(item=>{if(!zoneGroups[item.z])zoneGroups[item.z]=[];zoneGroups[item.z].push(item)});
         const zoneEntries=Object.entries(zoneGroups);
         const thS={padding:"6px 8px",fontWeight:700,fontSize:9.5,textTransform:"uppercase",letterSpacing:".05em",color:C.stone};
@@ -8097,9 +8174,49 @@ upd(item.id,{mods:newMods});
     </div></div>}
 
     {sMg&&<MarginCalc tot={comp.tot} onClose={()=>ssMg(false)}/>}
-    
+
     {showQuotesList&&<QuotesList user={user} onLoadQuote={loadQuoteFromList} onClose={()=>setShowQuotesList(false)}/>}
     {showAdminPanel&&profile?.role==="admin"&&<AdminPanel supabaseClient={supabase} onClose={()=>setShowAdminPanel(false)}/>}
+
+    {showHistory&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,backdropFilter:"blur(3px)",padding:"14px",overflow:"auto"}}>
+      <div style={{background:C.paper,borderRadius:"12px",padding:"20px",width:"100%",maxWidth:"500px",maxHeight:"80vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,0.3)"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px",paddingBottom:"12px",borderBottom:`1px solid ${C.bdr}`}}>
+          <h3 style={{fontFamily:F.d,fontSize:"18px",fontWeight:"700",color:C.ink}}>Quote History</h3>
+          <button onClick={()=>setShowHistory(false)} style={{background:"none",border:"none",fontSize:"24px",cursor:"pointer",color:C.stone}}>×</button>
+        </div>
+        {versions.length===0?<div style={{textAlign:"center",color:C.stone,padding:"28px",fontSize:12.5}}>No version history</div>:
+          <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
+            {versions.map((v,idx)=>(<div key={idx} style={{background:C.cream,border:`1px solid ${C.bdr}`,borderRadius:"8px",padding:"12px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"start"}}>
+                <div>
+                  <div style={{fontSize:"13px",fontWeight:"600",color:C.ink}}>{new Date(v.at).toLocaleString()}</div>
+                  <div style={{fontSize:"11px",color:C.stone,marginTop:"2px"}}>{v.items} items · {fm(v.total)}</div>
+                </div>
+                <button className="bt bp" onClick={()=>{if(v.snapshot){const s=v.snapshot;sNm(s.nm);sPid(s.pid);sSp(s.sp);sCx(s.cx);sDoor(s.door);sDrwF(s.drwF);sGlaze(s.glaze);sHL(s.highlight);sCT1(s.charT1);sCT2(s.charT2);sColor(s.color);sMat(s.mat);sIntF(s.intF);sDrwBox(s.drwBox);sItems(s.items);setShowHistory(false);fl("Restored version");}}} style={{fontSize:10.5,padding:"5px 10px"}}>Restore</button>
+              </div>
+            </div>))
+          }
+          </div>
+        }
+      </div>
+    </div>}
+
+    {showShareModal&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,backdropFilter:"blur(3px)",padding:"14px",overflow:"auto"}}>
+      <div style={{background:C.paper,borderRadius:"12px",padding:"20px",width:"100%",maxWidth:"480px",boxShadow:"0 20px 60px rgba(0,0,0,0.3)"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px",paddingBottom:"12px",borderBottom:`1px solid ${C.bdr}`}}>
+          <h3 style={{fontFamily:F.d,fontSize:"18px",fontWeight:"700",color:C.ink}}>Share Quote</h3>
+          <button onClick={()=>setShowShareModal(false)} style={{background:"none",border:"none",fontSize:"24px",cursor:"pointer",color:C.stone}}>×</button>
+        </div>
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:13,fontWeight:600,color:C.ink,marginBottom:6}}>Project: {nm}</div>
+          <div style={{fontSize:11,color:C.stone,lineHeight:1.6}}>Items: {comp.n} · Rooms: {comp.zc} · List Price: {fm(comp.tot)}</div>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          <button onClick={()=>{const lines=[nm,`Items: ${comp.n}`,`Rooms: ${comp.zc}`,`List Price: ${fm(comp.tot)}`];if(dealerMult>0&&dealerMult<1)lines.push(`Dealer Cost (×${dealerMult}): ${fm(comp.tot*dealerMult)}`);lines.push(`Date: ${new Date().toLocaleDateString()}`);navigator.clipboard.writeText(lines.join("\n")).then(()=>fl("Summary copied!")).catch(e=>console.error(e));setShowShareModal(false);}} className="bt bp" style={{width:"100%",fontSize:12,padding:"10px"}}>📋 Copy Summary</button>
+          <button onClick={()=>{const lines=[nm,`Items: ${comp.n}`,`Rooms: ${comp.zc}`,`List Price: ${fm(comp.tot)}`];if(dealerMult>0&&dealerMult<1)lines.push(`Dealer Cost (×${dealerMult}): ${fm(comp.tot*dealerMult)}`);lines.push(`Date: ${new Date().toLocaleDateString()}`);const mailto=`mailto:?subject=${encodeURIComponent(nm + " - Quote")}&body=${encodeURIComponent(lines.join("\n"))}`;window.location.href=mailto;setShowShareModal(false);}} className="bt bg" style={{width:"100%",fontSize:12,padding:"10px"}}>✉ Email Quote</button>
+        </div>
+      </div>
+    </div>}
   </div>);
 }
 
