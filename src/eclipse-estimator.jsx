@@ -6460,7 +6460,11 @@ const F={d:"'Playfair Display',Georgia,serif",b:"'DM Sans','Helvetica Neue',sans
 // ── Supabase Client ──
 const SUPABASE_URL = "https://rljpgudmvbaocomktone.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsanBndWRtdmJhb2NvbWt0b25lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTk5ODYsImV4cCI6MjA4OTU5NTk4Nn0.YqtoSBM0utOmZlKWvd8OQ2w9m3iytkGwP9LRqpbqa1w";
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    lock: async (name, acquireTimeout, fn) => { return await fn(); },
+  },
+});
 
 const C={ink:"#1a1814",warm:"#f7f3ee",cream:"#faf8f4",paper:"#fff",stone:"#8a7e70",stL:"#c4b9aa",bdr:"#e5dfd6",acc:"#2c4a34",accS:"#e8f0ea",gold:"#b8963e",goldS:"#f5eedd",red:"#a83232"};
 const fm=n=>"$"+Math.round(n).toLocaleString();
@@ -7415,45 +7419,9 @@ function AuthWrapper() {
 
   useEffect(() => {
     let mounted = true;
-    const STORAGE_KEY = 'sb-rljpgudmvbaocomktone-auth-token';
 
     const checkAuth = async () => {
       try {
-        // Read session from localStorage directly to avoid Web Locks API hang
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            if (parsed?.user) {
-              if (!mounted) return;
-              setUser(parsed.user);
-              // Show app immediately — fetch profile via direct REST to avoid lock
-              setLoading(false);
-              // Fetch profile using direct REST call with stored access token
-              try {
-                const res = await fetch(
-                  `https://rljpgudmvbaocomktone.supabase.co/rest/v1/profiles?id=eq.${parsed.user.id}&select=*`,
-                  { headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': `Bearer ${parsed.access_token}`,
-                  }}
-                );
-                if (res.ok) {
-                  const rows = await res.json();
-                  if (mounted && rows[0]) setProfile(rows[0]);
-                }
-              } catch (e) { console.warn("Direct profile fetch failed:", e); }
-              // Refresh session in background (non-blocking)
-              supabaseClient.auth.getSession().then(({ data: { session } }) => {
-                if (!mounted) return;
-                if (session?.user) { setUser(session.user); }
-                else { setUser(null); setProfile(null); localStorage.removeItem(STORAGE_KEY); }
-              }).catch(() => {});
-              return;
-            }
-          } catch (e) { /* invalid JSON, fall through */ }
-        }
-        // No stored session — try getSession (fast when no lock contention)
         const { data: { session } } = await supabaseClient.auth.getSession();
         const currentUser = session?.user || null;
         if (!mounted) return;
