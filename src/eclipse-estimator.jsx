@@ -6483,9 +6483,12 @@ const isFLS=(s)=>s==="FLS";
 const FLS_DEPTH_MIN=6,FLS_DEPTH_MAX=24,FLS_LEN_MIN=12,FLS_LEN_MAX=96;
 const LSD_NOTE="Doors not available over 84\" tall, or over 30\" wide\n• Doors over 66\" tall will have no warranty\n• One panel tall doors over 48\" tall will have no warranty\n• One panel wide doors over 24\" wide will have no warranty\n• Doors 66\" to 84\" tall will not be bored for hinges\n• Doors over 24\" wide will not be bored for hinges";
 const LSD_SKUS=new Set(["LSD"]);
-const SKU_LABELS={"LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts"};
+const SKU_LABELS={"LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts","CUSTOM":"Custom Quote"};
+const isCustom=(s)=>s==="CUSTOM";
 
-const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{const s=item.so||sp;const sm=SP[s]||0;const cm=CX[cx]||0;const len=item.len||1;
+const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{
+  if(isCustom(item.s)){const u=item.p||0;return{u,t:u*item.q,stockBase:u,prePly:u,doorChg:0,dfChg:0,dbChg:0,itemSQ:false,rbsChg:0,plyPct:0};}
+  const s=item.so||sp;const sm=SP[s]||0;const cm=CX[cx]||0;const len=item.len||1;
   const sqin=item.sqin||0;const itemSQ=isSqIn(item.s,item.r);
   const stockBase=itemSQ?(item.p*sqin*(1+sm/100)):(item.p*len*(1+sm/100));
   const ds=item.ds||gDoor||"HNVR";const dInfo=DOORS.find(d=>d.v===ds);
@@ -6847,9 +6850,11 @@ function MarginCalc({tot,onClose}){
   </div></div>);
 }
 
-function AddUI({onAdd}){
+function AddUI({onAdd,onAddCustom}){
   const[sk,sSk]=useState(CATALOG[0]?.s||""),[q,sQ]=useState(1),[z,sZ]=useState("kitchen"),[sr,sSr]=useState(""),[tf,sTf]=useState("all"),[len,sLen]=useState(10);
   const[sqW,sSqW]=useState(36),[sqH,sSqH]=useState(34);
+  const[showCQ,setShowCQ]=useState(false);
+  const[cqDesc,setCqDesc]=useState(""),[cqPrice,setCqPrice]=useState(""),[cqNum,setCqNum]=useState(""),[cqZ,setCqZ]=useState("kitchen"),[cqQ,setCqQ]=useState(1),[cqPdf,setCqPdf]=useState(null),[cqPdfName,setCqPdfName]=useState("");
   const selCat=CATALOG.find(c=>c.s===sk);const isM=selCat?.t==="M";const isSQ=selCat?isSqIn(selCat.s,selCat.r):false;
   const fl=useMemo(()=>{let l=CATALOG;if(tf!=="all")l=l.filter(c=>c.t===tf);if(sr){const s=sr.toLowerCase();l=l.filter(c=>c.s.toLowerCase().includes(s)||c.r.toLowerCase().includes(s));}return l.slice(0,200);},[tf,sr]);
   const grouped=useMemo(()=>{const g={};fl.forEach(c=>{const k=c.r||c.t;if(!g[k])g[k]=[];g[k].push(c)});return Object.entries(g)},[fl]);
@@ -6904,6 +6909,43 @@ function AddUI({onAdd}){
       <div style={{width:60}}><label className="lb">{isM?"Pcs":isSQ?"Pcs":"Qty"}</label><input type="number" className="inp" min={1} max={999} value={q} onChange={e=>sQ(Math.max(1,+e.target.value))} style={{textAlign:"center"}}/></div>
       <div style={{flex:"1 1 80px"}}><label className="lb">Room</label><select className="sel" value={z} onChange={e=>sZ(e.target.value)}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
       <button className="bt bp" onClick={()=>{const cat=CATALOG.find(c=>c.s===sk);if(cat){onAdd(cat,q,z,cat.t==="M"?len:0,isSqIn(cat.s,cat.r)?sqW*sqH:0,isSqIn(cat.s,cat.r)?sqW:0,isSqIn(cat.s,cat.r)?sqH:0);sQ(1);}}} style={{minWidth:100}}>+ Add</button>
+    </div>
+    {/* Custom Quote Section */}
+    <div style={{marginTop:10,borderTop:`2px solid ${C.gold}`,paddingTop:10}}>
+      <button onClick={()=>setShowCQ(!showCQ)} style={{width:"100%",background:showCQ?C.goldS:"#fff",border:`2px solid ${C.gold}`,borderRadius:8,padding:"8px 12px",cursor:"pointer",fontSize:12,fontWeight:700,color:C.gold,display:"flex",alignItems:"center",gap:6,justifyContent:"space-between",transition:"all .15s"}}>
+        <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:14}}>{showCQ?"▾":"▸"}</span><span>📝 Custom Quote Item</span></span>
+        <span style={{fontSize:10,fontWeight:400,color:C.stone}}>Factory special / custom pricing</span>
+      </button>
+      {showCQ&&<div style={{border:`1px solid ${C.gold}33`,borderTop:"none",borderRadius:"0 0 8px 8px",padding:"12px",background:C.goldS}}>
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          <div><label className="lb" style={{color:C.gold}}>Description</label>
+            <textarea value={cqDesc} onChange={e=>setCqDesc(e.target.value)} placeholder="Describe the custom item — e.g. Custom island with waterfall edge, modified 48&quot; pantry..." rows={2} style={{width:"100%",padding:"6px 8px",fontSize:11,border:`1px solid ${C.bdr}`,borderRadius:5,fontFamily:F.b,boxSizing:"border-box",resize:"vertical"}}/>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+            <div><label className="lb" style={{color:C.gold}}>List Price ($)</label>
+              <input type="number" className="inp" min={0} step={0.01} value={cqPrice} onChange={e=>setCqPrice(e.target.value)} placeholder="0.00" style={{fontSize:12}}/>
+            </div>
+            <div><label className="lb" style={{color:C.gold}}>Factory Quote #</label>
+              <input type="text" className="inp" value={cqNum} onChange={e=>setCqNum(e.target.value)} placeholder="e.g. CQ-2026-0412" style={{fontSize:12}}/>
+            </div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"60px 1fr",gap:8}}>
+            <div><label className="lb" style={{color:C.gold}}>Qty</label><input type="number" className="inp" min={1} max={999} value={cqQ} onChange={e=>setCqQ(Math.max(1,+e.target.value))} style={{textAlign:"center"}}/></div>
+            <div><label className="lb" style={{color:C.gold}}>Room</label><select className="sel" value={cqZ} onChange={e=>setCqZ(e.target.value)}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
+          </div>
+          <div><label className="lb" style={{color:C.gold}}>Custom Quote PDF (optional)</label>
+            <div style={{display:"flex",gap:6,alignItems:"center"}}>
+              <label style={{background:"#fff",border:`1px solid ${C.bdr}`,borderRadius:5,padding:"5px 10px",fontSize:11,cursor:"pointer",color:C.ink,fontWeight:600}}>
+                {cqPdfName||"Choose File"}
+                <input type="file" accept=".pdf" onChange={e=>{const f=e.target.files?.[0];if(f){setCqPdfName(f.name);const reader=new FileReader();reader.onload=ev=>setCqPdf(ev.target.result);reader.readAsDataURL(f)}}} style={{display:"none"}}/>
+              </label>
+              {cqPdfName&&<span style={{fontSize:10,color:C.stone}}>{cqPdfName}</span>}
+              {cqPdf&&<button onClick={()=>{setCqPdf(null);setCqPdfName("")}} style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:4,padding:"2px 6px",fontSize:10,color:C.red,cursor:"pointer"}}>✕</button>}
+            </div>
+          </div>
+          <button className="bt bp" onClick={()=>{if(!cqDesc.trim()||!cqPrice){alert("Please enter a description and price.");return;}onAddCustom({desc:cqDesc.trim(),price:parseFloat(cqPrice)||0,quoteNum:cqNum.trim(),pdf:cqPdf,pdfName:cqPdfName,q:cqQ,z:cqZ});setCqDesc("");setCqPrice("");setCqNum("");setCqPdf(null);setCqPdfName("");setCqQ(1);}} style={{width:"100%",fontSize:12,padding:"10px",background:C.gold,borderColor:C.gold}}>+ Add Custom Quote Item</button>
+        </div>
+      </div>}
     </div>
   </div>);
 }
@@ -7685,6 +7727,12 @@ function App({user, profile, supabase, onLogout}){
     fl(`Added ${q}× ${cat.s}${len?` (${len}ft)`:""}${sqin?` (${sqin} sq.in)`:""}`);if(mob)ssAd(false);
   },[fl,mob]);
 
+  const addCustom=useCallback(({desc,price,quoteNum,pdf,pdfName,q,z})=>{
+    const newId=uid();
+    sItems(p=>[...p,{id:newId,s:"CUSTOM",t:"X",r:"CQ",p:price,q,z,so:null,len:0,hng:"",fe:"",ds:"",dc:0,drc:0,brot:0,sqin:0,sqW:0,sqH:0,rbs:false,mods:{},rot:"",rotQ:0,rotFeg:false,rot2:"",rot2Q:0,rot2Feg:false,cqDesc:desc,cqNum:quoteNum,cqPdf:pdf,cqPdfName:pdfName}]);
+    fl(`Added custom item: ${desc.slice(0,40)}${desc.length>40?"...":""}`);if(mob)ssAd(false);
+  },[fl,mob]);
+
   const upd=useCallback((id,p)=>sItems(prev=>prev.map(it=>it.id===id?{...it,...p}:it)),[]);
   const rem=useCallback(id=>sItems(prev=>prev.filter(it=>it.id!==id)),[]);
   const dup=useCallback(id=>{sItems(p=>{const s=p.find(it=>it.id===id);return s?[...p,{...s,id:uid()}]:p});fl("Duplicated")},[fl]);
@@ -7749,6 +7797,7 @@ function App({user, profile, supabase, onLogout}){
         const orderItems=zoneItems.map(it=>{const{t}=cp(it,sp,cx,door,drwF,drwBox);const iM=it.t==="M";const isSQ=isSqIn(it.s,it.r);
           const mcRaw=calcModCost(it,it.mods,cp(it,sp,cx,door,drwF,drwBox).stockBase);
           const total=t+mcRaw*(1+((it.mods&&cx==="Plywood")?10:0)/100)*it.q;
+          if(isCustom(it.s)){return{description:`CUSTOM: ${(it.cqDesc||"Custom Item").slice(0,80)}${it.cqNum?` [${it.cqNum}]`:""}`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
           return{description:`${it.s}${it.ds?` (${it.ds})`:""}`+(iM?` ${it.len}ft`:"")+(isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":""),qty:String(it.q),finishedEnd:it.fe==="B"?"Both":it.fe||"",hinge:it.hng||"",price:`$${Math.round(total).toLocaleString()}`};
         });
         const zoneTot=zoneItems.reduce((s,it)=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);return s+total+mcRaw*(1+plyPct/100)*it.q},0);
@@ -7924,7 +7973,7 @@ function App({user, profile, supabase, onLogout}){
           </div></div>}
       </div>
 
-      {!mob&&<div className="c" style={{marginBottom:10}}><div className="ch">Add Cabinets<span style={{fontSize:10.5,color:C.stone,fontFamily:F.b,fontWeight:400}}>Eclipse Catalog v8.8.0 · {CATALOG.length} SKUs</span></div><div className="cb"><AddUI onAdd={addIt}/></div></div>}
+      {!mob&&<div className="c" style={{marginBottom:10}}><div className="ch">Add Cabinets<span style={{fontSize:10.5,color:C.stone,fontFamily:F.b,fontWeight:400}}>Eclipse Catalog v8.8.0 · {CATALOG.length} SKUs</span></div><div className="cb"><AddUI onAdd={addIt} onAddCustom={addCustom}/></div></div>}
 
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,flexWrap:"wrap",gap:4}}>
         <div style={{display:"flex",gap:3,alignItems:"center",overflowX:"auto"}}>
@@ -7956,6 +8005,61 @@ if(modDef?.excGroup&&val){CABINET_MODS.filter(m=>m.excGroup===modDef.excGroup&&m
 if(val)newMods[code]=val;else delete newMods[code];
 upd(item.id,{mods:newMods});
 };
+          /* ─── CUSTOM QUOTE ITEM — special inline editor ─── */
+          if(isCustom(item.s)){
+            return(<div key={item.id} className="ic" style={{borderLeft:"4px solid #0ea5e9"}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
+                <div>
+                  <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#0369a1"}}>Custom Quote</span>
+                  <span className="pl" style={{marginLeft:5,background:"#e0f2fe",color:"#0369a1"}}>CQ</span>
+                  {item.cqNum&&<span className="pl" style={{marginLeft:3,background:"#fef3c7",color:"#92400e"}}>#{item.cqNum}</span>}
+                </div>
+                <div style={{display:"flex",gap:4,alignItems:"center"}}>
+                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                  <button onClick={()=>{if(confirm("Remove this custom item?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                </div>
+              </div>
+              <div style={{marginBottom:6}}>
+                <label className="lb">Description</label>
+                <textarea value={item.cqDesc||""} onChange={e=>upd(item.id,{cqDesc:e.target.value})} rows={2} style={{width:"100%",padding:"6px 8px",fontSize:11.5,border:`1px solid ${C.bdr}`,borderRadius:6,fontFamily:F.b,resize:"vertical",boxSizing:"border-box"}} placeholder="Item description..."/>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:6}}>
+                <div>
+                  <label className="lb">List Price ($)</label>
+                  <input type="number" className="inp" min={0} step={0.01} value={item.p||""} onChange={e=>upd(item.id,{p:Math.max(0,+e.target.value)})} style={{textAlign:"center",padding:5,fontSize:12}}/>
+                </div>
+                <div>
+                  <label className="lb">Factory Quote #</label>
+                  <input type="text" className="inp" value={item.cqNum||""} onChange={e=>upd(item.id,{cqNum:e.target.value})} style={{padding:5,fontSize:12}} placeholder="e.g. FQ-12345"/>
+                </div>
+                <div>
+                  <label className="lb">Room</label>
+                  <select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select>
+                </div>
+              </div>
+              {item.cqPdf&&<div style={{marginBottom:6,padding:"6px 10px",background:"#f0f9ff",borderRadius:6,border:"1px solid #bae6fd",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <span style={{fontSize:16}}>📎</span>
+                  <span style={{fontSize:11,color:"#0369a1",fontWeight:600}}>{item.cqPdfName||"Attached PDF"}</span>
+                </div>
+                <div style={{display:"flex",gap:4}}>
+                  <a href={item.cqPdf} download={item.cqPdfName||"custom-quote.pdf"} style={{fontSize:10,color:"#0369a1",fontWeight:600,textDecoration:"underline",cursor:"pointer"}}>Download</a>
+                  <button onClick={()=>upd(item.id,{cqPdf:null,cqPdfName:""})} style={{fontSize:10,color:C.red,background:"none",border:"none",cursor:"pointer",fontWeight:600}}>Remove</button>
+                </div>
+              </div>}
+              {!item.cqPdf&&<div style={{marginBottom:6}}>
+                <label className="lb">Attach PDF</label>
+                <input type="file" accept=".pdf" onChange={e=>{const f=e.target.files?.[0];if(f){const r=new FileReader();r.onload=ev=>upd(item.id,{cqPdf:ev.target.result,cqPdfName:f.name});r.readAsDataURL(f)}}} style={{fontSize:10.5}}/>
+              </div>}
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div style={{display:"flex",alignItems:"center",gap:6}}>
+                  <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
+                  <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
+                </div>
+                <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
+              </div>
+            </div>);
+          }
           return(<div key={item.id} className={`ic${ov?" ov":""}`}>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
               <div>
@@ -8175,6 +8279,25 @@ upd(item.id,{mods:newMods});
               const{u,t:total,stockBase,prePly,doorChg,dfChg,dbChg,itemSQ,rbsChg,plyPct}=cp(item,sp,cx,door,drwF,drwBox);const ov=!!item.so;const isMould=item.t==="M";const isWall=item.t==="W";
               const mcRaw=calcModCost(item,item.mods,stockBase);const modCost=mcRaw*(1+plyPct/100);const modTotal=modCost*item.q;const grandTotal=total+modTotal;
               const activeMods=item.mods?Object.entries(item.mods).filter(([,v])=>Array.isArray(v)?v.some(p=>p.on):v>0):[];
+              if(isCustom(item.s)){
+                return(<div key={item.id} className="ic" style={{margin:"8px",marginBottom:"0",borderLeft:"4px solid #0ea5e9"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
+                    <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#0369a1"}}>Custom Quote</span><span className="pl" style={{marginLeft:5,background:"#e0f2fe",color:"#0369a1"}}>CQ</span>{item.cqNum&&<span className="pl" style={{marginLeft:3,background:"#fef3c7",color:"#92400e"}}>#{item.cqNum}</span>}</div>
+                    <div style={{display:"flex",gap:4,alignItems:"center"}}>
+                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                      <button onClick={()=>{if(confirm("Remove this custom item?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                    </div>
+                  </div>
+                  {item.cqDesc&&<div style={{fontSize:10.5,color:C.stone,marginBottom:3,whiteSpace:"pre-line"}}>{item.cqDesc}</div>}
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6}}>
+                      <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
+                      <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
+                    </div>
+                    <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
+                  </div>
+                </div>);
+              }
               return(<div key={item.id} className={`ic${ov?" ov":""}`} style={{margin:"8px",marginBottom:"0"}}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
                   <div><span className="mn" style={{fontWeight:700,fontSize:12.5}}>{item.s}</span><span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>{isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}{item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}{item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng}</span>}{item.fe&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe}</span>}{activeMods.length>0&&<span className="pl" style={{marginLeft:3,background:"#7c3aed18",color:"#6d28d9"}}>{activeMods.length} mod{activeMods.length>1?"s":""}</span>}</div>
@@ -8277,7 +8400,7 @@ upd(item.id,{mods:newMods});
 
     {mob&&<button onClick={()=>ssAd(true)} style={{position:"fixed",bottom:"calc(14px + env(safe-area-inset-bottom,0px))",right:14,zIndex:800,width:54,height:54,borderRadius:"50%",background:C.acc,color:"#fff",border:"none",fontSize:26,cursor:"pointer",boxShadow:"0 4px 14px rgba(0,0,0,.22)",display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>}
 
-    {mob&&sAd&&<><div className="sbg" onClick={()=>ssAd(false)}/><div className="sht"><div className="shtH"/><div className="shtT"><span>Add Cabinets</span><button onClick={()=>ssAd(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>✕</button></div><div className="shtB"><AddUI onAdd={addIt}/></div></div></>}
+    {mob&&sAd&&<><div className="sbg" onClick={()=>ssAd(false)}/><div className="sht"><div className="shtH"/><div className="shtT"><span>Add Cabinets</span><button onClick={()=>ssAd(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>✕</button></div><div className="shtB"><AddUI onAdd={addIt} onAddCustom={addCustom}/></div></div></>}
 
     {mob&&sCf&&<><div className="sbg" onClick={()=>ssCf(false)}/><div className="sht"><div className="shtH"/><div className="shtT"><span>Order Selections</span><button onClick={()=>ssCf(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>✕</button></div><div className="shtB">
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
