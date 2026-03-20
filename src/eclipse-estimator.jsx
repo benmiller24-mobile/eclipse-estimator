@@ -7427,9 +7427,22 @@ function AuthWrapper() {
             if (parsed?.user) {
               if (!mounted) return;
               setUser(parsed.user);
-              const prof = await fetchProfile(parsed.user.id);
-              if (mounted) setProfile(prof);
-              if (mounted) setLoading(false);
+              // Show app immediately — fetch profile via direct REST to avoid lock
+              setLoading(false);
+              // Fetch profile using direct REST call with stored access token
+              try {
+                const res = await fetch(
+                  `https://rljpgudmvbaocomktone.supabase.co/rest/v1/profiles?id=eq.${parsed.user.id}&select=*`,
+                  { headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${parsed.access_token}`,
+                  }}
+                );
+                if (res.ok) {
+                  const rows = await res.json();
+                  if (mounted && rows[0]) setProfile(rows[0]);
+                }
+              } catch (e) { console.warn("Direct profile fetch failed:", e); }
               // Refresh session in background (non-blocking)
               supabaseClient.auth.getSession().then(({ data: { session } }) => {
                 if (!mounted) return;
