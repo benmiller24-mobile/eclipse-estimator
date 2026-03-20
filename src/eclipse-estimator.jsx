@@ -7543,17 +7543,17 @@ function App({user, profile, supabase, onLogout}){
     if(!supabase||!user)return;
     const t=setTimeout(async()=>{
       try{
-        const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items};
         // Compute total inline to avoid referencing comp before it's defined
         let tot=0;items.forEach(it=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);tot+=total+mcRaw*(1+plyPct/100)*it.q});
         const lastVersion=versions[versions.length-1];const meaningfulChange=!lastVersion||items.length!==lastVersion.items||Math.abs(tot-lastVersion.total)/Math.max(1,lastVersion.total)>0.05;
         let newVersions=versions;
         if(meaningfulChange){newVersions=[...versions,{at:new Date().toISOString(),items:items.length,total:tot,snapshot:{nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items}}].slice(-10);}
+        const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,versions:newVersions};
         if(currentQuoteId){
-          await supabase.from("quotes").update({name:nm,data:stateData,versions:newVersions,updated_at:new Date().toISOString()}).eq("id",currentQuoteId);
+          await supabase.from("quotes").update({name:nm,data:stateData,updated_at:new Date().toISOString()}).eq("id",currentQuoteId);
           if(meaningfulChange)setVersions(newVersions);
         }else{
-          const{data,error}=await supabase.from("quotes").insert({user_id:user.id,name:nm,data:stateData,versions:newVersions}).select("id").single();
+          const{data,error}=await supabase.from("quotes").insert({user_id:user.id,name:nm,data:stateData}).select("id").single();
           if(data&&!error){setCurrentQuoteId(data.id);setVersions(newVersions);}
         }
       }catch(e){console.error("Auto-save error:",e)}
@@ -7566,11 +7566,11 @@ function App({user, profile, supabase, onLogout}){
     if(!supabase||!user)return;
     (async()=>{
       try{
-        const{data}=await supabase.from("quotes").select("id,data,name,versions").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1).single();
+        const{data}=await supabase.from("quotes").select("id,data,name").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1).single();
         if(data&&data.data){
           const d=data.data;
           setCurrentQuoteId(data.id);
-          setVersions(data.versions||[]);
+          setVersions(d.versions||[]);
           if(d.nm)sNm(d.nm);if(d.pid)sPid(d.pid);if(d.sp)sSp(d.sp);if(d.cx)sCx(d.cx);
           if(d.door)sDoor(d.door);if(d.drwF)sDrwF(d.drwF);if(d.glaze)sGlaze(d.glaze);
           if(d.highlight)sHL(d.highlight);if(d.charT1)sCT1(d.charT1);if(d.charT2)sCT2(d.charT2);
@@ -7585,11 +7585,11 @@ function App({user, profile, supabase, onLogout}){
   const loadQuoteFromList=useCallback(async(quoteId)=>{
     if(!supabase)return;
     try{
-      const{data}=await supabase.from("quotes").select("id,data,name,versions").eq("id",quoteId).single();
+      const{data}=await supabase.from("quotes").select("id,data,name").eq("id",quoteId).single();
       if(data&&data.data){
         const d=data.data;
         setCurrentQuoteId(data.id);
-        setVersions(data.versions||[]);
+        setVersions(d.versions||[]);
         if(d.nm)sNm(d.nm);if(d.pid)sPid(d.pid);if(d.sp)sSp(d.sp);if(d.cx)sCx(d.cx);
         if(d.door)sDoor(d.door);if(d.drwF)sDrwF(d.drwF);if(d.glaze)sGlaze(d.glaze);
         if(d.highlight)sHL(d.highlight);if(d.charT1)sCT1(d.charT1);if(d.charT2)sCT2(d.charT2);
