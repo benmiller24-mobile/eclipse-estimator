@@ -5342,7 +5342,7 @@ EXVAL75|437|S13|A
 EXVAL78|445|S13|A
 EXVAL81|453|S13|A
 EXVAL84|461|S13|A
-PROFILE FILLER|0.71|S13|A
+PROFILE FILLER|0.711|S13|A
 STVAL36|108|S13|A
 STVAL39|118|S13|A
 STVAL42|127|S13|A
@@ -6356,7 +6356,8 @@ const uid=()=>Math.random().toString(36).slice(2,10);
 // S36 finished tops + edge-banded panels, S37 finished panels, S38 soumi panels
 const SQI_REFS=new Set(["S3","S4","S5","S33","S34","S35","S36","S37","S38","S42"]);
 const SQI_FIXED=new Set(["BB1/4","BB1/4-CMP","BB1/4-CMP-Beaded","BB1/2-CMP","TKMSBB","TKMSLBB","DROT5/8","DROT3/4","LROT","SROT5/8","DROT5/8-PAD","DROT3/4-PAD","DROT5/8-FM","DROT3/4-FM","LROT-FM","SROT5/8-FM","DIRF","CNRLG","VAL","BLLG","BRLG","SDI-W","CLC","LCEC"]);
-const isSqIn=(s,r)=>SQI_REFS.has(r)&&!SQI_FIXED.has(s);
+const SQI_SKUS=new Set(["PROFILE FILLER"]);
+const isSqIn=(s,r)=>(SQI_REFS.has(r)&&!SQI_FIXED.has(s))||SQI_SKUS.has(s);
 
 const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{const s=item.so||sp;const sm=SP[s]||0;const cm=CX[cx]||0;const len=item.len||1;
   const sqin=item.sqin||0;const itemSQ=isSqIn(item.s,item.r);
