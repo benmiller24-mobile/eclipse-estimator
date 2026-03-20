@@ -7619,18 +7619,32 @@ function App({user, profile, supabase, onLogout}){
     return{tot,un,n:items.length,zm,tm,zc:Object.keys(zm).length,ov};
   },[items,sp,cx,door]);
 
-  const save=useCallback(()=>{
-    const e={id:pid,nm,at:new Date().toISOString(),sp,cx,door,drwF,glaze,highlight,charT1,charT2,mat,intF,drwBox,items,n:items.length,tot:comp.tot};
+  const save=useCallback(async()=>{
+    // Save to localStorage
+    const e={id:pid,nm,at:new Date().toISOString(),sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,n:items.length,tot:comp.tot};
     const s=ldS();const i=s.findIndex(x=>x.id===pid);if(i>=0)s[i]=e;else s.unshift(e);
-    svS(s);fl(`"${nm}" saved`);
-  },[pid,nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,mat,intF,drwBox,items,comp.tot,fl]);
+    svS(s);
+    // Also save to Supabase explicitly
+    if(supabase&&user){
+      try{
+        const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,versions};
+        if(currentQuoteId){
+          await supabase.from("quotes").update({name:nm,data:stateData,updated_at:new Date().toISOString()}).eq("id",currentQuoteId);
+        }else{
+          const{data:ins,error}=await supabase.from("quotes").insert({user_id:user.id,name:nm,data:stateData}).select("id").single();
+          if(ins&&!error)setCurrentQuoteId(ins.id);
+        }
+      }catch(err){console.error("Save error:",err)}
+    }
+    fl(`"${nm}" saved`);
+  },[pid,nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,comp.tot,fl,supabase,user,currentQuoteId,versions]);
 
-  const load=useCallback(e=>{sPid(e.id);sNm(e.nm);sSp(e.sp||"White Oak");sCx(e.cx||"Standard");
+  const load=useCallback(e=>{setCurrentQuoteId(null);setVersions([]);sPid(e.id);sNm(e.nm);sSp(e.sp||"White Oak");sCx(e.cx||"Standard");
     sDoor(e.door||"HNVR");sDrwF(e.drwF||"DF-HNVR");sGlaze(e.glaze||"NONE");sHL(e.highlight||"NONE");
     sCT1(e.charT1||"NONE");sCT2(e.charT2||"NONE");sMat(e.mat||"PB");sIntF(e.intF||"STD-MAPL");sDrwBox(e.drwBox||"5/8-STD");
-    sItems(e.items||[]);fl(`Loaded "${e.nm}"`)},[fl]);
-  const newP=useCallback(()=>{sPid(uid());sNm("Untitled Project");sSp("White Oak");sCx("Standard");
-    sDoor("HNVR");sDrwF("DF-HNVR");sGlaze("NONE");sHL("NONE");sCT1("NONE");sCT2("NONE");sMat("PB");sIntF("STD-MAPL");sDrwBox("5/8-STD");sItems([])},[]);
+    sItems(e.items||[]);sColor(e.color||"");fl(`Loaded "${e.nm}"`)},[fl]);
+  const newP=useCallback(()=>{setCurrentQuoteId(null);setVersions([]);sPid(uid());sNm("Untitled Project");sSp("White Oak");sCx("Standard");
+    sDoor("HNVR");sDrwF("DF-HNVR");sGlaze("NONE");sHL("NONE");sCT1("NONE");sCT2("NONE");sMat("PB");sIntF("STD-MAPL");sDrwBox("5/8-STD");sItems([]);sColor("");fl("New project started")},[fl]);
   const fi=useMemo(()=>tf==="all"?items:items.filter(it=>it.t===tf),[items,tf]);
 
   const csv=useCallback(()=>{
