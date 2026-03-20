@@ -6476,6 +6476,8 @@ const SQI_REFS=new Set(["S3","S4","S5","S33","S34","S35","S36","S37","S38","S42"
 const SQI_FIXED=new Set(["BB1/4","BB1/4-CMP","BB1/4-CMP-Beaded","BB1/2-CMP","TKMSBB","TKMSLBB","DROT5/8","DROT3/4","LROT","SROT5/8","DROT5/8-PAD","DROT3/4-PAD","DROT5/8-FM","DROT3/4-FM","LROT-FM","SROT5/8-FM","DIRF","CNRLG","VAL","BLLG","BRLG","SDI-W","CLC","LCEC"]);
 const SQI_SKUS=new Set(["PROFILE FILLER"]);
 const isSqIn=(s,r)=>(SQI_REFS.has(r)&&!SQI_FIXED.has(s))||SQI_SKUS.has(s);
+const isFLS=(s)=>s==="FLS";
+const FLS_DEPTH_MIN=6,FLS_DEPTH_MAX=24,FLS_LEN_MIN=12,FLS_LEN_MAX=96;
 
 const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{const s=item.so||sp;const sm=SP[s]||0;const cm=CX[cx]||0;const len=item.len||1;
   const sqin=item.sqin||0;const itemSQ=isSqIn(item.s,item.r);
@@ -6872,9 +6874,16 @@ function AddUI({onAdd}){
       </div>
     </div>}
     {isSQ&&<div style={{marginBottom:7,padding:"8px 10px",background:"#e8f0ea",borderRadius:7,border:"1px solid #2c4a3433"}}>
-      <label className="lb" style={{color:"#2c4a34"}}>Panel Dimensions (inches)</label>
+      <label className="lb" style={{color:"#2c4a34"}}>{isFLS(sk)?"Floating Shelf Dimensions (inches)":"Panel Dimensions (inches)"}</label>
       <div style={{display:"flex",gap:6,marginTop:3,alignItems:"center",flexWrap:"wrap"}}>
-        <div style={{display:"flex",gap:4,alignItems:"center"}}><input type="number" className="inp" min={1} max={120} value={sqW} onChange={e=>sSqW(Math.max(1,+e.target.value))} style={{width:60,textAlign:"center"}} placeholder="W"/><span style={{color:C.stone}}>×</span><input type="number" className="inp" min={1} max={120} value={sqH} onChange={e=>sSqH(Math.max(1,+e.target.value))} style={{width:60,textAlign:"center"}} placeholder="H"/></div>
+        {isFLS(sk)?<>
+          <div style={{display:"flex",gap:4,alignItems:"center"}}>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}><span style={{fontSize:9,color:C.stone,marginBottom:1}}>Depth</span><input type="number" className="inp" min={FLS_DEPTH_MIN} max={FLS_DEPTH_MAX} value={sqW} onChange={e=>sSqW(Math.max(FLS_DEPTH_MIN,Math.min(FLS_DEPTH_MAX,+e.target.value)))} style={{width:60,textAlign:"center"}} placeholder="D"/></div>
+            <span style={{color:C.stone,marginTop:12}}>×</span>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}><span style={{fontSize:9,color:C.stone,marginBottom:1}}>Length</span><input type="number" className="inp" min={FLS_LEN_MIN} max={FLS_LEN_MAX} value={sqH} onChange={e=>sSqH(Math.max(FLS_LEN_MIN,Math.min(FLS_LEN_MAX,+e.target.value)))} style={{width:60,textAlign:"center"}} placeholder="L"/></div>
+          </div>
+          <span style={{fontSize:10,color:C.stone}}>{FLS_DEPTH_MIN}–{FLS_DEPTH_MAX}" deep, {FLS_LEN_MIN}–{FLS_LEN_MAX}" long</span>
+        </>:<div style={{display:"flex",gap:4,alignItems:"center"}}><input type="number" className="inp" min={1} max={120} value={sqW} onChange={e=>sSqW(Math.max(1,+e.target.value))} style={{width:60,textAlign:"center"}} placeholder="W"/><span style={{color:C.stone}}>×</span><input type="number" className="inp" min={1} max={120} value={sqH} onChange={e=>sSqH(Math.max(1,+e.target.value))} style={{width:60,textAlign:"center"}} placeholder="H"/></div>}
         <span style={{fontSize:11,color:C.stone}}>= {(sqW*sqH).toLocaleString()} sq.in</span>
         {selCat&&<span style={{fontSize:11,color:"#2c4a34",fontWeight:600}}>${(selCat.p*sqW*sqH).toFixed(2)}/pc</span>}
       </div>
@@ -6882,7 +6891,7 @@ function AddUI({onAdd}){
     <div style={{display:"flex",gap:6,alignItems:"flex-end",flexWrap:"wrap"}}>
       <div style={{width:60}}><label className="lb">{isM?"Pcs":isSQ?"Pcs":"Qty"}</label><input type="number" className="inp" min={1} max={999} value={q} onChange={e=>sQ(Math.max(1,+e.target.value))} style={{textAlign:"center"}}/></div>
       <div style={{flex:"1 1 80px"}}><label className="lb">Room</label><select className="sel" value={z} onChange={e=>sZ(e.target.value)}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
-      <button className="bt bp" onClick={()=>{const cat=CATALOG.find(c=>c.s===sk);if(cat){onAdd(cat,q,z,cat.t==="M"?len:0,isSqIn(cat.s,cat.r)?sqW*sqH:0);sQ(1);}}} style={{minWidth:100}}>+ Add</button>
+      <button className="bt bp" onClick={()=>{const cat=CATALOG.find(c=>c.s===sk);if(cat){onAdd(cat,q,z,cat.t==="M"?len:0,isSqIn(cat.s,cat.r)?sqW*sqH:0,isSqIn(cat.s,cat.r)?sqW:0,isSqIn(cat.s,cat.r)?sqH:0);sQ(1);}}} style={{minWidth:100}}>+ Add</button>
     </div>
   </div>);
 }
@@ -7601,9 +7610,9 @@ function App({user, profile, supabase, onLogout}){
     }catch(e){console.error("Error loading quote:",e)}
   },[supabase,fl]);
 
-  const addIt=useCallback((cat,q,z,len,sqin)=>{
+  const addIt=useCallback((cat,q,z,len,sqin,dimW,dimH)=>{
     const newId=uid();
-    sItems(p=>[...p,{id:newId,s:cat.s,t:cat.t,r:cat.r,p:cat.p,q,z,so:null,len:len||0,hng:"",fe:"",ds:"",dc:guessDoors(cat.s,cat.t),drc:guessDrawers(cat.s,cat.t),brot:guessBuiltInROT(cat.s),sqin:sqin||0,rbs:false,mods:{},rot:"",rotQ:0,rotFeg:false,rot2:"",rot2Q:0,rot2Feg:false}]);
+    sItems(p=>[...p,{id:newId,s:cat.s,t:cat.t,r:cat.r,p:cat.p,q,z,so:null,len:len||0,hng:"",fe:"",ds:"",dc:guessDoors(cat.s,cat.t),drc:guessDrawers(cat.s,cat.t),brot:guessBuiltInROT(cat.s),sqin:sqin||0,sqW:dimW||0,sqH:dimH||0,rbs:false,mods:{},rot:"",rotQ:0,rotFeg:false,rot2:"",rot2Q:0,rot2Feg:false}]);
     const isMod=cat.t!=="M"&&!isSqIn(cat.s,cat.r);if(isMod)sModOpen(prev=>{const n=new Set(prev);n.add(newId);return n});
     fl(`Added ${q}× ${cat.s}${len?` (${len}ft)`:""}${sqin?` (${sqin} sq.in)`:""}`);if(mob)ssAd(false);
   },[fl,mob]);
@@ -7886,7 +7895,7 @@ upd(item.id,{mods:newMods});
                 <span className="mn" style={{fontWeight:700,fontSize:12.5}}>{item.s}</span>
                 <span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>
                 {isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}
-                {itemSQ&&<span className="pl" style={{marginLeft:3,background:"#e8f0ea",color:"#2c4a34"}}>{(item.sqin||0).toLocaleString()} sq.in</span>}
+                {itemSQ&&<span className="pl" style={{marginLeft:3,background:"#e8f0ea",color:"#2c4a34"}}>{isFLS(item.s)?`${item.sqW||0}"D × ${item.sqH||0}"L`:""} {(item.sqin||0).toLocaleString()} sq.in</span>}
                 {item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}
                 {item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng}</span>}
                 {item.fe&&intF!=="LINEN"&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe==="L"?"Left":"Right"}</span>}
@@ -7903,10 +7912,22 @@ upd(item.id,{mods:newMods});
               <button className={`ch2 ${item.len===10?"on":""}`} onClick={()=>upd(item.id,{len:10})} style={item.len===10?{borderColor:C.gold,color:C.gold,background:C.gold+"14"}:{}}>10 ft</button>
               <span style={{fontSize:10,color:C.stone,alignSelf:"center"}}>= {fm(u)}/pc</span>
             </div>}
-            {itemSQ&&<div style={{display:"flex",gap:4,marginBottom:5,alignItems:"center",padding:"6px 8px",background:"#e8f0ea",borderRadius:6}}>
-              <span className="lb" style={{marginBottom:0,color:"#2c4a34"}}>Sq.In:</span>
-              <input type="number" className="inp" min={1} max={99999} value={item.sqin||0} onChange={e=>upd(item.id,{sqin:Math.max(0,+e.target.value)})} style={{width:80,textAlign:"center",padding:4,fontSize:11}}/>
-              <span style={{fontSize:10,color:C.stone}}>${item.p}/sq.in = {fm(u)}/pc</span>
+            {itemSQ&&<div style={{display:"flex",gap:4,marginBottom:5,alignItems:"center",padding:"6px 8px",background:"#e8f0ea",borderRadius:6,flexWrap:"wrap"}}>
+              {isFLS(item.s)?<>
+                <span className="lb" style={{marginBottom:0,color:"#2c4a34"}}>Depth:</span>
+                <input type="number" className="inp" min={FLS_DEPTH_MIN} max={FLS_DEPTH_MAX} value={item.sqW||FLS_DEPTH_MIN} onChange={e=>{const d=Math.max(FLS_DEPTH_MIN,Math.min(FLS_DEPTH_MAX,+e.target.value));upd(item.id,{sqW:d,sqin:d*(item.sqH||FLS_LEN_MIN)})}} style={{width:55,textAlign:"center",padding:4,fontSize:11}}/>
+                <span style={{color:C.stone}}>×</span>
+                <span className="lb" style={{marginBottom:0,color:"#2c4a34"}}>Length:</span>
+                <input type="number" className="inp" min={FLS_LEN_MIN} max={FLS_LEN_MAX} value={item.sqH||FLS_LEN_MIN} onChange={e=>{const l=Math.max(FLS_LEN_MIN,Math.min(FLS_LEN_MAX,+e.target.value));upd(item.id,{sqH:l,sqin:(item.sqW||FLS_DEPTH_MIN)*l})}} style={{width:55,textAlign:"center",padding:4,fontSize:11}}/>
+                <span style={{fontSize:10,color:C.stone}}>= {(item.sqin||0).toLocaleString()} sq.in · ${item.p}/sq.in = {fm(u)}/pc</span>
+              </>:<>
+                <span className="lb" style={{marginBottom:0,color:"#2c4a34"}}>W:</span>
+                <input type="number" className="inp" min={1} max={120} value={item.sqW||1} onChange={e=>{const w=Math.max(1,+e.target.value);upd(item.id,{sqW:w,sqin:w*(item.sqH||1)})}} style={{width:55,textAlign:"center",padding:4,fontSize:11}}/>
+                <span style={{color:C.stone}}>×</span>
+                <span className="lb" style={{marginBottom:0,color:"#2c4a34"}}>H:</span>
+                <input type="number" className="inp" min={1} max={120} value={item.sqH||1} onChange={e=>{const h=Math.max(1,+e.target.value);upd(item.id,{sqH:h,sqin:(item.sqW||1)*h})}} style={{width:55,textAlign:"center",padding:4,fontSize:11}}/>
+                <span style={{fontSize:10,color:C.stone}}>= {(item.sqin||0).toLocaleString()} sq.in · ${item.p}/sq.in = {fm(u)}/pc</span>
+              </>}
             </div>}
             <div style={{display:"grid",gridTemplateColumns:(isMould||itemSQ)?"1fr 1fr":"1fr 1fr 1fr",gap:6,marginBottom:5}}>
               <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
