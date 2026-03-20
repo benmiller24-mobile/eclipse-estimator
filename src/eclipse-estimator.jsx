@@ -6460,7 +6460,14 @@ const F={d:"'Playfair Display',Georgia,serif",b:"'DM Sans','Helvetica Neue',sans
 // ── Supabase Client ──
 const SUPABASE_URL = "https://rljpgudmvbaocomktone.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsanBndWRtdmJhb2NvbWt0b25lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTk5ODYsImV4cCI6MjA4OTU5NTk4Nn0.YqtoSBM0utOmZlKWvd8OQ2w9m3iytkGwP9LRqpbqa1w";
-const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    detectSessionInUrl: false,
+    autoRefreshToken: true,
+    lock: { enabled: false },
+  },
+});
 
 const C={ink:"#1a1814",warm:"#f7f3ee",cream:"#faf8f4",paper:"#fff",stone:"#8a7e70",stL:"#c4b9aa",bdr:"#e5dfd6",acc:"#2c4a34",accS:"#e8f0ea",gold:"#b8963e",goldS:"#f5eedd",red:"#a83232"};
 const fm=n=>"$"+Math.round(n).toLocaleString();
@@ -7400,6 +7407,7 @@ function AuthWrapper() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const loadingResolved = { current: false };
 
   const fetchProfile = async (userId) => {
     try {
@@ -7426,7 +7434,7 @@ function AuthWrapper() {
           if (mounted) setProfile(prof);
         }
       } catch (e) { console.error("Auth check error:", e); }
-      if (mounted) setLoading(false);
+      if (mounted) { loadingResolved.current = true; setLoading(false); }
     };
 
     checkAuth();
@@ -7441,10 +7449,22 @@ function AuthWrapper() {
       } else {
         setProfile(null);
       }
+      loadingResolved.current = true;
       setLoading(false);
     });
 
-    return () => { mounted = false; subscription?.unsubscribe(); };
+    // Safety timeout: if loading hasn't resolved in 6s, clear stale session and show login
+    const safetyTimeout = setTimeout(() => {
+      if (mounted && !loadingResolved.current) {
+        console.warn("Auth loading timeout - clearing stale session");
+        localStorage.removeItem('sb-rljpgudmvbaocomktone-auth-token');
+        setUser(null);
+        setProfile(null);
+        setLoading(false);
+      }
+    }, 6000);
+
+    return () => { mounted = false; subscription?.unsubscribe(); clearTimeout(safetyTimeout); };
   }, []);
 
   const handleLogout = async () => {
