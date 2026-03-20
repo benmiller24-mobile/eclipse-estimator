@@ -6458,6 +6458,8 @@ const CABINET_MODS=[
   {code:"PTKL",label:"Prep Toe Kick Lighting",price:60,unit:"/cab",types:["B","V","T"],group:"Lighting Prep",input:"check"},
   {code:"PFSL",label:"Prep Floating Shelf Lighting",price:100,unit:"/shelf",types:["W"],group:"Lighting Prep",input:"check",skuMatch:/FL/i},
   {code:"PWL",label:"Prep Wall Cabinet Lighting",price:60,unit:"/cab",types:["W"],group:"Lighting Prep",input:"check"},
+  {code:"PWL",label:"Prep Wall Cabinet Lighting",price:60,unit:"/shelf",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^FLS$/},
+  {code:"PWL",label:"Prep Wall Cabinet Lighting",price:60,unit:"/panel",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^F(WEP|BEP|VEP|VTEP|REP)/},
   {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/cab",types:["W"],group:"Lighting Prep",input:"check"},
   {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/shelf",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^FLS$/},
   {code:"FLED_FEP",label:"LED Lighting Prep — Flush End Panel",price:60,unit:"/panel",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^F(WEP|BEP|VEP|VTEP|REP)/},
