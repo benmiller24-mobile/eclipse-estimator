@@ -7401,42 +7401,50 @@ function AuthWrapper() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchProfile = async (userId) => {
+    try {
+      const { data: prof, error } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+      if (error) { console.warn("Profile fetch error:", error.message); return null; }
+      return prof;
+    } catch (e) { console.warn("Profile fetch exception:", e); return null; }
+  };
+
   useEffect(() => {
+    let mounted = true;
     const checkAuth = async () => {
-      const { data: { user: currentUser } } = await supabaseClient.auth.getUser();
-      setUser(currentUser);
-      
-      if (currentUser) {
-        const { data: prof } = await supabaseClient
-          .from("profiles")
-          .select("*")
-          .eq("id", currentUser.id)
-          .single();
-        setProfile(prof);
-      }
-      setLoading(false);
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        const currentUser = session?.user || null;
+        if (!mounted) return;
+        setUser(currentUser);
+        if (currentUser) {
+          const prof = await fetchProfile(currentUser.id);
+          if (mounted) setProfile(prof);
+        }
+      } catch (e) { console.error("Auth check error:", e); }
+      if (mounted) setLoading(false);
     };
 
     checkAuth();
 
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
-      const sessionUser = session?.user;
+      const sessionUser = session?.user || null;
+      if (!mounted) return;
       setUser(sessionUser);
       if (sessionUser) {
-        const { data: prof } = await supabaseClient
-          .from("profiles")
-          .select("*")
-          .eq("id", sessionUser.id)
-          .single();
-        setProfile(prof);
+        const prof = await fetchProfile(sessionUser.id);
+        if (mounted) setProfile(prof);
       } else {
         setProfile(null);
       }
+      setLoading(false);
     });
 
-    return () => {
-      subscription?.unsubscribe();
-    };
+    return () => { mounted = false; subscription?.unsubscribe(); };
   }, []);
 
   const handleLogout = async () => {
