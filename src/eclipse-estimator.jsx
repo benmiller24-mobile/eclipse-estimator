@@ -7482,9 +7482,67 @@ function App({user, profile, supabase, onLogout}){
   const[sMg,ssMg]=useState(false),[sSv,ssSv]=useState(false),[sAd,ssAd]=useState(false),[sCf,ssCf]=useState(false);
   const[tf,sTf]=useState("all"),[ntf,sNtf]=useState(null),[mob,sMob]=useState(false);
   const[modOpen,sModOpen]=useState(()=>new Set());
+  const[showQuotesList,setShowQuotesList]=useState(false);
+  const[showAdminPanel,setShowAdminPanel]=useState(false);
+  const[currentQuoteId,setCurrentQuoteId]=useState(null);
 
   useEffect(()=>{const c=()=>sMob(window.innerWidth<=768);c();window.addEventListener("resize",c);return()=>window.removeEventListener("resize",c)},[]);
   const fl=useCallback(m=>{sNtf(m);setTimeout(()=>sNtf(null),2000)},[]);
+
+  // ── Auto-save to Supabase (2s debounce) ──
+  useEffect(()=>{
+    if(!supabase||!user)return;
+    const t=setTimeout(async()=>{
+      try{
+        const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items};
+        if(currentQuoteId){
+          await supabase.from("quotes").update({name:nm,data:stateData,updated_at:new Date().toISOString()}).eq("id",currentQuoteId);
+        }else{
+          const{data,error}=await supabase.from("quotes").insert({user_id:user.id,name:nm,data:stateData}).select("id").single();
+          if(data&&!error)setCurrentQuoteId(data.id);
+        }
+      }catch(e){console.error("Auto-save error:",e)}
+    },2000);
+    return()=>clearTimeout(t);
+  },[nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,currentQuoteId,supabase,user]);
+
+  // ── Load most recent quote on mount ──
+  useEffect(()=>{
+    if(!supabase||!user)return;
+    (async()=>{
+      try{
+        const{data}=await supabase.from("quotes").select("id,data,name").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1).single();
+        if(data&&data.data){
+          const d=data.data;
+          setCurrentQuoteId(data.id);
+          if(d.nm)sNm(d.nm);if(d.pid)sPid(d.pid);if(d.sp)sSp(d.sp);if(d.cx)sCx(d.cx);
+          if(d.door)sDoor(d.door);if(d.drwF)sDrwF(d.drwF);if(d.glaze)sGlaze(d.glaze);
+          if(d.highlight)sHL(d.highlight);if(d.charT1)sCT1(d.charT1);if(d.charT2)sCT2(d.charT2);
+          if(d.color!==undefined)sColor(d.color);if(d.mat)sMat(d.mat);if(d.intF)sIntF(d.intF);
+          if(d.drwBox)sDrwBox(d.drwBox);if(d.items)sItems(d.items);
+        }
+      }catch(e){/* no quotes yet, that's fine */}
+    })();
+  },[supabase,user]);
+
+  // ── Load a specific quote from the quotes list ──
+  const loadQuoteFromList=useCallback(async(quoteId)=>{
+    if(!supabase)return;
+    try{
+      const{data}=await supabase.from("quotes").select("id,data,name").eq("id",quoteId).single();
+      if(data&&data.data){
+        const d=data.data;
+        setCurrentQuoteId(data.id);
+        if(d.nm)sNm(d.nm);if(d.pid)sPid(d.pid);if(d.sp)sSp(d.sp);if(d.cx)sCx(d.cx);
+        if(d.door)sDoor(d.door);if(d.drwF)sDrwF(d.drwF);if(d.glaze)sGlaze(d.glaze);
+        if(d.highlight)sHL(d.highlight);if(d.charT1)sCT1(d.charT1);if(d.charT2)sCT2(d.charT2);
+        if(d.color!==undefined)sColor(d.color);if(d.mat)sMat(d.mat);if(d.intF)sIntF(d.intF);
+        if(d.drwBox)sDrwBox(d.drwBox);if(d.items)sItems(d.items);
+        setShowQuotesList(false);
+        fl("Quote loaded");
+      }
+    }catch(e){console.error("Error loading quote:",e)}
+  },[supabase,fl]);
 
   const addIt=useCallback((cat,q,z,len,sqin)=>{
     const newId=uid();
