@@ -6566,6 +6566,7 @@ const CABINET_MODS=[
   {code:"SMPDD",label:"Sim Metal Plumbing Divided Drawer",price:130,unit:"/drw",types:["B","V","C","D"],group:"Drawer Mods",input:"qty",max:6},
   {code:"LPDD",label:"Legrabox Plumbing Divided Drawer",price:874,unit:"/drw",types:["B","V","C","D"],group:"Drawer Mods",input:"qty",max:6},
   {code:"TIP_ONDR",label:"Tip-On for Drawers (15\"+ wide/deep)",price:189,unit:"/drw",types:["B","V","C","D","T"],group:"Drawer Mods",input:"qty",max:10},
+  {code:"MXDF",label:"Mixed Drawer Front",price:105,unit:"/position",types:["B","V","T"],group:"Drawer Mods",input:"mxdf",max:4},
   {code:"BBP",label:"Beaded Back Panel (req. FI, not TFL/HPL)",price:100,unit:"/cab",types:["B","V","C","D","T","W"],group:"Structure",input:"check"},
   {code:"MOD_SQ",label:"Square Cabinet Mod (h,d) — 30% min",price:0,unit:"%",types:["B","V","C","D","T","W"],group:"Structure",input:"dims",pct:30,excGroup:"mod"},
   {code:"MOD_ANG",label:"Angle Cabinet Mod (h,d,w) — 50% min",price:0,unit:"%",types:["B","V","C","D","T","W"],group:"Structure",input:"dims",pct:50,excGroup:"mod"},  {code:"FREE_W",label:"Free Width Modification",price:0,unit:"",types:["B","V","C","D","T","W"],group:"Structure",input:"width",note:"Only available on approx. 30% of cabinets"},
@@ -6616,6 +6617,7 @@ const calcModCost=(item,mods,baseUnitPrice)=>{
   if(mods){CABINET_MODS.forEach(m=>{const v=mods[m.code];if(!v)return;
     if(m.pct){cost+=baseUnitPrice*(m.pct/100);}
     else if(m.input==="side"){const sides=v==="B"?2:1;cost+=m.price*sides;}
+    else if(m.input==="mxdf"){if(Array.isArray(v))cost+=m.price*v.length;}
     else{cost+=m.price*(m.input==="check"||m.input==="dims"||m.input==="width"?1:v);}
   });}
   if(item.rot&&item.rotQ>0){const ro=ROT_OPTIONS.find(r=>r.v===item.rot);if(ro){cost+=ro.price*item.rotQ;if(item.rotFeg)cost+=72*item.rotQ;}}
@@ -7936,7 +7938,7 @@ function App({user, profile, supabase, onLogout}){
         <div>{!groupByZone?fi.map(item=>{
           const{u,t:total,stockBase,prePly,doorChg,dfChg,dbChg,itemSQ,rbsChg,plyPct}=cp(item,sp,cx,door,drwF,drwBox);const ov=!!item.so;const isMould=item.t==="M";const isWall=item.t==="W";
 const mcRaw=calcModCost(item,item.mods,stockBase);const modCost=mcRaw*(1+plyPct/100);const modTotal=modCost*item.q;const grandTotal=total+modTotal;
-const activeMods=item.mods?Object.entries(item.mods).filter(([,v])=>v>0):[];
+const activeMods=item.mods?Object.entries(item.mods).filter(([,v])=>Array.isArray(v)?v.length>0:v>0):[];
 const applicableMods=getApplicableMods(item);const modsExpanded=modOpen.has(item.id);
 const setMod=(code,val)=>{const newMods={...(item.mods||{})};
 const modDef=CABINET_MODS.find(m=>m.code===code);
@@ -8067,7 +8069,7 @@ upd(item.id,{mods:newMods});
                   return Object.entries(groups).map(([gName,gMods])=><div key={gName} style={{marginBottom:10}}>
                     <div style={{fontSize:9.5,fontWeight:700,textTransform:"uppercase",letterSpacing:".08em",color:"#6d28d9",marginBottom:5,paddingBottom:3,borderBottom:"1px solid #7c3aed22"}}>{gName}</div>
                     <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:5}}>
-                      {gMods.map(m=>{const val=item.mods?.[m.code]||0;const isOn=val;
+                      {gMods.filter(m=>m.input!=="mxdf").map(m=>{const val=item.mods?.[m.code]||0;const isOn=val;
                         return(<div key={m.code} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 8px",borderRadius:6,background:isOn?"#7c3aed18":"#fff",border:`1.5px solid ${isOn?"#7c3aed":"#e2ddf5"}`,cursor:"pointer",transition:"all .1s"}}>
                           {m.input==="dims"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked){setMod(m.code,{w:"",h:"",d:""})}else{setMod(m.code,false)}}} style={{accentColor:"#1c3aed",margin:0,cursor:"pointer"}}/><span style={{fontSize:"0.8rem",color:isOn?"#1c3aed":"#888"}}>Enabled</span></div>{isOn&&typeof isOn==="object"?<div style={{display:"flex",gap:"4px",marginTop:"4px"}}>{["W","H","D"].map(dim=><label key={dim} style={{display:"flex",flexDirection:"column",alignItems:"center",fontSize:"0.65rem",color:"#666"}}>{dim}<input type="text" value={isOn[dim.toLowerCase()]||""} onChange={e=>{const nv={...isOn};nv[dim.toLowerCase()]=e.target.value;setMod(m.code,nv)}} style={{width:"44px",textAlign:"center",padding:"2px",fontSize:"0.75rem",borderRadius:"3px",border:"1px solid #a6b4a6"}}/></label>)}</div>:null}</div>:m.input==="width"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked)setMod(m.code,true);else setMod(m.code,false)}} style={{accentColor:"#c3aed1"}}/><span style={{fontSize:".85rem",color:isOn?"#c3aed1":"#888"}}>Enabled</span>{isOn!==false&&isOn!==0&&isOn!==undefined?<input type="text" value={typeof isOn==="string"?isOn:""} onChange={e=>setMod(m.code,e.target.value||true)} style={{width:"52px",padding:"2px 4px",border:"1px solid #ccc",borderRadius:"3px",fontSize:".85rem",marginLeft:"4px"}} placeholder="W"/>:null}</div>{m.note?<div style={{fontSize:".7rem",color:"#b08000",marginTop:"2px",fontStyle:"italic"}}>{m.note}</div>:null}</div>:m.input==="side"?
                             <div style={{display:"flex",gap:3}}>
@@ -8088,6 +8090,33 @@ upd(item.id,{mods:newMods});
                         </div>);
                       })}
                     </div>
+                    {/* Mixed Drawer Front (MXDF) — full-width special UI */}
+                    {gMods.filter(m=>m.input==="mxdf").map(m=>{const val=item.mods?.[m.code];const positions=Array.isArray(val)?val:[];const isOn=positions.length>0;
+                      return(<div key={m.code} style={{marginTop:6,borderRadius:6,border:`1.5px solid ${isOn?"#7c3aed":"#e2ddf5"}`,background:isOn?"#7c3aed18":"#fff",overflow:"hidden"}}>
+                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 10px"}}>
+                          <div>
+                            <div style={{fontSize:11,fontWeight:isOn?700:500,color:isOn?"#6d28d9":C.ink}}>{m.label}</div>
+                            <div style={{fontSize:9.5,color:isOn?"#7c3aed":C.stone}}>{m.code} · ${m.price}/position{isOn?` = ${fm(m.price*positions.length)}`:""}</div>
+                          </div>
+                          {positions.length<(m.max||4)&&<button onClick={()=>{const newPos=[...positions,{pos:positions.length+1,door:"",note:""}];setMod(m.code,newPos)}} style={{background:"#7c3aed",color:"#fff",border:"none",borderRadius:5,padding:"4px 10px",fontSize:10,fontWeight:700,cursor:"pointer"}}>+ Add Position</button>}
+                        </div>
+                        {positions.length>0&&<div style={{borderTop:"1px solid #7c3aed33",padding:"6px 10px",display:"flex",flexDirection:"column",gap:6}}>
+                          {positions.map((p,pi)=><div key={pi} style={{background:"#fff",border:"1px solid #e2ddf5",borderRadius:6,padding:"8px 10px"}}>
+                            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
+                              <div style={{display:"flex",alignItems:"center",gap:6}}>
+                                <span style={{fontSize:11,fontWeight:700,color:"#6d28d9"}}>Position {pi+2}</span>
+                                <select value={p.door||""} onChange={e=>{const np=[...positions];np[pi]={...np[pi],door:e.target.value};setMod(m.code,np)}} style={{fontSize:10,padding:"2px 4px",borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}>
+                                  <option value="">— Select Door Style —</option>
+                                  {DOORS.map(d=><option key={d.v} value={d.v}>{d.l}</option>)}
+                                </select>
+                              </div>
+                              <button onClick={()=>{const np=positions.filter((_,i)=>i!==pi);setMod(m.code,np.length?np:0)}} style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:4,padding:"2px 6px",fontSize:10,color:C.red,cursor:"pointer",fontWeight:600}}>✕</button>
+                            </div>
+                            <input type="text" placeholder="Notes — e.g. drawer front description, special instructions..." value={p.note||""} onChange={e=>{const np=[...positions];np[pi]={...np[pi],note:e.target.value};setMod(m.code,np)}} style={{width:"100%",padding:"5px 8px",fontSize:11,border:`1px solid ${C.bdr}`,borderRadius:5,fontFamily:F.b,boxSizing:"border-box"}}/>
+                          </div>)}
+                        </div>}
+                      </div>);
+                    })}
                   </div>);
                 })()}
                 {activeMods.length>0&&<div style={{borderTop:"2px solid #7c3aed33",paddingTop:8,marginTop:6,display:"flex",justifyContent:"space-between",alignItems:"center",background:"#7c3aed0a",margin:"6px -12px -10px",padding:"8px 12px",borderRadius:"0 0 4px 4px"}}>
@@ -8100,7 +8129,8 @@ upd(item.id,{mods:newMods});
               <div style={{fontSize:9.5,fontWeight:700,color:"#6d28d9",marginBottom:3}}>Active Modifications (+{fm(modCost)}/unit)</div>
               <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
               {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
-                return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}>⚙ {m.label}{m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
+                const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.length:0;
+                return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}>⚙ {m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
               })}
               </div>
             </div>}
@@ -8128,7 +8158,7 @@ upd(item.id,{mods:newMods});
             {!isCollapsed&&<div style={{border:`1px solid ${C.bdr}`,borderTop:"none",padding:"0"}}>{zItems.map(item=>{
               const{u,t:total,stockBase,prePly,doorChg,dfChg,dbChg,itemSQ,rbsChg,plyPct}=cp(item,sp,cx,door,drwF,drwBox);const ov=!!item.so;const isMould=item.t==="M";const isWall=item.t==="W";
               const mcRaw=calcModCost(item,item.mods,stockBase);const modCost=mcRaw*(1+plyPct/100);const modTotal=modCost*item.q;const grandTotal=total+modTotal;
-              const activeMods=item.mods?Object.entries(item.mods).filter(([,v])=>v>0):[];
+              const activeMods=item.mods?Object.entries(item.mods).filter(([,v])=>Array.isArray(v)?v.length>0:v>0):[];
               return(<div key={item.id} className={`ic${ov?" ov":""}`} style={{margin:"8px",marginBottom:"0"}}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
                   <div><span className="mn" style={{fontWeight:700,fontSize:12.5}}>{item.s}</span><span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>{isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}{item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}{item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng}</span>}{item.fe&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe}</span>}{activeMods.length>0&&<span className="pl" style={{marginLeft:3,background:"#7c3aed18",color:"#6d28d9"}}>{activeMods.length} mod{activeMods.length>1?"s":""}</span>}</div>
