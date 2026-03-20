@@ -6558,8 +6558,8 @@ const CABINET_MODS=[
   {code:"MOD_SQ",label:"Square Cabinet Mod (h,d) — 30% min",price:0,unit:"%",types:["B","V","C","D","T","W"],group:"Structure",input:"dims",pct:30,excGroup:"mod"},
   {code:"MOD_ANG",label:"Angle Cabinet Mod (h,d,w) — 50% min",price:0,unit:"%",types:["B","V","C","D","T","W"],group:"Structure",input:"dims",pct:50,excGroup:"mod"},  {code:"FREE_W",label:"Free Width Modification",price:0,unit:"",types:["B","V","C","D","T","W"],group:"Structure",input:"width",note:"Only available on approx. 30% of cabinets"},
 
-  {code:"ESFL",label:"Extended Side to Floor — Left",price:89,unit:"/side",types:["B","V","C","D","T","W"],group:"Side Mods",input:"check"},
-  {code:"ESFR",label:"Extended Side to Floor — Right",price:89,unit:"/side",types:["B","V","C","D","T","W"],group:"Side Mods",input:"check"},
+  {code:"ESFL",label:"Extended Side to Floor — Left",price:89,unit:"/side",types:["B","V","C","D","T"],group:"Side Mods",input:"check"},
+  {code:"ESFR",label:"Extended Side to Floor — Right",price:89,unit:"/side",types:["B","V","C","D","T"],group:"Side Mods",input:"check"},
   {code:"WSL",label:"Wide Stile Left (up to 6\")",price:290,unit:"/side",types:["B","V","C","D","T","W"],group:"Side Mods",input:"check"},
   {code:"WSR",label:"Wide Stile Right (up to 6\")",price:290,unit:"/side",types:["B","V","C","D","T","W"],group:"Side Mods",input:"check"},
   {code:"CENTER_STILE",label:"Add Center Stile (3\")",price:200,unit:"/cab",types:["B","V","C","D","T","W"],group:"Side Mods",input:"check"},
