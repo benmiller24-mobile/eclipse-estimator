@@ -6280,6 +6280,9 @@ CNRLG|100|S42|A
 FLS|1.20|S42|A
 SDI-W|338|S42|A
 VAL|60|S42|A
+LSD|0.50|C3|A
+SLBDF|0.412|C3|A
+5PDF|0.711|C3|A
 CR12|286|S43|A
 CR15|307|S43|A
 CR18|329|S43|A
@@ -6450,7 +6453,7 @@ const CX = { "Standard": 0, "Plywood": 10 };
 const TN = { B:"Base", W:"Wall", T:"Tall", V:"Vanity", C:"Vanity Tall", D:"Dressing Room", A:"Accessory", G:"GOLA", M:"Moulding", X:"Other" };
 const TC = { B:"#3d5a47", W:"#4a6178", T:"#6b5340", V:"#6b4a6b", C:"#8b5a8b", D:"#5a7b6b", A:"#6b6b6b", G:"#5a6b4a", M:"#8b6b3d", X:"#999" };
 // Price book section names by ref letter
-const SEC={E:"Wall Cabinets",F:"Pediments",G:"Range Hoods",H:"RH Accessories",I:"Base Cabinets",J:"Island End Caps",K:"Island Cabinets",L:"Utility Cabinets",M:"Tall Shelf Cabinets",N:"Vanity Cabinets",O:"ADA Compliant",P:"Vanity Tall Custom",Q:"Dressing Room",R:"GOLA Channel",S:"Accessories & Panels",T:"Moulding",U:"Samples & Displays"};
+const SEC={C:"Loose Doors & Drawer Fronts",E:"Wall Cabinets",F:"Pediments",G:"Range Hoods",H:"RH Accessories",I:"Base Cabinets",J:"Island End Caps",K:"Island Cabinets",L:"Utility Cabinets",M:"Tall Shelf Cabinets",N:"Vanity Cabinets",O:"ADA Compliant",P:"Vanity Tall Custom",Q:"Dressing Room",R:"GOLA Channel",S:"Accessories & Panels",T:"Moulding",U:"Samples & Displays"};
 const ZN = [
   {id:"kitchen",l:"Kitchen",i:"🍳"},{id:"island",l:"Island",i:"🏝"},{id:"pantry",l:"Pantry",i:"🗄"},
   {id:"bath",l:"Bath",i:"🚿"},{id:"laundry",l:"Laundry",i:"👕"},{id:"mudroom",l:"Mudroom",i:"🥾"},
@@ -6472,12 +6475,15 @@ const uid=()=>Math.random().toString(36).slice(2,10);
 // Per-sq-inch SKU prefixes (bar backs, finished panels, edge-banded panels, slat bar backs, finished tops)
 // Per-sq-inch items: S33 bar backs, S34 component bar backs, S35 slat bar backs, 
 // S36 finished tops + edge-banded panels, S37 finished panels, S38 soumi panels
-const SQI_REFS=new Set(["S3","S4","S5","S33","S34","S35","S36","S37","S38","S42"]);
+const SQI_REFS=new Set(["S3","S4","S5","S33","S34","S35","S36","S37","S38","S42","C3"]);
 const SQI_FIXED=new Set(["BB1/4","BB1/4-CMP","BB1/4-CMP-Beaded","BB1/2-CMP","TKMSBB","TKMSLBB","DROT5/8","DROT3/4","LROT","SROT5/8","DROT5/8-PAD","DROT3/4-PAD","DROT5/8-FM","DROT3/4-FM","LROT-FM","SROT5/8-FM","DIRF","CNRLG","VAL","BLLG","BRLG","SDI-W","CLC","LCEC"]);
 const SQI_SKUS=new Set(["PROFILE FILLER"]);
 const isSqIn=(s,r)=>(SQI_REFS.has(r)&&!SQI_FIXED.has(s))||SQI_SKUS.has(s);
 const isFLS=(s)=>s==="FLS";
 const FLS_DEPTH_MIN=6,FLS_DEPTH_MAX=24,FLS_LEN_MIN=12,FLS_LEN_MAX=96;
+const LSD_NOTE="Doors not available over 84\" tall, or over 30\" wide\n• Doors over 66\" tall will have no warranty\n• One panel tall doors over 48\" tall will have no warranty\n• One panel wide doors over 24\" wide will have no warranty\n• Doors 66\" to 84\" tall will not be bored for hinges\n• Doors over 24\" wide will not be bored for hinges";
+const LSD_SKUS=new Set(["LSD"]);
+const SKU_LABELS={"LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts"};
 
 const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{const s=item.so||sp;const sm=SP[s]||0;const cm=CX[cx]||0;const len=item.len||1;
   const sqin=item.sqin||0;const itemSQ=isSqIn(item.s,item.r);
@@ -6860,7 +6866,7 @@ function AddUI({onAdd}){
           {ref} — {SEC[ref.charAt(0)]||TN[items[0]?.t]||""} ({items.length})
         </div>
         {items.map(c=><div key={c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"transparent",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid transparent"}}>
-          <span className="mn" style={{fontWeight:600,fontSize:11}}>{c.s}</span>
+          <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s}</span>
           <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
         </div>)}
       </div>)}
@@ -6889,6 +6895,10 @@ function AddUI({onAdd}){
         <span style={{fontSize:11,color:C.stone}}>= {(sqW*sqH).toLocaleString()} sq.in</span>
         {selCat&&<span style={{fontSize:11,color:"#2c4a34",fontWeight:600}}>${(selCat.p*sqW*sqH).toFixed(2)}/pc</span>}
       </div>
+    </div>}
+    {LSD_SKUS.has(sk)&&<div style={{marginBottom:7,padding:"8px 10px",background:"#fef3cd",borderRadius:7,border:"1px solid #f0c040"}}>
+      <div style={{fontSize:10,fontWeight:700,color:"#856404",marginBottom:3}}>⚠ Important Notes</div>
+      <div style={{fontSize:10,color:"#856404",lineHeight:1.5,whiteSpace:"pre-line"}}>{LSD_NOTE}</div>
     </div>}
     <div style={{display:"flex",gap:6,alignItems:"flex-end",flexWrap:"wrap"}}>
       <div style={{width:60}}><label className="lb">{isM?"Pcs":isSQ?"Pcs":"Qty"}</label><input type="number" className="inp" min={1} max={999} value={q} onChange={e=>sQ(Math.max(1,+e.target.value))} style={{textAlign:"center"}}/></div>
@@ -7949,7 +7959,7 @@ upd(item.id,{mods:newMods});
           return(<div key={item.id} className={`ic${ov?" ov":""}`}>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
               <div>
-                <span className="mn" style={{fontWeight:700,fontSize:12.5}}>{item.s}</span>
+                <span className="mn" style={{fontWeight:700,fontSize:12.5}}>{SKU_LABELS[item.s]||item.s}</span>
                 <span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>
                 {isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}
                 {itemSQ&&<span className="pl" style={{marginLeft:3,background:"#e8f0ea",color:"#2c4a34"}}>{isFLS(item.s)?`${item.sqW||0}"D × ${item.sqH||0}"L`:""} {(item.sqin||0).toLocaleString()} sq.in</span>}
@@ -7985,6 +7995,10 @@ upd(item.id,{mods:newMods});
                 <input type="number" className="inp" min={1} max={120} value={item.sqH||1} onChange={e=>{const h=Math.max(1,+e.target.value);upd(item.id,{sqH:h,sqin:(item.sqW||1)*h})}} style={{width:55,textAlign:"center",padding:4,fontSize:11}}/>
                 <span style={{fontSize:10,color:C.stone}}>= {(item.sqin||0).toLocaleString()} sq.in · ${item.p}/sq.in = {fm(u)}/pc</span>
               </>}
+            </div>}
+            {LSD_SKUS.has(item.s)&&<div style={{marginBottom:5,padding:"6px 8px",background:"#fef3cd",borderRadius:6,border:"1px solid #f0c040"}}>
+              <div style={{fontSize:9.5,fontWeight:700,color:"#856404",marginBottom:2}}>⚠ Important Notes</div>
+              <div style={{fontSize:9.5,color:"#856404",lineHeight:1.5,whiteSpace:"pre-line"}}>{LSD_NOTE}</div>
             </div>}
             <div style={{display:"grid",gridTemplateColumns:(isMould||itemSQ)?"1fr 1fr":"1fr 1fr 1fr",gap:6,marginBottom:5}}>
               <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
