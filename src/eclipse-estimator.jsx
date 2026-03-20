@@ -7531,7 +7531,7 @@ function App({user, profile, supabase, onLogout}){
   const[currentQuoteId,setCurrentQuoteId]=useState(null);
   const[versions,setVersions]=useState([]);
   const[showHistory,setShowHistory]=useState(false);
-  const[groupByZone,setGroupByZone]=useState(true);
+  const[groupByZone,setGroupByZone]=useState(false);
   const[collapsedZones,setCollapsedZones]=useState(new Set());
   const[showShareModal,setShowShareModal]=useState(false);
 
