@@ -7836,10 +7836,843 @@ function AuthWrapper() {
     return <PendingApproval user={user} onLogout={handleLogout} />;
   }
 
-  return <App user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} />;
+  const [activeView, setActiveView] = useState("dashboard");
+  const [workflowData, setWorkflowData] = useState(null);
+
+  if (activeView === "dashboard") {
+    return <Dashboard user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onNavigate={(view, data) => { setActiveView(view); setWorkflowData(data || null); }} />;
+  }
+  if (activeView === "warranty") {
+    return <WarrantyRequest user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onBack={() => setActiveView("dashboard")} />;
+  }
+  if (activeView === "samples") {
+    return <SampleOrdering user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onBack={() => setActiveView("dashboard")} />;
+  }
+  if (activeView === "express") {
+    return <ExpressPartsOrder user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onBack={() => setActiveView("dashboard")} />;
+  }
+  return <App user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onBack={() => setActiveView("dashboard")} />;
 }
 
-function App({user, profile, supabase, onLogout}){
+
+// ═══════════════════════════════════════════════════
+// ██ DASHBOARD — Hub Landing Page
+// ═══════════════════════════════════════════════════
+function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
+  const [quotes, setQuotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [mob, setMob] = useState(false);
+
+  useEffect(() => {
+    const c = () => setMob(window.innerWidth <= 768);
+    c(); window.addEventListener("resize", c);
+    return () => window.removeEventListener("resize", c);
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { data } = await supabase.from("quotes").select("id,name,updated_at,data").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(6);
+        setQuotes(data || []);
+      } catch (e) { console.error(e); }
+      setLoading(false);
+    };
+    load();
+  }, [user.id, supabase]);
+
+  const workflows = [
+    { id: "estimator", icon: "📐", title: "Standard Order", desc: "Full cabinetry estimator — build complete kitchen, bath & closet orders", color: C.acc, bg: C.accS },
+    { id: "express", icon: "⚡", title: "Express Parts", desc: "Quick order for replacement doors, drawer fronts, or individual parts", color: "#7c3aed", bg: "#ede9fe" },
+    { id: "warranty", icon: "🛡️", title: "Warranty Request", desc: "Submit no-charge warranty replacements with original order reference", color: "#0369a1", bg: "#e0f2fe" },
+    { id: "samples", icon: "🎨", title: "Order Samples", desc: "Sample doors, drawer fronts, color blocks & color chips", color: "#b45309", bg: "#fef3c7" },
+  ];
+
+  return (
+    <div style={{minHeight:"100vh",background:C.warm}}>
+      {/* Header */}
+      <div style={{background:C.ink,padding:"16px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontFamily:F.d,fontSize:mob?18:24,fontWeight:700,color:C.cream,letterSpacing:1}}>Eclipse Cabinetry</span>
+          <span style={{fontSize:10,padding:"3px 8px",borderRadius:4,background:C.gold+"22",color:C.gold,fontWeight:600,border:`1px solid ${C.gold}44`}}>HUB</span>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:11,color:C.stL,fontFamily:F.b}}>{profile?.business_name || profile?.email || ""}</span>
+          <button onClick={onLogout} style={{background:"none",border:`1px solid ${C.stL}44`,borderRadius:6,padding:"5px 12px",color:C.stL,cursor:"pointer",fontSize:11,fontFamily:F.b}}>Logout</button>
+        </div>
+      </div>
+
+      <div style={{maxWidth:900,margin:"0 auto",padding:mob?"16px":"32px 24px"}}>
+        {/* Welcome */}
+        <div style={{marginBottom:28}}>
+          <h1 style={{fontFamily:F.d,fontSize:mob?22:28,fontWeight:700,color:C.ink,margin:0}}>Welcome back{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}</h1>
+          <p style={{fontFamily:F.b,fontSize:13,color:C.stone,margin:"6px 0 0"}}>What would you like to do today?</p>
+        </div>
+
+        {/* Workflow Cards */}
+        <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:14,marginBottom:32}}>
+          {workflows.map(w => (
+            <button key={w.id} onClick={() => onNavigate(w.id)} style={{
+              background:C.paper, border:`1px solid ${C.bdr}`, borderRadius:12, padding:mob?"16px":"20px 22px",
+              cursor:"pointer", textAlign:"left", transition:"all 0.15s ease",
+              display:"flex", flexDirection:"column", gap:8, position:"relative", overflow:"hidden"
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = w.color; e.currentTarget.style.boxShadow = `0 4px 20px ${w.color}18`; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.boxShadow = "none"; }}
+            >
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:24,width:42,height:42,borderRadius:10,background:w.bg,display:"flex",alignItems:"center",justifyContent:"center"}}>{w.icon}</span>
+                <div>
+                  <div style={{fontFamily:F.d,fontSize:16,fontWeight:700,color:C.ink}}>{w.title}</div>
+                  <div style={{fontFamily:F.b,fontSize:11.5,color:C.stone,marginTop:2,lineHeight:1.4}}>{w.desc}</div>
+                </div>
+              </div>
+              <div style={{position:"absolute",right:16,top:"50%",transform:"translateY(-50%)",fontSize:18,color:C.stL}}>›</div>
+            </button>
+          ))}
+        </div>
+
+        {/* Recent Projects */}
+        <div style={{background:C.paper,borderRadius:12,border:`1px solid ${C.bdr}`,overflow:"hidden"}}>
+          <div style={{padding:"14px 20px",borderBottom:`1px solid ${C.bdr}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <h2 style={{fontFamily:F.d,fontSize:16,fontWeight:700,color:C.ink,margin:0}}>Recent Projects</h2>
+            <button onClick={() => onNavigate("estimator")} style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.acc,fontFamily:F.b,fontWeight:600}}>+ New Order</button>
+          </div>
+          {loading ? (
+            <div style={{padding:24,textAlign:"center",color:C.stone,fontSize:12}}>Loading...</div>
+          ) : quotes.length === 0 ? (
+            <div style={{padding:32,textAlign:"center"}}>
+              <div style={{fontSize:32,marginBottom:8}}>📋</div>
+              <div style={{fontSize:13,color:C.stone,fontFamily:F.b}}>No projects yet — start your first order above!</div>
+            </div>
+          ) : (
+            <div>
+              {quotes.map(q => {
+                const itemCount = q.data?.items?.length || 0;
+                const species = q.data?.sp || "";
+                const door = q.data?.door || "";
+                return (
+                  <button key={q.id} onClick={() => onNavigate("estimator", { quoteId: q.id })} style={{
+                    display:"flex", justifyContent:"space-between", alignItems:"center", width:"100%",
+                    padding:"12px 20px", background:"none", border:"none", borderBottom:`1px solid ${C.bdr}`,
+                    cursor:"pointer", textAlign:"left", transition:"background 0.1s"
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = C.cream}
+                  onMouseLeave={e => e.currentTarget.style.background = "none"}
+                  >
+                    <div>
+                      <div style={{fontFamily:F.b,fontSize:13,fontWeight:600,color:C.ink}}>{q.name || "Untitled"}</div>
+                      <div style={{fontSize:11,color:C.stone,marginTop:2}}>{itemCount} item{itemCount !== 1 ? "s" : ""}{species ? ` · ${species}` : ""}{door ? ` · ${door}` : ""}</div>
+                    </div>
+                    <div style={{textAlign:"right"}}>
+                      <div style={{fontSize:10.5,color:C.stone}}>{new Date(q.updated_at).toLocaleDateString()}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Admin access */}
+        {profile?.role === "admin" && (
+          <div style={{marginTop:16,textAlign:"center"}}>
+            <button onClick={() => onNavigate("estimator")} style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.stone,fontFamily:F.b,textDecoration:"underline"}}>Open Admin Panel →</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// ██ WARRANTY REQUEST — Lightweight Form
+// ═══════════════════════════════════════════════════
+function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
+  const [mob, setMob] = useState(false);
+  const [ntf, setNtf] = useState(null);
+  const fl = useCallback(m => { setNtf(m); setTimeout(() => setNtf(null), 2200); }, []);
+
+  useEffect(() => {
+    const c = () => setMob(window.innerWidth <= 768);
+    c(); window.addEventListener("resize", c);
+    return () => window.removeEventListener("resize", c);
+  }, []);
+
+  // Warranty-specific state
+  const [origOrderNum, setOrigOrderNum] = useState("");
+  const [origOrderDate, setOrigOrderDate] = useState("");
+  const [dealerName, setDealerName] = useState(profile?.business_name || "");
+  const [dealerCode, setDealerCode] = useState("");
+  const [contactName, setContactName] = useState(profile?.full_name || "");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactEmail, setContactEmail] = useState(profile?.email || "");
+  const [shipAddr, setShipAddr] = useState("");
+  const [prevWarranty, setPrevWarranty] = useState("No");
+  const [warrantyNotes, setWarrantyNotes] = useState("");
+  const [items, setItems] = useState([{ id: uid(), desc: "", qty: 1, reason: "" }]);
+
+  // Species/style from original order
+  const [sp, setSp] = useState("White Oak");
+  const [door, setDoor] = useState("HNVR");
+  const [cx, setCx] = useState("Standard");
+  const [color, setColor] = useState("");
+
+  const addItem = () => setItems(p => [...p, { id: uid(), desc: "", qty: 1, reason: "" }]);
+  const removeItem = (id) => setItems(p => p.filter(i => i.id !== id));
+  const updateItem = (id, field, val) => setItems(p => p.map(i => i.id === id ? { ...i, [field]: val } : i));
+
+  const generateWarrantyPdf = async () => {
+    if (!origOrderNum) { fl("Please enter the original order number"); return; }
+    if (items.every(i => !i.desc)) { fl("Please add at least one item"); return; }
+
+    // For now generate a simple text-based PDF summary
+    const { PDFDocument, rgb, StandardFonts } = await import("pdf-lib");
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const fontB = await doc.embedFont(StandardFonts.HelveticaBold);
+    const page = doc.addPage([612, 792]);
+    let y = 740;
+    const ln = (text, x, size, f) => { page.drawText(text, { x, y, size: size || 11, font: f || font, color: rgb(0.1, 0.09, 0.08) }); y -= (size || 11) + 6; };
+
+    // Header
+    page.drawText("ECLIPSE CABINETRY", { x: 50, y: 760, size: 20, font: fontB, color: rgb(0.1, 0.09, 0.08) });
+    page.drawText("WARRANTY REQUEST", { x: 50, y: 740, size: 14, font: fontB, color: rgb(0.72, 0.59, 0.24) });
+    page.drawText("Form: ECL-WRTY-CS", { x: 400, y: 760, size: 9, font, color: rgb(0.54, 0.49, 0.44) });
+    y = 710;
+
+    // Divider
+    page.drawRectangle({ x: 50, y: y, width: 512, height: 1, color: rgb(0.9, 0.87, 0.84) });
+    y -= 20;
+
+    ln("Original Order #: " + origOrderNum, 50, 11, fontB);
+    if (origOrderDate) ln("Original Order Date: " + origOrderDate, 50);
+    ln("Previously Replaced Under Warranty: " + prevWarranty, 50);
+    y -= 6;
+    ln("Dealer: " + dealerName + (dealerCode ? " (" + dealerCode + ")" : ""), 50);
+    ln("Contact: " + contactName, 50);
+    if (contactPhone) ln("Phone: " + contactPhone, 50);
+    ln("Email: " + contactEmail, 50);
+    if (shipAddr) ln("Ship To: " + shipAddr, 50);
+    y -= 6;
+    ln("Species: " + sp + "  |  Door Style: " + door + "  |  Construction: " + cx, 50);
+    if (color) ln("Color: " + color, 50);
+    y -= 10;
+
+    // Items header
+    page.drawRectangle({ x: 50, y: y + 4, width: 512, height: 18, color: rgb(0.1, 0.09, 0.08) });
+    page.drawText("QTY", { x: 55, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("DESCRIPTION", { x: 90, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("REASON", { x: 350, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    y -= 18;
+
+    const validItems = items.filter(i => i.desc);
+    validItems.forEach((item, idx) => {
+      if (y < 60) {
+        const np = doc.addPage([612, 792]);
+        y = 740;
+      }
+      const bg = idx % 2 === 0 ? rgb(0.98, 0.97, 0.96) : rgb(1, 1, 1);
+      page.drawRectangle({ x: 50, y: y - 2, width: 512, height: 16, color: bg });
+      page.drawText(String(item.qty), { x: 55, y: y + 1, size: 10, font });
+      page.drawText(item.desc.slice(0, 40), { x: 90, y: y + 1, size: 10, font });
+      page.drawText((item.reason || "").slice(0, 30), { x: 350, y: y + 1, size: 10, font });
+      y -= 16;
+    });
+
+    y -= 14;
+    if (warrantyNotes) {
+      ln("Notes:", 50, 10, fontB);
+      const lines = warrantyNotes.match(/.{1,80}/g) || [];
+      lines.forEach(l => ln(l, 55, 9));
+    }
+
+    // Footer
+    page.drawText("$0.00 — No Charge (Warranty)", { x: 350, y: 50, size: 11, font: fontB, color: rgb(0.1, 0.09, 0.08) });
+    page.drawText("Generated " + new Date().toLocaleDateString(), { x: 50, y: 50, size: 8, font, color: rgb(0.54, 0.49, 0.44) });
+
+    const bytes = await doc.save();
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Eclipse-Warranty-${origOrderNum || "REQ"}-${new Date().toISOString().slice(0,10)}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    fl("Warranty PDF downloaded!");
+  };
+
+  const fieldStyle = { width: "100%", padding: "8px 10px", border: `1px solid ${C.bdr}`, borderRadius: 6, fontSize: 12, fontFamily: F.b, background: C.cream, outline: "none" };
+  const labelStyle = { fontSize: 10.5, fontWeight: 600, color: C.stone, fontFamily: F.b, marginBottom: 3, display: "block" };
+
+  return (
+    <div style={{minHeight:"100vh",background:C.warm}}>
+      {/* Header */}
+      <div style={{background:C.ink,padding:"12px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <button onClick={onBack} style={{background:"none",border:"none",cursor:"pointer",color:C.stL,fontSize:18,padding:"0 4px"}}>‹</button>
+          <span style={{fontFamily:F.d,fontSize:mob?15:18,fontWeight:700,color:C.cream}}>Warranty Request</span>
+          <span style={{fontSize:9,padding:"2px 7px",borderRadius:4,background:"#0369a122",color:"#0ea5e9",fontWeight:600,border:"1px solid #0369a144"}}>ECL-WRTY</span>
+        </div>
+        <span style={{fontSize:11,color:C.stL,fontFamily:F.b}}>{profile?.business_name || ""}</span>
+      </div>
+
+      {ntf && <div style={{position:"fixed",top:60,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:C.ink,color:C.gold,padding:"8px 18px",borderRadius:8,fontSize:12,fontFamily:F.b,boxShadow:"0 4px 20px rgba(0,0,0,.3)"}}>{ntf}</div>}
+
+      <div style={{maxWidth:680,margin:"0 auto",padding:mob?"14px":"28px 20px"}}>
+        {/* Info banner */}
+        <div style={{background:"#e0f2fe",border:"1px solid #0369a133",borderRadius:8,padding:"10px 14px",marginBottom:18,fontSize:11.5,color:"#0c4a6e",fontFamily:F.b}}>
+          🛡️ Warranty items ship at <strong>no charge</strong>. You must reference the original order number. Items previously replaced under warranty must be noted.
+        </div>
+
+        {/* Original Order Info */}
+        <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
+          <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Original Order Reference</div>
+          <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10}}>
+            <div><label style={labelStyle}>Original Order # *</label><input value={origOrderNum} onChange={e=>setOrigOrderNum(e.target.value)} placeholder="e.g. ECL-2024-00123" style={{...fieldStyle,borderColor:!origOrderNum?"#f59e0b":C.bdr}} /></div>
+            <div><label style={labelStyle}>Original Order Date</label><input type="date" value={origOrderDate} onChange={e=>setOrigOrderDate(e.target.value)} style={fieldStyle} /></div>
+          </div>
+          <div style={{marginTop:10}}>
+            <label style={labelStyle}>Previously replaced under warranty?</label>
+            <div style={{display:"flex",gap:8}}>
+              {["No","Yes"].map(v=>(<button key={v} onClick={()=>setPrevWarranty(v)} style={{padding:"6px 16px",borderRadius:6,fontSize:11,fontFamily:F.b,fontWeight:600,cursor:"pointer",border:`1px solid ${prevWarranty===v?"#0369a1":C.bdr}`,background:prevWarranty===v?"#e0f2fe":"#fff",color:prevWarranty===v?"#0369a1":C.stone}}>{v}</button>))}
+            </div>
+          </div>
+        </div>
+
+        {/* Dealer & Contact */}
+        <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
+          <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Dealer & Contact</div>
+          <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10}}>
+            <div><label style={labelStyle}>Dealer Name</label><input value={dealerName} onChange={e=>setDealerName(e.target.value)} style={fieldStyle} /></div>
+            <div><label style={labelStyle}>Dealer Code</label><input value={dealerCode} onChange={e=>setDealerCode(e.target.value)} style={fieldStyle} /></div>
+            <div><label style={labelStyle}>Contact Name</label><input value={contactName} onChange={e=>setContactName(e.target.value)} style={fieldStyle} /></div>
+            <div><label style={labelStyle}>Phone</label><input value={contactPhone} onChange={e=>setContactPhone(e.target.value)} style={fieldStyle} /></div>
+            <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
+            <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Ship-To Address</label><input value={shipAddr} onChange={e=>setShipAddr(e.target.value)} placeholder="Street, City, State, ZIP" style={fieldStyle} /></div>
+          </div>
+        </div>
+
+        {/* Species/Style */}
+        <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
+          <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Original Order Specs</div>
+          <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr 1fr",gap:10}}>
+            <div><label style={labelStyle}>Species</label><input value={sp} onChange={e=>setSp(e.target.value)} style={fieldStyle} /></div>
+            <div><label style={labelStyle}>Door Style</label><input value={door} onChange={e=>setDoor(e.target.value)} style={fieldStyle} /></div>
+            <div><label style={labelStyle}>Construction</label><input value={cx} onChange={e=>setCx(e.target.value)} style={fieldStyle} /></div>
+            <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Color / Finish</label><input value={color} onChange={e=>setColor(e.target.value)} placeholder="If applicable" style={fieldStyle} /></div>
+          </div>
+        </div>
+
+        {/* Item List */}
+        <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+            <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink}}>Warranty Items</div>
+            <button onClick={addItem} style={{background:C.accS,border:`1px solid ${C.acc}44`,borderRadius:6,padding:"5px 12px",fontSize:10.5,fontFamily:F.b,fontWeight:600,color:C.acc,cursor:"pointer"}}>+ Add Item</button>
+          </div>
+          <div style={{fontSize:10,color:C.stone,fontFamily:F.b,marginBottom:10}}>All items are $0 — no charge under warranty</div>
+          {items.map((item, idx) => (
+            <div key={item.id} style={{display:"grid",gridTemplateColumns:mob?"1fr":"50px 1fr 1fr 32px",gap:8,marginBottom:8,padding:"8px 10px",background:idx%2===0?C.cream:"transparent",borderRadius:6,alignItems:"end"}}>
+              <div><label style={labelStyle}>Qty</label><input type="number" min="1" value={item.qty} onChange={e=>updateItem(item.id,"qty",parseInt(e.target.value)||1)} style={{...fieldStyle,textAlign:"center"}} /></div>
+              <div><label style={labelStyle}>Description / SKU</label><input value={item.desc} onChange={e=>updateItem(item.id,"desc",e.target.value)} placeholder="e.g. W3630 or Door for W3630" style={fieldStyle} /></div>
+              <div><label style={labelStyle}>Reason for Replacement</label><input value={item.reason} onChange={e=>updateItem(item.id,"reason",e.target.value)} placeholder="Damaged, wrong size, etc." style={fieldStyle} /></div>
+              <button onClick={()=>removeItem(item.id)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.red,padding:"4px",alignSelf:"end",marginBottom:2}} title="Remove">&times;</button>
+            </div>
+          ))}
+        </div>
+
+        {/* Notes */}
+        <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:18}}>
+          <label style={labelStyle}>Additional Notes</label>
+          <textarea value={warrantyNotes} onChange={e=>setWarrantyNotes(e.target.value)} rows={3} placeholder="Any additional warranty details or instructions..." style={{...fieldStyle,resize:"vertical"}} />
+        </div>
+
+        {/* Actions */}
+        <div style={{display:"flex",gap:10,justifyContent:"center"}}>
+          <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
+          <button onClick={generateWarrantyPdf} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)"}}>🛡️ Generate Warranty PDF</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// ██ SAMPLE ORDERING — 4 Sample Type Cards
+// ═══════════════════════════════════════════════════
+function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
+  const [mob, setMob] = useState(false);
+  const [ntf, setNtf] = useState(null);
+  const fl = useCallback(m => { setNtf(m); setTimeout(() => setNtf(null), 2200); }, []);
+  const [activeType, setActiveType] = useState(null);
+
+  useEffect(() => {
+    const c = () => setMob(window.innerWidth <= 768);
+    c(); window.addEventListener("resize", c);
+    return () => window.removeEventListener("resize", c);
+  }, []);
+
+  // Shared fields
+  const [dealerName, setDealerName] = useState(profile?.business_name || "");
+  const [dealerCode, setDealerCode] = useState("");
+  const [contactName, setContactName] = useState(profile?.full_name || "");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactEmail, setContactEmail] = useState(profile?.email || "");
+  const [shipAddr, setShipAddr] = useState("");
+
+  // Sample door/drawer specs
+  const [sampleSp, setSampleSp] = useState("White Oak");
+  const [sampleDoor, setSampleDoor] = useState("HNVR");
+  const [sampleColor, setSampleColor] = useState("");
+  const [sampleEdge, setSampleEdge] = useState("");
+  const [sampleCharT, setSampleCharT] = useState("NONE");
+
+  // Color blocks/chips
+  const [colorSelections, setColorSelections] = useState(Array(10).fill(""));
+  const [blockType, setBlockType] = useState("RCSB"); // RCSB or RLVSB
+  const [orderType, setOrderType] = useState("Standard"); // Standard or Express
+
+  const sampleTypes = [
+    { id: "sd", icon: "🚪", title: "Sample Door 12½×15½", price: "$350", code: "ECL-SD", desc: "12.5 x 15.5 inch sample door in your selected species and style" },
+    { id: "ffd", icon: "🗄️", title: "Sample Door & Drawer Front", price: "$475", code: "ECL-FFD", desc: "14.5 x 24 inch pinned sample door and drawer front" },
+    { id: "rcbs", icon: "🧱", title: "Color Block Samples", price: "$250/set", code: "ECL-RCBS", desc: "Set of up to 10 replacement color block samples" },
+    { id: "rccs", icon: "🎨", title: "Color Chip Samples", price: "Per 10", code: "ECL-RCCS", desc: "Set of up to 10 replacement color chip samples" },
+  ];
+
+  const generateSamplePdf = async () => {
+    if (!activeType) return;
+    const { PDFDocument, rgb, StandardFonts } = await import("pdf-lib");
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const fontB = await doc.embedFont(StandardFonts.HelveticaBold);
+    const page = doc.addPage([612, 792]);
+    let y = 740;
+    const ln = (text, x, sz, f) => { page.drawText(text || "", { x, y, size: sz || 11, font: f || font, color: rgb(0.1, 0.09, 0.08) }); y -= (sz || 11) + 6; };
+
+    const st = sampleTypes.find(s => s.id === activeType);
+    page.drawText("ECLIPSE CABINETRY", { x: 50, y: 760, size: 20, font: fontB, color: rgb(0.1, 0.09, 0.08) });
+    page.drawText("SAMPLE ORDER — " + (st?.title || "").toUpperCase(), { x: 50, y: 740, size: 12, font: fontB, color: rgb(0.72, 0.59, 0.24) });
+    page.drawText("Form: " + (st?.code || ""), { x: 420, y: 760, size: 9, font, color: rgb(0.54, 0.49, 0.44) });
+    y = 710;
+
+    page.drawRectangle({ x: 50, y, width: 512, height: 1, color: rgb(0.9, 0.87, 0.84) });
+    y -= 20;
+
+    ln("Dealer: " + dealerName + (dealerCode ? " (" + dealerCode + ")" : ""), 50);
+    ln("Contact: " + contactName + (contactPhone ? " | " + contactPhone : ""), 50);
+    ln("Email: " + contactEmail, 50);
+    if (shipAddr) ln("Ship To: " + shipAddr, 50);
+    y -= 10;
+
+    if (activeType === "sd" || activeType === "ffd") {
+      ln("Species: " + sampleSp, 50, 11, fontB);
+      ln("Door Style: " + sampleDoor, 50);
+      if (sampleColor) ln("Color: " + sampleColor, 50);
+      if (sampleEdge) ln("Edge Profile: " + sampleEdge, 50);
+      if (sampleCharT && sampleCharT !== "NONE") ln("Character Technique: " + sampleCharT, 50);
+      y -= 10;
+      ln("Price: " + (st?.price || ""), 50, 13, fontB);
+    } else {
+      ln("Sample Type: " + (blockType === "RLVSB" ? "LVS Block" : "Standard Block"), 50, 11, fontB);
+      ln("Order Type: " + orderType, 50);
+      y -= 6;
+      ln("Color Selections:", 50, 11, fontB);
+      colorSelections.forEach((c, i) => {
+        if (c) ln("  " + (i + 1) + ". " + c, 55, 10);
+      });
+      y -= 10;
+      ln("Price: " + (st?.price || ""), 50, 13, fontB);
+    }
+
+    page.drawText("Generated " + new Date().toLocaleDateString(), { x: 50, y: 50, size: 8, font, color: rgb(0.54, 0.49, 0.44) });
+
+    const bytes = await doc.save();
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Eclipse-Sample-${st?.code || "ORD"}-${new Date().toISOString().slice(0,10)}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    fl("Sample order PDF downloaded!");
+  };
+
+  const fieldStyle = { width: "100%", padding: "8px 10px", border: `1px solid ${C.bdr}`, borderRadius: 6, fontSize: 12, fontFamily: F.b, background: C.cream, outline: "none" };
+  const labelStyle = { fontSize: 10.5, fontWeight: 600, color: C.stone, fontFamily: F.b, marginBottom: 3, display: "block" };
+
+  return (
+    <div style={{minHeight:"100vh",background:C.warm}}>
+      <div style={{background:C.ink,padding:"12px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <button onClick={onBack} style={{background:"none",border:"none",cursor:"pointer",color:C.stL,fontSize:18,padding:"0 4px"}}>‹</button>
+          <span style={{fontFamily:F.d,fontSize:mob?15:18,fontWeight:700,color:C.cream}}>Order Samples</span>
+          <span style={{fontSize:9,padding:"2px 7px",borderRadius:4,background:"#b4530922",color:"#f59e0b",fontWeight:600,border:"1px solid #b4530944"}}>SAMPLES</span>
+        </div>
+        <span style={{fontSize:11,color:C.stL,fontFamily:F.b}}>{profile?.business_name || ""}</span>
+      </div>
+
+      {ntf && <div style={{position:"fixed",top:60,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:C.ink,color:C.gold,padding:"8px 18px",borderRadius:8,fontSize:12,fontFamily:F.b,boxShadow:"0 4px 20px rgba(0,0,0,.3)"}}>{ntf}</div>}
+
+      <div style={{maxWidth:720,margin:"0 auto",padding:mob?"14px":"28px 20px"}}>
+        {/* Sample Type Selector */}
+        {!activeType ? (
+          <>
+            <div style={{marginBottom:20}}>
+              <h2 style={{fontFamily:F.d,fontSize:20,fontWeight:700,color:C.ink,margin:0}}>Choose Sample Type</h2>
+              <p style={{fontFamily:F.b,fontSize:12,color:C.stone,margin:"4px 0 0"}}>Select the type of sample you'd like to order</p>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:12}}>
+              {sampleTypes.map(st => (
+                <button key={st.id} onClick={() => setActiveType(st.id)} style={{
+                  background:C.paper,border:`1px solid ${C.bdr}`,borderRadius:10,padding:"18px",cursor:"pointer",textAlign:"left",transition:"all 0.15s"
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#b45309"; e.currentTarget.style.boxShadow = "0 4px 16px #b4530918"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.boxShadow = "none"; }}
+                >
+                  <div style={{fontSize:28,marginBottom:6}}>{st.icon}</div>
+                  <div style={{fontFamily:F.d,fontSize:15,fontWeight:700,color:C.ink}}>{st.title}</div>
+                  <div style={{fontFamily:F.b,fontSize:11,color:C.stone,margin:"4px 0 8px",lineHeight:1.4}}>{st.desc}</div>
+                  <div style={{fontFamily:F.m,fontSize:14,fontWeight:700,color:"#b45309"}}>{st.price}</div>
+                </button>
+              ))}
+            </div>
+            <div style={{textAlign:"center",marginTop:20}}>
+              <button onClick={onBack} style={{padding:"8px 20px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
+            </div>
+          </>
+        ) : (
+          <>
+            <button onClick={() => setActiveType(null)} style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.acc,fontFamily:F.b,fontWeight:600,marginBottom:14,display:"block"}}>← Back to sample types</button>
+
+            <div style={{background:"#fef3c7",border:"1px solid #b4530933",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:11.5,color:"#92400e",fontFamily:F.b,display:"flex",alignItems:"center",gap:8}}>
+              <span style={{fontSize:18}}>{sampleTypes.find(s=>s.id===activeType)?.icon}</span>
+              <span><strong>{sampleTypes.find(s=>s.id===activeType)?.title}</strong> — {sampleTypes.find(s=>s.id===activeType)?.price}</span>
+            </div>
+
+            {/* Dealer & Shipping */}
+            <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
+              <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Dealer & Delivery</div>
+              <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10}}>
+                <div><label style={labelStyle}>Dealer Name</label><input value={dealerName} onChange={e=>setDealerName(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Dealer Code</label><input value={dealerCode} onChange={e=>setDealerCode(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Contact</label><input value={contactName} onChange={e=>setContactName(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Phone</label><input value={contactPhone} onChange={e=>setContactPhone(e.target.value)} style={fieldStyle} /></div>
+                <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
+                <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Delivery Address *</label><input value={shipAddr} onChange={e=>setShipAddr(e.target.value)} placeholder="Street, City, State, ZIP" style={{...fieldStyle,borderColor:!shipAddr?"#f59e0b":C.bdr}} /></div>
+              </div>
+            </div>
+
+            {/* Specs — varies by type */}
+            {(activeType === "sd" || activeType === "ffd") && (
+              <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
+                <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Sample Specifications</div>
+                <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10}}>
+                  <div><label style={labelStyle}>Species</label><input value={sampleSp} onChange={e=>setSampleSp(e.target.value)} style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Door Style</label><input value={sampleDoor} onChange={e=>setSampleDoor(e.target.value)} style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Color / Finish</label><input value={sampleColor} onChange={e=>setSampleColor(e.target.value)} style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Edge Profile</label><input value={sampleEdge} onChange={e=>setSampleEdge(e.target.value)} style={fieldStyle} /></div>
+                  <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Character Technique</label><input value={sampleCharT} onChange={e=>setSampleCharT(e.target.value)} placeholder="NONE" style={fieldStyle} /></div>
+                </div>
+              </div>
+            )}
+
+            {(activeType === "rcbs" || activeType === "rccs") && (
+              <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
+                <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Color Selections (up to 10)</div>
+                {activeType === "rcbs" && (
+                  <div style={{marginBottom:12}}>
+                    <label style={labelStyle}>Block Type</label>
+                    <div style={{display:"flex",gap:8}}>
+                      {[{v:"RCSB",l:"Standard Block ($250)"},{v:"RLVSB",l:"LVS Block ($250)"}].map(o=>(
+                        <button key={o.v} onClick={()=>setBlockType(o.v)} style={{padding:"6px 14px",borderRadius:6,fontSize:11,fontFamily:F.b,fontWeight:600,cursor:"pointer",border:`1px solid ${blockType===o.v?"#b45309":C.bdr}`,background:blockType===o.v?"#fef3c7":"#fff",color:blockType===o.v?"#b45309":C.stone}}>{o.l}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div style={{marginBottom:12}}>
+                  <label style={labelStyle}>Order Type</label>
+                  <div style={{display:"flex",gap:8}}>
+                    {["Standard","Express"].map(v=>(
+                      <button key={v} onClick={()=>setOrderType(v)} style={{padding:"6px 14px",borderRadius:6,fontSize:11,fontFamily:F.b,fontWeight:600,cursor:"pointer",border:`1px solid ${orderType===v?"#b45309":C.bdr}`,background:orderType===v?"#fef3c7":"#fff",color:orderType===v?"#b45309":C.stone}}>{v}</button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:8}}>
+                  {colorSelections.map((c, i) => (
+                    <div key={i}><label style={labelStyle}>Color {i+1}</label><input value={c} onChange={e=>{const n=[...colorSelections];n[i]=e.target.value;setColorSelections(n)}} placeholder={`Color name ${i+1}`} style={fieldStyle} /></div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:18}}>
+              <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
+              <button onClick={generateSamplePdf} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)"}}>🎨 Generate Sample Order PDF</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════
+// ██ EXPRESS PARTS ORDER — Parcel/Truck/DDF
+// ═══════════════════════════════════════════════════
+function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
+  const [mob, setMob] = useState(false);
+  const [ntf, setNtf] = useState(null);
+  const fl = useCallback(m => { setNtf(m); setTimeout(() => setNtf(null), 2200); }, []);
+
+  useEffect(() => {
+    const c = () => setMob(window.innerWidth <= 768);
+    c(); window.addEventListener("resize", c);
+    return () => window.removeEventListener("resize", c);
+  }, []);
+
+  // Express type: parcel, truck, ddf (door/drawer front only)
+  const [expressType, setExpressType] = useState(null);
+
+  // Shared fields
+  const [dealerName, setDealerName] = useState(profile?.business_name || "");
+  const [dealerCode, setDealerCode] = useState("");
+  const [contactName, setContactName] = useState(profile?.full_name || "");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactEmail, setContactEmail] = useState(profile?.email || "");
+  const [shipAddr, setShipAddr] = useState("");
+  const [poNumber, setPoNumber] = useState("");
+
+  // Order specs (for parcel/truck cover sheet)
+  const [sp, setSp] = useState("White Oak");
+  const [door, setDoor] = useState("HNVR");
+  const [drwF, setDrwF] = useState("DF-HNVR");
+  const [cx, setCx] = useState("Standard");
+  const [color, setColor] = useState("");
+  const [mat, setMat] = useState("PB");
+  const [intF, setIntF] = useState("STD-MAPL");
+  const [drwBox, setDrwBox] = useState("5/8-STD");
+  const [glaze, setGlaze] = useState("NONE");
+
+  // Items
+  const [items, setItems] = useState([{ id: uid(), sku: "", desc: "", qty: 1, hinge: "", price: "" }]);
+
+  const addItem = () => setItems(p => [...p, { id: uid(), sku: "", desc: "", qty: 1, hinge: "", price: "" }]);
+  const removeItem = (id) => setItems(p => p.filter(i => i.id !== id));
+  const updateItem = (id, field, val) => setItems(p => p.map(i => i.id === id ? { ...i, [field]: val } : i));
+
+  const expressTypes = [
+    { id: "ddf", icon: "🚪", title: "Door & Drawer Fronts Only", code: "ECL-EXP-DDF", desc: "Express order for doors and drawer fronts only — ships in 5 working days", ship: "UPS/FedEx" },
+    { id: "parcel", icon: "📦", title: "Express Parcel", code: "ECL-EXP-P", desc: "Smaller express orders that ship via UPS/FedEx in 5 working days", ship: "UPS/FedEx" },
+    { id: "truck", icon: "🚛", title: "Express Truck", code: "ECL-EXP-T", desc: "Larger express orders shipped via common carrier (freight collect) in 5 working days", ship: "Common Carrier (Freight Collect)" },
+  ];
+
+  const generateExpressPdf = async () => {
+    if (!expressType) return;
+    if (items.every(i => !i.sku && !i.desc)) { fl("Please add at least one item"); return; }
+
+    const { PDFDocument, rgb, StandardFonts } = await import("pdf-lib");
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const fontB = await doc.embedFont(StandardFonts.HelveticaBold);
+    const page = doc.addPage([612, 792]);
+    let y = 740;
+    const ln = (text, x, sz, f) => { page.drawText(text || "", { x, y, size: sz || 11, font: f || font, color: rgb(0.1, 0.09, 0.08) }); y -= (sz || 11) + 6; };
+
+    const et = expressTypes.find(e => e.id === expressType);
+    page.drawText("ECLIPSE CABINETRY", { x: 50, y: 760, size: 20, font: fontB, color: rgb(0.1, 0.09, 0.08) });
+    page.drawText("EXPRESS ORDER — " + (et?.title || "").toUpperCase(), { x: 50, y: 740, size: 12, font: fontB, color: rgb(0.72, 0.59, 0.24) });
+    page.drawText("Form: " + (et?.code || ""), { x: 420, y: 760, size: 9, font, color: rgb(0.54, 0.49, 0.44) });
+    y = 710;
+
+    page.drawRectangle({ x: 50, y, width: 512, height: 1, color: rgb(0.9, 0.87, 0.84) });
+    y -= 20;
+
+    ln("Shipping: " + (et?.ship || ""), 50, 10, fontB);
+    ln("⚡ Ships in 5 Working Days", 50, 10, fontB);
+    if (poNumber) ln("PO #: " + poNumber, 50);
+    y -= 6;
+
+    ln("Dealer: " + dealerName + (dealerCode ? " (" + dealerCode + ")" : ""), 50);
+    ln("Contact: " + contactName + (contactPhone ? " | " + contactPhone : ""), 50);
+    ln("Email: " + contactEmail, 50);
+    if (shipAddr) ln("Ship To: " + shipAddr, 50);
+    y -= 6;
+
+    if (expressType !== "ddf") {
+      ln("Species: " + sp + "  |  Door: " + door + "  |  Construction: " + cx, 50);
+      if (color) ln("Color: " + color, 50);
+      ln("Material: " + mat + "  |  Interior: " + intF + "  |  Drawer Box: " + drwBox, 50);
+      if (glaze !== "NONE") ln("Glaze: " + glaze, 50);
+      y -= 6;
+    }
+
+    // Items table
+    page.drawRectangle({ x: 50, y: y + 4, width: 512, height: 18, color: rgb(0.1, 0.09, 0.08) });
+    page.drawText("QTY", { x: 55, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("ITEM #", { x: 85, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("DESCRIPTION", { x: 170, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("HINGE", { x: 380, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("PRICE", { x: 450, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    y -= 18;
+
+    let grandTotal = 0;
+    const validItems = items.filter(i => i.sku || i.desc);
+    validItems.forEach((item, idx) => {
+      if (y < 80) {
+        const np = doc.addPage([612, 792]);
+        y = 740;
+      }
+      const bg = idx % 2 === 0 ? rgb(0.98, 0.97, 0.96) : rgb(1, 1, 1);
+      page.drawRectangle({ x: 50, y: y - 2, width: 512, height: 16, color: bg });
+      page.drawText(String(item.qty), { x: 55, y: y + 1, size: 10, font });
+      page.drawText((item.sku || "").slice(0, 12), { x: 85, y: y + 1, size: 10, font });
+      page.drawText((item.desc || "").slice(0, 30), { x: 170, y: y + 1, size: 10, font });
+      page.drawText((item.hinge || ""), { x: 380, y: y + 1, size: 10, font });
+      const p = parseFloat(item.price) || 0;
+      grandTotal += p * item.qty;
+      page.drawText(p ? fm(p) : "", { x: 450, y: y + 1, size: 10, font });
+      y -= 16;
+    });
+
+    y -= 10;
+    page.drawRectangle({ x: 350, y: y - 4, width: 212, height: 22, color: rgb(0.1, 0.09, 0.08) });
+    page.drawText("TOTAL: " + fm(grandTotal), { x: 360, y: y, size: 13, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("Generated " + new Date().toLocaleDateString(), { x: 50, y: 50, size: 8, font, color: rgb(0.54, 0.49, 0.44) });
+
+    const bytes = await doc.save();
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Eclipse-Express-${et?.code || "ORD"}-${poNumber || new Date().toISOString().slice(0,10)}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+    fl("Express order PDF downloaded!");
+  };
+
+  const fieldStyle = { width: "100%", padding: "8px 10px", border: `1px solid ${C.bdr}`, borderRadius: 6, fontSize: 12, fontFamily: F.b, background: C.cream, outline: "none" };
+  const labelStyle = { fontSize: 10.5, fontWeight: 600, color: C.stone, fontFamily: F.b, marginBottom: 3, display: "block" };
+
+  return (
+    <div style={{minHeight:"100vh",background:C.warm}}>
+      <div style={{background:C.ink,padding:"12px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{display:"flex",alignItems:"center",gap:12}}>
+          <button onClick={onBack} style={{background:"none",border:"none",cursor:"pointer",color:C.stL,fontSize:18,padding:"0 4px"}}>‹</button>
+          <span style={{fontFamily:F.d,fontSize:mob?15:18,fontWeight:700,color:C.cream}}>Express Parts Order</span>
+          <span style={{fontSize:9,padding:"2px 7px",borderRadius:4,background:"#7c3aed22",color:"#a78bfa",fontWeight:600,border:"1px solid #7c3aed44"}}>EXPRESS</span>
+        </div>
+        <span style={{fontSize:11,color:C.stL,fontFamily:F.b}}>{profile?.business_name || ""}</span>
+      </div>
+
+      {ntf && <div style={{position:"fixed",top:60,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:C.ink,color:C.gold,padding:"8px 18px",borderRadius:8,fontSize:12,fontFamily:F.b,boxShadow:"0 4px 20px rgba(0,0,0,.3)"}}>{ntf}</div>}
+
+      <div style={{maxWidth:720,margin:"0 auto",padding:mob?"14px":"28px 20px"}}>
+        {!expressType ? (
+          <>
+            <div style={{marginBottom:20}}>
+              <h2 style={{fontFamily:F.d,fontSize:20,fontWeight:700,color:C.ink,margin:0}}>Choose Express Order Type</h2>
+              <p style={{fontFamily:F.b,fontSize:12,color:C.stone,margin:"4px 0 0"}}>All express orders ship in 5 working days</p>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr",gap:12}}>
+              {expressTypes.map(et => (
+                <button key={et.id} onClick={() => setExpressType(et.id)} style={{
+                  background:C.paper,border:`1px solid ${C.bdr}`,borderRadius:10,padding:"18px 22px",cursor:"pointer",textAlign:"left",transition:"all 0.15s",
+                  display:"flex",alignItems:"center",gap:14
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#7c3aed"; e.currentTarget.style.boxShadow = "0 4px 16px #7c3aed18"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.boxShadow = "none"; }}
+                >
+                  <span style={{fontSize:28,width:48,height:48,borderRadius:10,background:"#ede9fe",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{et.icon}</span>
+                  <div>
+                    <div style={{fontFamily:F.d,fontSize:15,fontWeight:700,color:C.ink}}>{et.title}</div>
+                    <div style={{fontFamily:F.b,fontSize:11,color:C.stone,marginTop:2,lineHeight:1.4}}>{et.desc}</div>
+                    <div style={{fontSize:10,color:"#7c3aed",fontWeight:600,marginTop:4}}>Ships via: {et.ship}</div>
+                  </div>
+                  <div style={{marginLeft:"auto",fontSize:18,color:C.stL}}>›</div>
+                </button>
+              ))}
+            </div>
+            <div style={{textAlign:"center",marginTop:20}}>
+              <button onClick={onBack} style={{padding:"8px 20px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
+            </div>
+          </>
+        ) : (
+          <>
+            <button onClick={() => setExpressType(null)} style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.acc,fontFamily:F.b,fontWeight:600,marginBottom:14,display:"block"}}>← Back to order types</button>
+
+            <div style={{background:"#ede9fe",border:"1px solid #7c3aed33",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:11.5,color:"#5b21b6",fontFamily:F.b,display:"flex",alignItems:"center",gap:8}}>
+              <span style={{fontSize:16}}>⚡</span>
+              <span><strong>{expressTypes.find(e=>e.id===expressType)?.title}</strong> — Ships in 5 working days via {expressTypes.find(e=>e.id===expressType)?.ship}</span>
+            </div>
+
+            {/* Dealer & Contact */}
+            <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
+              <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Dealer & Shipping</div>
+              <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10}}>
+                <div><label style={labelStyle}>Dealer Name</label><input value={dealerName} onChange={e=>setDealerName(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Dealer Code</label><input value={dealerCode} onChange={e=>setDealerCode(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Contact</label><input value={contactName} onChange={e=>setContactName(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Phone</label><input value={contactPhone} onChange={e=>setContactPhone(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>PO Number</label><input value={poNumber} onChange={e=>setPoNumber(e.target.value)} style={fieldStyle} /></div>
+                <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Ship-To Address</label><input value={shipAddr} onChange={e=>setShipAddr(e.target.value)} placeholder="Street, City, State, ZIP" style={fieldStyle} /></div>
+              </div>
+            </div>
+
+            {/* Order Specs — only for parcel/truck */}
+            {expressType !== "ddf" && (
+              <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
+                <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Order Specifications</div>
+                <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr 1fr",gap:10}}>
+                  <div><label style={labelStyle}>Species</label><input value={sp} onChange={e=>setSp(e.target.value)} style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Door Style</label><input value={door} onChange={e=>setDoor(e.target.value)} style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Drawer Front</label><input value={drwF} onChange={e=>setDrwF(e.target.value)} style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Construction</label><input value={cx} onChange={e=>setCx(e.target.value)} style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Material</label><input value={mat} onChange={e=>setMat(e.target.value)} style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Interior Finish</label><input value={intF} onChange={e=>setIntF(e.target.value)} style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Drawer Box</label><input value={drwBox} onChange={e=>setDrwBox(e.target.value)} style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Color</label><input value={color} onChange={e=>setColor(e.target.value)} style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Glaze</label><input value={glaze} onChange={e=>setGlaze(e.target.value)} placeholder="NONE" style={fieldStyle} /></div>
+                </div>
+              </div>
+            )}
+
+            {/* Items */}
+            <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+                <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink}}>Items</div>
+                <button onClick={addItem} style={{background:"#ede9fe",border:"1px solid #7c3aed44",borderRadius:6,padding:"5px 12px",fontSize:10.5,fontFamily:F.b,fontWeight:600,color:"#7c3aed",cursor:"pointer"}}>+ Add Item</button>
+              </div>
+              {items.map((item, idx) => (
+                <div key={item.id} style={{display:"grid",gridTemplateColumns:mob?"1fr":"50px 100px 1fr 70px 80px 32px",gap:8,marginBottom:8,padding:"8px 10px",background:idx%2===0?C.cream:"transparent",borderRadius:6,alignItems:"end"}}>
+                  <div><label style={labelStyle}>Qty</label><input type="number" min="1" value={item.qty} onChange={e=>updateItem(item.id,"qty",parseInt(e.target.value)||1)} style={{...fieldStyle,textAlign:"center"}} /></div>
+                  <div><label style={labelStyle}>Item #</label><input value={item.sku} onChange={e=>updateItem(item.id,"sku",e.target.value)} placeholder="SKU" style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Description</label><input value={item.desc} onChange={e=>updateItem(item.id,"desc",e.target.value)} placeholder="e.g. W3630 Wall Cabinet" style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Hinge</label><input value={item.hinge} onChange={e=>updateItem(item.id,"hinge",e.target.value)} placeholder="L/R" style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Price</label><input value={item.price} onChange={e=>updateItem(item.id,"price",e.target.value)} placeholder="$0" style={fieldStyle} /></div>
+                  <button onClick={()=>removeItem(item.id)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.red,padding:"4px",alignSelf:"end",marginBottom:2}} title="Remove">&times;</button>
+                </div>
+              ))}
+              {items.length > 0 && (
+                <div style={{textAlign:"right",marginTop:8,fontFamily:F.m,fontSize:13,fontWeight:700,color:C.ink}}>
+                  Total: {fm(items.reduce((s,i)=>(parseFloat(i.price)||0)*i.qty+s,0))}
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:18}}>
+              <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
+              <button onClick={generateExpressPdf} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)"}}>⚡ Generate Express Order PDF</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function App({user, profile, supabase, onLogout, onBack}){
   const[nm,sNm]=useState("Untitled Project"),[pid,sPid]=useState(uid());
   const[sp,sSp]=useState("White Oak"),[cx,sCx]=useState("Standard");
   const[door,sDoor]=useState("HNVR"),[drwF,sDrwF]=useState("DF-HNVR"),[glaze,sGlaze]=useState("NONE");
@@ -8163,6 +8996,7 @@ function App({user, profile, supabase, onLogout}){
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowQuotesList(true)}>📋{!mob&&" Quotes"}</button>
         {versions.length>0&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowHistory(true)}>📜{!mob&&" History"}</button>}
         {profile?.role==="admin"&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold}} onClick={()=>setShowAdminPanel(true)}>⚙{!mob&&" Admin"}</button>}
+        {onBack&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold,fontWeight:600}} onClick={onBack}>🏠{!mob&&" Hub"}</button>}
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={onLogout}>{!mob&&"Sign "}Out</button>
         {mob&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream,fontSize:11,padding:"4px 8px"}} onClick={genOrder}>📋 Order</button>}
         {mob&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream,fontSize:13}} onClick={()=>ssCf(true)}>⚙</button>}
