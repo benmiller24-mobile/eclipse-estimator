@@ -7685,6 +7685,7 @@ function App({user, profile, supabase, onLogout}){
   const[showHistory,setShowHistory]=useState(false);
   const[groupByZone,setGroupByZone]=useState(false);
   const[collapsedZones,setCollapsedZones]=useState(new Set());
+  const[showOrderReview,setShowOrderReview]=useState(false);
 
   useEffect(()=>{const c=()=>sMob(window.innerWidth<=768);c();window.addEventListener("resize",c);return()=>window.removeEventListener("resize",c)},[]);
   const fl=useCallback(m=>{sNtf(m);setTimeout(()=>sNtf(null),2000)},[]);
@@ -7756,7 +7757,7 @@ function App({user, profile, supabase, onLogout}){
 
   const upd=useCallback((id,p)=>sItems(prev=>prev.map(it=>it.id===id?{...it,...p}:it)),[]);
   const rem=useCallback(id=>sItems(prev=>prev.filter(it=>it.id!==id)),[]);
-  const dup=useCallback(id=>{sItems(p=>{const s=p.find(it=>it.id===id);return s?[...p,{...s,id:uid()}]:p});fl("Duplicated")},[fl]);
+  const dup=useCallback(id=>{const newId=uid();sItems(p=>{const s=p.find(it=>it.id===id);return s?[...p,{...s,id:newId}]:p});sModOpen(prev=>{const n=new Set(prev);n.add(newId);return n});fl("Duplicated — edit below ✏️");setTimeout(()=>{const el=document.getElementById("item-"+newId);if(el)el.scrollIntoView({behavior:"smooth",block:"center"})},120)},[fl]);
 
   const comp=useMemo(()=>{
     let tot=0,un=0,ov=0;const zm={},tm={};
@@ -8020,10 +8021,12 @@ function App({user, profile, supabase, onLogout}){
         <div style={{display:"flex",gap:3}}>
           <button className="bt bgl" onClick={()=>ssMg(true)} style={{fontSize:11}}>💰{mob?"":" Margin"}</button>
           <button className="bt bg" onClick={csv} style={{fontSize:11}}>📄{mob?"":" CSV"}</button>
-          <button className="bt bp" onClick={genOrder} style={{fontSize:11}}>📋{mob?"":" Order Form"}</button>
+          <button className="bt bp" onClick={()=>{if(items.length===0){fl("No items to generate order form");return;}setShowOrderReview(true)}} style={{fontSize:11}}>📋{mob?"":" Order Form"}</button>
           {mob&&<button className="bt bg" onClick={newP} style={{fontSize:11}}>+New</button>}
         </div>
       </div>
+
+      {items.length>0&&(()=>{const rm={};items.forEach(it=>{if(!rm[it.z])rm[it.z]={n:0,c:0};rm[it.z].n+=it.q;const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);rm[it.z].c+=total+mcR*(1+plyPct/100)*it.q});const usedZones=ZN.filter(z=>rm[z.id]);const maxN=Math.max(...usedZones.map(z=>rm[z.id].n),1);return(<div style={{display:"flex",gap:6,marginBottom:8,overflowX:"auto",paddingBottom:2}}>{usedZones.map(z=>{const d=rm[z.id];const pct=Math.max(8,Math.round(d.n/maxN*100));return(<div key={z.id} style={{flex:"1 0 0",minWidth:mob?80:100,background:C.warm,borderRadius:8,padding:"8px 10px",border:`1px solid ${C.bdr}`}}><div style={{display:"flex",alignItems:"center",gap:4,marginBottom:4}}><span style={{fontSize:14}}>{z.i}</span><span style={{fontSize:10.5,fontWeight:600,fontFamily:F.b,color:C.ink}}>{z.l}</span></div><div style={{background:C.bdr,borderRadius:3,height:5,overflow:"hidden"}}><div style={{width:pct+"%",height:"100%",background:C.acc,borderRadius:3,transition:"width .3s"}}/></div><div style={{marginTop:3,fontSize:9.5,color:C.stone,fontFamily:F.m}}>{d.n} unit{d.n!==1?"s":""} · {fm(d.c)}</div></div>)})}</div>)})()}
 
       {items.length===0?(<div className="c" style={{padding:mob?28:44,textAlign:"center"}}>
         <div style={{fontSize:28,marginBottom:8}}>◻</div>
@@ -8046,7 +8049,7 @@ upd(item.id,{mods:newMods});
           if(isREF(item.s)){
             const panelCount=((item.sqH||0)<=47.9375)?1:((item.sqH||0)<=81.9375)?2:3;
             const showRefDwg=modOpen.has("ref-dwg-"+item.id);
-            return(<div key={item.id} className="ic" style={{borderLeft:"4px solid #059669"}}>
+            return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #059669"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                 <div>
                   <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#059669"}}>Custom Refrigerator Panel</span>
@@ -8137,7 +8140,7 @@ upd(item.id,{mods:newMods});
           }
           /* ─── DISHWASHER PANEL — special inline editor ─── */
           if(isDP(item.s)){
-            return(<div key={item.id} className="ic" style={{borderLeft:"4px solid #7c3aed"}}>
+            return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #7c3aed"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                 <div>
                   <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#7c3aed"}}>Dishwasher Panel</span>
@@ -8192,7 +8195,7 @@ upd(item.id,{mods:newMods});
           }
           /* ─── BEVERAGE CENTER FRONT w/ ALUMINUM TRIM — special inline editor ─── */
           if(isBCFT(item.s)){
-            return(<div key={item.id} className="ic" style={{borderLeft:"4px solid #b45309"}}>
+            return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #b45309"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                 <div>
                   <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#b45309"}}>Bev Center Front</span>
@@ -8249,7 +8252,7 @@ upd(item.id,{mods:newMods});
           /* ─── COLUMN OVERLAY — special inline editor ─── */
           if(isCO(item.s)){
             const showCoDwg=modOpen.has("co-dwg-"+item.id);
-            return(<div key={item.id} className="ic" style={{borderLeft:"4px solid #6d28d9"}}>
+            return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #6d28d9"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                 <div>
                   <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#6d28d9"}}>Column Overlay</span>
@@ -8301,7 +8304,7 @@ upd(item.id,{mods:newMods});
           }
           /* ─── BEVERAGE CENTER FRONT (BCF) — special inline editor ─── */
           if(isBCF(item.s)){
-            return(<div key={item.id} className="ic" style={{borderLeft:"4px solid #0d9488"}}>
+            return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #0d9488"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                 <div>
                   <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#0d9488"}}>Beverage Center Front</span>
@@ -8356,7 +8359,7 @@ upd(item.id,{mods:newMods});
           }
           /* ─── CUSTOM QUOTE ITEM — special inline editor ─── */
           if(isCustom(item.s)){
-            return(<div key={item.id} className="ic" style={{borderLeft:"4px solid #0ea5e9"}}>
+            return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #0ea5e9"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
                 <div>
                   <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#0369a1"}}>Custom Quote</span>
@@ -8409,7 +8412,7 @@ upd(item.id,{mods:newMods});
               </div>
             </div>);
           }
-          return(<div key={item.id} className={`ic${ov?" ov":""}`}>
+          return(<div key={item.id} id={"item-"+item.id} className={`ic${ov?" ov":""}`}>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
               <div>
                 <span className="mn" style={{fontWeight:700,fontSize:12.5}}>{SKU_LABELS[item.s]||item.s}</span>
@@ -8421,6 +8424,7 @@ upd(item.id,{mods:newMods});
                 {item.fe&&intF!=="LINEN"&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe==="L"?"Left":"Right"}</span>}
                 {item.rbs&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>RBS +$87</span>}
                 {activeMods.length>0&&activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;const modAmt=m.input==="mxdf"?m.price*mxdfCount:m.input==="side"?m.price*(qty==="B"?2:1):m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?m.price:m.price*(+qty||1);return <span key={code} className="pl" style={{marginLeft:3,background:"#7c3aed18",color:"#6d28d9"}}>{m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"L":"R"})`:typeof qty==="number"&&qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:modAmt>0?`+${fm(modAmt)}`:""}</span>})}
+                {(()=>{const w=[];if(!isMould&&!itemSQ&&!isCustom(item.s)){if(item.dc>0&&!item.hng)w.push("No hinge");if((item.t==="B"||item.t==="T"||item.t==="V")&&!item.fe)w.push("No fin. end");}if(itemSQ&&(item.sqin||0)===0)w.push("0 sq.in");return w.length>0?<div style={{display:"flex",gap:3,marginTop:2,flexWrap:"wrap"}}>{w.map(x=><span key={x} style={{fontSize:9,padding:"1px 6px",borderRadius:3,background:"#fef3c7",color:"#92400e",fontWeight:600,border:"1px solid #f59e0b44"}}>⚠ {x}</span>)}</div>:null})()}
                 <div style={{fontSize:10.5,color:C.stone,marginTop:1}}>{item.r} · {SEC[item.r.charAt(0)]||""}{isMould?` · $${item.p}/LF`:""}{!isMould&&!itemSQ&&modCost>0?` · Base ${fm(u-doorChg-rbsChg)} + Mods ${fm(modCost)} = ${fm(u+modCost)}/ea`:""}</div>
               </div>
               <div style={{display:"flex",gap:4,alignItems:"center"}}>
@@ -8905,6 +8909,45 @@ upd(item.id,{mods:newMods});
         }
       </div>
     </div>}
+
+    {showOrderReview&&<><div className="sbg" onClick={()=>setShowOrderReview(false)} style={{zIndex:1100}}/><div style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:1101,width:mob?"95vw":"600px",maxHeight:"80vh",background:"#fff",borderRadius:12,boxShadow:"0 20px 60px rgba(0,0,0,.35)",overflow:"hidden",display:"flex",flexDirection:"column"}}>
+      <div style={{background:C.ink,padding:"14px 18px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <span style={{fontFamily:F.d,fontSize:16,fontWeight:700,color:C.cream}}>Review Order Before Generating</span>
+        <button onClick={()=>setShowOrderReview(false)} style={{background:"none",border:"none",color:C.stL,cursor:"pointer",fontSize:18}}>✕</button>
+      </div>
+      <div style={{overflowY:"auto",padding:"14px 18px",flex:1}}>
+        {(()=>{const rz={};items.forEach(it=>{const z=it.z||"other";if(!rz[z])rz[z]=[];rz[z].push(it)});const ze=Object.entries(rz);let warnings=0;
+        return(<div>
+          <div style={{fontSize:11,color:C.stone,marginBottom:10,fontFamily:F.b}}>Project: <strong style={{color:C.ink}}>{nm||"Untitled"}</strong> · {sp} · {door} · {items.length} item{items.length!==1?"s":""} · {comp.zc} room{comp.zc!==1?"s":""}</div>
+          {ze.map(([zid,zItems])=>{const zInfo=ZN.find(z=>z.id===zid)||{l:zid,i:"📦"};let zt=0;zItems.forEach(it=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);zt+=total+mcR*(1+plyPct/100)*it.q});
+          return(<div key={zid} style={{marginBottom:10}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 10px",background:C.warm,borderRadius:6,marginBottom:4}}>
+              <span style={{fontWeight:600,fontSize:12}}>{zInfo.i} {zInfo.l}</span>
+              <span style={{fontSize:11,fontFamily:F.m,color:C.stone}}>{zItems.reduce((s,i)=>s+i.q,0)} units · {fm(zt)}</span>
+            </div>
+            {zItems.map((it,idx)=>{const{u,t:total,stockBase,plyPct,itemSQ}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);const gt=total+mcR*(1+plyPct/100)*it.q;const iM=it.t==="M";
+              const iw=[];if(!iM&&!itemSQ&&!isCustom(it.s)){if(it.dc>0&&!it.hng){iw.push("No hinge");warnings++;}if((it.t==="B"||it.t==="T"||it.t==="V")&&!it.fe){iw.push("No fin. end");warnings++;}}if(itemSQ&&(it.sqin||0)===0){iw.push("0 sq.in");warnings++;}
+              return(<div key={it.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 10px",fontSize:11,borderBottom:`1px solid ${C.bdr}`,background:idx%2===0?"transparent":"#fafaf8"}}>
+                <div style={{display:"flex",alignItems:"center",gap:6,flex:1}}>
+                  <span style={{fontWeight:600,fontFamily:F.m,minWidth:32}}>{it.q}×</span>
+                  <span style={{fontWeight:500}}>{SKU_LABELS[it.s]||it.s}{it.ds&&it.ds!==door?` (${it.ds})`:""}{iM?` ${it.len}ft`:""}{itemSQ?` ${it.sqin}sq.in`:""}</span>
+                  {iw.map(w=><span key={w} style={{fontSize:8.5,padding:"1px 5px",borderRadius:3,background:"#fef3c7",color:"#92400e",fontWeight:600,border:"1px solid #f59e0b44",marginLeft:3}}>⚠ {w}</span>)}
+                </div>
+                <span style={{fontFamily:F.m,fontWeight:600,fontSize:11,color:C.ink}}>{fm(gt)}</span>
+              </div>)})}
+          </div>)})}
+          <div style={{background:C.ink,borderRadius:8,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:6}}>
+            <span style={{fontFamily:F.d,fontWeight:700,fontSize:14,color:C.cream}}>List Price Total</span>
+            <span style={{fontFamily:F.m,fontWeight:700,fontSize:18,color:C.gold}}>{fm(comp.tot)}</span>
+          </div>
+          {warnings>0&&<div style={{marginTop:8,padding:"8px 12px",background:"#fef3c7",borderRadius:6,border:"1px solid #f59e0b44",fontSize:11,color:"#92400e"}}>⚠ {warnings} warning{warnings!==1?"s":""} found — items may be missing hinge, finished end, or dimensions. You can still generate the order form.</div>}
+        </div>)})()}
+      </div>
+      <div style={{padding:"12px 18px",borderTop:`1px solid ${C.bdr}`,display:"flex",justifyContent:"space-between",gap:8}}>
+        <button onClick={()=>setShowOrderReview(false)} className="bt bg" style={{fontSize:12,flex:1}}>Cancel</button>
+        <button onClick={()=>{setShowOrderReview(false);genOrder()}} className="bt bp" style={{fontSize:12,flex:2,fontWeight:700}}>📋 Generate Order Form PDF</button>
+      </div>
+    </div></>}
 
   </div>);
 }
