@@ -8805,7 +8805,11 @@ upd(item.id,{mods:newMods});
                   </tr></thead>
                   <tbody>
                     {zItems.map((item,idx)=>{const{u,t,itemSQ,stockBase,plyPct}=cp(item,sp,cx,door,drwF,drwBox);const mcR=calcModCost(item,item.mods,stockBase);const total=t+mcR*(1+plyPct/100)*item.q;const iM=item.t==="M";
-                      const desc=`${item.s}${item.ds&&item.ds!==door?` (${item.ds})`:""}`+(iM?` ${item.len}ft`:"")+(itemSQ?` ${item.sqin}sq.in`:"")+(item.rbs?" +RBS":"");
+                      let desc=isCustom(item.s)?`CUSTOM: ${(item.cqDesc||"Custom Item").slice(0,60)}${item.cqNum?` [${item.cqNum}]`:""}`:isREF(item.s)?`REF PANEL ${item.sqW||0}"×${item.sqH||0}" ${(item.sqin||0)}sq.in${item.refIce?" +ICE CUTOUT":""}`:isDP(item.s)?`DW PANEL ${item.sqW||0}"×${item.sqH||0}"`:isBCFT(item.s)?`${item.s} (${BCFT_LABELS[item.s]||""}) ${item.sqW||0}"×${item.sqH||0}"`:isBCF(item.s)?`BCF ${item.sqW||0}"×${item.sqH||0}"`:isCO(item.s)?`${item.s} (${CO_LABELS[item.s]||""}) ${item.sqH||0}"`:(`${item.s}${item.ds&&item.ds!==door?` (${item.ds})`:""}`+(iM?` ${item.len}ft`:"")+(itemSQ?` ${item.sqin}sq.in`:"")+(item.rbs?" +RBS":""));
+                      const mp=[];if(item.mods){Object.entries(item.mods).forEach(([code,v])=>{if(!v&&v!==0)return;const m=CABINET_MODS.find(x=>x.code===code);if(!m)return;if(m.input==="mxdf"){const ct=Array.isArray(v)?v.filter(p=>p.on).length:0;if(ct>0)mp.push(`${m.label} x${ct}`);}else if(m.input==="side"&&typeof v==="string"&&v)mp.push(`${m.label} (${v==="B"?"Both":v})`);else if(m.input==="select"&&v)mp.push(`${m.label} (${v})`);else if((m.input==="check"||m.input==="width"||m.input==="dims")&&v)mp.push(m.label);else if(typeof v==="number"&&v>0)mp.push(`${m.label}${v>1?` x${v}`:""}`);});}
+                      if(item.rot&&item.rotQ>0)mp.push(`ROT ${item.rot} x${item.rotQ}${item.rotFeg?" +FEG":""}`);
+                      if(item.rot2&&item.rot2Q>0)mp.push(`FM-ROT ${item.rot2} x${item.rot2Q}${item.rot2Feg?" +FEG":""}`);
+                      if(mp.length>0)desc+=" | "+mp.join(", ");
                       const feLabel=item.fe==="B"?"Both":item.fe==="L"?"L":item.fe==="R"?"R":"";
                       return(<tr key={item.id} style={{borderBottom:`1px solid ${C.bdr}`,background:idx%2===0?"transparent":C.cream}}>
                         <td style={{padding:"5px 8px",fontFamily:F.m,fontSize:11,color:C.stone}}>{idx+1}</td>
