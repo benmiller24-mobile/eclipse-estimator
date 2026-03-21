@@ -8611,8 +8611,9 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   const itemTotals = useMemo(() => {
     return items.map(item => {
       if (!item.s) return { u: 0, total: 0, modCost: 0 };
-      // For DDF items, compute sqin from width * height
-      const computedItem = (item.r === "C3") ? { ...item, sqin: (item.sqW || 0) * (item.sqH || 0) } : item;
+      // For DDF items, compute sqin from width * height and ensure per-sqin rate from DDF_TYPES
+      const ddfT = (item.r === "C3") ? DDF_TYPES.find(d => d.v === item.s) : null;
+      const computedItem = (item.r === "C3") ? { ...item, sqin: (item.sqW || 0) * (item.sqH || 0), p: ddfT?.price || item.p } : item;
       const { u, t: total, stockBase, plyPct } = cp(computedItem, sp, cx, door, drwF, drwBox);
       const mcRaw = calcModCost(computedItem, computedItem.mods, stockBase);
       const modCost = mcRaw * (1 + plyPct / 100);
@@ -8676,7 +8677,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
     page.drawText("UNIT", { x: 440, y: y + 7, size: 8, font: fontB, color: rgb(0.96, 0.95, 0.93) });
     page.drawText("TOTAL", { x: 500, y: y + 7, size: 8, font: fontB, color: rgb(0.96, 0.95, 0.93) });
     y -= 18;
-    const validItems = items.filter(i => i.s).map(i => i.r === "C3" ? { ...i, sqin: (i.sqW || 0) * (i.sqH || 0) } : i);
+    const validItems = items.filter(i => i.s).map(i => { if (i.r === "C3") { const dt = DDF_TYPES.find(d => d.v === i.s); return { ...i, sqin: (i.sqW || 0) * (i.sqH || 0), p: dt?.price || i.p }; } return i; });
     validItems.forEach((item, idx) => {
       if (y < 80) { doc.addPage([612, 792]); y = 740; }
       const t = itemTotals[items.indexOf(item)] || {};
@@ -8808,11 +8809,12 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
               {expressType==="ddf" ? (
                 /* ═══ DDF-SPECIFIC ITEM LIST ═══ */
                 items.map((item, idx) => {
+                  const ddfType = DDF_TYPES.find(d => d.v === item.s);
+                  const sqinRate = ddfType?.price || item.p || 0;
                   const sqin = (item.sqW || 0) * (item.sqH || 0);
-                  const ddfItem = { ...item, sqin };
+                  const ddfItem = { ...item, sqin, p: sqinRate };
                   const { u, stockBase, doorChg, dfChg } = cp(ddfItem, sp, cx, door, drwF, drwBox);
                   const lineTotal = u * item.q;
-                  const ddfType = DDF_TYPES.find(d => d.v === item.s);
 
                   return (
                     <div key={item.id} style={{padding:"14px 16px",background:idx%2===0?C.cream:"#fff",borderRadius:10,marginBottom:8,border:`1px solid ${C.acc}33`,transition:"all .15s"}}>
@@ -8878,7 +8880,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                         <div style={{fontSize:10,color:C.stone,fontFamily:F.b}}>
                           <span style={{fontWeight:600,color:C.ink}}>{ddfType?.l||item.s}</span>
                           {item.cabinetRef ? ` for ${item.cabinetRef}` : ""}
-                          {sqin > 0 ? ` · ${item.sqW}" × ${item.sqH}" = ${sqin.toLocaleString()} sq.in · $${item.p}/sq.in` + (doorChg > 0 ? ` + $${doorChg} door grp` : "") + (dfChg > 0 ? ` + $${dfChg} DF grp` : "") : " · Enter width and height"}
+                          {sqin > 0 ? ` · ${item.sqW}" × ${item.sqH}" = ${sqin.toLocaleString()} sq.in · $${sqinRate}/sq.in` + (doorChg > 0 ? ` + $${doorChg} door grp` : "") + (dfChg > 0 ? ` + $${dfChg} DF grp` : "") : " · Enter width and height"}
                           {item.hng ? ` · ${item.hng} hinge` : ""}
                         </div>
                         <div style={{fontFamily:F.m,fontWeight:700,fontSize:14,color:sqin>0?C.ink:C.stone}}>
