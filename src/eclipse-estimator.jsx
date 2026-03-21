@@ -6647,7 +6647,7 @@ const calcModCost=(item,mods,baseUnitPrice)=>{
     if(m.pct){cost+=baseUnitPrice*(m.pct/100);}
     else if(m.input==="side"){const sides=v==="B"?2:1;cost+=m.price*sides;}
     else if(m.input==="mxdf"){if(Array.isArray(v))cost+=m.price*v.filter(p=>p.on).length;}
-    else{cost+=m.price*(m.input==="check"||m.input==="dims"||m.input==="width"?1:v);}
+    else{cost+=m.price*(m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?1:+v||0);}
   });}
   if(item.rot&&item.rotQ>0){const ro=ROT_OPTIONS.find(r=>r.v===item.rot);if(ro){cost+=ro.price*item.rotQ;if(item.rotFeg)cost+=72*item.rotQ;}}
   if(item.rot2&&item.rot2Q>0){const ro2=ROT_OPTIONS.find(r=>r.v===item.rot2);if(ro2){cost+=ro2.price*item.rot2Q;if(item.rot2Feg)cost+=72*item.rot2Q;}}
