@@ -7700,24 +7700,13 @@ function App({user, profile, supabase, onLogout}){
     return()=>clearTimeout(t);
   },[nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,currentQuoteId,supabase,user,versions]);
 
-  // ── Load most recent quote on mount ──
+  // ── Start fresh new order on login — user loads saved orders manually ──
   useEffect(()=>{
     if(!supabase||!user)return;
-    (async()=>{
-      try{
-        const{data}=await supabase.from("quotes").select("id,data,name").eq("user_id",user.id).order("updated_at",{ascending:false}).limit(1).single();
-        if(data&&data.data){
-          const d=data.data;
-          setCurrentQuoteId(data.id);
-          setVersions(d.versions||[]);
-          if(d.nm)sNm(d.nm);if(d.pid)sPid(d.pid);if(d.sp)sSp(d.sp);if(d.cx)sCx(d.cx);
-          if(d.door)sDoor(d.door);if(d.drwF)sDrwF(d.drwF);if(d.glaze)sGlaze(d.glaze);
-          if(d.highlight)sHL(d.highlight);if(d.charT1)sCT1(d.charT1);if(d.charT2)sCT2(d.charT2);
-          if(d.color!==undefined)sColor(d.color);if(d.mat)sMat(d.mat);if(d.intF)sIntF(d.intF);
-          if(d.drwBox)sDrwBox(d.drwBox);if(d.items)sItems(d.items);
-        }
-      }catch(e){/* no quotes yet, that's fine */}
-    })();
+    setCurrentQuoteId(null);setVersions([]);sPid(uid());sNm("Untitled Project");
+    sSp("White Oak");sCx("Standard");sDoor("HNVR");sDrwF("DF-HNVR");
+    sGlaze("NONE");sHL("NONE");sCT1("NONE");sCT2("NONE");
+    sMat("PB");sIntF("STD-MAPL");sDrwBox("5/8-STD");sItems([]);sColor("");
   },[supabase,user]);
 
   // ── Load a specific quote from the quotes list ──
