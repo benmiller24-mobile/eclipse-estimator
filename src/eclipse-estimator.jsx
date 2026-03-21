@@ -8498,12 +8498,13 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 }
 
 // ═══════════════════════════════════════════════════
-// ██ EXPRESS PARTS ORDER — Parcel/Truck/DDF (with pricing)
+// ██ EXPRESS PARTS ORDER — Parcel/Truck/DDF (full pricing + mods)
 // ═══════════════════════════════════════════════════
 function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   const [mob, setMob] = useState(false);
   const [ntf, setNtf] = useState(null);
   const fl = useCallback(m => { setNtf(m); setTimeout(() => setNtf(null), 2200); }, []);
+  const [modOpen, sModOpen] = useState(() => new Set());
 
   useEffect(() => {
     const c = () => setMob(window.innerWidth <= 768);
@@ -8526,25 +8527,34 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   const [cx, setCx] = useState("Standard");
   const [drwBox, setDrwBox] = useState("5/8-STD");
 
-  const [items, setItems] = useState([{ id: uid(), sku: "", desc: "", qty: 1, hinge: "", unitPrice: 0 }]);
+  // Items are now full item objects like the estimator
+  const [items, setItems] = useState([]);
 
-  const addItem = () => setItems(p => [...p, { id: uid(), sku: "", desc: "", qty: 1, hinge: "", unitPrice: 0 }]);
+  const addBlankItem = () => setItems(p => [...p, { id: uid(), s: "", t: "", r: "", p: 0, q: 1, len: 0, hng: "", fe: "", ds: "", dc: 0, drc: 0, brot: 0, sqin: 0, sqW: 0, sqH: 0, rbs: false, mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, so: null, ovenSpec: {} }]);
   const removeItem = (id) => setItems(p => p.filter(i => i.id !== id));
-  const updateItem = (id, field, val) => setItems(p => p.map(i => i.id === id ? { ...i, [field]: val } : i));
+  const updItem = (id, changes) => setItems(p => p.map(i => i.id === id ? { ...i, ...changes } : i));
 
-  // Recalc prices when specs change
-  useEffect(() => {
-    setItems(prev => prev.map(item => {
-      if (!item.sku) return item;
-      const cat = CATALOG.find(c => c.s === item.sku);
-      if (!cat) return item;
-      const fakeItem = { s: cat.s, t: cat.t, r: cat.r, p: cat.p, q: 1, len: cat.t === "M" ? 10 : 0, sqin: 0, sqW: 0, sqH: 0, dc: guessDoors(cat.s, cat.t), drc: guessDrawers(cat.s, cat.t), ds: door, dfs: drwF, so: null, hng: "", fe: "", mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, brot: guessBuiltInROT(cat.s), rbs: false };
-      const { u } = cp(fakeItem, sp, cx, door, drwF, drwBox);
-      return { ...item, unitPrice: u };
+  // When a SKU is selected from search, create a proper item
+  const selectSku = (itemId, cat) => {
+    setItems(p => p.map(i => {
+      if (i.id !== itemId) return i;
+      return { ...i, s: cat.s, t: cat.t, r: cat.r, p: cat.p, dc: guessDoors(cat.s, cat.t), drc: guessDrawers(cat.s, cat.t), brot: guessBuiltInROT(cat.s), len: cat.t === "M" ? 10 : 0, mods: {} };
     }));
-  }, [sp, cx, door, drwF, drwBox]);
+  };
 
-  const grandTotal = items.reduce((s, i) => s + (i.unitPrice || 0) * i.qty, 0);
+  // Compute totals
+  const itemTotals = useMemo(() => {
+    return items.map(item => {
+      if (!item.s) return { u: 0, total: 0, modCost: 0 };
+      const { u, t: total, stockBase, plyPct } = cp(item, sp, cx, door, drwF, drwBox);
+      const mcRaw = calcModCost(item, item.mods, stockBase);
+      const modCost = mcRaw * (1 + plyPct / 100);
+      const grandTotal = total + modCost * item.q;
+      return { u, total: grandTotal, modCost, stockBase, plyPct };
+    });
+  }, [items, sp, cx, door, drwF, drwBox]);
+
+  const grandTotal = itemTotals.reduce((s, t) => s + t.total, 0);
 
   const expressTypes = [
     { id: "ddf", icon: "🚪", title: "Door & Drawer Fronts Only", code: "ECL-EXP-DDF", desc: "Express order for doors and drawer fronts only — ships in 5 working days", ship: "UPS/FedEx" },
@@ -8552,9 +8562,20 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
     { id: "truck", icon: "🚛", title: "Express Truck", code: "ECL-EXP-T", desc: "Larger express orders shipped via common carrier (freight collect) in 5 working days", ship: "Common Carrier (Freight Collect)" },
   ];
 
+  const setMod = (itemId, code, val) => {
+    setItems(p => p.map(i => {
+      if (i.id !== itemId) return i;
+      const newMods = { ...(i.mods || {}) };
+      const modDef = CABINET_MODS.find(m => m.code === code);
+      if (modDef?.excGroup && val) { CABINET_MODS.filter(m => m.excGroup === modDef.excGroup && m.code !== code).forEach(m => { delete newMods[m.code]; }); }
+      if (val) newMods[code] = val; else delete newMods[code];
+      return { ...i, mods: newMods };
+    }));
+  };
+
   const generateExpressPdf = async () => {
     if (!expressType) return;
-    if (items.every(i => !i.sku && !i.desc)) { fl("Please add at least one item"); return; }
+    if (items.length === 0 || items.every(i => !i.s)) { fl("Please add at least one item"); return; }
     const { PDFDocument, rgb, StandardFonts } = await import("pdf-lib");
     const doc = await PDFDocument.create();
     const font = await doc.embedFont(StandardFonts.Helvetica);
@@ -8579,25 +8600,39 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
     ln("Drawer Front: " + drwF + "  |  Drawer Box: " + drwBox, 50);
     y -= 6;
     page.drawRectangle({ x: 50, y: y + 4, width: 512, height: 18, color: rgb(0.1, 0.09, 0.08) });
-    page.drawText("QTY", { x: 55, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
-    page.drawText("SKU", { x: 85, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
-    page.drawText("DESCRIPTION", { x: 170, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
-    page.drawText("HINGE", { x: 380, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
-    page.drawText("UNIT", { x: 430, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
-    page.drawText("TOTAL", { x: 490, y: y + 7, size: 9, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("QTY", { x: 55, y: y + 7, size: 8, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("SKU", { x: 80, y: y + 7, size: 8, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("DESCRIPTION", { x: 155, y: y + 7, size: 8, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("HNG", { x: 310, y: y + 7, size: 8, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("FE", { x: 340, y: y + 7, size: 8, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("MODS", { x: 370, y: y + 7, size: 8, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("UNIT", { x: 440, y: y + 7, size: 8, font: fontB, color: rgb(0.96, 0.95, 0.93) });
+    page.drawText("TOTAL", { x: 500, y: y + 7, size: 8, font: fontB, color: rgb(0.96, 0.95, 0.93) });
     y -= 18;
-    const validItems = items.filter(i => i.sku || i.desc);
+    const validItems = items.filter(i => i.s);
     validItems.forEach((item, idx) => {
       if (y < 80) { doc.addPage([612, 792]); y = 740; }
+      const t = itemTotals[items.indexOf(item)] || {};
       const bg = idx % 2 === 0 ? rgb(0.98, 0.97, 0.96) : rgb(1, 1, 1);
       page.drawRectangle({ x: 50, y: y - 2, width: 512, height: 16, color: bg });
-      page.drawText(String(item.qty), { x: 55, y: y + 1, size: 10, font });
-      page.drawText((item.sku || "").slice(0, 12), { x: 85, y: y + 1, size: 10, font });
-      page.drawText((SKU_LABELS[item.sku] || item.desc || "").slice(0, 28), { x: 170, y: y + 1, size: 10, font });
-      page.drawText((item.hinge || ""), { x: 385, y: y + 1, size: 10, font });
-      page.drawText(item.unitPrice ? fm(item.unitPrice) : "", { x: 430, y: y + 1, size: 10, font });
-      page.drawText(item.unitPrice ? fm(item.unitPrice * item.qty) : "", { x: 490, y: y + 1, size: 10, font });
+      page.drawText(String(item.q), { x: 55, y: y + 1, size: 9, font });
+      page.drawText((item.s || "").slice(0, 12), { x: 80, y: y + 1, size: 9, font });
+      page.drawText((SKU_LABELS[item.s] || item.s || "").slice(0, 22), { x: 155, y: y + 1, size: 9, font });
+      page.drawText((item.hng || ""), { x: 312, y: y + 1, size: 9, font });
+      page.drawText((item.fe || ""), { x: 342, y: y + 1, size: 9, font });
+      const mc = Object.keys(item.mods || {}).length;
+      if (mc > 0) page.drawText(mc + " mod" + (mc > 1 ? "s" : ""), { x: 370, y: y + 1, size: 8, font });
+      page.drawText(t.u ? fm(t.u + (t.modCost || 0)) : "", { x: 440, y: y + 1, size: 9, font });
+      page.drawText(t.total ? fm(t.total) : "", { x: 500, y: y + 1, size: 9, font });
       y -= 16;
+      // List active mods
+      const activeMods = item.mods ? Object.entries(item.mods).filter(([, v]) => Array.isArray(v) ? v.some(p => p.on) : v > 0) : [];
+      if (activeMods.length > 0) {
+        activeMods.forEach(([code]) => {
+          const m = CABINET_MODS.find(x => x.code === code);
+          if (m && y > 60) { page.drawText("  ⚙ " + m.label, { x: 155, y: y + 1, size: 7, font, color: rgb(0.43, 0.16, 0.84) }); y -= 12; }
+        });
+      }
     });
     y -= 10;
     page.drawRectangle({ x: 350, y: y - 4, width: 212, height: 22, color: rgb(0.1, 0.09, 0.08) });
@@ -8626,7 +8661,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
         <span style={{fontSize:11,color:C.stL,fontFamily:F.b}}>{profile?.business_name || ""}</span>
       </div>
       {ntf && <div style={{position:"fixed",top:60,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:C.ink,color:C.gold,padding:"8px 18px",borderRadius:8,fontSize:12,fontFamily:F.b,boxShadow:"0 4px 20px rgba(0,0,0,.3)"}}>{ntf}</div>}
-      <div style={{maxWidth:720,margin:"0 auto",padding:mob?"14px":"28px 20px"}}>
+      <div style={{maxWidth:760,margin:"0 auto",padding:mob?"14px":"28px 20px"}}>
         {!expressType ? (
           <>
             <div style={{marginBottom:20}}>
@@ -8635,7 +8670,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
             </div>
             <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr",gap:12}}>
               {expressTypes.map(et => (
-                <button key={et.id} onClick={() => setExpressType(et.id)} style={{
+                <button key={et.id} onClick={() => { setExpressType(et.id); if(items.length===0) addBlankItem(); }} style={{
                   background:C.paper,border:`1px solid ${C.bdr}`,borderRadius:10,padding:"18px 22px",cursor:"pointer",textAlign:"left",transition:"all 0.15s",
                   display:"flex",alignItems:"center",gap:14
                 }}
@@ -8688,27 +8723,118 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
             <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
                 <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink}}>Items</div>
-                <button onClick={addItem} style={{background:"#ede9fe",border:"1px solid #7c3aed44",borderRadius:6,padding:"5px 12px",fontSize:10.5,fontFamily:F.b,fontWeight:600,color:"#7c3aed",cursor:"pointer"}}>+ Add Item</button>
+                <button onClick={addBlankItem} style={{background:"#ede9fe",border:"1px solid #7c3aed44",borderRadius:6,padding:"5px 12px",fontSize:10.5,fontFamily:F.b,fontWeight:600,color:"#7c3aed",cursor:"pointer"}}>+ Add Item</button>
               </div>
-              <div style={{fontSize:10,color:C.stone,fontFamily:F.b,marginBottom:10}}>Search by SKU to auto-price from the Eclipse catalog.</div>
-              {items.map((item, idx) => (
-                <div key={item.id} style={{padding:"10px 12px",background:idx%2===0?C.cream:"transparent",borderRadius:8,marginBottom:6,border:`1px solid ${C.bdr}44`}}>
-                  <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"50px 1fr 70px 32px",gap:8,alignItems:"end"}}>
-                    <div><label style={labelStyle}>Qty</label><input type="number" min="1" value={item.qty} onChange={e=>updateItem(item.id,"qty",parseInt(e.target.value)||1)} style={{...fieldStyle,textAlign:"center"}} /></div>
-                    <div><label style={labelStyle}>SKU (search catalog)</label><SkuSearchInput value={item.sku} sp={sp} cx={cx} door={door} drwF={drwF} drwBox={drwBox} placeholder="Type to search SKU..." onSelect={(cat, unitP) => { setItems(p => p.map(i => i.id === item.id ? { ...i, sku: cat.s, desc: SKU_LABELS[cat.s] || cat.s, unitPrice: unitP } : i)); }} /></div>
-                    <div><label style={labelStyle}>Hinge</label>
-                      <select value={item.hinge} onChange={e=>updateItem(item.id,"hinge",e.target.value)} style={{...fieldStyle,cursor:"pointer",appearance:"auto"}}>
-                        <option value="">—</option><option value="L">Left</option><option value="R">Right</option><option value="Pair">Pair</option>
-                      </select>
+              <div style={{fontSize:10,color:C.stone,fontFamily:F.b,marginBottom:10}}>Search by SKU to auto-price. Set hinge, finished ends, and modifications per item.</div>
+
+              {items.map((item, idx) => {
+                const t = itemTotals[idx] || {};
+                const isMould = item.t === "M";
+                const itemSQ = item.s ? isSqIn(item.s, item.r) : false;
+                const applicableMods = item.s ? getApplicableMods(item) : [];
+                const modsExpanded = modOpen.has(item.id);
+                const activeMods = item.mods ? Object.entries(item.mods).filter(([, v]) => Array.isArray(v) ? v.some(p => p.on) : v > 0) : [];
+
+                return (
+                  <div key={item.id} style={{padding:"12px 14px",background:idx%2===0?C.cream:"#fff",borderRadius:10,marginBottom:8,border:`1px solid ${item.s?C.acc+"33":C.bdr}`,transition:"all .15s"}}>
+                    {/* Row 1: SKU search + Qty + Delete */}
+                    <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"60px 1fr 32px",gap:8,alignItems:"end",marginBottom:item.s?8:0}}>
+                      <div><label style={labelStyle}>Qty</label><input type="number" min="1" value={item.q} onChange={e=>updItem(item.id,{q:Math.max(1,parseInt(e.target.value)||1)})} style={{...fieldStyle,textAlign:"center"}} /></div>
+                      <div><label style={labelStyle}>SKU (search catalog)</label><SkuSearchInput value={item.s} sp={sp} cx={cx} door={door} drwF={drwF} drwBox={drwBox} placeholder="Type to search SKU..." onSelect={(cat) => selectSku(item.id, cat)} /></div>
+                      <button onClick={()=>removeItem(item.id)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.red,padding:"4px",alignSelf:"end",marginBottom:2}}>&times;</button>
                     </div>
-                    <button onClick={()=>removeItem(item.id)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.red,padding:"4px",alignSelf:"end",marginBottom:2}}>&times;</button>
+
+                    {/* Row 2: Item details (only shown after SKU selected) */}
+                    {item.s && !isMould && !itemSQ && (<>
+                      <div style={{display:"grid",gridTemplateColumns:mob?"1fr 1fr":"80px 80px 80px 80px 1fr",gap:6,marginBottom:6}}>
+                        <div><label style={labelStyle}>Hinge</label>
+                          <select value={item.hng||""} onChange={e=>updItem(item.id,{hng:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto",fontSize:11}}>
+                            <option value="">—</option><option value="L">Left</option><option value="R">Right</option><option value="Pair">Pair</option>
+                          </select>
+                        </div>
+                        <div><label style={labelStyle}>Fin. End</label>
+                          <select value={item.fe||""} onChange={e=>updItem(item.id,{fe:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto",fontSize:11}}>
+                            <option value="">—</option><option value="L">Left</option><option value="R">Right</option><option value="B">Both</option>
+                          </select>
+                        </div>
+                        <div><label style={labelStyle}>Doors</label>
+                          <input type="number" min="0" max="10" value={item.dc||0} onChange={e=>updItem(item.id,{dc:Math.max(0,+e.target.value)})} style={{...fieldStyle,textAlign:"center",fontSize:11}} />
+                        </div>
+                        <div><label style={labelStyle}>Drawers</label>
+                          <input type="number" min="0" max="10" value={item.drc||0} onChange={e=>updItem(item.id,{drc:Math.max(0,+e.target.value)})} style={{...fieldStyle,textAlign:"center",fontSize:11}} />
+                        </div>
+                        <div><label style={labelStyle}>Door Style Override</label>
+                          <select value={item.ds||""} onChange={e=>updItem(item.id,{ds:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto",fontSize:11}}>
+                            <option value="">— global ({door}) —</option>
+                            {DOORS.map(d=><option key={d.v} value={d.v}>{d.l} ({d.g})</option>)}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Modifications Panel */}
+                      {applicableMods.length > 0 && <div style={{marginBottom:5}}>
+                        <button onClick={()=>sModOpen(prev=>{const n=new Set(prev);if(modsExpanded)n.delete(item.id);else n.add(item.id);return n})} style={{background:activeMods.length>0?"#7c3aed18":"#f0edff",border:`2px solid ${activeMods.length>0?"#7c3aed":"#c4b5fd"}`,borderRadius:8,padding:"7px 10px",cursor:"pointer",fontSize:11,fontWeight:700,color:activeMods.length>0?"#7c3aed":"#6d28d9",display:"flex",alignItems:"center",gap:6,width:"100%",justifyContent:"space-between",transition:"all .15s"}}>
+                          <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:14}}>{modsExpanded?"▾":"▸"}</span><span>⚙ Modifications</span><span style={{background:activeMods.length>0?"#7c3aed":"#a78bfa",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:9,fontWeight:700}}>{activeMods.length>0?`${activeMods.length} active`:`${applicableMods.length} available`}</span></span>
+                          {(t.modCost||0)>0&&<span style={{fontFamily:F.m,fontWeight:700,color:"#7c3aed",fontSize:12}}>+{fm(t.modCost*item.q)}</span>}
+                        </button>
+                        {modsExpanded&&<div style={{borderLeft:"4px solid #7c3aed",borderRight:`1px solid #7c3aed33`,borderBottom:`1px solid #7c3aed33`,borderTop:"none",borderRadius:"0 0 8px 8px",padding:"10px 12px",marginTop:-1,background:"linear-gradient(135deg,#f8f5ff,#f0edff)"}}>
+                          {(()=>{const groups={};applicableMods.forEach(m=>{if(!groups[m.group])groups[m.group]=[];groups[m.group].push(m)});
+                            return Object.entries(groups).map(([gName,gMods])=><div key={gName} style={{marginBottom:10}}>
+                              <div style={{fontSize:9.5,fontWeight:700,textTransform:"uppercase",letterSpacing:".08em",color:"#6d28d9",marginBottom:5,paddingBottom:3,borderBottom:"1px solid #7c3aed22"}}>{gName}</div>
+                              <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:5}}>
+                                {gMods.filter(m=>m.input!=="mxdf").map(m=>{const val=item.mods?.[m.code]||0;const isOn=val;
+                                  return(<div key={m.code} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 8px",borderRadius:6,background:isOn?"#7c3aed18":"#fff",border:`1.5px solid ${isOn?"#7c3aed":"#e2ddf5"}`,cursor:"pointer",transition:"all .1s"}}>
+                                    {m.input==="side"?
+                                      <div style={{display:"flex",gap:3}}>
+                                        {[["","—"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} onClick={()=>setMod(item.id,m.code,v||0)} style={{fontSize:10,padding:"2px 6px",borderRadius:4,border:`1.5px solid ${val===v&&v?"#7c3aed":C.bdr}`,background:val===v&&v?"#7c3aed14":"#fff",color:val===v&&v?"#7c3aed":C.stone,cursor:"pointer",fontFamily:F.b}}>{l}</button>)}
+                                      </div>:
+                                    m.input==="select"?
+                                      <select value={val||""} onChange={e=>setMod(item.id,m.code,e.target.value||0)} style={{fontSize:10,padding:"2px 4px",borderRadius:4,border:`1px solid ${isOn?"#7c3aed":C.bdr}`,fontFamily:F.m,cursor:"pointer"}}>
+                                        <option value="">— None —</option>{(m.options||[]).map(o=><option key={o} value={o}>{o}</option>)}
+                                      </select>:
+                                    m.input==="check"?
+                                      <input type="checkbox" checked={!!isOn} onChange={e=>setMod(item.id,m.code,e.target.checked?1:0)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
+                                    m.input==="dims"?
+                                      <input type="checkbox" checked={!!isOn} onChange={e=>setMod(item.id,m.code,e.target.checked?{w:"",h:"",d:""}:false)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
+                                    m.input==="width"?
+                                      <input type="checkbox" checked={!!isOn} onChange={e=>setMod(item.id,m.code,e.target.checked?true:false)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
+                                      <input type="number" min={0} max={m.max||10} value={val} onChange={e=>setMod(item.id,m.code,Math.max(0,Math.min(m.max||10,+e.target.value)))} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
+                                    }
+                                    <div style={{flex:1,minWidth:0}}>
+                                      <div style={{fontSize:10.5,fontWeight:isOn?700:500,color:isOn?"#6d28d9":C.ink,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.label}</div>
+                                      <div style={{fontSize:9,color:isOn?"#7c3aed":C.stone}}>{m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:""}</div>
+                                    </div>
+                                  </div>);
+                                })}
+                              </div>
+                            </div>);
+                          })()}
+                          {activeMods.length>0&&<div style={{borderTop:"2px solid #7c3aed33",paddingTop:8,marginTop:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                            <span style={{fontSize:10,color:"#6d28d9",fontWeight:700}}>⚙ {activeMods.length} mod{activeMods.length>1?"s":""} · +{fm(t.modCost||0)}/unit</span>
+                            <button onClick={()=>updItem(item.id,{mods:{}})} style={{background:"#fff",border:"1px solid #dc262644",borderRadius:5,padding:"3px 10px",fontSize:9,color:C.red,cursor:"pointer",fontWeight:600}}>Clear All</button>
+                          </div>}
+                        </div>}
+                      </div>}
+
+                      {/* Active mods summary when collapsed */}
+                      {!modsExpanded&&activeMods.length>0&&<div style={{borderLeft:"4px solid #7c3aed",paddingLeft:8,marginBottom:5,marginTop:2}}>
+                        <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>
+                          {activeMods.map(([code])=>{const m=CABINET_MODS.find(x=>x.code===code);return m?<span key={code} style={{display:"inline-flex",fontSize:9,background:"#7c3aed18",color:"#6d28d9",borderRadius:4,padding:"1px 6px",fontWeight:600,border:"1px solid #7c3aed33"}}>⚙ {m.label}</span>:null})}
+                        </div>
+                      </div>}
+                    </>)}
+
+                    {/* Price summary */}
+                    {item.s && <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:4,paddingTop:6,borderTop:`1px solid ${C.bdr}`}}>
+                      <span style={{fontSize:11,color:C.stone,fontFamily:F.b}}>{SKU_LABELS[item.s]||item.s} <span style={{color:C.stL}}>· {TN[item.t]||item.t} · {item.r}</span>{item.hng?` · ${item.hng} hinge`:""}{item.fe?` · FE ${item.fe}`:""}</span>
+                      <span style={{fontFamily:F.m,fontWeight:700,fontSize:13,color:C.ink}}>{fm(t.total||0)}</span>
+                    </div>}
                   </div>
-                  {item.sku && <div style={{marginTop:6,display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:11,fontFamily:F.m}}>
-                    <span style={{color:C.stone}}>{SKU_LABELS[item.sku] || item.sku}{item.hinge ? ` (${item.hinge})` : ""}</span>
-                    <span><span style={{color:C.acc,fontWeight:600}}>{fm(item.unitPrice)}/ea</span> <span style={{color:C.ink,fontWeight:700,marginLeft:6}}>× {item.qty} = {fm(item.unitPrice * item.qty)}</span></span>
-                  </div>}
-                </div>
-              ))}
+                );
+              })}
+
+              {items.length === 0 && <div style={{padding:24,textAlign:"center",color:C.stone,fontSize:12}}>No items yet — click "+ Add Item" above</div>}
+
               {grandTotal > 0 && <div style={{textAlign:"right",marginTop:10,padding:"10px 14px",background:C.ink,borderRadius:8}}>
                 <span style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.cream}}>Order Total: </span>
                 <span style={{fontFamily:F.m,fontSize:18,fontWeight:700,color:C.gold}}>{fm(grandTotal)}</span>
