@@ -7823,7 +7823,14 @@ function App({user, profile, supabase, onLogout}){
           if(isBCFT(it.s)){return{description:`${it.s} (${BCFT_LABELS[it.s]||""}) ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
           if(isBCF(it.s)){return{description:`BCF ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
           if(isCO(it.s)){return{description:`${it.s} (${CO_LABELS[it.s]||""}) ${it.sqH||0}" tall`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
-          const modParts=[];if(it.mods){const activeMods=Object.entries(it.mods).filter(([,v])=>Array.isArray(v)?v.some(p=>p.on):v>0);activeMods.forEach(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return;const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;const amt=m.input==="mxdf"?m.price*mxdfCount:m.input==="side"?m.price*(qty==="B"?2:1):m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?m.price:m.price*(+qty||1);modParts.push(`${m.label}${m.input==="mxdf"?` x${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty})`:typeof qty==="number"&&qty>1?` x${qty}`:""}${amt>0?` +$${amt}`:m.pct?` +${m.pct}%`:""}`);});}
+          const modParts=[];if(it.mods){Object.entries(it.mods).forEach(([code,v])=>{if(!v&&v!==0)return;const m=CABINET_MODS.find(x=>x.code===code);if(!m)return;
+            if(m.input==="mxdf"){const ct=Array.isArray(v)?v.filter(p=>p.on).length:0;if(ct>0)modParts.push(`${m.label} x${ct} +$${m.price*ct}`);}
+            else if(m.input==="side"&&typeof v==="string"&&v){modParts.push(`${m.label} (${v==="B"?"Both":v}) +$${m.price*(v==="B"?2:1)}`);}
+            else if(m.input==="select"&&v){modParts.push(`${m.label} (${v})${m.price>0?` +$${m.price}`:""}`);}
+            else if(m.input==="dims"&&v){const d=typeof v==="object"?`${v.w||""}x${v.h||""}x${v.d||""}`:"";modParts.push(`${m.label}${d?` (${d})`:""} +$${m.price}`);}
+            else if((m.input==="check"||m.input==="width")&&v){modParts.push(`${m.label}${m.pct?` +${m.pct}%`:m.price>0?` +$${m.price}`:""}`);}
+            else if(typeof v==="number"&&v>0){modParts.push(`${m.label}${v>1?` x${v}`:""} ${m.pct?`+${m.pct}%`:m.price>0?`+$${m.price*v}`:""}`);}
+          });}
           if(it.rot&&it.rotQ>0){const ro=ROT_OPTIONS.find(r=>r.v===it.rot);if(ro)modParts.push(`ROT ${it.rot} x${it.rotQ}${it.rotFeg?" +FEG":""}`);}
           if(it.rot2&&it.rot2Q>0){const ro2=ROT_OPTIONS.find(r=>r.v===it.rot2);if(ro2)modParts.push(`FM-ROT ${it.rot2} x${it.rot2Q}${it.rot2Feg?" +FEG":""}`);}
           const modStr=modParts.length>0?" | "+modParts.join(", "):"";
