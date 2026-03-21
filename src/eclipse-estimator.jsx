@@ -7986,7 +7986,7 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
 // ═══════════════════════════════════════════════════
 // ██ SHARED: SKU Search Dropdown (used by Express & Warranty)
 // ═══════════════════════════════════════════════════
-function SkuSearchInput({value, onSelect, placeholder, sp, cx, door, drwF, drwBox}) {
+function SkuSearchInput({value, onSelect, placeholder, sp, cx, door, drwF, drwBox, catalogFilter}) {
   const [sr, setSr] = useState("");
   const [open, setOpen] = useState(false);
   const ref = useCallback(node => { if(node) node.focus(); }, []);
@@ -7994,8 +7994,9 @@ function SkuSearchInput({value, onSelect, placeholder, sp, cx, door, drwF, drwBo
   const results = useMemo(() => {
     if (!sr || sr.length < 1) return [];
     const s = sr.toLowerCase();
-    return CATALOG.filter(c => c.s.toLowerCase().includes(s) || (SKU_LABELS[c.s]||"").toLowerCase().includes(s) || c.r.toLowerCase().includes(s)).slice(0, 40);
-  }, [sr]);
+    const pool = catalogFilter ? CATALOG.filter(catalogFilter) : CATALOG;
+    return pool.filter(c => c.s.toLowerCase().includes(s) || (SKU_LABELS[c.s]||"").toLowerCase().includes(s) || c.r.toLowerCase().includes(s)).slice(0, 40);
+  }, [sr, catalogFilter]);
 
   const priceFor = (cat) => {
     const item = { s: cat.s, t: cat.t, r: cat.r, p: cat.p, q: 1, len: cat.t === "M" ? 10 : 0, sqin: 0, sqW: 0, sqH: 0, dc: guessDoors(cat.s, cat.t), drc: guessDrawers(cat.s, cat.t), ds: door, dfs: drwF, so: null, hng: "", fe: "", mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, brot: guessBuiltInROT(cat.s), rbs: false };
@@ -8500,6 +8501,39 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 // ═══════════════════════════════════════════════════
 // ██ EXPRESS PARTS ORDER — Parcel/Truck/DDF (full pricing + mods)
 // ═══════════════════════════════════════════════════
+// Express Parcel: only parts/accessories, no cabinets, no doors/drawer fronts
+const EXPRESS_PARCEL_FILTER = (c) => {
+  // Allow mouldings (toe kick, crown, etc.)
+  if (c.t === 'M') return true;
+  // Only type A (accessories/parts) beyond mouldings
+  if (c.t !== 'A') return false;
+  // Exclude loose doors & drawer fronts (ref C3)
+  if (c.r === 'C3') return false;
+  // Exclude profile fillers
+  if (c.s === 'PROFILE FILLER') return false;
+  // Exclude range hood assemblies (type A with G-series refs = full hoods)
+  if (/^G\d/.test(c.r)) return false;
+  // Exclude pedestal assemblies
+  if (/^F\d/.test(c.r)) return false;
+  // Exclude island end caps & island cabinets
+  if (/^[JK]\d/.test(c.r)) return false;
+  // Exclude ADA-specific items
+  if (/^O\d/.test(c.r)) return false;
+  // Allow all other accessories: end panels (S1-S9), fillers (S11-S12,S42-S43),
+  // valances/corbels (S3,S13-S24), plywood tops/shelves (S36-S37), drawer boxes/
+  // roll-outs (S38-S39), inserts (S29-S32,S40), hardware (S4-S5,S41,S44-S45),
+  // stain/touch-up kits (S46), range hood accessories (H1-H3), samples (U2-U10),
+  // toe kick (I2), and other parts (B2,B14,D17,E4)
+  return true;
+};
+
+// Express DDF: doors & drawer fronts only
+const EXPRESS_DDF_FILTER = (c) => {
+  if (c.t !== 'A') return false;
+  // Only loose doors & drawer fronts section
+  return c.r === 'C3';
+};
+
 function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   const [mob, setMob] = useState(false);
   const [ntf, setNtf] = useState(null);
@@ -8698,6 +8732,13 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
               <span style={{fontSize:16}}>⚡</span>
               <span><strong>{expressTypes.find(e=>e.id===expressType)?.title}</strong> — Ships in 5 working days via {expressTypes.find(e=>e.id===expressType)?.ship}</span>
             </div>
+            {expressType==="parcel"&&<div style={{background:"#fef3c7",border:"1px solid #f59e0b44",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:10.5,color:"#92400e",fontFamily:F.b,lineHeight:1.5}}>
+              <strong>Express Parcel Eligible Items:</strong> End panels (base, wall, vanity), standard fillers (no profile), mouldings, toe kick, plywood tops, finished shelves, valances, corbels, onlays, range hood accessories, drawer boxes, roll-outs, lazy susan kits, cutlery divider inserts, shelf supports, spice drawer inserts, spice racks, stain/touch-up kits, wire tray dividers, standard adjustable shelves, color door samples (max 3), and various hardware.<br/>
+              <strong>Max length:</strong> 94" — for longer items, specify how to cut down (e.g. 6' and 4'). <strong>No doors or drawer fronts</strong> — use ECL-EXP-DDF form for those. Orders with non-qualifying items will be placed for normal production without prior notification. No order changes or modifications allowed.
+            </div>}
+            {expressType==="ddf"&&<div style={{background:"#fef3c7",border:"1px solid #f59e0b44",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:10.5,color:"#92400e",fontFamily:F.b,lineHeight:1.5}}>
+              <strong>Door & Drawer Fronts Only.</strong> This form is for loose doors and drawer fronts. No cabinets or other parts. Orders with non-qualifying items will be placed for normal production without prior notification.
+            </div>}
 
             {/* Dealer & Contact */}
             <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
@@ -8725,7 +8766,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                 <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink}}>Items</div>
                 <button onClick={addBlankItem} style={{background:"#ede9fe",border:"1px solid #7c3aed44",borderRadius:6,padding:"5px 12px",fontSize:10.5,fontFamily:F.b,fontWeight:600,color:"#7c3aed",cursor:"pointer"}}>+ Add Item</button>
               </div>
-              <div style={{fontSize:10,color:C.stone,fontFamily:F.b,marginBottom:10}}>Search by SKU to auto-price. Set hinge, finished ends, and modifications per item.</div>
+              <div style={{fontSize:10,color:C.stone,fontFamily:F.b,marginBottom:10}}>{expressType==="parcel"?"Search by SKU for express parcel parts: end panels, fillers, mouldings, plywood tops, shelves, valances, corbels, roll-outs, drawer boxes, hardware, samples, and more. Max length 94\". No doors/drawer fronts on this form.":expressType==="ddf"?"Search by SKU for doors and drawer fronts only.":"Search by SKU to auto-price. Set hinge, finished ends, and modifications per item."}</div>
 
               {items.map((item, idx) => {
                 const t = itemTotals[idx] || {};
@@ -8740,12 +8781,25 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                     {/* Row 1: SKU search + Qty + Delete */}
                     <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"60px 1fr 32px",gap:8,alignItems:"end",marginBottom:item.s?8:0}}>
                       <div><label style={labelStyle}>Qty</label><input type="number" min="1" value={item.q} onChange={e=>updItem(item.id,{q:Math.max(1,parseInt(e.target.value)||1)})} style={{...fieldStyle,textAlign:"center"}} /></div>
-                      <div><label style={labelStyle}>SKU (search catalog)</label><SkuSearchInput value={item.s} sp={sp} cx={cx} door={door} drwF={drwF} drwBox={drwBox} placeholder="Type to search SKU..." onSelect={(cat) => selectSku(item.id, cat)} /></div>
+                      <div><label style={labelStyle}>SKU (search catalog)</label><SkuSearchInput value={item.s} sp={sp} cx={cx} door={door} drwF={drwF} drwBox={drwBox} placeholder="Type to search SKU..." onSelect={(cat) => selectSku(item.id, cat)} catalogFilter={expressType==="parcel"?EXPRESS_PARCEL_FILTER:expressType==="ddf"?EXPRESS_DDF_FILTER:null} /></div>
                       <button onClick={()=>removeItem(item.id)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.red,padding:"4px",alignSelf:"end",marginBottom:2}}>&times;</button>
                     </div>
 
-                    {/* Row 2: Item details (only shown after SKU selected) */}
-                    {item.s && !isMould && !itemSQ && (<>
+                    {/* Moulding length input */}
+                    {item.s && isMould && <div style={{display:"grid",gridTemplateColumns:"120px 1fr",gap:8,marginBottom:6,alignItems:"end"}}>
+                      <div><label style={labelStyle}>Length (LF)</label><input type="number" min="1" max="240" value={item.len||10} onChange={e=>updItem(item.id,{len:Math.max(1,+e.target.value)})} style={{...fieldStyle,textAlign:"center",fontSize:11}} /></div>
+                      <div style={{fontSize:10,color:C.stone,fontFamily:F.b,paddingBottom:8}}>Priced per linear foot. Max 94" for express parcel.</div>
+                    </div>}
+
+                    {/* Sq-in items (panels, finished tops) */}
+                    {item.s && itemSQ && <div style={{display:"grid",gridTemplateColumns:"80px 80px 1fr",gap:8,marginBottom:6,alignItems:"end"}}>
+                      <div><label style={labelStyle}>Width (in)</label><input type="number" min="0" value={item.sqW||0} onChange={e=>updItem(item.id,{sqW:+e.target.value,sqin:(+e.target.value)*(item.sqH||0)})} style={{...fieldStyle,textAlign:"center",fontSize:11}} /></div>
+                      <div><label style={labelStyle}>Height (in)</label><input type="number" min="0" value={item.sqH||0} onChange={e=>updItem(item.id,{sqH:+e.target.value,sqin:(item.sqW||0)*(+e.target.value)})} style={{...fieldStyle,textAlign:"center",fontSize:11}} /></div>
+                      <div style={{fontSize:10,color:C.stone,fontFamily:F.b,paddingBottom:8}}>{(item.sqin||0).toLocaleString()} sq.in — priced per square inch</div>
+                    </div>}
+
+                    {/* Row 2: Cabinet details (hinge, FE, mods — only for cabinet types) */}
+                    {item.s && !isMould && !itemSQ && ["B","W","T","V","C","D"].includes(item.t) && (<>
                       <div style={{display:"grid",gridTemplateColumns:mob?"1fr 1fr":"80px 80px 80px 80px 1fr",gap:6,marginBottom:6}}>
                         <div><label style={labelStyle}>Hinge</label>
                           <select value={item.hng||""} onChange={e=>updItem(item.id,{hng:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto",fontSize:11}}>
