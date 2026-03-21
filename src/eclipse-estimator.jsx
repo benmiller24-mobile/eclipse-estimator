@@ -8783,26 +8783,52 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                               <div style={{fontSize:9.5,fontWeight:700,textTransform:"uppercase",letterSpacing:".08em",color:"#6d28d9",marginBottom:5,paddingBottom:3,borderBottom:"1px solid #7c3aed22"}}>{gName}</div>
                               <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:5}}>
                                 {gMods.filter(m=>m.input!=="mxdf").map(m=>{const val=item.mods?.[m.code]||0;const isOn=val;
-                                  return(<div key={m.code} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 8px",borderRadius:6,background:isOn?"#7c3aed18":"#fff",border:`1.5px solid ${isOn?"#7c3aed":"#e2ddf5"}`,cursor:"pointer",transition:"all .1s"}}>
-                                    {m.input==="side"?
+                                  return(<div key={m.code} style={{display:"flex",alignItems:m.input==="dims"||m.input==="width"?"flex-start":"center",gap:6,padding:"5px 8px",borderRadius:6,background:isOn?"#7c3aed18":"#fff",border:`1.5px solid ${isOn?"#7c3aed":"#e2ddf5"}`,cursor:"pointer",transition:"all .1s"}}>
+                                    {m.input==="dims"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked){setMod(item.id,m.code,{w:"",h:"",d:""})}else{setMod(item.id,m.code,false)}}} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/><span style={{fontSize:"0.8rem",color:isOn?"#7c3aed":"#888"}}>Enabled</span></div>{isOn&&typeof isOn==="object"?<div style={{display:"flex",gap:"4px",marginTop:"4px"}}>{["W","H","D"].map(dim=><label key={dim} style={{display:"flex",flexDirection:"column",alignItems:"center",fontSize:"0.65rem",color:"#666"}}>{dim}<input type="text" value={isOn[dim.toLowerCase()]||""} onChange={e=>{const nv={...isOn};nv[dim.toLowerCase()]=e.target.value;setMod(item.id,m.code,nv)}} style={{width:"44px",textAlign:"center",padding:"2px",fontSize:"0.75rem",borderRadius:"3px",border:"1px solid #a6b4a6"}}/></label>)}</div>:null}</div>:
+                                    m.input==="width"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked)setMod(item.id,m.code,true);else setMod(item.id,m.code,false)}} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/><span style={{fontSize:".8rem",color:isOn?"#7c3aed":"#888"}}>Enabled</span>{isOn!==false&&isOn!==0&&isOn!==undefined?<input type="text" value={typeof isOn==="string"?isOn:""} onChange={e=>setMod(item.id,m.code,e.target.value||true)} style={{width:"52px",padding:"2px 4px",border:"1px solid #ccc",borderRadius:"3px",fontSize:".8rem",marginLeft:"4px"}} placeholder="W"/>:null}</div>{m.note?<div style={{fontSize:".7rem",color:"#b08000",marginTop:"2px",fontStyle:"italic"}}>{m.note}</div>:null}</div>:
+                                    m.input==="side"?
                                       <div style={{display:"flex",gap:3}}>
                                         {[["","—"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} onClick={()=>setMod(item.id,m.code,v||0)} style={{fontSize:10,padding:"2px 6px",borderRadius:4,border:`1.5px solid ${val===v&&v?"#7c3aed":C.bdr}`,background:val===v&&v?"#7c3aed14":"#fff",color:val===v&&v?"#7c3aed":C.stone,cursor:"pointer",fontFamily:F.b}}>{l}</button>)}
                                       </div>:
                                     m.input==="select"?
-                                      <select value={val||""} onChange={e=>setMod(item.id,m.code,e.target.value||0)} style={{fontSize:10,padding:"2px 4px",borderRadius:4,border:`1px solid ${isOn?"#7c3aed":C.bdr}`,fontFamily:F.m,cursor:"pointer"}}>
+                                      <select value={val||""} onChange={e=>setMod(item.id,m.code,e.target.value||0)} style={{fontSize:10,padding:"2px 4px",borderRadius:4,border:`1px solid ${isOn?"#7c3aed":C.bdr}`,background:isOn?"#7c3aed0a":"#fff",fontFamily:F.m,cursor:"pointer"}}>
                                         <option value="">— None —</option>{(m.options||[]).map(o=><option key={o} value={o}>{o}</option>)}
                                       </select>:
                                     m.input==="check"?
                                       <input type="checkbox" checked={!!isOn} onChange={e=>setMod(item.id,m.code,e.target.checked?1:0)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
-                                    m.input==="dims"?
-                                      <input type="checkbox" checked={!!isOn} onChange={e=>setMod(item.id,m.code,e.target.checked?{w:"",h:"",d:""}:false)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
-                                    m.input==="width"?
-                                      <input type="checkbox" checked={!!isOn} onChange={e=>setMod(item.id,m.code,e.target.checked?true:false)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
                                       <input type="number" min={0} max={m.max||10} value={val} onChange={e=>setMod(item.id,m.code,Math.max(0,Math.min(m.max||10,+e.target.value)))} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
                                     }
                                     <div style={{flex:1,minWidth:0}}>
                                       <div style={{fontSize:10.5,fontWeight:isOn?700:500,color:isOn?"#6d28d9":C.ink,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.label}</div>
-                                      <div style={{fontSize:9,color:isOn?"#7c3aed":C.stone}}>{m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:""}</div>
+                                      <div style={{fontSize:9,color:isOn?"#7c3aed":C.stone,fontWeight:isOn?600:400}}>{m.code} · {m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.input==="side"?m.price*(val==="B"?2:1):m.price*(m.input==="check"?1:val))}`:""}</div>
+                                    </div>
+                                  </div>);
+                                })}
+                                {/* Mixed Drawer Front (MXDF) — 3 fixed position slots */}
+                                {gMods.filter(m=>m.input==="mxdf").map(m=>{const val=item.mods?.[m.code];const positions=Array.isArray(val)?val:[];const activeCount=positions.filter(p=>p.on).length;const isOn=activeCount>0;
+                                  const slots=[0,1,2].map(i=>positions[i]||{on:false,door:"",note:""});
+                                  const updateSlot=(si,changes)=>{const ns=[...slots];ns[si]={...ns[si],...changes};const anyOn=ns.some(s=>s.on);setMod(item.id,m.code,anyOn?ns:0)};
+                                  return(<div key={m.code} style={{marginTop:6,borderRadius:6,border:`1.5px solid ${isOn?"#7c3aed":"#e2ddf5"}`,background:isOn?"#7c3aed0a":"#fff",overflow:"hidden",gridColumn:"1/-1"}}>
+                                    <div style={{padding:"6px 10px"}}>
+                                      <div style={{fontSize:11,fontWeight:isOn?700:500,color:isOn?"#6d28d9":C.ink}}>{m.label}</div>
+                                      <div style={{fontSize:9.5,color:isOn?"#7c3aed":C.stone}}>{m.code} · ${m.price}/position{isOn?` · ${activeCount} active = ${fm(m.price*activeCount)}`:""}</div>
+                                    </div>
+                                    <div style={{borderTop:"1px solid #7c3aed22",padding:"6px 10px",display:"flex",flexDirection:"column",gap:6}}>
+                                      {slots.map((sl,si)=>{const posNum=si+2;return(
+                                        <div key={si} style={{background:sl.on?"#7c3aed12":"#fff",border:`1.5px solid ${sl.on?"#7c3aed":"#e2ddf5"}`,borderRadius:6,padding:"8px 10px",transition:"all .15s"}}>
+                                          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:sl.on?6:0}}>
+                                            <input type="checkbox" checked={!!sl.on} onChange={e=>updateSlot(si,{on:e.target.checked})} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>
+                                            <span style={{fontSize:12,fontWeight:700,color:sl.on?"#6d28d9":C.stone}}>Position {posNum}</span>
+                                            {sl.on&&<span style={{fontSize:10,color:"#7c3aed",fontWeight:600}}>+$105</span>}
+                                          </div>
+                                          {sl.on&&<div style={{marginLeft:22,display:"flex",flexDirection:"column",gap:5}}>
+                                            <select value={sl.door||""} onChange={e=>updateSlot(si,{door:e.target.value})} style={{fontSize:11,padding:"4px 6px",borderRadius:5,border:`1px solid ${C.bdr}`,fontFamily:F.m,width:"100%",boxSizing:"border-box"}}>
+                                              <option value="">— Select Door Style —</option>
+                                              {DOORS.map(d=><option key={d.v} value={d.v}>{d.l}</option>)}
+                                            </select>
+                                            <input type="text" placeholder="Notes — e.g. drawer front description, special instructions..." value={sl.note||""} onChange={e=>updateSlot(si,{note:e.target.value})} style={{width:"100%",padding:"5px 8px",fontSize:11,border:`1px solid ${C.bdr}`,borderRadius:5,fontFamily:F.b,boxSizing:"border-box"}}/>
+                                          </div>}
+                                        </div>);})}
                                     </div>
                                   </div>);
                                 })}
@@ -8818,8 +8844,12 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
 
                       {/* Active mods summary when collapsed */}
                       {!modsExpanded&&activeMods.length>0&&<div style={{borderLeft:"4px solid #7c3aed",paddingLeft:8,marginBottom:5,marginTop:2}}>
-                        <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>
-                          {activeMods.map(([code])=>{const m=CABINET_MODS.find(x=>x.code===code);return m?<span key={code} style={{display:"inline-flex",fontSize:9,background:"#7c3aed18",color:"#6d28d9",borderRadius:4,padding:"1px 6px",fontWeight:600,border:"1px solid #7c3aed33"}}>⚙ {m.label}</span>:null})}
+                        <div style={{fontSize:9.5,fontWeight:700,color:"#6d28d9",marginBottom:3}}>Active Modifications (+{fm(t.modCost||0)}/unit)</div>
+                        <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                          {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
+                            const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;
+                            return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}>⚙ {m.label}{m.input==="mxdf"?` x${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:m.input==="dims"&&typeof qty==="object"?` (${qty.w||"?"}x${qty.h||"?"}x${qty.d||"?"})`:qty>1?` x${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
+                          })}
                         </div>
                       </div>}
                     </>)}
