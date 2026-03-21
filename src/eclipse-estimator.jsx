@@ -8847,7 +8847,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                         <div>
                           <label style={labelStyle}>Hinge</label>
                           <select value={item.hng||""} onChange={e=>updItem(item.id,{hng:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto"}}>
-                            <option value="">—</option><option value="L">Left</option><option value="R">Right</option><option value="Pair">Pair</option>
+                            <option value="">—</option><option value="L">Left</option><option value="R">Right</option><option value="NB">No Boring</option>
                           </select>
                         </div>
                         <div>
