@@ -6870,10 +6870,15 @@ function MarginCalc({tot,onClose}){
   </div></div>);
 }
 
+const RECENT_SK="eclipse_recent_skus";const MAX_RECENT=10;
+const getRecent=()=>{try{return JSON.parse(localStorage.getItem(RECENT_SK)||"[]")}catch{return[]}};
+const trackRecent=(sku)=>{try{let r=getRecent().filter(s=>s!==sku);r.unshift(sku);if(r.length>MAX_RECENT)r=r.slice(0,MAX_RECENT);localStorage.setItem(RECENT_SK,JSON.stringify(r))}catch{}};
+
 function AddUI({onAdd,onAddCustom}){
   const[sk,sSk]=useState(CATALOG[0]?.s||""),[q,sQ]=useState(1),[z,sZ]=useState("kitchen"),[sr,sSr]=useState(""),[tf,sTf]=useState("all"),[len,sLen]=useState(10);
   const[sqW,sSqW]=useState(36),[sqH,sSqH]=useState(34);
   const[showCQ,setShowCQ]=useState(false);
+  const[recentSkus,setRecentSkus]=useState(getRecent);
   const[cqDesc,setCqDesc]=useState(""),[cqPrice,setCqPrice]=useState(""),[cqNum,setCqNum]=useState(""),[cqZ,setCqZ]=useState("kitchen"),[cqQ,setCqQ]=useState(1),[cqPdf,setCqPdf]=useState(null),[cqPdfName,setCqPdfName]=useState("");
   const selCat=CATALOG.find(c=>c.s===sk);const isM=selCat?.t==="M";const isSQ=selCat?isSqIn(selCat.s,selCat.r):false;
   const fl=useMemo(()=>{let l=CATALOG;if(tf!=="all")l=l.filter(c=>c.t===tf);if(sr){const s=sr.toLowerCase();l=l.filter(c=>c.s.toLowerCase().includes(s)||c.r.toLowerCase().includes(s));}return l.slice(0,200);},[tf,sr]);
@@ -6886,6 +6891,13 @@ function AddUI({onAdd,onAddCustom}){
       </div>
     </div>
     <div style={{maxHeight:"36vh",overflowY:"auto",border:`1px solid ${C.bdr}`,borderRadius:7,marginBottom:7,background:C.cream}}>
+      {recentSkus.length>0&&!sr&&tf==="all"&&<div>
+        <div style={{padding:"4px 9px",background:"linear-gradient(90deg,#f59e0b22,#f59e0b08)",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:"#b45309",position:"sticky",top:0,zIndex:2,borderBottom:`1px solid #f59e0b33`,display:"flex",alignItems:"center",gap:5}}>⚡ Recently Used ({recentSkus.length})</div>
+        {recentSkus.map(s=>{const c=CATALOG.find(x=>x.s===s);if(!c)return null;return(<div key={"recent-"+c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"#fffbeb08",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid #f59e0b44"}}>
+            <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s} <span style={{fontSize:9.5,color:C.stone,fontWeight:400}}>{c.r}</span></span>
+            <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
+          </div>)})}
+      </div>}
       {grouped.map(([ref,items])=><div key={ref}>
         <div style={{padding:"4px 9px",background:C.warm,fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:C.stone,position:"sticky",top:0,zIndex:1,borderBottom:`1px solid ${C.bdr}`}}>
           {ref} — {SEC[ref.charAt(0)]||TN[items[0]?.t]||""} ({items.length})
@@ -6928,7 +6940,7 @@ function AddUI({onAdd,onAddCustom}){
     <div style={{display:"flex",gap:6,alignItems:"flex-end",flexWrap:"wrap"}}>
       <div style={{width:60}}><label className="lb">{isM?"Pcs":isSQ?"Pcs":"Qty"}</label><input type="number" className="inp" min={1} max={999} value={q} onChange={e=>sQ(Math.max(1,+e.target.value))} style={{textAlign:"center"}}/></div>
       <div style={{flex:"1 1 80px"}}><label className="lb">Room</label><select className="sel" value={z} onChange={e=>sZ(e.target.value)}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
-      <button className="bt bp" onClick={()=>{const cat=CATALOG.find(c=>c.s===sk);if(cat){onAdd(cat,q,z,cat.t==="M"?len:0,isSqIn(cat.s,cat.r)?sqW*sqH:0,isSqIn(cat.s,cat.r)?sqW:0,isSqIn(cat.s,cat.r)?sqH:0);sQ(1);}}} style={{minWidth:100}}>+ Add</button>
+      <button className="bt bp" onClick={()=>{const cat=CATALOG.find(c=>c.s===sk);if(cat){onAdd(cat,q,z,cat.t==="M"?len:0,isSqIn(cat.s,cat.r)?sqW*sqH:0,isSqIn(cat.s,cat.r)?sqW:0,isSqIn(cat.s,cat.r)?sqH:0);trackRecent(cat.s);setRecentSkus(getRecent());sQ(1);}}} style={{minWidth:100}}>+ Add</button>
     </div>
     {/* Custom Quote Section */}
     <div style={{marginTop:10,borderTop:`2px solid ${C.gold}`,paddingTop:10}}>
