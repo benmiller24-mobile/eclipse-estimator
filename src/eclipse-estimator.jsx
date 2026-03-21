@@ -8773,6 +8773,11 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
             {expressType==="ddf"&&<div style={{background:"#fef3c7",border:"1px solid #f59e0b44",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:10.5,color:"#92400e",fontFamily:F.b,lineHeight:1.5}}>
               <strong>Express Door & Drawer Front Order (ECL-EXP-DDF)</strong> — Chargeable door and drawer front items only. Select the type (Loose Door, Slab DF, or 5-Piece DF), enter the cabinet it's for, and specify width and height. Price is calculated per square inch. Not for warranty replacements — use ECL-WRTY for those. <strong>This order is final — no changes or modifications allowed.</strong>
             </div>}
+            {expressType==="truck"&&<div style={{background:"#fef2f2",border:"2px solid #dc2626",borderRadius:8,padding:"14px 18px",marginBottom:16,fontSize:13,color:"#991b1b",fontFamily:F.b,lineHeight:1.5,textAlign:"center"}}>
+              <div style={{fontSize:22,marginBottom:4}}>&#9888;</div>
+              <strong style={{fontSize:15}}>FREIGHT WILL BE AT LEAST $750 PER CABINET</strong><br/>
+              <span style={{fontSize:11}}>Express Truck orders ship via common carrier (freight collect). Plan for a minimum freight charge of $750 per cabinet.</span>
+            </div>}
 
             {/* Dealer & Contact */}
             <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
