@@ -6692,12 +6692,13 @@ const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{
   const stockBase=isCOItem?(item.p*(item.sqH||0)*(1+sm/100)):itemSQ?(item.p*sqin*(1+sm/100)+refIceCost):(item.p*len*(1+sm/100));
   const ds=item.ds||gDoor||"HNVR";const dInfo=DOORS.find(d=>d.v===ds);
   const dgCharge=dInfo?DG[dInfo.g]||0:0;const dxCharge=dInfo?.x||0;
-  const doorChg=(itemSQ||item.t==="M")?0:(dgCharge+dxCharge)*(item.dc||0);
+  const isC3=item.r==="C3";
+  const doorChg=(itemSQ&&!isC3||item.t==="M")?0:(dgCharge+dxCharge)*(item.dc||0);
   const drc=item.drc||0;const dfS=item.dfs||gDrwF||"DF-HNVR";
   const dfI=DRW_FRONTS.find(d=>d.v===dfS);const dfgChg=dfI?.g?DG[dfI.g]||0:0;
-  const dfChg=(itemSQ||item.t==="M")?0:dfgChg*drc;
+  const dfChg=(itemSQ&&!isC3||item.t==="M")?0:dfgChg*drc;
   const rotQ=(item.rot&&item.rotQ>0)?item.rotQ:0;const rot2Q=(item.rot2&&item.rot2Q>0)?item.rot2Q:0;const brot=item.brot||0;
-  const dbI=DRW_BOX.find(d=>d.v===(gDrwBox||"5/8-STD"));const dbChg=(drc+rotQ+rot2Q+brot)*(dbI?.price||0);
+  const dbI=DRW_BOX.find(d=>d.v===(gDrwBox||"5/8-STD"));const dbChg=isC3?0:(drc+rotQ+rot2Q+brot)*(dbI?.price||0);
   const rbsChg=item.rbs?87:0;
   const prePly=stockBase+doorChg+dfChg+dbChg+rbsChg;
   const u=prePly*(1+cm/100);
@@ -8580,13 +8581,13 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   const [items, setItems] = useState([]);
 
   const DDF_TYPES = [
-    { v: "LSD", l: "Loose Door", price: 0.5, r: "C3" },
-    { v: "SLBDF", l: "Slab Drawer Front", price: 0.412, r: "C3" },
-    { v: "5PDF", l: "5-Piece Drawer Front", price: 0.711, r: "C3" },
+    { v: "LSD", l: "Loose Door", price: 0.5, r: "C3", dc: 1, drc: 0 },
+    { v: "SLBDF", l: "Slab Drawer Front", price: 0.412, r: "C3", dc: 0, drc: 0 },
+    { v: "5PDF", l: "5-Piece Drawer Front", price: 0.711, r: "C3", dc: 0, drc: 1 },
   ];
   const addBlankItem = () => {
     if (expressType === "ddf") {
-      setItems(p => [...p, { id: uid(), s: "LSD", t: "A", r: "C3", p: 0.5, q: 1, len: 0, hng: "", fe: "", ds: "", dc: 0, drc: 0, brot: 0, sqin: 0, sqW: 0, sqH: 0, rbs: false, mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, so: null, ovenSpec: {}, cabinetRef: "", ddfDesc: "" }]);
+      setItems(p => [...p, { id: uid(), s: "LSD", t: "A", r: "C3", p: 0.5, q: 1, len: 0, hng: "", fe: "", ds: "", dc: 1, drc: 0, brot: 0, sqin: 0, sqW: 0, sqH: 0, rbs: false, mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, so: null, ovenSpec: {}, cabinetRef: "", ddfDesc: "" }]);
     } else {
       setItems(p => [...p, { id: uid(), s: "", t: "", r: "", p: 0, q: 1, len: 0, hng: "", fe: "", ds: "", dc: 0, drc: 0, brot: 0, sqin: 0, sqW: 0, sqH: 0, rbs: false, mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, so: null, ovenSpec: {} }]);
     }
@@ -8809,7 +8810,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                 items.map((item, idx) => {
                   const sqin = (item.sqW || 0) * (item.sqH || 0);
                   const ddfItem = { ...item, sqin };
-                  const { u } = cp(ddfItem, sp, cx, door, drwF, drwBox);
+                  const { u, stockBase, doorChg, dfChg } = cp(ddfItem, sp, cx, door, drwF, drwBox);
                   const lineTotal = u * item.q;
                   const ddfType = DDF_TYPES.find(d => d.v === item.s);
 
@@ -8819,7 +8820,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                       <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"200px 1fr 60px 32px",gap:8,alignItems:"end",marginBottom:10}}>
                         <div>
                           <label style={labelStyle}>Type</label>
-                          <select value={item.s} onChange={e=>{const d=DDF_TYPES.find(x=>x.v===e.target.value);if(d)updItem(item.id,{s:d.v,p:d.price,r:d.r,t:"A"})}} style={{...fieldStyle,cursor:"pointer",appearance:"auto"}}>
+                          <select value={item.s} onChange={e=>{const d=DDF_TYPES.find(x=>x.v===e.target.value);if(d)updItem(item.id,{s:d.v,p:d.price,r:d.r,t:"A",dc:d.dc,drc:d.drc})}} style={{...fieldStyle,cursor:"pointer",appearance:"auto"}}>
                             {DDF_TYPES.map(d=><option key={d.v} value={d.v}>{d.l} ({d.v})</option>)}
                           </select>
                         </div>
@@ -8877,7 +8878,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                         <div style={{fontSize:10,color:C.stone,fontFamily:F.b}}>
                           <span style={{fontWeight:600,color:C.ink}}>{ddfType?.l||item.s}</span>
                           {item.cabinetRef ? ` for ${item.cabinetRef}` : ""}
-                          {sqin > 0 ? ` · ${item.sqW}" x ${item.sqH}" = ${sqin.toLocaleString()} sq.in · ${item.p}/sq.in` : " · Enter width and height"}
+                          {sqin > 0 ? ` · ${item.sqW}" × ${item.sqH}" = ${sqin.toLocaleString()} sq.in · $${item.p}/sq.in` + (doorChg > 0 ? ` + $${doorChg} door grp` : "") + (dfChg > 0 ? ` + $${dfChg} DF grp` : "") : " · Enter width and height"}
                           {item.hng ? ` · ${item.hng} hinge` : ""}
                         </div>
                         <div style={{fontFamily:F.m,fontWeight:700,fontSize:14,color:sqin>0?C.ink:C.stone}}>
