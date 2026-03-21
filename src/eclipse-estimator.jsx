@@ -6470,7 +6470,7 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 });
 
 const C={ink:"#1a1814",warm:"#f7f3ee",cream:"#faf8f4",paper:"#fff",stone:"#8a7e70",stL:"#c4b9aa",bdr:"#e5dfd6",acc:"#2c4a34",accS:"#e8f0ea",gold:"#b8963e",goldS:"#f5eedd",red:"#a83232"};
-const fm=n=>{const v=Number(n);return "$"+(isNaN(v)?0:Math.round(v)).toLocaleString()};
+const fm=n=>"$"+Math.round(n||0).toLocaleString();
 const uid=()=>Math.random().toString(36).slice(2,10);
 // Per-sq-inch SKU prefixes (bar backs, finished panels, edge-banded panels, slat bar backs, finished tops)
 // Per-sq-inch items: S33 bar backs, S34 component bar backs, S35 slat bar backs, 
