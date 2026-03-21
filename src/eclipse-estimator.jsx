@@ -8564,7 +8564,18 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   // Items are now full item objects like the estimator
   const [items, setItems] = useState([]);
 
-  const addBlankItem = () => setItems(p => [...p, { id: uid(), s: "", t: "", r: "", p: 0, q: 1, len: 0, hng: "", fe: "", ds: "", dc: 0, drc: 0, brot: 0, sqin: 0, sqW: 0, sqH: 0, rbs: false, mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, so: null, ovenSpec: {} }]);
+  const DDF_TYPES = [
+    { v: "LSD", l: "Loose Door", price: 0.5, r: "C3" },
+    { v: "SLBDF", l: "Slab Drawer Front", price: 0.412, r: "C3" },
+    { v: "5PDF", l: "5-Piece Drawer Front", price: 0.711, r: "C3" },
+  ];
+  const addBlankItem = () => {
+    if (expressType === "ddf") {
+      setItems(p => [...p, { id: uid(), s: "LSD", t: "A", r: "C3", p: 0.5, q: 1, len: 0, hng: "", fe: "", ds: "", dc: 0, drc: 0, brot: 0, sqin: 0, sqW: 0, sqH: 0, rbs: false, mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, so: null, ovenSpec: {}, cabinetRef: "", ddfDesc: "" }]);
+    } else {
+      setItems(p => [...p, { id: uid(), s: "", t: "", r: "", p: 0, q: 1, len: 0, hng: "", fe: "", ds: "", dc: 0, drc: 0, brot: 0, sqin: 0, sqW: 0, sqH: 0, rbs: false, mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, so: null, ovenSpec: {} }]);
+    }
+  };
   const removeItem = (id) => setItems(p => p.filter(i => i.id !== id));
   const updItem = (id, changes) => setItems(p => p.map(i => i.id === id ? { ...i, ...changes } : i));
 
@@ -8580,10 +8591,12 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   const itemTotals = useMemo(() => {
     return items.map(item => {
       if (!item.s) return { u: 0, total: 0, modCost: 0 };
-      const { u, t: total, stockBase, plyPct } = cp(item, sp, cx, door, drwF, drwBox);
-      const mcRaw = calcModCost(item, item.mods, stockBase);
+      // For DDF items, compute sqin from width * height
+      const computedItem = (item.r === "C3") ? { ...item, sqin: (item.sqW || 0) * (item.sqH || 0) } : item;
+      const { u, t: total, stockBase, plyPct } = cp(computedItem, sp, cx, door, drwF, drwBox);
+      const mcRaw = calcModCost(computedItem, computedItem.mods, stockBase);
       const modCost = mcRaw * (1 + plyPct / 100);
-      const grandTotal = total + modCost * item.q;
+      const grandTotal = total + modCost * computedItem.q;
       return { u, total: grandTotal, modCost, stockBase, plyPct };
     });
   }, [items, sp, cx, door, drwF, drwBox]);
@@ -8643,7 +8656,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
     page.drawText("UNIT", { x: 440, y: y + 7, size: 8, font: fontB, color: rgb(0.96, 0.95, 0.93) });
     page.drawText("TOTAL", { x: 500, y: y + 7, size: 8, font: fontB, color: rgb(0.96, 0.95, 0.93) });
     y -= 18;
-    const validItems = items.filter(i => i.s);
+    const validItems = items.filter(i => i.s).map(i => i.r === "C3" ? { ...i, sqin: (i.sqW || 0) * (i.sqH || 0) } : i);
     validItems.forEach((item, idx) => {
       if (y < 80) { doc.addPage([612, 792]); y = 740; }
       const t = itemTotals[items.indexOf(item)] || {};
@@ -8737,7 +8750,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
               <strong>Max length:</strong> 94" — for longer items, specify how to cut down (e.g. 6' and 4'). <strong>No doors or drawer fronts</strong> — use ECL-EXP-DDF form for those. Orders with non-qualifying items will be placed for normal production without prior notification. No order changes or modifications allowed.
             </div>}
             {expressType==="ddf"&&<div style={{background:"#fef3c7",border:"1px solid #f59e0b44",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:10.5,color:"#92400e",fontFamily:F.b,lineHeight:1.5}}>
-              <strong>Door & Drawer Fronts Only.</strong> This form is for loose doors and drawer fronts. No cabinets or other parts. Orders with non-qualifying items will be placed for normal production without prior notification.
+              <strong>Express Door & Drawer Front Order (ECL-EXP-DDF)</strong> — Chargeable door and drawer front items only. Select the type (Loose Door, Slab DF, or 5-Piece DF), enter the cabinet it's for, and specify width and height. Price is calculated per square inch. Not for warranty replacements — use ECL-WRTY for those. <strong>This order is final — no changes or modifications allowed.</strong>
             </div>}
 
             {/* Dealer & Contact */}
@@ -8766,9 +8779,98 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                 <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink}}>Items</div>
                 <button onClick={addBlankItem} style={{background:"#ede9fe",border:"1px solid #7c3aed44",borderRadius:6,padding:"5px 12px",fontSize:10.5,fontFamily:F.b,fontWeight:600,color:"#7c3aed",cursor:"pointer"}}>+ Add Item</button>
               </div>
-              <div style={{fontSize:10,color:C.stone,fontFamily:F.b,marginBottom:10}}>{expressType==="parcel"?"Search by SKU for express parcel parts: end panels, fillers, mouldings, plywood tops, shelves, valances, corbels, roll-outs, drawer boxes, hardware, samples, and more. Max length 94\". No doors/drawer fronts on this form.":expressType==="ddf"?"Search by SKU for doors and drawer fronts only.":"Search by SKU to auto-price. Set hinge, finished ends, and modifications per item."}</div>
+              {expressType==="ddf" ? (
+                <div style={{fontSize:10,color:C.stone,fontFamily:F.b,marginBottom:10}}>Select door or drawer front type, enter the cabinet it's for, and specify width and height. Price is calculated per square inch with species and construction markups applied.</div>
+              ) : (
+                <div style={{fontSize:10,color:C.stone,fontFamily:F.b,marginBottom:10}}>{expressType==="parcel"?"Search by SKU for express parcel parts: end panels, fillers, mouldings, plywood tops, shelves, valances, corbels, roll-outs, drawer boxes, hardware, samples, and more. Max length 94\". No doors/drawer fronts on this form.":"Search by SKU to auto-price. Set hinge, finished ends, and modifications per item."}</div>
+              )}
 
-              {items.map((item, idx) => {
+              {expressType==="ddf" ? (
+                /* ═══ DDF-SPECIFIC ITEM LIST ═══ */
+                items.map((item, idx) => {
+                  const sqin = (item.sqW || 0) * (item.sqH || 0);
+                  const ddfItem = { ...item, sqin };
+                  const { u } = cp(ddfItem, sp, cx, door, drwF, drwBox);
+                  const lineTotal = u * item.q;
+                  const ddfType = DDF_TYPES.find(d => d.v === item.s);
+
+                  return (
+                    <div key={item.id} style={{padding:"14px 16px",background:idx%2===0?C.cream:"#fff",borderRadius:10,marginBottom:8,border:`1px solid ${C.acc}33`,transition:"all .15s"}}>
+                      {/* Row 1: Type + Cabinet Ref + Qty + Delete */}
+                      <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"200px 1fr 60px 32px",gap:8,alignItems:"end",marginBottom:10}}>
+                        <div>
+                          <label style={labelStyle}>Type</label>
+                          <select value={item.s} onChange={e=>{const d=DDF_TYPES.find(x=>x.v===e.target.value);if(d)updItem(item.id,{s:d.v,p:d.price,r:d.r,t:"A"})}} style={{...fieldStyle,cursor:"pointer",appearance:"auto"}}>
+                            {DDF_TYPES.map(d=><option key={d.v} value={d.v}>{d.l} ({d.v})</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Cabinet Reference <span style={{color:C.stone,fontWeight:400}}>(e.g. B12, W3630)</span></label>
+                          <input value={item.cabinetRef||""} onChange={e=>updItem(item.id,{cabinetRef:e.target.value})} placeholder="Cabinet SKU this is for..." style={fieldStyle} />
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Qty</label>
+                          <input type="number" min="1" value={item.q} onChange={e=>updItem(item.id,{q:Math.max(1,parseInt(e.target.value)||1)})} style={{...fieldStyle,textAlign:"center"}} />
+                        </div>
+                        <button onClick={()=>removeItem(item.id)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.red,padding:"4px",alignSelf:"end",marginBottom:2}}>&times;</button>
+                      </div>
+
+                      {/* Row 2: Width + Height + Hinge + Door/DF Style Override */}
+                      <div style={{display:"grid",gridTemplateColumns:mob?"1fr 1fr":"80px 80px 90px 1fr",gap:8,alignItems:"end",marginBottom:8}}>
+                        <div>
+                          <label style={labelStyle}>Width (in)</label>
+                          <input type="number" min="0" step="0.25" value={item.sqW||""} onChange={e=>updItem(item.id,{sqW:+e.target.value||0})} placeholder="W" style={{...fieldStyle,textAlign:"center"}} />
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Height (in)</label>
+                          <input type="number" min="0" step="0.25" value={item.sqH||""} onChange={e=>updItem(item.id,{sqH:+e.target.value||0})} placeholder="H" style={{...fieldStyle,textAlign:"center"}} />
+                        </div>
+                        <div>
+                          <label style={labelStyle}>Hinge</label>
+                          <select value={item.hng||""} onChange={e=>updItem(item.id,{hng:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto"}}>
+                            <option value="">—</option><option value="L">Left</option><option value="R">Right</option><option value="Pair">Pair</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style={labelStyle}>{item.s==="LSD"?"Door Style Override":"Drawer Front Style Override"}</label>
+                          {item.s==="LSD" ? (
+                            <select value={item.ds||""} onChange={e=>updItem(item.id,{ds:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto",fontSize:11}}>
+                              <option value="">— global ({door}) —</option>
+                              {DOORS.map(d=><option key={d.v} value={d.v}>{d.l} ({d.g})</option>)}
+                            </select>
+                          ) : (
+                            <select value={item.dfs||""} onChange={e=>updItem(item.id,{dfs:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto",fontSize:11}}>
+                              <option value="">— global ({drwF}) —</option>
+                              {DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.l} ({d.g})</option>)}
+                            </select>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Optional description */}
+                      <div style={{marginBottom:8}}>
+                        <label style={labelStyle}>Description / Notes <span style={{color:C.stone,fontWeight:400}}>(optional)</span></label>
+                        <input value={item.ddfDesc||""} onChange={e=>updItem(item.id,{ddfDesc:e.target.value})} placeholder="E.g.: Replacement door for B12, damaged in shipping" style={fieldStyle} />
+                      </div>
+
+                      {/* Price summary */}
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:8,borderTop:`1px solid ${C.bdr}`}}>
+                        <div style={{fontSize:10,color:C.stone,fontFamily:F.b}}>
+                          <span style={{fontWeight:600,color:C.ink}}>{ddfType?.l||item.s}</span>
+                          {item.cabinetRef ? ` for ${item.cabinetRef}` : ""}
+                          {sqin > 0 ? ` · ${item.sqW}" x ${item.sqH}" = ${sqin.toLocaleString()} sq.in · ${item.p}/sq.in` : " · Enter width and height"}
+                          {item.hng ? ` · ${item.hng} hinge` : ""}
+                        </div>
+                        <div style={{fontFamily:F.m,fontWeight:700,fontSize:14,color:sqin>0?C.ink:C.stone}}>
+                          {sqin > 0 ? fm(lineTotal) : "—"}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+              /* ═══ STANDARD / PARCEL / TRUCK ITEM LIST ═══ */
+              items.map((item, idx) => {
                 const t = itemTotals[idx] || {};
                 const isMould = item.t === "M";
                 const itemSQ = item.s ? isSqIn(item.s, item.r) : false;
@@ -8781,7 +8883,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                     {/* Row 1: SKU search + Qty + Delete */}
                     <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"60px 1fr 32px",gap:8,alignItems:"end",marginBottom:item.s?8:0}}>
                       <div><label style={labelStyle}>Qty</label><input type="number" min="1" value={item.q} onChange={e=>updItem(item.id,{q:Math.max(1,parseInt(e.target.value)||1)})} style={{...fieldStyle,textAlign:"center"}} /></div>
-                      <div><label style={labelStyle}>SKU (search catalog)</label><SkuSearchInput value={item.s} sp={sp} cx={cx} door={door} drwF={drwF} drwBox={drwBox} placeholder="Type to search SKU..." onSelect={(cat) => selectSku(item.id, cat)} catalogFilter={expressType==="parcel"?EXPRESS_PARCEL_FILTER:expressType==="ddf"?EXPRESS_DDF_FILTER:null} /></div>
+                      <div><label style={labelStyle}>SKU (search catalog)</label><SkuSearchInput value={item.s} sp={sp} cx={cx} door={door} drwF={drwF} drwBox={drwBox} placeholder="Type to search SKU..." onSelect={(cat) => selectSku(item.id, cat)} catalogFilter={expressType==="parcel"?EXPRESS_PARCEL_FILTER:null} /></div>
                       <button onClick={()=>removeItem(item.id)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.red,padding:"4px",alignSelf:"end",marginBottom:2}}>&times;</button>
                     </div>
 
@@ -8915,7 +9017,8 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                     </div>}
                   </div>
                 );
-              })}
+              })
+              )}
 
               {items.length === 0 && <div style={{padding:24,textAlign:"center",color:C.stone,fontSize:12}}>No items yet — click "+ Add Item" above</div>}
 
