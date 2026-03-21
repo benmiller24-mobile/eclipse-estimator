@@ -7759,6 +7759,8 @@ function AuthWrapper() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeView, setActiveView] = useState("dashboard");
+  const [workflowData, setWorkflowData] = useState(null);
 
   const fetchProfile = async (userId) => {
     try {
@@ -7835,9 +7837,6 @@ function AuthWrapper() {
   if (profile?.role === "pending") {
     return <PendingApproval user={user} onLogout={handleLogout} />;
   }
-
-  const [activeView, setActiveView] = useState("dashboard");
-  const [workflowData, setWorkflowData] = useState(null);
 
   if (activeView === "dashboard") {
     return <Dashboard user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onNavigate={(view, data) => { setActiveView(view); setWorkflowData(data || null); }} />;
