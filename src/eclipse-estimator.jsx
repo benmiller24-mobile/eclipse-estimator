@@ -8143,7 +8143,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
           <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Dealer & Contact</div>
           <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10}}>
             <div><label style={labelStyle}>Dealer Name</label><input value={dealerName} onChange={e=>setDealerName(e.target.value)} style={fieldStyle} /></div>
-            <div><label style={labelStyle}>Dealer Code</label><input value={dealerCode} onChange={e=>setDealerCode(e.target.value)} style={fieldStyle} /></div>
+            <div><label style={labelStyle}>Dealer Number</label><input value={dealerCode} onChange={e=>setDealerCode(e.target.value)} style={fieldStyle} /></div>
             <div><label style={labelStyle}>Contact Name</label><input value={contactName} onChange={e=>setContactName(e.target.value)} style={fieldStyle} /></div>
             <div><label style={labelStyle}>Phone</label><input value={contactPhone} onChange={e=>setContactPhone(e.target.value)} style={fieldStyle} /></div>
             <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
@@ -8352,7 +8352,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
               <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Dealer & Delivery</div>
               <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10}}>
                 <div><label style={labelStyle}>Dealer Name</label><input value={dealerName} onChange={e=>setDealerName(e.target.value)} style={fieldStyle} /></div>
-                <div><label style={labelStyle}>Dealer Code</label><input value={dealerCode} onChange={e=>setDealerCode(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Dealer Number</label><input value={dealerCode} onChange={e=>setDealerCode(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>Contact</label><input value={contactName} onChange={e=>setContactName(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>Phone</label><input value={contactPhone} onChange={e=>setContactPhone(e.target.value)} style={fieldStyle} /></div>
                 <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
@@ -8609,7 +8609,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
               <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Dealer & Shipping</div>
               <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10}}>
                 <div><label style={labelStyle}>Dealer Name</label><input value={dealerName} onChange={e=>setDealerName(e.target.value)} style={fieldStyle} /></div>
-                <div><label style={labelStyle}>Dealer Code</label><input value={dealerCode} onChange={e=>setDealerCode(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Dealer Number</label><input value={dealerCode} onChange={e=>setDealerCode(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>Contact</label><input value={contactName} onChange={e=>setContactName(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>Phone</label><input value={contactPhone} onChange={e=>setContactPhone(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
