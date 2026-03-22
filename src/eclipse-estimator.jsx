@@ -7326,8 +7326,25 @@ function LoginForm({onLoginSuccess}) {
           </button>
         </form>
 
+        {!isSignup && (
+          <div style={{ marginTop:12, textAlign:"center" }}>
+            <button onClick={async ()=>{
+              if(!email){setError("Enter your email first");return;}
+              setLoading(true);
+              try{
+                const{error:e}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
+                if(e)throw e;
+                setError("Password reset link sent — check your email");
+              }catch(e){setError(e.message);}
+              finally{setLoading(false);}
+            }} style={{ background:"none", border:"none", color:C.stone, cursor:"pointer", fontSize:13, textDecoration:"underline" }}>
+              Forgot password?
+            </button>
+          </div>
+        )}
+
         <div style={{
-          marginTop: "16px",
+          marginTop: "12px",
           textAlign: "center",
           fontSize: "13px",
         }}>
@@ -7597,7 +7614,12 @@ function AdminPanel({supabaseClient: sb, onClose}) {
   const [newDealerName, setNewDealerName] = useState("");
   const [newDealerCode, setNewDealerCode] = useState("");
   const [newDealerMult, setNewDealerMult] = useState("");
+  const [invEmail, setInvEmail] = useState("");
+  const [invName, setInvName] = useState("");
+  const [invRole, setInvRole] = useState("designer");
+  const [invDealer, setInvDealer] = useState("");
   const [loading, setLoading] = useState(false);
+  const [inviting, setInviting] = useState(false);
   const [toast, setToast] = useState("");
   const [tab, setTab] = useState("pending"); // pending | users | dealers
   const isMob = typeof window!=="undefined" && window.innerWidth<=768;
@@ -7675,6 +7697,47 @@ function AdminPanel({supabaseClient: sb, onClose}) {
   const deactivateUser = async (userId) => {
     if (!window.confirm("Set this user to pending? They will lose access until re-approved.")) return;
     if (await updateUser(userId, { role: "pending" })) flash("User deactivated");
+  };
+
+  const inviteUser = async () => {
+    if (!invEmail) return;
+    setInviting(true);
+    try {
+      // 1. Create auth user with a random temporary password
+      const tempPw = "Tmp_" + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2) + "!1";
+      const { data: signUpData, error: signUpErr } = await sb.auth.signUp({
+        email: invEmail,
+        password: tempPw,
+        options: { data: { full_name: invName, business_name: "" } },
+      });
+      if (signUpErr) throw signUpErr;
+      const newUid = signUpData.user?.id;
+      // 2. Update profile with role + dealer (profile may be created by trigger — retry briefly)
+      if (newUid) {
+        let retries = 0;
+        while (retries < 5) {
+          const { error: profErr } = await sb.from("profiles").update({
+            role: invRole,
+            dealer_id: invDealer ? parseInt(invDealer) : null,
+            full_name: invName,
+          }).eq("id", newUid);
+          if (!profErr) break;
+          retries++;
+          await new Promise(r => setTimeout(r, 600));
+        }
+      }
+      // 3. Send password reset email so user can set their own password
+      const { error: resetErr } = await sb.auth.resetPasswordForEmail(invEmail, {
+        redirectTo: window.location.origin,
+      });
+      if (resetErr) console.warn("Reset email error (user still created):", resetErr.message);
+      setInvEmail(""); setInvName(""); setInvRole("designer"); setInvDealer("");
+      loadUsers();
+      flash("Invite sent to " + invEmail);
+    } catch (err) {
+      console.error("Invite error:", err);
+      flash("Error: " + err.message);
+    } finally { setInviting(false); }
   };
 
   const pendingUsers = users.filter(u => u.role === "pending");
@@ -7803,6 +7866,43 @@ function AdminPanel({supabaseClient: sb, onClose}) {
         {/* ── USERS TAB ── */}
         {tab==="users" && (
           <div>
+            {/* Invite User form */}
+            <div style={sectionHead}>Invite New User</div>
+            <div style={{...cardStyle, marginBottom:20, borderLeft:`4px solid #16a34a`}}>
+              <div style={{display:"grid",gridTemplateColumns:isMob?"1fr":"1fr 1fr",gap:8,marginBottom:8}}>
+                <div>
+                  <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Email *</label>
+                  <input type="email" className="inp" placeholder="jane@company.com" value={invEmail} onChange={e=>setInvEmail(e.target.value)} style={{width:"100%",minHeight:44,fontSize:14,padding:"8px 12px"}}/>
+                </div>
+                <div>
+                  <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Full Name</label>
+                  <input type="text" className="inp" placeholder="Jane Smith" value={invName} onChange={e=>setInvName(e.target.value)} style={{width:"100%",minHeight:44,fontSize:14,padding:"8px 12px"}}/>
+                </div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:isMob?"1fr":"1fr 1fr",gap:8,marginBottom:12}}>
+                <div>
+                  <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Role</label>
+                  <select value={invRole} onChange={e=>setInvRole(e.target.value)} className="sel" style={{width:"100%",minHeight:44,fontSize:14}}>
+                    <option value="designer">Designer</option>
+                    <option value="dealer">Dealer</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Assign to Dealer</label>
+                  <select value={invDealer} onChange={e=>setInvDealer(e.target.value)} className="sel" style={{width:"100%",minHeight:44,fontSize:14}}>
+                    <option value="">— None —</option>
+                    {dealers.map(d=><option key={d.id} value={d.id}>{d.name} ({d.code})</option>)}
+                  </select>
+                </div>
+              </div>
+              <button onClick={inviteUser} disabled={inviting||!invEmail} className="bt bp" style={{width:"100%",minHeight:48,fontSize:15,fontWeight:700,background:"#16a34a",border:"none",opacity:!invEmail?0.5:1}}>
+                {inviting ? "Sending invite..." : "Send Invite"}
+              </button>
+              <div style={{fontSize:11,color:C.stone,marginTop:8,lineHeight:1.4}}>
+                User will receive an email to set their password. They'll be pre-approved with the role and dealer you select — no pending step.
+              </div>
+            </div>
+
             <div style={sectionHead}>{activeUsers.length} Active User{activeUsers.length!==1?"s":""}</div>
             <div style={{display:"flex",flexDirection:"column",gap:10}}>
               {activeUsers.map(u=><UserCard key={u.id} u={u} showApprove={false}/>)}
@@ -7857,12 +7957,58 @@ function AdminPanel({supabaseClient: sb, onClose}) {
 }
 
 // ── AuthWrapper Component ──
+/* ── SetPasswordForm — shown after user clicks password-reset link ── */
+function SetPasswordForm({onDone}) {
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (pw.length < 6) { setError("Password must be at least 6 characters"); return; }
+    if (pw !== pw2) { setError("Passwords do not match"); return; }
+    setLoading(true);
+    try {
+      const { error: upErr } = await supabaseClient.auth.updateUser({ password: pw });
+      if (upErr) throw upErr;
+      onDone();
+    } catch (err) { setError(err.message); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div style={{ position:"fixed", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:`linear-gradient(135deg, ${C.ink} 0%, ${C.acc} 100%)`, padding:20 }}>
+      <div style={{ background:C.paper, borderRadius:12, padding:32, width:"100%", maxWidth:380, boxShadow:"0 20px 60px rgba(0,0,0,0.3)" }}>
+        <h1 style={{ fontFamily:F.d, fontSize:24, fontWeight:700, color:C.ink, marginBottom:8 }}>Set Your Password</h1>
+        <p style={{ fontSize:13, color:C.stone, marginBottom:24 }}>Choose a password for your Eclipse Estimator account.</p>
+        <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:12 }}>
+          <div>
+            <label className="lb">New Password</label>
+            <input type="password" className="inp" value={pw} onChange={e=>setPw(e.target.value)} required style={{fontSize:16}} />
+          </div>
+          <div>
+            <label className="lb">Confirm Password</label>
+            <input type="password" className="inp" value={pw2} onChange={e=>setPw2(e.target.value)} required style={{fontSize:16}} />
+          </div>
+          {error && <div style={{ fontSize:12, color:C.red, background:"#fee", padding:"8px 10px", borderRadius:6 }}>{error}</div>}
+          <button type="submit" className="bt bp" disabled={loading} style={{ width:"100%", marginTop:8, minHeight:48, fontSize:15, fontWeight:700 }}>
+            {loading ? "Saving..." : "Set Password & Continue"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 function AuthWrapper() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState("dashboard");
   const [workflowData, setWorkflowData] = useState(null);
+  const [showResetPw, setShowResetPw] = useState(false);
 
   const fetchProfile = async (userId) => {
     try {
@@ -7898,6 +8044,9 @@ function AuthWrapper() {
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
       const sessionUser = session?.user || null;
       if (!mounted) return;
+      if (event === "PASSWORD_RECOVERY") {
+        setShowResetPw(true);
+      }
       setUser(sessionUser);
       if (sessionUser) {
         const prof = await fetchProfile(sessionUser.id);
@@ -7934,6 +8083,10 @@ function AuthWrapper() {
 
   if (!user) {
     return <LoginForm onLoginSuccess={(u) => setUser(u)} />;
+  }
+
+  if (showResetPw) {
+    return <SetPasswordForm onDone={() => setShowResetPw(false)} />;
   }
 
   if (profile?.role === "pending") {
