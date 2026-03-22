@@ -7596,21 +7596,22 @@ function AdminPanel({supabaseClient: sb, onClose}) {
   const [dealers, setDealers] = useState([]);
   const [newDealerName, setNewDealerName] = useState("");
   const [newDealerCode, setNewDealerCode] = useState("");
+  const [newDealerMult, setNewDealerMult] = useState("");
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState("");
+  const [tab, setTab] = useState("pending"); // pending | users | dealers
+  const isMob = typeof window!=="undefined" && window.innerWidth<=768;
 
-  useEffect(() => {
-    loadUsers();
-    loadDealers();
-  }, []);
+  useEffect(() => { loadUsers(); loadDealers(); }, []);
+
+  const flash = (msg) => { setToast(msg); setTimeout(()=>setToast(""), 2400); };
 
   const loadUsers = async () => {
     try {
-      const { data, error } = await sb.from("profiles").select("id,email,role,dealer_id,discount_pct");
+      const { data, error } = await sb.from("profiles").select("id,email,role,dealer_id,discount_pct,full_name,business_name");
       if (error) throw error;
       setUsers(data || []);
-    } catch (err) {
-      console.error("Error loading users:", err);
-    }
+    } catch (err) { console.error("Error loading users:", err); }
   };
 
   const loadDealers = async () => {
@@ -7618,185 +7619,238 @@ function AdminPanel({supabaseClient: sb, onClose}) {
       const { data, error } = await sb.from("dealers").select("id,name,code");
       if (error) throw error;
       setDealers(data || []);
-    } catch (err) {
-      console.error("Error loading dealers:", err);
-    }
+    } catch (err) { console.error("Error loading dealers:", err); }
+  };
+
+  const updateUser = async (userId, fields) => {
+    try {
+      const { error } = await sb.from("profiles").update(fields).eq("id", userId);
+      if (error) throw error;
+      loadUsers();
+      return true;
+    } catch (err) { console.error("Error updating user:", err); return false; }
+  };
+
+  const approveUser = async (userId, role) => {
+    if (await updateUser(userId, { role })) flash("User approved as " + role);
   };
 
   const updateUserRole = async (userId, newRole) => {
-    try {
-      const { error } = await sb
-        .from("profiles")
-        .update({ role: newRole })
-        .eq("id", userId);
-      if (error) throw error;
-      loadUsers();
-    } catch (err) {
-      console.error("Error updating role:", err);
-    }
+    if (await updateUser(userId, { role: newRole })) flash("Role updated");
   };
 
   const updateUserMultiplier = async (userId, mult) => {
-    try {
-      const { error } = await sb
-        .from("profiles")
-        .update({ discount_pct: mult })
-        .eq("id", userId);
-      if (error) throw error;
-      loadUsers();
-    } catch (err) {
-      console.error("Error updating multiplier:", err);
-    }
+    if (await updateUser(userId, { discount_pct: mult })) flash("Multiplier saved");
+  };
+
+  const assignDealer = async (userId, dealerId) => {
+    if (await updateUser(userId, { dealer_id: dealerId || null })) flash("Dealer assigned");
   };
 
   const createDealer = async () => {
     if (!newDealerName || !newDealerCode) return;
     setLoading(true);
     try {
-      const { error } = await sb
-        .from("dealers")
-        .insert([{ name: newDealerName, code: newDealerCode }]);
+      const { error } = await sb.from("dealers").insert([{ name: newDealerName, code: newDealerCode }]);
       if (error) throw error;
-      setNewDealerName("");
-      setNewDealerCode("");
+      setNewDealerName(""); setNewDealerCode(""); setNewDealerMult("");
       loadDealers();
-    } catch (err) {
-      console.error("Error creating dealer:", err);
-    } finally {
-      setLoading(false);
-    }
+      flash("Dealer created");
+    } catch (err) { console.error("Error creating dealer:", err); }
+    finally { setLoading(false); }
+  };
+
+  const deleteDealer = async (id, name) => {
+    if (!window.confirm("Delete dealer \"" + name + "\"? Users linked to this dealer will be unlinked.")) return;
+    try {
+      // Unlink any users assigned to this dealer
+      await sb.from("profiles").update({ dealer_id: null }).eq("dealer_id", id);
+      const { error } = await sb.from("dealers").delete().eq("id", id);
+      if (error) throw error;
+      loadDealers(); loadUsers();
+      flash("Dealer deleted");
+    } catch (err) { console.error("Error deleting dealer:", err); }
+  };
+
+  const deactivateUser = async (userId) => {
+    if (!window.confirm("Set this user to pending? They will lose access until re-approved.")) return;
+    if (await updateUser(userId, { role: "pending" })) flash("User deactivated");
+  };
+
+  const pendingUsers = users.filter(u => u.role === "pending");
+  const activeUsers = users.filter(u => u.role !== "pending");
+  const dealerMap = {};
+  dealers.forEach(d => { dealerMap[d.id] = d; });
+
+  const sectionHead = { fontSize:13, fontWeight:700, color:C.ink, textTransform:"uppercase", letterSpacing:"0.05em", marginBottom:10 };
+  const cardStyle = { background:C.cream, border:`1px solid ${C.bdr}`, borderRadius:10, padding:isMob?10:14 };
+  const tabBtn = (id, label, count) => (
+    <button key={id} onClick={()=>setTab(id)} style={{
+      flex:1, padding:isMob?"10px 6px":"8px 14px", fontSize:isMob?13:13, fontWeight:600,
+      background:tab===id?C.ink:"transparent", color:tab===id?C.paper:C.stone,
+      border:`1px solid ${tab===id?C.ink:C.bdr}`, borderRadius:8, cursor:"pointer",
+      minHeight:44, transition:"all 0.15s",
+    }}>{label}{count>0 && <span style={{
+      display:"inline-block", background:tab===id?"#ef4444":C.red, color:"#fff",
+      borderRadius:10, fontSize:10, fontWeight:700, padding:"1px 6px", marginLeft:6,
+    }}>{count}</span>}</button>
+  );
+
+  /* ── User card sub-component ── */
+  const UserCard = ({u, showApprove}) => {
+    const dl = u.dealer_id ? dealerMap[u.dealer_id] : null;
+    return (
+      <div style={{...cardStyle, ...(showApprove?{borderLeft:`4px solid ${C.acc}`}:{})}}>
+        {/* Row 1: Identity */}
+        <div style={{marginBottom:8}}>
+          <div style={{fontSize:14,fontWeight:700,color:C.ink}}>{u.full_name || u.email}</div>
+          {u.full_name && <div style={{fontSize:12,color:C.stone,marginTop:1}}>{u.email}</div>}
+          {u.business_name && <div style={{fontSize:12,color:C.acc,marginTop:2,fontWeight:600}}>{u.business_name}</div>}
+        </div>
+
+        {/* Quick-approve buttons for pending users */}
+        {showApprove && (
+          <div style={{display:"flex",gap:8,marginBottom:10,flexWrap:"wrap"}}>
+            <button onClick={()=>approveUser(u.id,"designer")} className="bt bp" style={{flex:1,minHeight:44,fontSize:14,fontWeight:700,background:"#16a34a",border:"none"}}>Approve as Designer</button>
+            <button onClick={()=>approveUser(u.id,"dealer")} className="bt bp" style={{flex:1,minHeight:44,fontSize:14,fontWeight:700,background:C.acc,border:"none"}}>Approve as Dealer</button>
+          </div>
+        )}
+
+        {/* Row 2: Role + Dealer assignment (active users) */}
+        {!showApprove && (
+          <div style={{display:"grid",gridTemplateColumns:isMob?"1fr":"1fr 1fr",gap:8,marginBottom:u.role==="dealer"?8:0}}>
+            <div>
+              <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Role</label>
+              <select value={u.role} onChange={e=>updateUserRole(u.id,e.target.value)} className="sel" style={{width:"100%",minHeight:40,fontSize:14}}>
+                <option value="pending">Pending</option>
+                <option value="designer">Designer</option>
+                <option value="dealer">Dealer</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div>
+              <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Dealer</label>
+              <select value={u.dealer_id||""} onChange={e=>assignDealer(u.id,e.target.value?parseInt(e.target.value):null)} className="sel" style={{width:"100%",minHeight:40,fontSize:14}}>
+                <option value="">— None —</option>
+                {dealers.map(d=><option key={d.id} value={d.id}>{d.name} ({d.code})</option>)}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Multiplier row (dealer role only) */}
+        {u.role==="dealer"&&!showApprove&&(
+          <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+            <label style={{fontSize:12,fontWeight:600,color:C.ink}}>Multiplier %</label>
+            <input type="number" className="inp" min={0} max={100} step={0.1}
+              value={u.discount_pct ? Math.round(u.discount_pct*1000)/10 : ""}
+              placeholder="e.g. 53.9"
+              onChange={e=>{const v=parseFloat(e.target.value);if(!isNaN(v))updateUserMultiplier(u.id,Math.max(0,Math.min(1,v/100)));}}
+              style={{width:100,minHeight:40,padding:"6px 10px",fontSize:14}}/>
+            <span style={{fontSize:12,color:C.stone}}>{u.discount_pct ? "×"+u.discount_pct : ""}</span>
+            <button onClick={()=>deactivateUser(u.id)} title="Deactivate user" style={{marginLeft:"auto",background:"none",border:`1px solid ${C.red}`,color:C.red,borderRadius:8,padding:"6px 12px",fontSize:12,fontWeight:600,cursor:"pointer",minHeight:36}}>Deactivate</button>
+          </div>
+        )}
+        {u.role!=="dealer"&&!showApprove&&(
+          <div style={{display:"flex",justifyContent:"flex-end",marginTop:4}}>
+            <button onClick={()=>deactivateUser(u.id)} title="Deactivate user" style={{background:"none",border:`1px solid ${C.red}`,color:C.red,borderRadius:8,padding:"6px 12px",fontSize:12,fontWeight:600,cursor:"pointer",minHeight:36}}>Deactivate</button>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(3px)", padding: "14px", overflow: "auto" }}>
+    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", display:"flex", alignItems:isMob?"flex-end":"center", justifyContent:"center", zIndex:1000, backdropFilter:"blur(3px)", padding:isMob?0:"14px" }}>
       <div style={{
-        background: C.paper,
-        borderRadius: "12px",
-        padding: "20px",
-        width: "100%",
-        maxWidth: "600px",
-        maxHeight: "85vh",
-        overflowY: "auto",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+        background:C.paper, borderRadius:isMob?"16px 16px 0 0":"12px",
+        padding:isMob?"16px 14px 24px":"24px", width:"100%", maxWidth:isMob?"100%":"640px",
+        maxHeight:isMob?"92vh":"88vh", overflowY:"auto", WebkitOverflowScrolling:"touch",
+        boxShadow:"0 20px 60px rgba(0,0,0,0.3)",
       }}>
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "20px",
-          paddingBottom: "12px",
-          borderBottom: `1px solid ${C.bdr}`,
-        }}>
-          <h3 style={{
-            fontFamily: F.d,
-            fontSize: "20px",
-            fontWeight: "700",
-            color: C.ink,
-          }}>Admin Panel</h3>
-          <button
-            onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              fontSize: "24px",
-              cursor: "pointer",
-              color: C.stone,
-            }}
-          >×</button>
+        {/* Drag handle on mobile */}
+        {isMob && <div style={{width:36,height:4,background:C.bdr,borderRadius:2,margin:"0 auto 12px"}}/>}
+
+        {/* Header */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16, paddingBottom:12, borderBottom:`1px solid ${C.bdr}` }}>
+          <h3 style={{ fontFamily:F.d, fontSize:isMob?18:20, fontWeight:700, color:C.ink }}>Admin Panel</h3>
+          <button onClick={onClose} style={{ background:"none", border:"none", fontSize:28, cursor:"pointer", color:C.stone, minWidth:44, minHeight:44, display:"flex", alignItems:"center", justifyContent:"center" }}>×</button>
         </div>
 
-        <div style={{ marginBottom: "32px" }}>
-          <h4 style={{
-            fontSize: "14px",
-            fontWeight: "700",
-            color: C.ink,
-            marginBottom: "12px",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-          }}>Users</h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {users.map((u) => (
-              <div key={u.id} style={{
-                background: C.cream,
-                border: `1px solid ${C.bdr}`,
-                borderRadius: "8px",
-                padding: "12px",
-              }}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:u.role==="dealer"?"8px":"0"}}>
-                  <div>
-                    <div style={{ fontSize: "13px", fontWeight: "600", color: C.ink }}>{u.email}</div>
-                    <div style={{ fontSize: "11px", color: C.stone, marginTop: "2px" }}>Role: {u.role}</div>
-                  </div>
-                  <select
-                    value={u.role}
-                    onChange={(e) => updateUserRole(u.id, e.target.value)}
-                    className="sel"
-                    style={{ width: "120px" }}
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="designer">Designer</option>
-                    <option value="dealer">Dealer</option>
-                    <option value="admin">Admin</option>
-                  </select>
+        {/* Toast */}
+        {toast && <div style={{background:"#16a34a",color:"#fff",padding:"10px 16px",borderRadius:8,fontSize:13,fontWeight:600,marginBottom:12,textAlign:"center",animation:"fadeIn 0.2s"}}>{toast}</div>}
+
+        {/* Tab bar */}
+        <div style={{display:"flex",gap:6,marginBottom:16}}>
+          {tabBtn("pending","Pending",pendingUsers.length)}
+          {tabBtn("users","Users",0)}
+          {tabBtn("dealers","Dealers",0)}
+        </div>
+
+        {/* ── PENDING TAB ── */}
+        {tab==="pending" && (
+          <div>
+            {pendingUsers.length===0 ? (
+              <div style={{textAlign:"center",padding:"40px 20px",color:C.stone,fontSize:14}}>No pending requests</div>
+            ) : (
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                {pendingUsers.map(u=><UserCard key={u.id} u={u} showApprove={true}/>)}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── USERS TAB ── */}
+        {tab==="users" && (
+          <div>
+            <div style={sectionHead}>{activeUsers.length} Active User{activeUsers.length!==1?"s":""}</div>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              {activeUsers.map(u=><UserCard key={u.id} u={u} showApprove={false}/>)}
+            </div>
+          </div>
+        )}
+
+        {/* ── DEALERS TAB ── */}
+        {tab==="dealers" && (
+          <div>
+            <div style={sectionHead}>Add New Dealer</div>
+            <div style={{...cardStyle, marginBottom:20}}>
+              <div style={{display:"grid",gridTemplateColumns:isMob?"1fr":"1fr 1fr",gap:8,marginBottom:10}}>
+                <div>
+                  <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Dealer Name *</label>
+                  <input type="text" className="inp" placeholder="Eclipse Kitchen & Bath" value={newDealerName} onChange={e=>setNewDealerName(e.target.value)} style={{width:"100%",minHeight:44,fontSize:14,padding:"8px 12px"}}/>
                 </div>
-                {u.role==="dealer"&&<div style={{display:"flex",gap:8,alignItems:"center"}}>
-                  <label style={{fontSize:"11px",fontWeight:600,color:C.ink}}>Multiplier:</label>
-                  <input type="number" className="inp" min={0} max={1} step={0.001} value={u.discount_pct||0} onChange={(e)=>updateUserMultiplier(u.id,Math.max(0,Math.min(1,+e.target.value)))} style={{width:80,padding:"4px 6px",fontSize:11}}/>
-                  <span style={{fontSize:10,color:C.stone}}>e.g. 0.539</span>
-                </div>}
+                <div>
+                  <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Dealer Code *</label>
+                  <input type="text" className="inp" placeholder="EKB" value={newDealerCode} onChange={e=>setNewDealerCode(e.target.value)} style={{width:"100%",minHeight:44,fontSize:14,padding:"8px 12px"}}/>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
+              <button onClick={createDealer} disabled={loading||!newDealerName||!newDealerCode} className="bt bp" style={{width:"100%",minHeight:48,fontSize:15,fontWeight:700,opacity:(!newDealerName||!newDealerCode)?0.5:1}}>
+                {loading ? "Creating..." : "+ Add Dealer"}
+              </button>
+            </div>
 
-        <div>
-          <h4 style={{
-            fontSize: "14px",
-            fontWeight: "700",
-            color: C.ink,
-            marginBottom: "12px",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-          }}>Dealers</h4>
-          <div style={{ marginBottom: "16px", display: "flex", gap: "8px" }}>
-            <input
-              type="text"
-              className="inp"
-              placeholder="Dealer name"
-              value={newDealerName}
-              onChange={(e) => setNewDealerName(e.target.value)}
-              style={{ flex: 1 }}
-            />
-            <input
-              type="text"
-              className="inp"
-              placeholder="Code"
-              value={newDealerCode}
-              onChange={(e) => setNewDealerCode(e.target.value)}
-              style={{ flex: 1 }}
-            />
-            <button
-              onClick={createDealer}
-              disabled={loading}
-              className="bt bp"
-            >
-              {loading ? "..." : "Add"}
-            </button>
+            <div style={sectionHead}>{dealers.length} Dealer{dealers.length!==1?"s":""}</div>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {dealers.map(d => {
+                const linked = users.filter(u=>u.dealer_id===d.id);
+                return (
+                  <div key={d.id} style={cardStyle}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                      <div>
+                        <div style={{fontSize:14,fontWeight:700,color:C.ink}}>{d.name}</div>
+                        <div style={{fontSize:12,color:C.stone,marginTop:2}}>Code: {d.code}</div>
+                        {linked.length>0 && <div style={{fontSize:11,color:C.acc,marginTop:4,fontWeight:600}}>{linked.length} user{linked.length!==1?"s":""}: {linked.map(u=>u.full_name||u.email).join(", ")}</div>}
+                        {linked.length===0 && <div style={{fontSize:11,color:C.stone,marginTop:4,fontStyle:"italic"}}>No users linked</div>}
+                      </div>
+                      <button onClick={()=>deleteDealer(d.id,d.name)} title="Delete dealer" style={{background:"none",border:`1px solid ${C.red}`,color:C.red,borderRadius:8,padding:"6px 10px",fontSize:12,fontWeight:600,cursor:"pointer",minHeight:36,flexShrink:0}}>Delete</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {dealers.map((d) => (
-              <div key={d.id} style={{
-                background: C.cream,
-                border: `1px solid ${C.bdr}`,
-                borderRadius: "8px",
-                padding: "12px",
-              }}>
-                <div style={{ fontSize: "13px", fontWeight: "600", color: C.ink }}>{d.name}</div>
-                <div style={{ fontSize: "11px", color: C.stone, marginTop: "2px" }}>Code: {d.code}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
