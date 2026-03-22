@@ -8335,10 +8335,19 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
   const [sampleEdge, setSampleEdge] = useState("");
   const [sampleCharT, setSampleCharT] = useState("NONE");
 
+  const [samplePO, setSamplePO] = useState("");
+
   // Color blocks/chips
   const [colorSelections, setColorSelections] = useState(Array(10).fill(""));
   const [blockType, setBlockType] = useState("RCSB"); // RCSB or RLVSB
   const [orderType, setOrderType] = useState("Standard"); // Standard or Express
+
+  // Flat sorted list of all unique Eclipse finish colors for dropdown
+  const ALL_COLORS = useMemo(() => {
+    const set = new Set();
+    Object.values(FINISH_COLORS).forEach(arr => arr.forEach(c => set.add(c)));
+    return [...set].sort();
+  }, []);
 
   const sampleTypes = [
     { id: "sd85", icon: "📋", title: "Sample Door 8½×11 (Standard)", price: "$65+", code: "ECL-SD-STD", desc: "8.5 x 11 inch standard sample door — $65 list + species & construction upcharges. Not available in Walnut, Rustic Walnut, Rift White Oak, QS White Oak, or TFL." },
@@ -8529,7 +8538,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 
       setText("Business Name", dealerName);
       setText("Customer #", dealerCode);
-      setText("P.O. Number", "");
+      setText("P.O. Number", samplePO);
       setText("Job Name", "");
       setText("Order Date", new Date().toLocaleDateString());
       setText("Salesperson/Contact", contactName);
@@ -8576,7 +8585,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 
       setText("Business Name", dealerName);
       setText("Customer #", dealerCode);
-      setText("P.O. Number", "");
+      setText("P.O. Number", samplePO);
       setText("Job Name", "");
       setText("Order Date", new Date().toLocaleDateString());
       setText("Salesperson/Contact", contactName);
@@ -8669,7 +8678,8 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
                 <div><label style={labelStyle}>Dealer Number</label><input value={dealerCode} onChange={e=>setDealerCode(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>Contact</label><input value={contactName} onChange={e=>setContactName(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>Phone</label><input value={contactPhone} onChange={e=>setContactPhone(e.target.value)} style={fieldStyle} /></div>
-                <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>PO Number</label><input value={samplePO} onChange={e=>setSamplePO(e.target.value)} style={fieldStyle} /></div>
                 <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Delivery Address *</label><input value={shipAddr} onChange={e=>setShipAddr(e.target.value)} placeholder="Street, City, State, ZIP" style={{...fieldStyle,borderColor:!shipAddr?"#f59e0b":C.bdr}} /></div>
               </div>
             </div>
@@ -8714,7 +8724,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:8}}>
                   {colorSelections.map((c, i) => (
-                    <div key={i}><label style={labelStyle}>Color {i+1}</label><input value={c} onChange={e=>{const n=[...colorSelections];n[i]=e.target.value;setColorSelections(n)}} placeholder={`Color name ${i+1}`} style={fieldStyle} /></div>
+                    <div key={i}><label style={labelStyle}>Color {i+1}</label><select value={c} onChange={e=>{const n=[...colorSelections];n[i]=e.target.value;setColorSelections(n)}} style={fieldStyle}><option value="">— Select Color —</option>{ALL_COLORS.map(clr=><option key={clr} value={clr}>{clr}</option>)}</select></div>
                   ))}
                 </div>
               </div>
