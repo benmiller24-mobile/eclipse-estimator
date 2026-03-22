@@ -8572,12 +8572,31 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
     load();
   }, [user.id, supabase]);
 
-  const WfIcon = ({type, color, size=20}) => {
-    const s = {width:size,height:size,fill:"none",stroke:color,strokeWidth:1.8,strokeLinecap:"round",strokeLinejoin:"round"};
-    if(type==="estimator") return (<svg viewBox="0 0 24 24" style={s}><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="15" x2="21" y2="15"/></svg>);
-    if(type==="express") return (<svg viewBox="0 0 24 24" style={s}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill={color+"22"}/></svg>);
-    if(type==="warranty") return (<svg viewBox="0 0 24 24" style={s}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill={color+"22"}/><polyline points="9 12 11 14 15 10"/></svg>);
-    if(type==="samples") return (<svg viewBox="0 0 24 24" style={s}><rect x="2" y="4" width="14" height="16" rx="2" fill={color+"22"}/><path d="M22 7l-5-3v16l5-3V7z"/><circle cx="9" cy="12" r="3"/></svg>);
+  const WfIcon = ({type, color, size=22}) => {
+    const s = {width:size,height:size,fill:"none",stroke:color,strokeWidth:1.5,strokeLinecap:"round",strokeLinejoin:"round"};
+    /* Standard Order — clipboard with list lines, SF Symbols doc.text style */
+    if(type==="estimator") return (<svg viewBox="0 0 24 24" style={s}>
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+      <rect x="9" y="2" width="6" height="4" rx="1.5"/>
+      <line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="15.5" x2="13" y2="15.5"/>
+    </svg>);
+    /* Express Parts — paper plane, fast + lightweight, SF Symbols paperplane style */
+    if(type==="express") return (<svg viewBox="0 0 24 24" style={s}>
+      <path d="M21.5 2.5l-9.1 18.8a.3.3 0 0 1-.5 0L8.8 14.1a.3.3 0 0 0-.2-.2L1.2 11a.3.3 0 0 1 0-.5L21.5 2.5z"/>
+      <line x1="21.5" y1="2.5" x2="8.7" y2="14"/>
+    </svg>);
+    /* Warranty — shield with small checkmark, SF Symbols checkmark.shield style */
+    if(type==="warranty") return (<svg viewBox="0 0 24 24" style={s}>
+      <path d="M12 2l7.5 3.5v5c0 5.25-3.19 10.15-7.5 11.5C7.69 20.65 4.5 15.75 4.5 10.5v-5L12 2z"/>
+      <polyline points="9 12.5 11 14.5 15 10.5" strokeWidth="1.6"/>
+    </svg>);
+    /* Samples — overlapping swatches / color chips, SF Symbols paintpalette style */
+    if(type==="samples") return (<svg viewBox="0 0 24 24" style={s}>
+      <rect x="3" y="3" width="11" height="14" rx="2.5"/>
+      <rect x="10" y="7" width="11" height="14" rx="2.5"/>
+      <circle cx="8.5" cy="10" r="1.5" fill={color} stroke="none"/>
+      <circle cx="15.5" cy="14" r="1.5" fill={color} stroke="none"/>
+    </svg>);
     return null;
   };
 
@@ -8610,24 +8629,23 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
         </div>
 
         {/* Workflow Cards */}
-        <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:14,marginBottom:32}}>
+        <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:mob?12:16,marginBottom:32}}>
           {workflows.map(w => (
             <button key={w.id} onClick={() => onNavigate(w.id)} style={{
-              background:C.paper, border:`1px solid ${C.bdr}`, borderRadius:12, padding:mob?"16px":"20px 22px",
-              cursor:"pointer", textAlign:"left", transition:"all 0.15s ease",
-              display:"flex", flexDirection:"column", gap:8, position:"relative", overflow:"hidden"
+              background:C.paper, border:`1px solid ${C.bdr}`, borderRadius:16, padding:mob?"16px 18px":"22px 24px",
+              cursor:"pointer", textAlign:"left", transition:"all .22s cubic-bezier(.16,1,.3,1)",
+              display:"flex", alignItems:"center", gap:14, position:"relative", overflow:"hidden",
+              boxShadow:"0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.02)"
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = w.color; e.currentTarget.style.boxShadow = `0 4px 20px ${w.color}18`; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.boxShadow = "none"; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = w.color+"66"; e.currentTarget.style.boxShadow = `0 6px 24px ${w.color}14, 0 1px 3px rgba(0,0,0,.04)`; e.currentTarget.style.transform = "translateY(-1px)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.02)"; e.currentTarget.style.transform = "translateY(0)"; }}
             >
-              <div style={{display:"flex",alignItems:"center",gap:10}}>
-                <span style={{width:42,height:42,borderRadius:10,background:w.bg,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><WfIcon type={w.id} color={w.color} size={20}/></span>
-                <div>
-                  <div style={{fontFamily:F.d,fontSize:16,fontWeight:700,color:C.ink}}>{w.title}</div>
-                  <div style={{fontFamily:F.b,fontSize:11.5,color:C.stone,marginTop:2,lineHeight:1.4}}>{w.desc}</div>
-                </div>
+              <span style={{width:46,height:46,borderRadius:13,background:w.bg,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:`inset 0 0 0 1px ${w.color}12`}}><WfIcon type={w.id} color={w.color} size={22}/></span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontFamily:F.d,fontSize:mob?15:16,fontWeight:700,color:C.ink,letterSpacing:"-0.01em"}}>{w.title}</div>
+                <div style={{fontFamily:F.b,fontSize:11.5,color:C.stone,marginTop:3,lineHeight:1.45,opacity:.85}}>{w.desc}</div>
               </div>
-              <div style={{position:"absolute",right:16,top:"50%",transform:"translateY(-50%)",fontSize:18,color:C.stL}}>›</div>
+              <svg width="7" height="12" viewBox="0 0 7 12" fill="none" style={{flexShrink:0,opacity:.3}}><path d="M1 1l5 5-5 5" stroke={C.stone} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
           ))}
         </div>
