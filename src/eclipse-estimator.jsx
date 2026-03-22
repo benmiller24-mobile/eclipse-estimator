@@ -8336,6 +8336,10 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
   const [sampleCharT, setSampleCharT] = useState("NONE");
 
   const [samplePO, setSamplePO] = useState("");
+  const [sampleJobName, setSampleJobName] = useState("");
+  const [sampleCity, setSampleCity] = useState("");
+  const [sampleState, setSampleState] = useState("");
+  const [sampleZip, setSampleZip] = useState("");
 
   // Color blocks/chips
   const [colorSelections, setColorSelections] = useState(Array(10).fill(""));
@@ -8445,8 +8449,8 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       // Header fields
       setText("Business Name", dealerName);
       setText("Customer #", dealerCode);
-      setText("P.O. Number", "");
-      setText("Job Name", "");
+      setText("P.O. Number", samplePO);
+      setText("Job Name", sampleJobName);
       setText("Wood Species", sampleSp);
       setText("Color", sampleColor || "");
       setText("Door Style", sampleDoor);
@@ -8459,6 +8463,9 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("Company Name", dealerName);
       setText("Contact Name", contactName);
       setText("Street Address", shipAddr);
+      setText("City", sampleCity);
+      setText("State", sampleState);
+      setText("Zip Code", sampleZip);
 
       // Character technique checkboxes
       if (sampleCharT === "Aged†" || sampleCharT === "Aged") setCheck("Aged†");
@@ -8496,8 +8503,8 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       // Header fields
       setText("Business Name", dealerName);
       setText("Customer #", dealerCode);
-      setText("P.O. Number", "");
-      setText("Job Name", "");
+      setText("P.O. Number", samplePO);
+      setText("Job Name", sampleJobName);
       setText("Wood Species", sampleSp);
       setText("Color", sampleColor || "");
       setText("Door Style", sampleDoor);
@@ -8510,6 +8517,9 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("Company Name", dealerName);
       setText("Contact Name", contactName);
       setText("Street Address", shipAddr);
+      setText("City", sampleCity);
+      setText("State", sampleState);
+      setText("Zip Code", sampleZip);
 
       // Character technique checkboxes (these are PDFButtons with OFF/ON naming)
       if (sampleCharT === "Aged†" || sampleCharT === "Aged") { try { form.getButton("Aged† ON").enableReadOnly(); } catch(e) {} }
@@ -8548,8 +8558,8 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       // Header fields
       setText("Business Name", dealerName);
       setText("Customer #", dealerCode);
-      setText("P.O. Number", "");
-      setText("Job Name", "");
+      setText("P.O. Number", samplePO);
+      setText("Job Name", sampleJobName);
       setText("Wood Species", sampleSp);
       setText("Color", sampleColor || "");
       setText("Lower Door Style", sampleDoor);
@@ -8563,6 +8573,9 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("Company Name", dealerName);
       setText("Contact Name", contactName);
       setText("Street Address", shipAddr);
+      setText("City", sampleCity);
+      setText("State", sampleState);
+      setText("Zip Code", sampleZip);
 
       // Character technique checkboxes
       if (sampleCharT === "Aged†" || sampleCharT === "Aged") setCheck("Aged†");
@@ -8741,7 +8754,13 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
                 <div><label style={labelStyle}>Phone</label><input value={contactPhone} onChange={e=>setContactPhone(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>PO Number</label><input value={samplePO} onChange={e=>setSamplePO(e.target.value)} style={fieldStyle} /></div>
-                <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Delivery Address *</label><input value={shipAddr} onChange={e=>setShipAddr(e.target.value)} placeholder="Street, City, State, ZIP" style={{...fieldStyle,borderColor:!shipAddr?"#f59e0b":C.bdr}} /></div>
+                <div><label style={labelStyle}>Job Name</label><input value={sampleJobName} onChange={e=>setSampleJobName(e.target.value)} style={fieldStyle} /></div>
+                <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Street Address</label><input value={shipAddr} onChange={e=>setShipAddr(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>City</label><input value={sampleCity} onChange={e=>setSampleCity(e.target.value)} style={fieldStyle} /></div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+                  <div><label style={labelStyle}>State</label><input value={sampleState} onChange={e=>setSampleState(e.target.value)} style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Zip Code</label><input value={sampleZip} onChange={e=>setSampleZip(e.target.value)} style={fieldStyle} /></div>
+                </div>
               </div>
             </div>
 
