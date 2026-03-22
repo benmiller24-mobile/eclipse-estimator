@@ -7019,6 +7019,8 @@ const DRW_BOX=[
 
 const CSS=`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');*{box-sizing:border-box;margin:0;padding:0}input,select,button{font-family:${F.b}}input:focus,select:focus{border-color:${C.acc}!important;outline:none;box-shadow:0 0 0 2px ${C.acc}22}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:${C.stL};border-radius:3px}@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes fi{from{opacity:0}to{opacity:1}}.c{background:${C.paper};border-radius:10px;border:1px solid ${C.bdr};box-shadow:0 1px 3px rgba(0,0,0,.04)}.ch{padding:11px 14px;border-bottom:1px solid ${C.bdr};font-family:${F.d};font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:6px}.cb{padding:14px}.lb{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:${C.stone};margin-bottom:3px;display:block}.inp{font-size:13px;padding:7px 9px;border-radius:6px;border:1px solid ${C.bdr};background:${C.cream};color:${C.ink};width:100%}.sel{font-size:13px;padding:7px 26px 7px 9px;border-radius:6px;border:1px solid ${C.bdr};background:${C.cream};color:${C.ink};width:100%;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a7e70'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}.bt{font-size:11.5px;font-weight:600;padding:7px 13px;border-radius:6px;border:none;cursor:pointer;white-space:nowrap;min-height:38px;display:inline-flex;align-items:center;justify-content:center;gap:3px}.bp{background:${C.acc};color:#fff}.bg{background:transparent;color:${C.acc};border:1px solid ${C.bdr}}.bgl{background:${C.gold};color:#fff}.ch2{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:3px 7px;border-radius:4px;border:1.5px solid ${C.bdr};background:${C.cream};color:${C.stone};cursor:pointer;min-height:30px}.ch2.on{border-color:${C.acc};background:${C.accS};color:${C.acc}}.pl{font-size:8.5px;font-weight:700;padding:2px 6px;border-radius:10px;letter-spacing:.05em;text-transform:uppercase}.mn{font-family:${F.m}}.ntf{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:2000;background:${C.acc};color:#fff;padding:9px 22px;border-radius:8px;font-weight:600;font-size:12.5px;box-shadow:0 4px 14px rgba(0,0,0,.2);animation:fu .2s;pointer-events:none}.ic{padding:10px;border-radius:8px;border:1px solid ${C.bdr};background:${C.cream};animation:fu .15s}.ic.ov{border-color:${C.gold};background:${C.goldS}}.ic+.ic{margin-top:6px}.mbg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(3px);padding:14px}.sbg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:900;animation:fi .15s}.sht{position:fixed;bottom:0;left:0;right:0;z-index:910;background:${C.paper};border-radius:14px 14px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.12);animation:su .2s;max-height:85vh;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0)}.shtH{width:34px;height:4px;border-radius:2px;background:${C.stL};margin:9px auto 5px}.shtT{padding:7px 14px 10px;font-family:${F.d};font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid ${C.bdr}}.shtB{padding:14px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}`;
 
+function Tip({text}){const[show,setShow]=useState(false);return(<span style={{position:"relative",display:"inline-block",marginLeft:3,cursor:"help"}} onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)} onClick={e=>{e.stopPropagation();setShow(!show)}}><span style={{fontSize:10,color:C.stone,fontWeight:700,width:14,height:14,borderRadius:"50%",border:`1px solid ${C.stL}`,display:"inline-flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>?</span>{show&&<span style={{position:"absolute",bottom:"120%",left:"50%",transform:"translateX(-50%)",background:C.ink,color:"#fff",padding:"6px 10px",borderRadius:6,fontSize:10.5,lineHeight:1.4,whiteSpace:"normal",width:"max-content",maxWidth:220,zIndex:999,boxShadow:"0 4px 12px rgba(0,0,0,.25)",fontWeight:400,pointerEvents:"none"}}>{text}</span>}</span>)}
+
 function MarginCalc({tot,onClose}){
   const[mt,sMt]=useState("markup"),[mp,sMp]=useState(35),[il,sIl]=useState(65),[lf,sLf]=useState(20),[cs,sCs]=useState(85),[sf,sSf]=useState(45),[df,sDf]=useState(750),[fr,sFr]=useState(450);
   const sell=mt==="markup"?tot*(1+mp/100):tot/(1-mp/100),gp=sell-tot,inst=il*lf,ct=cs*sf,pt=sell+inst+ct+df+fr;
@@ -7166,6 +7168,9 @@ function AddUI({onAdd,onAddCustom}){
 const SK="ecl880";
 const ldS=()=>{try{return JSON.parse(localStorage.getItem(SK)||"[]")}catch{return[]}};
 const svS=l=>{try{localStorage.setItem(SK,JSON.stringify(l))}catch{}};
+const PREFS_SK="ecl_prefs";
+const ldPrefs=()=>{try{return JSON.parse(localStorage.getItem(PREFS_SK)||"{}")}catch{return{}}};
+const svPrefs=p=>{try{localStorage.setItem(PREFS_SK,JSON.stringify(p))}catch{}};
 
 // ── LoginForm Component ──
 function LoginForm({onLoginSuccess}) {
@@ -8131,10 +8136,11 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
 
   const [origOrderNum, setOrigOrderNum] = useState("");
   const [origOrderDate, setOrigOrderDate] = useState("");
+  const _wp=ldPrefs();
   const [dealerName, setDealerName] = useState(profile?.business_name || "");
-  const [dealerCode, setDealerCode] = useState("");
+  const [dealerCode, setDealerCode] = useState(_wp.dealerCode || "");
   const [contactName, setContactName] = useState(profile?.full_name || "");
-  const [contactPhone, setContactPhone] = useState("");
+  const [contactPhone, setContactPhone] = useState(_wp.contactPhone || "");
   const [contactEmail, setContactEmail] = useState(profile?.email || "");
   const [shipAddr, setShipAddr] = useState("");
   const [prevWarranty, setPrevWarranty] = useState("No");
@@ -8180,6 +8186,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
   const generateWarrantyPdf = async () => {
     if (!origOrderNum) { fl("Please enter the original order number"); return; }
     if (items.every(i => !i.sku && !i.desc)) { fl("Please add at least one item"); return; }
+    svPrefs({...ldPrefs(),dealerCode,contactPhone});
 
     const { PDFDocument, PDFName: PN, rgb: RGB } = await import("pdf-lib");
 
@@ -8423,7 +8430,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
 
         <div style={{display:"flex",gap:10,justifyContent:"center"}}>
           <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
-          <button onClick={generateWarrantyPdf} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)"}}>🛡️ Generate Warranty PDF</button>
+          <button onClick={()=>{const missing=[];if(!origOrderNum)missing.push("Original Order #");if(!dealerName)missing.push("Dealer Name");if(missing.length){fl(`⚠ Please fill: ${missing.join(", ")}`);return;}generateWarrantyPdf()}} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)",...(!origOrderNum?{opacity:0.7}:{})}}>🛡️ Generate Warranty PDF{!origOrderNum?" ⚠":""}</button>
         </div>
       </div>
     </div>
@@ -8446,10 +8453,11 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
   }, []);
 
   // Shared fields
+  const _sp=ldPrefs();
   const [dealerName, setDealerName] = useState(profile?.business_name || "");
-  const [dealerCode, setDealerCode] = useState("");
+  const [dealerCode, setDealerCode] = useState(_sp.dealerCode || "");
   const [contactName, setContactName] = useState(profile?.full_name || "");
-  const [contactPhone, setContactPhone] = useState("");
+  const [contactPhone, setContactPhone] = useState(_sp.contactPhone || "");
   const [contactEmail, setContactEmail] = useState(profile?.email || "");
   const [shipAddr, setShipAddr] = useState("");
 
@@ -8499,6 +8507,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 
   const generateSamplePdf = async () => {
     if (!activeType) return;
+    svPrefs({...ldPrefs(),dealerCode,contactPhone});
     const st = sampleTypes.find(s => s.id === activeType);
 
     // SD 8½×11 outputs on the actual Express Parcel form
@@ -9038,10 +9047,11 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   }, []);
 
   const [expressType, setExpressType] = useState(null);
+  const _ep=ldPrefs();
   const [dealerName, setDealerName] = useState(profile?.business_name || "");
-  const [dealerCode, setDealerCode] = useState("");
+  const [dealerCode, setDealerCode] = useState(_ep.dealerCode || "");
   const [contactName, setContactName] = useState(profile?.full_name || "");
-  const [contactPhone, setContactPhone] = useState("");
+  const [contactPhone, setContactPhone] = useState(_ep.contactPhone || "");
   const [contactEmail, setContactEmail] = useState(profile?.email || "");
   const [shipAddr, setShipAddr] = useState("");
   const [poNumber, setPoNumber] = useState("");
@@ -9126,6 +9136,8 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   const generateExpressPdf = async () => {
     if (!expressType) return;
     if (items.length === 0 || items.every(i => !i.s)) { fl("Please add at least one item"); return; }
+    // Save dealer info for future form pre-fill
+    svPrefs({...ldPrefs(),dealerCode,contactPhone});
 
     const { PDFDocument } = await import("pdf-lib");
 
@@ -9316,13 +9328,13 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
             <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
               <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Dealer & Shipping</div>
               <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10}}>
-                <div><label style={labelStyle}>Dealer Name</label><input value={dealerName} onChange={e=>setDealerName(e.target.value)} style={fieldStyle} /></div>
-                <div><label style={labelStyle}>Dealer Number</label><input value={dealerCode} onChange={e=>setDealerCode(e.target.value)} style={fieldStyle} /></div>
-                <div><label style={labelStyle}>Contact</label><input value={contactName} onChange={e=>setContactName(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Dealer Name *</label><input value={dealerName} onChange={e=>setDealerName(e.target.value)} style={{...fieldStyle,...(!dealerName?{borderColor:"#f59e0b",background:"#fffbeb"}:{})}} /></div>
+                <div><label style={labelStyle}>Dealer Number *</label><input value={dealerCode} onChange={e=>setDealerCode(e.target.value)} style={{...fieldStyle,...(!dealerCode?{borderColor:"#f59e0b",background:"#fffbeb"}:{})}} /></div>
+                <div><label style={labelStyle}>Contact *</label><input value={contactName} onChange={e=>setContactName(e.target.value)} style={{...fieldStyle,...(!contactName?{borderColor:"#f59e0b",background:"#fffbeb"}:{})}} /></div>
                 <div><label style={labelStyle}>Phone</label><input value={contactPhone} onChange={e=>setContactPhone(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>PO Number</label><input value={poNumber} onChange={e=>setPoNumber(e.target.value)} style={fieldStyle} /></div>
-                {expressType!=="truck"&&<div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Ship-To Address</label><input value={shipAddr} onChange={e=>setShipAddr(e.target.value)} placeholder="Street, City, State, ZIP" style={fieldStyle} /></div>}
+                {expressType!=="truck"&&<div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Ship-To Address *</label><input value={shipAddr} onChange={e=>setShipAddr(e.target.value)} placeholder="Street, City, State, ZIP" style={{...fieldStyle,...(!shipAddr?{borderColor:"#f59e0b",background:"#fffbeb"}:{})}} /></div>}
               </div>
             </div>
 
@@ -9608,7 +9620,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
 
             <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:18}}>
               <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
-              <button onClick={generateExpressPdf} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)"}}>⚡ Generate Express Order PDF</button>
+              <button onClick={()=>{const missing=[];if(!dealerName)missing.push("Dealer Name");if(!dealerCode)missing.push("Dealer Number");if(!contactName)missing.push("Contact");if(expressType!=="truck"&&!shipAddr)missing.push("Ship-To Address");if(missing.length){fl(`⚠ Please fill: ${missing.join(", ")}`);return;}generateExpressPdf()}} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)",...((!dealerName||!dealerCode||!contactName)?{opacity:0.7}:{})}}>⚡ Generate Express Order PDF{(!dealerName||!dealerCode||!contactName)?" ⚠":""}</button>
             </div>
           </>
         )}
@@ -9722,6 +9734,8 @@ function App({user, profile, supabase, onLogout, onBack}){
     const e={id:pid,nm,at:new Date().toISOString(),sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,n:items.length,tot:comp.tot};
     const s=ldS();const i=s.findIndex(x=>x.id===pid);if(i>=0)s[i]=e;else s.unshift(e);
     svS(s);
+    // Remember last-used order selections for smart defaults on new projects
+    svPrefs({...ldPrefs(),sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox});
     // Also save to Supabase explicitly
     if(supabase&&user){
       try{
@@ -9741,8 +9755,10 @@ function App({user, profile, supabase, onLogout, onBack}){
     sDoor(e.door||"HNVR");sDrwF(e.drwF||"DF-HNVR");sGlaze(e.glaze||"NONE");sHL(e.highlight||"NONE");
     sCT1(e.charT1||"NONE");sCT2(e.charT2||"NONE");sMat(e.mat||"PB");sIntF(e.intF||"STD-MAPL");sDrwBox(e.drwBox||"5/8-STD");
     sItems(e.items||[]);sColor(e.color||"");fl(`Loaded "${e.nm}"`)},[fl]);
-  const newP=useCallback(()=>{setCurrentQuoteId(null);setVersions([]);sPid(uid());sNm("Untitled Project");sSp("White Oak");sCx("Standard");
-    sDoor("HNVR");sDrwF("DF-HNVR");sGlaze("NONE");sHL("NONE");sCT1("NONE");sCT2("NONE");sMat("PB");sIntF("STD-MAPL");sDrwBox("5/8-STD");sItems([]);sColor("");fl("New project started")},[fl]);
+  const newP=useCallback(()=>{setCurrentQuoteId(null);setVersions([]);sPid(uid());sNm("Untitled Project");
+    const pr=ldPrefs();
+    sSp(pr.sp||"White Oak");sCx(pr.cx||"Standard");
+    sDoor(pr.door||"HNVR");sDrwF(pr.drwF||"DF-HNVR");sGlaze(pr.glaze||"NONE");sHL(pr.highlight||"NONE");sCT1(pr.charT1||"NONE");sCT2(pr.charT2||"NONE");sMat(pr.mat||"PB");sIntF(pr.intF||"STD-MAPL");sDrwBox(pr.drwBox||"5/8-STD");sItems([]);sColor(pr.color||"");fl("New project started — using your last selections")},[fl]);
   const fi=useMemo(()=>tf==="all"?items:items.filter(it=>it.t===tf),[items,tf]);
 
   const csv=useCallback(()=>{
@@ -9947,6 +9963,18 @@ function App({user, profile, supabase, onLogout, onBack}){
       </div>
     </div>
 
+    {items.length>0&&<div style={{position:"sticky",top:mob?37:41,zIndex:99,background:C.acc,color:"#fff",padding:"4px 18px",display:"flex",alignItems:"center",justifyContent:"center",gap:mob?10:20,fontSize:mob?10:11,fontFamily:F.m,fontWeight:600,boxShadow:"0 2px 6px rgba(0,0,0,.15)"}}>
+      <span>{comp.n} item{comp.n!==1?"s":""}</span>
+      <span style={{opacity:.5}}>·</span>
+      <span>{comp.un} unit{comp.un!==1?"s":""}</span>
+      <span style={{opacity:.5}}>·</span>
+      <span>{comp.zc} room{comp.zc!==1?"s":""}</span>
+      <span style={{opacity:.5}}>·</span>
+      <span style={{color:C.goldS,fontWeight:700}}>{fm(comp.tot)}</span>
+      {dealerMult>0&&dealerMult<1&&<><span style={{opacity:.5}}>·</span><span style={{opacity:.85}}>Dealer {fm(comp.tot*dealerMult)}</span></>}
+      {!color&&<><span style={{opacity:.5}}>·</span><span style={{color:"#fcd34d"}}>⚠ No color</span></>}
+    </div>}
+
     <div style={{maxWidth:1320,margin:"0 auto",padding:mob?"10px 9px":"18px 18px 36px"}}>
       <div style={{display:"grid",gridTemplateColumns:"1fr",gap:10,marginBottom:10}}>
         <div className="c"><div className="cb" style={{padding:mob?10:14}}>
@@ -9969,7 +9997,7 @@ function App({user, profile, supabase, onLogout, onBack}){
               <div><label className="lb">Species / Material</label><select className="sel" value={sp} onChange={e=>{sSp(e.target.value);sColor("")}}>
                 {Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
               </select></div>
-              <div><label className="lb">Finish Color</label><select className="sel" value={color} onChange={e=>sColor(e.target.value)}><option value="">-- Select --</option>{(FINISH_COLORS[sp]||[]).map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+              <div><label className="lb">Finish Color {!color&&items.length>0&&<span style={{color:"#f59e0b",fontSize:9,fontWeight:600}}>● Required</span>}</label><select className="sel" value={color} onChange={e=>sColor(e.target.value)} style={!color&&items.length>0?{borderColor:"#f59e0b",background:"#fffbeb"}:{}}><option value="">-- Select --</option>{(FINISH_COLORS[sp]||[]).map(c=><option key={c} value={c}>{c}</option>)}</select></div>
               <div><label className="lb">Door Style</label><select className="sel" value={door} onChange={e=>sDoor(e.target.value)}>
                 {DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} — Grp {d.g} ${DG[d.g]||0}/dr{d.x?` +$${d.x}/dr`:""}</option>)}
               </select></div>
@@ -9982,13 +10010,13 @@ function App({user, profile, supabase, onLogout, onBack}){
               <div><label className="lb">Highlight</label><select className="sel" value={highlight} onChange={e=>sHL(e.target.value)}>
                 {HIGHLIGHTS.map(h=><option key={h.v} value={h.v}>{h.l}</option>)}
               </select></div>
-              <div><label className="lb">Character Tech 1</label><select className="sel" value={charT1} onChange={e=>sCT1(e.target.value)}>
+              <div><label className="lb">Character Tech 1<Tip text="Aged, Wearing, or Sand-through finish techniques that add character to the wood surface"/></label><select className="sel" value={charT1} onChange={e=>sCT1(e.target.value)}>
                 {CHAR_TECH.map(c=><option key={c.v} value={c.v}>{c.l}</option>)}
               </select></div>
-              <div><label className="lb">Character Tech 2</label><select className="sel" value={charT2} onChange={e=>sCT2(e.target.value)}>
+              <div><label className="lb">Character Tech 2<Tip text="Optional second character technique. Can be combined with Tech 1 for more depth"/></label><select className="sel" value={charT2} onChange={e=>sCT2(e.target.value)}>
                 {CHAR_TECH.map(c=><option key={c.v} value={c.v}>{c.l}</option>)}
               </select></div>
-              <div><label className="lb">Material / Construction</label><select className="sel" value={mat} onChange={e=>{sMat(e.target.value);sCx(e.target.value==="PLY"?"Plywood":"Standard")}}>
+              <div><label className="lb">Material / Construction<Tip text="Particle Board (standard) or Plywood. Selecting Plywood auto-switches construction and applies the plywood upcharge"/></label><select className="sel" value={mat} onChange={e=>{sMat(e.target.value);sCx(e.target.value==="PLY"?"Plywood":"Standard")}}>
                 {MATERIAL.map(m=><option key={m.v} value={m.v}>{m.l}</option>)}
               </select></div>
               <div><label className="lb">Interior</label><select className="sel" value={intF} onChange={e=>{sIntF(e.target.value);if(e.target.value==="LINEN")sItems(p=>p.map(it=>({...it,fe:""})))}}>
@@ -9998,7 +10026,7 @@ function App({user, profile, supabase, onLogout, onBack}){
                 {DRW_BOX.map(d=><option key={d.v} value={d.v}>{d.l}</option>)}
               </select></div>
             </div>
-            <div style={{marginTop:6,fontSize:10.5,color:C.stone}}>Effective multiplier: ×{((1+spp/100)*(1+cxp/100)).toFixed(3)}{mat==="PLY"?" (plywood)":""}</div>
+            <div style={{marginTop:6,fontSize:10.5,color:C.stone}}>Effective multiplier: ×{((1+spp/100)*(1+cxp/100)).toFixed(3)}{mat==="PLY"?" (plywood)":""}<Tip text={`Species ${sp} (${spp>=0?"+":""}${spp}%) × Construction ${cx} (${cxp>=0?"+":""}${cxp}%) applied to all base cabinet prices`}/></div>
           </div></div>}
       </div>
 
@@ -10012,7 +10040,7 @@ function App({user, profile, supabase, onLogout, onBack}){
         <div style={{display:"flex",gap:3}}>
           <button className="bt bgl" onClick={()=>ssMg(true)} style={{fontSize:11}}>💰{mob?"":" Margin"}</button>
           <button className="bt bg" onClick={csv} style={{fontSize:11}}>📄{mob?"":" CSV"}</button>
-          <button className="bt bp" onClick={()=>{if(items.length===0){fl("No items to generate order form");return;}setShowOrderReview(true)}} style={{fontSize:11}}>📋{mob?"":" Order Form"}</button>
+          <button className="bt bp" onClick={()=>{if(items.length===0){fl("No items to generate order form");return;}if(!color){fl("⚠ Please select a Finish Color before generating");return;}setShowOrderReview(true)}} style={{fontSize:11,...(!color&&items.length>0?{opacity:0.7}:{})}}>📋{mob?"":" Order Form"}{!color&&items.length>0&&!mob?" ⚠":""}</button>
           {mob&&<button className="bt bg" onClick={newP} style={{fontSize:11}}>+New</button>}
         </div>
       </div>
@@ -10055,25 +10083,25 @@ upd(item.id,{mods:newMods});
               </div>
               {/* ── Dimensions (1/16" precision) ── */}
               <div style={{display:"flex",gap:6,marginBottom:6,alignItems:"center",padding:"8px 10px",background:"#ecfdf5",borderRadius:6,flexWrap:"wrap"}}>
-                <span className="lb" style={{marginBottom:0,color:"#059669",fontWeight:700}}>Width:</span>
-                <input type="number" className="inp" min={0.0625} max={120} step={0.0625} value={item.sqW||0} onChange={e=>{const w=Math.max(0,+e.target.value);upd(item.id,{sqW:w,sqin:w*(item.sqH||0)})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}}/>
+                <span className="lb" style={{marginBottom:0,color:"#059669",fontWeight:700}}>Width:<Tip text="Enter exact width in inches (1/16″ precision). Use decimals: 23.5 = 23½″, 23.0625 = 23 1/16″"/></span>
+                <input type="number" className="inp" min={0.0625} max={120} step={0.0625} value={item.sqW||0} onChange={e=>{const w=Math.max(0,+e.target.value);upd(item.id,{sqW:w,sqin:w*(item.sqH||0)})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}} placeholder="0–120"/>
                 <span style={{color:C.stone,fontSize:11}}>″</span>
                 <span style={{color:C.stone,fontSize:14}}>×</span>
-                <span className="lb" style={{marginBottom:0,color:"#059669",fontWeight:700}}>Height:</span>
-                <input type="number" className="inp" min={0.0625} max={120} step={0.0625} value={item.sqH||0} onChange={e=>{const h=Math.max(0,+e.target.value);upd(item.id,{sqH:h,sqin:(item.sqW||0)*h})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}}/>
+                <span className="lb" style={{marginBottom:0,color:"#059669",fontWeight:700}}>Height:<Tip text="Panel height determines panel count: ≤47 15/16″ = 1 panel, 48–81 15/16″ = 2 panels, 82″+ = 3 panels"/></span>
+                <input type="number" className="inp" min={0.0625} max={120} step={0.0625} value={item.sqH||0} onChange={e=>{const h=Math.max(0,+e.target.value);upd(item.id,{sqH:h,sqin:(item.sqW||0)*h})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}} placeholder="0–120"/>
                 <span style={{color:C.stone,fontSize:11}}>″</span>
                 <span style={{fontSize:11,color:"#059669",fontWeight:600}}>= {(item.sqin||0).toLocaleString(undefined,{maximumFractionDigits:2})} sq.in · ${item.p}/sq.in = {fm(item.p*(item.sqin||0))}</span>
               </div>
               {/* ── Ice maker cutout ── */}
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,padding:"6px 10px",background:item.refIce?"#fef3c7":"#fff",borderRadius:6,border:`1.5px solid ${item.refIce?"#f59e0b":"#e5e7eb"}`}}>
                 <input type="checkbox" id={`refIce-${item.id}`} checked={!!item.refIce} onChange={e=>upd(item.id,{refIce:e.target.checked})} style={{width:15,height:15,cursor:"pointer",accentColor:"#f59e0b"}}/>
-                <label htmlFor={`refIce-${item.id}`} style={{fontSize:12,cursor:"pointer",fontWeight:item.refIce?700:500,color:item.refIce?"#92400e":"#666"}}>Ice Maker Cutout — +$200 list</label>
+                <label htmlFor={`refIce-${item.id}`} style={{fontSize:12,cursor:"pointer",fontWeight:item.refIce?700:500,color:item.refIce?"#92400e":"#666"}}>Ice Maker Cutout — +$200 list<Tip text="Adds a cutout for ice maker access. Note: this voids the finish warranty on this panel"/></label>
                 {item.refIce&&<span style={{fontSize:10,color:"#b45309",fontStyle:"italic"}}>Finish warranty voided</span>}
               </div>
               {/* ── Room & Species ── */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
                 <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
-                <div><label className="lb">Species Override</label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
+                <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
                   <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
                 </select></div>
               </div>
@@ -10156,7 +10184,7 @@ upd(item.id,{mods:newMods});
               {/* ── Room & Species ── */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
                 <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
-                <div><label className="lb">Species Override</label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
+                <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
                   <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
                 </select></div>
               </div>
@@ -10200,19 +10228,19 @@ upd(item.id,{mods:newMods});
               </div>
               {/* ── Dimensions (1/16" precision, max 24"W × 80"H) ── */}
               <div style={{display:"flex",gap:6,marginBottom:6,alignItems:"center",padding:"8px 10px",background:"#fef3c7",borderRadius:6,flexWrap:"wrap"}}>
-                <span className="lb" style={{marginBottom:0,color:"#b45309",fontWeight:700}}>Width:</span>
-                <input type="number" className="inp" min={0.0625} max={24} step={0.0625} value={item.sqW||0} onChange={e=>{const w=Math.max(0,Math.min(24,+e.target.value));upd(item.id,{sqW:w,sqin:w*(item.sqH||0)})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}}/>
+                <span className="lb" style={{marginBottom:0,color:"#b45309",fontWeight:700}}>Width:<Tip text="Max 24″. Enter exact width in inches (1/16″ precision)"/></span>
+                <input type="number" className="inp" min={0.0625} max={24} step={0.0625} value={item.sqW||0} onChange={e=>{const w=Math.max(0,Math.min(24,+e.target.value));upd(item.id,{sqW:w,sqin:w*(item.sqH||0)})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}} placeholder="0–24"/>
                 <span style={{color:C.stone,fontSize:11}}>″ (max 24″)</span>
                 <span style={{color:C.stone,fontSize:14}}>×</span>
-                <span className="lb" style={{marginBottom:0,color:"#b45309",fontWeight:700}}>Height:</span>
-                <input type="number" className="inp" min={0.0625} max={80} step={0.0625} value={item.sqH||0} onChange={e=>{const h=Math.max(0,Math.min(80,+e.target.value));upd(item.id,{sqH:h,sqin:(item.sqW||0)*h})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}}/>
+                <span className="lb" style={{marginBottom:0,color:"#b45309",fontWeight:700}}>Height:<Tip text="Max 80″. Enter exact height in inches (1/16″ precision)"/></span>
+                <input type="number" className="inp" min={0.0625} max={80} step={0.0625} value={item.sqH||0} onChange={e=>{const h=Math.max(0,Math.min(80,+e.target.value));upd(item.id,{sqH:h,sqin:(item.sqW||0)*h})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}} placeholder="0–80"/>
                 <span style={{color:C.stone,fontSize:11}}>″ (max 80″)</span>
                 <span style={{fontSize:11,color:"#b45309",fontWeight:600}}>= {(item.sqin||0).toLocaleString(undefined,{maximumFractionDigits:2})} sq.in · ${item.p}/sq.in = {fm(item.p*(item.sqin||0))}</span>
               </div>
               {/* ── Room & Species ── */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
                 <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
-                <div><label className="lb">Species Override</label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
+                <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
                   <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
                 </select></div>
               </div>
@@ -10265,7 +10293,7 @@ upd(item.id,{mods:newMods});
               {/* ── Room & Species ── */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
                 <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
-                <div><label className="lb">Species Override</label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
+                <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
                   <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
                 </select></div>
               </div>
@@ -10320,7 +10348,7 @@ upd(item.id,{mods:newMods});
               {/* ── Room & Species ── */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
                 <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
-                <div><label className="lb">Species Override</label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
+                <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
                   <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
                 </select></div>
               </div>
@@ -10479,7 +10507,7 @@ return(<div style={{marginBottom:5}}>
             </div>}
             <div style={{display:"grid",gridTemplateColumns:(isMould||itemSQ)?"1fr 1fr":"1fr 1fr 1fr",gap:6,marginBottom:5}}>
               <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
-              <div><label className="lb">Species Override</label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
+              <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
                 <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
               </select></div>
               {!isMould&&!itemSQ&&<div><label className="lb">Door Style</label><select className="sel" value={item.ds||""} onChange={e=>upd(item.id,{ds:e.target.value||""})} style={{fontSize:11.5,...(item.ds?{border:"2px solid #5a6b4a",fontWeight:600}:{})}}>
