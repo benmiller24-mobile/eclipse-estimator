@@ -6461,7 +6461,7 @@ const ZN = [
   {id:"bath",l:"Bath",i:"🚿"},{id:"laundry",l:"Laundry",i:"👕"},{id:"mudroom",l:"Mudroom",i:"🥾"},
   {id:"bar",l:"Bar",i:"🍷"},{id:"office",l:"Office",i:"💼"},{id:"other",l:"Other",i:"📦"},
 ];
-const F={d:"'Playfair Display',Georgia,serif",b:"'DM Sans','Helvetica Neue',sans-serif",m:"'JetBrains Mono','SF Mono',monospace"};
+const F={d:"'Questrial','Helvetica Neue',sans-serif",b:"'Assistant','Helvetica Neue',sans-serif",m:"'JetBrains Mono','SF Mono',monospace"};
 // ── Supabase Client ──
 const SUPABASE_URL = "https://rljpgudmvbaocomktone.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsanBndWRtdmJhb2NvbWt0b25lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTk5ODYsImV4cCI6MjA4OTU5NTk4Nn0.YqtoSBM0utOmZlKWvd8OQ2w9m3iytkGwP9LRqpbqa1w";
@@ -6471,7 +6471,7 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   },
 });
 
-const C={ink:"#1c1917",warm:"#f8f6f2",cream:"#fafaf8",paper:"#ffffff",stone:"#78716c",stL:"#bfb8af",bdr:"#e7e5e4",acc:"#2c5a3f",accS:"#ecfdf5",gold:"#a8892f",goldS:"#fef9ee",red:"#b91c1c"};
+const C={ink:"#000000",warm:"#F7F6F5",cream:"#FAFAF9",paper:"#FFFFFF",stone:"#AFA497",stL:"#DFDFDB",bdr:"#DFDFDB",acc:"#4A4A4D",accS:"#F7F6F5",gold:"#AFA497",goldS:"#F7F6F5",red:"#b91c1c"};
 const fm=n=>"$"+Math.round(n||0).toLocaleString();
 const uid=()=>Math.random().toString(36).slice(2,10);
 // Per-sq-inch SKU prefixes (bar backs, finished panels, edge-banded panels, slat bar backs, finished tops)
@@ -7023,7 +7023,7 @@ const DRW_BOX=[
   {v:"5/8-STD-FE",l:'5/8" Std Hdwd / Blum Full Ext (+$72/drw)'},{v:"5/8-SM-FE",l:'5/8" Sim Metal / Blum Full Ext (+$72/drw)'},
 ];
 
-const CSS=`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;600&display=swap');
+const CSS=`@import url('https://fonts.googleapis.com/css2?family=Questrial&family=Assistant:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 html{scroll-behavior:smooth}
 input,select,button,textarea{font-family:${F.b};touch-action:manipulation;transition:border-color .2s,box-shadow .2s,background .2s}
