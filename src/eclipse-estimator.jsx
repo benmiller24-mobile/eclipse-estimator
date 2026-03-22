@@ -7395,40 +7395,54 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewAll, setViewAll] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const isAdmin = profile?.role === "admin";
 
   const [userMap, setUserMap] = useState({});
-  useEffect(() => {
-    const loadQuotes = async () => {
-      setLoading(true);
-      try {
-        let query = supabaseClient.from("quotes").select("id,name,updated_at,user_id").order("updated_at", { ascending: false });
-        if (!viewAll || !isAdmin) query = query.eq("user_id", user.id);
-        const { data, error } = await query;
-        if (error) throw error;
-        setQuotes(data || []);
-        // For admin view, also fetch user profiles
-        if (viewAll && isAdmin && data?.length) {
-          const uids = [...new Set(data.map(q => q.user_id))];
-          const { data: profiles } = await supabaseClient.from("profiles").select("id,email,full_name,business_name").in("id", uids);
-          if (profiles) {
-            const m = {};
-            profiles.forEach(p => { m[p.id] = p; });
-            setUserMap(m);
-          }
+  const loadQuotes = async () => {
+    setLoading(true);
+    try {
+      let query = supabaseClient.from("quotes").select("id,name,updated_at,user_id").order("updated_at", { ascending: false });
+      if (!viewAll) query = query.eq("user_id", user.id);
+      const { data, error } = await query;
+      if (error) throw error;
+      setQuotes(data || []);
+      if (viewAll && data?.length) {
+        const uids = [...new Set(data.map(q => q.user_id))];
+        const { data: profiles } = await supabaseClient.from("profiles").select("id,email,full_name,business_name").in("id", uids);
+        if (profiles) {
+          const m = {};
+          profiles.forEach(p => { m[p.id] = p; });
+          setUserMap(m);
         }
-      } catch (err) {
-        console.error("Error loading quotes:", err);
-      } finally {
-        setLoading(false);
       }
-    };
-    loadQuotes();
-  }, [user.id, viewAll, isAdmin]);
+    } catch (err) {
+      console.error("Error loading quotes:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => { loadQuotes(); }, [user.id, viewAll]);
+
+  const deleteQuote = async (id) => {
+    setDeleting(true);
+    try {
+      const { error } = await supabaseClient.from("quotes").delete().eq("id", id);
+      if (error) throw error;
+      setQuotes(prev => prev.filter(q => q.id !== id));
+      setConfirmDeleteId(null);
+    } catch (err) {
+      console.error("Error deleting quote:", err);
+      alert("Failed to delete quote");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   // Group quotes by user when viewing all
   const grouped = useMemo(() => {
-    if (!viewAll || !isAdmin) return null;
+    if (!viewAll) return null;
     const g = {};
     quotes.forEach(q => {
       const uid = q.user_id;
@@ -7438,7 +7452,7 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
       g[uid].quotes.push(q);
     });
     return Object.values(g);
-  }, [quotes, viewAll, isAdmin, userMap]);
+  }, [quotes, viewAll, userMap]);
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(3px)", padding: "14px" }}>
@@ -7467,7 +7481,7 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
             color: C.ink,
           }}>{viewAll ? "All Quotes" : "My Quotes"}</h3>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            {isAdmin && <button onClick={() => setViewAll(!viewAll)} className="bt" style={{ fontSize: 11, padding: "4px 10px", background: viewAll ? C.accS : C.warm, border: `1px solid ${viewAll ? C.acc : C.bdr}`, color: viewAll ? C.acc : C.stone, borderRadius: 6, cursor: "pointer" }}>{viewAll ? "My Quotes" : "All Users"}</button>}
+            <button onClick={() => setViewAll(!viewAll)} className="bt" style={{ fontSize: 11, padding: "4px 10px", background: viewAll ? C.accS : C.warm, border: `1px solid ${viewAll ? C.acc : C.bdr}`, color: viewAll ? C.acc : C.stone, borderRadius: 6, cursor: "pointer" }}>{viewAll ? "My Quotes" : "All Quotes"}</button>
             <button
               onClick={onClose}
               style={{
@@ -7494,26 +7508,36 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   {group.quotes.map((quote) => (
-                    <button
-                      key={quote.id}
-                      onClick={() => onLoadQuote(quote.id)}
-                      style={{
-                        background: C.cream,
-                        border: `1px solid ${C.bdr}`,
-                        borderRadius: "8px",
-                        padding: "10px 12px",
-                        textAlign: "left",
-                        cursor: "pointer",
-                        transition: "all 0.2s",
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.acc; e.currentTarget.style.background = C.accS; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.background = C.cream; }}
-                    >
-                      <div style={{ fontSize: "13px", fontWeight: "600", color: C.ink }}>{quote.name}</div>
-                      <div style={{ fontSize: "11px", color: C.stone, marginTop: "3px" }}>
-                        {new Date(quote.updated_at).toLocaleDateString()}
-                      </div>
-                    </button>
+                    <div key={quote.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <button
+                        onClick={() => onLoadQuote(quote.id)}
+                        style={{
+                          flex: 1,
+                          background: C.cream,
+                          border: `1px solid ${C.bdr}`,
+                          borderRadius: "8px",
+                          padding: "10px 12px",
+                          textAlign: "left",
+                          cursor: "pointer",
+                          transition: "all 0.2s",
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.acc; e.currentTarget.style.background = C.accS; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.background = C.cream; }}
+                      >
+                        <div style={{ fontSize: "13px", fontWeight: "600", color: C.ink }}>{quote.name}</div>
+                        <div style={{ fontSize: "11px", color: C.stone, marginTop: "3px" }}>
+                          {new Date(quote.updated_at).toLocaleDateString()}
+                        </div>
+                      </button>
+                      {(quote.user_id === user.id || isAdmin) && (confirmDeleteId === quote.id ? (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                          <button onClick={() => deleteQuote(quote.id)} disabled={deleting} style={{ background: C.red, color: "#fff", border: "none", borderRadius: 5, padding: "4px 8px", fontSize: 10, fontWeight: 700, cursor: "pointer", opacity: deleting ? 0.5 : 1 }}>{deleting ? "..." : "Confirm"}</button>
+                          <button onClick={() => setConfirmDeleteId(null)} style={{ background: C.warm, color: C.stone, border: `1px solid ${C.bdr}`, borderRadius: 5, padding: "3px 8px", fontSize: 10, cursor: "pointer" }}>Cancel</button>
+                        </div>
+                      ) : (
+                        <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(quote.id); }} title="Delete quote" style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: C.stone, padding: "6px", borderRadius: 4, transition: "color 0.15s" }} onMouseEnter={(e) => e.currentTarget.style.color = C.red} onMouseLeave={(e) => e.currentTarget.style.color = C.stone}>✕</button>
+                      ))}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -7522,26 +7546,36 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {quotes.map((quote) => (
-              <button
-                key={quote.id}
-                onClick={() => onLoadQuote(quote.id)}
-                style={{
-                  background: C.cream,
-                  border: `1px solid ${C.bdr}`,
-                  borderRadius: "8px",
-                  padding: "12px",
-                  textAlign: "left",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.acc; e.currentTarget.style.background = C.accS; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.background = C.cream; }}
-              >
-                <div style={{ fontSize: "13px", fontWeight: "600", color: C.ink }}>{quote.name}</div>
-                <div style={{ fontSize: "11px", color: C.stone, marginTop: "4px" }}>
-                  {new Date(quote.updated_at).toLocaleDateString()}
-                </div>
-              </button>
+              <div key={quote.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <button
+                  onClick={() => onLoadQuote(quote.id)}
+                  style={{
+                    flex: 1,
+                    background: C.cream,
+                    border: `1px solid ${C.bdr}`,
+                    borderRadius: "8px",
+                    padding: "12px",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.acc; e.currentTarget.style.background = C.accS; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.background = C.cream; }}
+                >
+                  <div style={{ fontSize: "13px", fontWeight: "600", color: C.ink }}>{quote.name}</div>
+                  <div style={{ fontSize: "11px", color: C.stone, marginTop: "4px" }}>
+                    {new Date(quote.updated_at).toLocaleDateString()}
+                  </div>
+                </button>
+                {confirmDeleteId === quote.id ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                    <button onClick={() => deleteQuote(quote.id)} disabled={deleting} style={{ background: C.red, color: "#fff", border: "none", borderRadius: 5, padding: "4px 8px", fontSize: 10, fontWeight: 700, cursor: "pointer", opacity: deleting ? 0.5 : 1 }}>{deleting ? "..." : "Confirm"}</button>
+                    <button onClick={() => setConfirmDeleteId(null)} style={{ background: C.warm, color: C.stone, border: `1px solid ${C.bdr}`, borderRadius: 5, padding: "3px 8px", fontSize: 10, cursor: "pointer" }}>Cancel</button>
+                  </div>
+                ) : (
+                  <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(quote.id); }} title="Delete quote" style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: C.stone, padding: "6px", borderRadius: 4, transition: "color 0.15s" }} onMouseEnter={(e) => e.currentTarget.style.color = C.red} onMouseLeave={(e) => e.currentTarget.style.color = C.stone}>✕</button>
+                )}
+              </div>
             ))}
           </div>
         )}
