@@ -6682,7 +6682,7 @@ const OVEN_FORM_B64={"O":OVEN_FORM_O_B64,"OM":OVEN_FORM_OM_B64,"FIO":OVEN_FORM_F
 // Flat-price refs: samples, displays, stain/touch-up kits, casters — no species/construction markups
 const FLAT_REFS=new Set(["U2","U3","U4","U5","U6","U7","U8","U9","U10","S45","S46","D17"]);
 // Species NOT available for SD 8.5x11 standard sample
-const SD_BLOCKED_SP=new Set(["Walnut","Rustic Walnut","Rift White Oak","QS White Oak","TFL"]);
+const SD_BLOCKED_SP=new Set(["Walnut","Rustic Walnut","Rift White Oak","QS White Oak","TFL","PV","Rauvisio noir Matte HPL","Acrylic HG","Acrylic Matte","Recon White Oak","Recon Walnut"]);
 const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{
   if(isCustom(item.s)){const u=item.p||0;return{u,t:u*item.q,stockBase:u,prePly:u,doorChg:0,dfChg:0,dbChg:0,itemSQ:false,rbsChg:0,plyPct:0};}
   if(FLAT_REFS.has(item.r)&&item.s!=="SD81/2X11"){const u=item.p||0;return{u,t:u*item.q,stockBase:u,prePly:u,doorChg:0,dfChg:0,dbChg:0,itemSQ:false,rbsChg:0,plyPct:0};}
@@ -9000,11 +9000,8 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
             {(activeType === "sd" || activeType === "ffd" || activeType === "sd85" || activeType === "sd12std") && (
               <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
                 <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Sample Specifications</div>
-                {activeType==="sd85"&&SD_BLOCKED_SP.has(sampleSp)&&<div style={{background:"#fef2f2",border:"1px solid #ef444444",borderRadius:8,padding:"10px 14px",marginBottom:12,fontSize:11,color:"#991b1b",fontFamily:F.b,lineHeight:1.5}}>
-                  <strong>Not available in {sampleSp}.</strong> The 8½×11 standard sample is not available in Walnut, Rustic Walnut, Rift White Oak, QS White Oak, or TFL. Please select a different species.
-                </div>}
                 <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10}}>
-                  <div><label style={labelStyle}>Species</label><select value={sampleSp} onChange={e=>{setSampleSp(e.target.value);setSampleColor("")}} style={fieldStyle}>{Object.keys(SP).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
+                  <div><label style={labelStyle}>Species</label><select value={sampleSp} onChange={e=>{setSampleSp(e.target.value);setSampleColor("")}} style={fieldStyle}>{Object.keys(SP).filter(k=>activeType!=="sd85"||!SD_BLOCKED_SP.has(k)).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
                   {activeType!=="sd85"&&<div><label style={labelStyle}>Door Style</label><select value={sampleDoor} onChange={e=>setSampleDoor(e.target.value)} style={fieldStyle}>{DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}</option>)}</select></div>}
                   {activeType==="sd85"&&<div><label style={labelStyle}>Panel Type</label><select value={samplePanel} onChange={e=>setSamplePanel(e.target.value)} style={fieldStyle}><option value="Raised">Raised</option><option value="Recessed">Recessed</option></select></div>}
                   <div><label style={labelStyle}>Color / Finish</label><select value={sampleColor} onChange={e=>setSampleColor(e.target.value)} style={fieldStyle}><option value="">-- Select --</option>{(FINISH_COLORS[sampleSp]||[]).map(c=><option key={c} value={c}>{c}</option>)}</select></div>
