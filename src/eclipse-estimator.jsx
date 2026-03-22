@@ -8496,20 +8496,22 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
         templateBytes = new Uint8Array(await resp.arrayBuffer());
       } catch(e) { fl("Could not load express sample door form template"); return; }
 
-      const { PDFName: PN, PDFNumber: PNum } = await import("pdf-lib");
+      const { PDFName: PN, rgb: RGB } = await import("pdf-lib");
       const doc = await PDFDocument.load(templateBytes);
       const form = doc.getForm();
+      const page = doc.getPages()[0];
       const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
 
-      // Toggle ON/OFF button pair: show the ON version (F=4 visible), hide the OFF version (F=6 hidden)
+      // Draw an X over a button's rect area on the page
       const xOut = (name) => {
         try {
-          const onBtn = form.getButton(name + " ON");
-          onBtn.acroField.getWidgets().forEach(w => w.dict.set(PN.of("F"), PNum.of(4)));
-        } catch(e) {}
-        try {
-          const offBtn = form.getButton(name + " OFF");
-          offBtn.acroField.getWidgets().forEach(w => w.dict.set(PN.of("F"), PNum.of(6)));
+          const btn = form.getButton(name + " ON");
+          const w = btn.acroField.getWidgets()[0];
+          const rect = w.dict.get(PN.of("Rect")).asArray().map(v => v.numberValue);
+          const [x1, y1, x2, y2] = rect;
+          const pad = 3;
+          page.drawLine({ start: {x: x1+pad, y: y1+pad}, end: {x: x2-pad, y: y2-pad}, thickness: 2, color: RGB(0,0,0) });
+          page.drawLine({ start: {x: x1+pad, y: y2-pad}, end: {x: x2-pad, y: y1+pad}, thickness: 2, color: RGB(0,0,0) });
         } catch(e) {}
       };
 
@@ -8534,19 +8536,22 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("State", sampleState);
       setText("Zip Code", sampleZip);
 
-      // Glaze — x out selected option
+      // Glaze — draw X on selected option
       if (sampleGlaze && sampleGlaze !== "None") xOut(sampleGlaze); else xOut("None");
 
-      // Finish technique — x out selected option
-      if (sampleCharT === "Aged†" || sampleCharT === "Aged") xOut("Aged†");
-      else if (sampleCharT === "Wearing†" || sampleCharT === "Wearing") xOut("Wearing†");
-      else if (sampleCharT === "Sand-through‡" || sampleCharT === "Sand-through") xOut("Sand-through‡");
+      // Finish technique — draw X on selected option
+      if (sampleCharT === "Aged†" || sampleCharT === "Aged") xOut("Aged\u2020");
+      else if (sampleCharT === "Wearing†" || sampleCharT === "Wearing") xOut("Wearing\u2020");
+      else if (sampleCharT === "Sand-through‡" || sampleCharT === "Sand-through") xOut("Sand-through\u2021");
 
-      // Edge profile — x out selected option
+      // Edge profile — draw X on selected option
       if (sampleEdge && sampleEdge !== "None") xOut(sampleEdge);
 
-      // Hinge boring — x out Matching by default (can be extended later)
-      xOut("Matching");
+      // Remove all buttons so they don't cover the X marks after flattening
+      const allFields = form.getFields();
+      for (const f of allFields) {
+        if (f.constructor.name === "PDFButton") form.removeField(f);
+      }
 
       form.flatten();
       const bytes = await doc.save();
