@@ -8341,6 +8341,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
   const [colorSelections, setColorSelections] = useState(Array(10).fill(""));
   const [blockType, setBlockType] = useState("RCSB"); // RCSB or RLVSB
   const [orderType, setOrderType] = useState("Standard"); // Standard or Express
+  const [blockColorMode, setBlockColorMode] = useState("paint_stain"); // paint_stain or laminate
 
   // Colors grouped by species for dropdown with optgroups
   const COLORS_BY_SPECIES = useMemo(() => {
@@ -8352,6 +8353,10 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
   const COLORS_BY_SPECIES_NO_OW = useMemo(() => {
     return COLORS_BY_SPECIES.map(g => ({ species: g.species, colors: g.colors.filter(c => !c.startsWith("OW-")) })).filter(g => g.colors.length > 0);
   }, [COLORS_BY_SPECIES]);
+  // Laminate species for color blocks (cannot mix with paint/stain on same order)
+  const LAMINATE_SPECIES = new Set(["TFL","Rauvisio noir Matte HPL","Acrylic HG","Acrylic Matte","PV"]);
+  const COLORS_PAINT_STAIN = useMemo(() => COLORS_BY_SPECIES.filter(g => !LAMINATE_SPECIES.has(g.species)), [COLORS_BY_SPECIES]);
+  const COLORS_LAMINATE = useMemo(() => COLORS_BY_SPECIES.filter(g => LAMINATE_SPECIES.has(g.species)), [COLORS_BY_SPECIES]);
 
   const sampleTypes = [
     { id: "sd85", icon: "📋", title: "Sample Door 8½×11 (Standard)", price: "$65+", code: "ECL-SD-STD", desc: "8.5 x 11 inch standard sample door — $65 list + species & construction upcharges. Not available in Walnut, Rustic Walnut, Rift White Oak, QS White Oak, or TFL." },
@@ -8708,7 +8713,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
             {(activeType === "rcbs" || activeType === "rccs") && (
               <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
                 <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Color Selections (up to 10)</div>
-                {activeType === "rcbs" && (
+                {activeType === "rcbs" && (<>
                   <div style={{marginBottom:12}}>
                     <label style={labelStyle}>Block Type</label>
                     <div style={{display:"flex",gap:8}}>
@@ -8717,7 +8722,16 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
                       ))}
                     </div>
                   </div>
-                )}
+                  <div style={{marginBottom:12}}>
+                    <label style={labelStyle}>Color Category</label>
+                    <div style={{display:"flex",gap:8}}>
+                      {[{v:"paint_stain",l:"Paint / Stain"},{v:"laminate",l:"Laminate"}].map(o=>(
+                        <button key={o.v} onClick={()=>{setBlockColorMode(o.v);setColorSelections(Array(10).fill(""))}} style={{padding:"6px 14px",borderRadius:6,fontSize:11,fontFamily:F.b,fontWeight:600,cursor:"pointer",border:`1px solid ${blockColorMode===o.v?"#b45309":C.bdr}`,background:blockColorMode===o.v?"#fef3c7":"#fff",color:blockColorMode===o.v?"#b45309":C.stone}}>{o.l}</button>
+                      ))}
+                    </div>
+                    <div style={{fontSize:10,fontFamily:F.b,color:C.stone,marginTop:4,fontStyle:"italic"}}>Paint/stain and laminate colors cannot be mixed on the same order.</div>
+                  </div>
+                </>)}
                 <div style={{marginBottom:12}}>
                   <label style={labelStyle}>Order Type</label>
                   <div style={{display:"flex",gap:8}}>
@@ -8728,7 +8742,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:8}}>
                   {colorSelections.map((c, i) => {
-                    const colorList = activeType === "rccs" ? COLORS_BY_SPECIES_NO_OW : COLORS_BY_SPECIES;
+                    const colorList = activeType === "rccs" ? COLORS_BY_SPECIES_NO_OW : blockColorMode === "laminate" ? COLORS_LAMINATE : COLORS_PAINT_STAIN;
                     return <div key={i}><label style={labelStyle}>Color {i+1}</label><select value={c} onChange={e=>{const n=[...colorSelections];n[i]=e.target.value;setColorSelections(n)}} style={fieldStyle}><option value="">— Select Color —</option>{colorList.map(g=><optgroup key={g.species} label={g.species}>{g.colors.map(clr=><option key={g.species+"-"+clr} value={clr}>{clr}</option>)}</optgroup>)}</select></div>;
                   })}
                 </div>
