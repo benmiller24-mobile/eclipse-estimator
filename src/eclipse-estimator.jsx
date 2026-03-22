@@ -8725,12 +8725,26 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
       if (expressType === "parcel") {
         setText("Quantity " + n, item.q);
         setText("Item Number " + n, item.s);
-        setText("Description " + n, SKU_LABELS[item.s] || item.s);
+        // Build description with mods
+        const pSkuDesc = SKU_LABELS[item.s] || item.s;
+        const pMp = [];
+        if (item.mods) { Object.entries(item.mods).forEach(([code, v]) => { if (!v && v !== 0) return; const m = CABINET_MODS.find(x => x.code === code); if (!m) return; if (m.input === "mxdf") { const ct = Array.isArray(v) ? v.filter(p => p.on).length : 0; if (ct > 0) pMp.push(m.label + " x" + ct); } else if (m.input === "side" && typeof v === "string" && v) { pMp.push(m.label + " (" + (v === "B" ? "Both" : v) + ")"); } else if (m.input === "select" && v) { pMp.push(m.label + " (" + v + ")"); } else if (m.input === "dims" && v) { const d = typeof v === "object" ? (v.w || "") + "x" + (v.h || "") + "x" + (v.d || "") : ""; pMp.push(m.label + (d ? " (" + d + ")" : "")); } else if ((m.input === "check" || m.input === "width") && v) { pMp.push(m.label); } else if (typeof v === "number" && v > 0) { pMp.push(m.label + (v > 1 ? " x" + v : "")); } }); }
+        if (item.rot && item.rotQ > 0) pMp.push("ROT " + item.rot + " x" + item.rotQ);
+        if (item.rot2 && item.rot2Q > 0) pMp.push("FM-ROT " + item.rot2 + " x" + item.rot2Q);
+        const pModStr = pMp.length > 0 ? " | " + pMp.join(", ") : "";
+        setText("Description " + n, pSkuDesc + pModStr);
         setText("Price " + n, fm(t.total || 0));
       } else if (expressType === "truck") {
         setText("Quantity " + n, item.q);
-        setText("Cab No Line " + n, item.s);
-        setText("Description " + n, SKU_LABELS[item.s] || item.s);
+        setText("Cab No Line " + n, String(n));
+        // Build description: SKU + label + mods
+        const skuDesc = item.s + (SKU_LABELS[item.s] ? " " + SKU_LABELS[item.s] : "");
+        const mp = [];
+        if (item.mods) { Object.entries(item.mods).forEach(([code, v]) => { if (!v && v !== 0) return; const m = CABINET_MODS.find(x => x.code === code); if (!m) return; if (m.input === "mxdf") { const ct = Array.isArray(v) ? v.filter(p => p.on).length : 0; if (ct > 0) mp.push(m.label + " x" + ct); } else if (m.input === "side" && typeof v === "string" && v) { mp.push(m.label + " (" + (v === "B" ? "Both" : v) + ")"); } else if (m.input === "select" && v) { mp.push(m.label + " (" + v + ")"); } else if (m.input === "dims" && v) { const d = typeof v === "object" ? (v.w || "") + "x" + (v.h || "") + "x" + (v.d || "") : ""; mp.push(m.label + (d ? " (" + d + ")" : "")); } else if ((m.input === "check" || m.input === "width") && v) { mp.push(m.label); } else if (typeof v === "number" && v > 0) { mp.push(m.label + (v > 1 ? " x" + v : "")); } }); }
+        if (item.rot && item.rotQ > 0) mp.push("ROT " + item.rot + " x" + item.rotQ);
+        if (item.rot2 && item.rot2Q > 0) mp.push("FM-ROT " + item.rot2 + " x" + item.rot2Q);
+        const modStr = mp.length > 0 ? " | " + mp.join(", ") : "";
+        setText("Description " + n, skuDesc + modStr);
         setText("Hinge " + n, item.hng || "");
         setText("Finished Ends " + n, item.fe || "");
         setText("Price " + n, fm(t.total || 0));
