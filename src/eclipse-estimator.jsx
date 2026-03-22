@@ -7017,7 +7017,7 @@ const DRW_BOX=[
   {v:"5/8-STD-FE",l:'5/8" Std Hdwd / Blum Full Ext (+$72/drw)'},{v:"5/8-SM-FE",l:'5/8" Sim Metal / Blum Full Ext (+$72/drw)'},
 ];
 
-const CSS=`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');*{box-sizing:border-box;margin:0;padding:0}input,select,button{font-family:${F.b}}input:focus,select:focus{border-color:${C.acc}!important;outline:none;box-shadow:0 0 0 2px ${C.acc}22}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:${C.stL};border-radius:3px}@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes fi{from{opacity:0}to{opacity:1}}.c{background:${C.paper};border-radius:10px;border:1px solid ${C.bdr};box-shadow:0 1px 3px rgba(0,0,0,.04)}.ch{padding:11px 14px;border-bottom:1px solid ${C.bdr};font-family:${F.d};font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:6px}.cb{padding:14px}.lb{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:${C.stone};margin-bottom:3px;display:block}.inp{font-size:13px;padding:7px 9px;border-radius:6px;border:1px solid ${C.bdr};background:${C.cream};color:${C.ink};width:100%}.sel{font-size:13px;padding:7px 26px 7px 9px;border-radius:6px;border:1px solid ${C.bdr};background:${C.cream};color:${C.ink};width:100%;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a7e70'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}.bt{font-size:11.5px;font-weight:600;padding:7px 13px;border-radius:6px;border:none;cursor:pointer;white-space:nowrap;min-height:38px;display:inline-flex;align-items:center;justify-content:center;gap:3px}.bp{background:${C.acc};color:#fff}.bg{background:transparent;color:${C.acc};border:1px solid ${C.bdr}}.bgl{background:${C.gold};color:#fff}.ch2{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:3px 7px;border-radius:4px;border:1.5px solid ${C.bdr};background:${C.cream};color:${C.stone};cursor:pointer;min-height:30px}.ch2.on{border-color:${C.acc};background:${C.accS};color:${C.acc}}.pl{font-size:8.5px;font-weight:700;padding:2px 6px;border-radius:10px;letter-spacing:.05em;text-transform:uppercase}.mn{font-family:${F.m}}.ntf{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:2000;background:${C.acc};color:#fff;padding:9px 22px;border-radius:8px;font-weight:600;font-size:12.5px;box-shadow:0 4px 14px rgba(0,0,0,.2);animation:fu .2s;pointer-events:none}.ic{padding:10px;border-radius:8px;border:1px solid ${C.bdr};background:${C.cream};animation:fu .15s}.ic.ov{border-color:${C.gold};background:${C.goldS}}.ic+.ic{margin-top:6px}.mbg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(3px);padding:14px}.sbg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:900;animation:fi .15s}.sht{position:fixed;bottom:0;left:0;right:0;z-index:910;background:${C.paper};border-radius:14px 14px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.12);animation:su .2s;max-height:85vh;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0)}.shtH{width:34px;height:4px;border-radius:2px;background:${C.stL};margin:9px auto 5px}.shtT{padding:7px 14px 10px;font-family:${F.d};font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid ${C.bdr}}.shtB{padding:14px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}`;
+const CSS=`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}input,select,button{font-family:${F.b};touch-action:manipulation}input:focus,select:focus{border-color:${C.acc}!important;outline:none;box-shadow:0 0 0 2px ${C.acc}22}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:${C.stL};border-radius:3px}@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes fi{from{opacity:0}to{opacity:1}}.c{background:${C.paper};border-radius:10px;border:1px solid ${C.bdr};box-shadow:0 1px 3px rgba(0,0,0,.04)}.ch{padding:11px 14px;border-bottom:1px solid ${C.bdr};font-family:${F.d};font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:6px}.cb{padding:14px}.lb{font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:${C.stone};margin-bottom:3px;display:block}.inp{font-size:16px;padding:7px 9px;border-radius:6px;border:1px solid ${C.bdr};background:${C.cream};color:${C.ink};width:100%}@media(min-width:769px){.inp{font-size:13px}}.sel{font-size:16px;padding:7px 26px 7px 9px;border-radius:6px;border:1px solid ${C.bdr};background:${C.cream};color:${C.ink};width:100%;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a7e70'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center}@media(min-width:769px){.sel{font-size:13px}}.bt{font-size:11.5px;font-weight:600;padding:7px 13px;border-radius:6px;border:none;cursor:pointer;white-space:nowrap;min-height:38px;display:inline-flex;align-items:center;justify-content:center;gap:3px}.bp{background:${C.acc};color:#fff}.bg{background:transparent;color:${C.acc};border:1px solid ${C.bdr}}.bgl{background:${C.gold};color:#fff}.ch2{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:3px 7px;border-radius:4px;border:1.5px solid ${C.bdr};background:${C.cream};color:${C.stone};cursor:pointer;min-height:30px}.ch2.on{border-color:${C.acc};background:${C.accS};color:${C.acc}}.pl{font-size:8.5px;font-weight:700;padding:2px 6px;border-radius:10px;letter-spacing:.05em;text-transform:uppercase}.mn{font-family:${F.m}}.ntf{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:2000;background:${C.acc};color:#fff;padding:9px 22px;border-radius:8px;font-weight:600;font-size:12.5px;box-shadow:0 4px 14px rgba(0,0,0,.2);animation:fu .2s;pointer-events:none}.ic{padding:10px;border-radius:8px;border:1px solid ${C.bdr};background:${C.cream};animation:fu .15s}.ic.ov{border-color:${C.gold};background:${C.goldS}}.ic+.ic{margin-top:6px}.mbg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(3px);padding:14px}.sbg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:900;animation:fi .15s}.sht{position:fixed;bottom:0;left:0;right:0;z-index:910;background:${C.paper};border-radius:14px 14px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,.12);animation:su .2s;max-height:85vh;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0)}.shtH{width:34px;height:4px;border-radius:2px;background:${C.stL};margin:9px auto 5px}.shtT{padding:7px 14px 10px;font-family:${F.d};font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid ${C.bdr}}.shtB{padding:14px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}`;
 
 function Tip({text}){const[show,setShow]=useState(false);return(<span style={{position:"relative",display:"inline-block",marginLeft:3,cursor:"help"}} onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)} onClick={e=>{e.stopPropagation();setShow(!show)}}><span style={{fontSize:10,color:C.stone,fontWeight:700,width:14,height:14,borderRadius:"50%",border:`1px solid ${C.stL}`,display:"inline-flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>?</span>{show&&<span style={{position:"absolute",bottom:"120%",left:"50%",transform:"translateX(-50%)",background:C.ink,color:"#fff",padding:"6px 10px",borderRadius:6,fontSize:10.5,lineHeight:1.4,whiteSpace:"normal",width:"max-content",maxWidth:220,zIndex:999,boxShadow:"0 4px 12px rgba(0,0,0,.25)",fontWeight:400,pointerEvents:"none"}}>{text}</span>}</span>)}
 
@@ -7402,7 +7402,9 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
   const [viewAll, setViewAll] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [pressedId, setPressedId] = useState(null);
   const isAdmin = profile?.role === "admin";
+  const isMob = window.innerWidth <= 768;
 
   const [userMap, setUserMap] = useState({});
   const loadQuotes = async () => {
@@ -7459,131 +7461,124 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
     return Object.values(g);
   }, [quotes, viewAll, userMap]);
 
+  // Touch-friendly quote row renderer
+  const QuoteRow = ({quote, canDelete}) => (
+    <div style={{ display: "flex", alignItems: "center", gap: isMob ? 8 : 6 }}>
+      <button
+        onClick={() => onLoadQuote(quote.id)}
+        onTouchStart={() => setPressedId(quote.id)}
+        onTouchEnd={() => setPressedId(null)}
+        onTouchCancel={() => setPressedId(null)}
+        onMouseEnter={(e) => { if(!isMob){e.currentTarget.style.borderColor = C.acc; e.currentTarget.style.background = C.accS;} }}
+        onMouseLeave={(e) => { if(!isMob){e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.background = C.cream;} }}
+        style={{
+          flex: 1,
+          background: pressedId === quote.id ? C.accS : C.cream,
+          border: `1px solid ${pressedId === quote.id ? C.acc : C.bdr}`,
+          borderRadius: "8px",
+          padding: isMob ? "14px 14px" : "12px",
+          textAlign: "left",
+          cursor: "pointer",
+          transition: "all 0.15s",
+          minHeight: isMob ? 52 : "auto",
+          WebkitTapHighlightColor: "transparent",
+        }}
+      >
+        <div style={{ fontSize: isMob ? "14px" : "13px", fontWeight: "600", color: C.ink }}>{quote.name}</div>
+        <div style={{ fontSize: "11px", color: C.stone, marginTop: "3px" }}>
+          {new Date(quote.updated_at).toLocaleDateString()}
+        </div>
+      </button>
+      {canDelete && (confirmDeleteId === quote.id ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <button onClick={() => deleteQuote(quote.id)} disabled={deleting} style={{ background: C.red, color: "#fff", border: "none", borderRadius: 6, padding: isMob ? "8px 14px" : "4px 8px", fontSize: isMob ? 12 : 10, fontWeight: 700, cursor: "pointer", opacity: deleting ? 0.5 : 1, minHeight: isMob ? 36 : "auto" }}>{deleting ? "..." : "Delete"}</button>
+          <button onClick={() => setConfirmDeleteId(null)} style={{ background: C.warm, color: C.stone, border: `1px solid ${C.bdr}`, borderRadius: 6, padding: isMob ? "7px 14px" : "3px 8px", fontSize: isMob ? 12 : 10, cursor: "pointer", minHeight: isMob ? 36 : "auto" }}>Cancel</button>
+        </div>
+      ) : (
+        <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(quote.id); }} title="Delete quote" style={{ background: C.warm, border: `1px solid ${C.bdr}`, cursor: "pointer", fontSize: isMob ? 16 : 14, color: C.stone, padding: isMob ? "10px 12px" : "6px", borderRadius: 6, transition: "all 0.15s", minWidth: isMob ? 44 : "auto", minHeight: isMob ? 44 : "auto", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }} onMouseEnter={(e) => {if(!isMob) e.currentTarget.style.color = C.red}} onMouseLeave={(e) => {if(!isMob) e.currentTarget.style.color = C.stone}}>✕</button>
+      ))}
+    </div>
+  );
+
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(3px)", padding: "14px" }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: isMob ? "flex-end" : "center", justifyContent: "center", zIndex: 1000, backdropFilter: "blur(3px)", padding: isMob ? 0 : "14px" }} onClick={(e) => { if(e.target === e.currentTarget) onClose(); }}>
       <div style={{
         background: C.paper,
-        borderRadius: "12px",
-        padding: "20px",
+        borderRadius: isMob ? "16px 16px 0 0" : "12px",
         width: "100%",
-        maxWidth: "500px",
-        maxHeight: "80vh",
-        overflowY: "auto",
-        boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+        maxWidth: isMob ? "100%" : "500px",
+        maxHeight: isMob ? "92vh" : "80vh",
+        display: "flex",
+        flexDirection: "column",
+        boxShadow: "0 -4px 30px rgba(0,0,0,0.3)",
+        paddingBottom: isMob ? "env(safe-area-inset-bottom, 0px)" : 0,
+        animation: isMob ? "su .2s" : "fu .15s",
       }}>
+        {isMob && <div style={{width: 34, height: 4, borderRadius: 2, background: C.stL, margin: "10px auto 4px"}}/>}
         <div style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "16px",
-          paddingBottom: "12px",
+          padding: isMob ? "8px 16px 12px" : "16px 20px",
           borderBottom: `1px solid ${C.bdr}`,
+          flexShrink: 0,
         }}>
           <h3 style={{
             fontFamily: F.d,
-            fontSize: "18px",
+            fontSize: isMob ? "17px" : "18px",
             fontWeight: "700",
             color: C.ink,
           }}>{viewAll ? "All Quotes" : "My Quotes"}</h3>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <button onClick={() => setViewAll(!viewAll)} className="bt" style={{ fontSize: 11, padding: "4px 10px", background: viewAll ? C.accS : C.warm, border: `1px solid ${viewAll ? C.acc : C.bdr}`, color: viewAll ? C.acc : C.stone, borderRadius: 6, cursor: "pointer" }}>{viewAll ? "My Quotes" : "All Quotes"}</button>
+            <button onClick={() => setViewAll(!viewAll)} style={{ fontSize: 12, padding: isMob ? "8px 14px" : "4px 10px", background: viewAll ? C.accS : C.warm, border: `1px solid ${viewAll ? C.acc : C.bdr}`, color: viewAll ? C.acc : C.stone, borderRadius: 6, cursor: "pointer", fontWeight: 600, minHeight: isMob ? 38 : "auto", WebkitTapHighlightColor: "transparent" }}>{viewAll ? "My Quotes" : "All Quotes"}</button>
             <button
               onClick={onClose}
               style={{
-                background: "none",
-                border: "none",
-                fontSize: "20px",
+                background: C.warm,
+                border: `1px solid ${C.bdr}`,
+                fontSize: "18px",
                 cursor: "pointer",
                 color: C.stone,
+                borderRadius: 6,
+                width: isMob ? 38 : 32,
+                height: isMob ? 38 : 32,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                WebkitTapHighlightColor: "transparent",
               }}
             >×</button>
           </div>
         </div>
 
-        {loading ? (
-          <div style={{ textAlign: "center", color: C.stone, padding: "20px" }}>Loading quotes...</div>
-        ) : quotes.length === 0 ? (
-          <div style={{ textAlign: "center", color: C.stone, padding: "20px" }}>No quotes yet</div>
-        ) : viewAll && grouped ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            {grouped.map((group, gi) => (
-              <div key={gi}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: C.stone, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 6, padding: "4px 0", borderBottom: `1px solid ${C.bdr}` }}>
-                  {group.label}{group.business ? ` · ${group.business}` : ""} <span style={{ fontWeight: 400 }}>({group.quotes.length})</span>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                  {group.quotes.map((quote) => (
-                    <div key={quote.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <button
-                        onClick={() => onLoadQuote(quote.id)}
-                        style={{
-                          flex: 1,
-                          background: C.cream,
-                          border: `1px solid ${C.bdr}`,
-                          borderRadius: "8px",
-                          padding: "10px 12px",
-                          textAlign: "left",
-                          cursor: "pointer",
-                          transition: "all 0.2s",
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.acc; e.currentTarget.style.background = C.accS; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.background = C.cream; }}
-                      >
-                        <div style={{ fontSize: "13px", fontWeight: "600", color: C.ink }}>{quote.name}</div>
-                        <div style={{ fontSize: "11px", color: C.stone, marginTop: "3px" }}>
-                          {new Date(quote.updated_at).toLocaleDateString()}
-                        </div>
-                      </button>
-                      {(quote.user_id === user.id || isAdmin) && (confirmDeleteId === quote.id ? (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                          <button onClick={() => deleteQuote(quote.id)} disabled={deleting} style={{ background: C.red, color: "#fff", border: "none", borderRadius: 5, padding: "4px 8px", fontSize: 10, fontWeight: 700, cursor: "pointer", opacity: deleting ? 0.5 : 1 }}>{deleting ? "..." : "Confirm"}</button>
-                          <button onClick={() => setConfirmDeleteId(null)} style={{ background: C.warm, color: C.stone, border: `1px solid ${C.bdr}`, borderRadius: 5, padding: "3px 8px", fontSize: 10, cursor: "pointer" }}>Cancel</button>
-                        </div>
-                      ) : (
-                        <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(quote.id); }} title="Delete quote" style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: C.stone, padding: "6px", borderRadius: 4, transition: "color 0.15s" }} onMouseEnter={(e) => e.currentTarget.style.color = C.red} onMouseLeave={(e) => e.currentTarget.style.color = C.stone}>✕</button>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {quotes.map((quote) => (
-              <div key={quote.id} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <button
-                  onClick={() => onLoadQuote(quote.id)}
-                  style={{
-                    flex: 1,
-                    background: C.cream,
-                    border: `1px solid ${C.bdr}`,
-                    borderRadius: "8px",
-                    padding: "12px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.acc; e.currentTarget.style.background = C.accS; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.background = C.cream; }}
-                >
-                  <div style={{ fontSize: "13px", fontWeight: "600", color: C.ink }}>{quote.name}</div>
-                  <div style={{ fontSize: "11px", color: C.stone, marginTop: "4px" }}>
-                    {new Date(quote.updated_at).toLocaleDateString()}
+        <div style={{ padding: isMob ? "12px 14px 16px" : "16px 20px", overflowY: "auto", flex: 1, WebkitOverflowScrolling: "touch" }}>
+          {loading ? (
+            <div style={{ textAlign: "center", color: C.stone, padding: "28px 20px" }}>Loading quotes...</div>
+          ) : quotes.length === 0 ? (
+            <div style={{ textAlign: "center", color: C.stone, padding: "28px 20px" }}>No quotes yet</div>
+          ) : viewAll && grouped ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              {grouped.map((group, gi) => (
+                <div key={gi}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: C.stone, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 8, padding: "4px 0", borderBottom: `1px solid ${C.bdr}` }}>
+                    {group.label}{group.business ? ` · ${group.business}` : ""} <span style={{ fontWeight: 400 }}>({group.quotes.length})</span>
                   </div>
-                </button>
-                {confirmDeleteId === quote.id ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                    <button onClick={() => deleteQuote(quote.id)} disabled={deleting} style={{ background: C.red, color: "#fff", border: "none", borderRadius: 5, padding: "4px 8px", fontSize: 10, fontWeight: 700, cursor: "pointer", opacity: deleting ? 0.5 : 1 }}>{deleting ? "..." : "Confirm"}</button>
-                    <button onClick={() => setConfirmDeleteId(null)} style={{ background: C.warm, color: C.stone, border: `1px solid ${C.bdr}`, borderRadius: 5, padding: "3px 8px", fontSize: 10, cursor: "pointer" }}>Cancel</button>
+                  <div style={{ display: "flex", flexDirection: "column", gap: isMob ? "8px" : "6px" }}>
+                    {group.quotes.map((quote) => (
+                      <QuoteRow key={quote.id} quote={quote} canDelete={quote.user_id === user.id || isAdmin} />
+                    ))}
                   </div>
-                ) : (
-                  <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(quote.id); }} title="Delete quote" style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: C.stone, padding: "6px", borderRadius: 4, transition: "color 0.15s" }} onMouseEnter={(e) => e.currentTarget.style.color = C.red} onMouseLeave={(e) => e.currentTarget.style.color = C.stone}>✕</button>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: isMob ? "8px" : "8px" }}>
+              {quotes.map((quote) => (
+                <QuoteRow key={quote.id} quote={quote} canDelete={true} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -10057,25 +10052,32 @@ function App({user, profile, supabase, onLogout, onBack}){
     {ntf&&<div className="ntf">{ntf}</div>}
 
     <div style={{background:C.ink,color:C.cream,padding:mob?"9px 11px":"11px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:6,position:"sticky",top:0,zIndex:100}}>
-      <div style={{display:"flex",alignItems:"center",gap:7}}>
+      <div style={{display:"flex",alignItems:"center",gap:7,flexShrink:0}}>
         <span style={{fontFamily:F.d,fontSize:mob?15:18,fontWeight:700}}>Eclipse</span>
-        <span style={{fontSize:7.5,fontFamily:F.m,background:C.acc,color:"#fff",padding:"2px 5px",borderRadius:3}}>v8.8.0</span>
-        <span style={{fontSize:9,color:C.stL}}>{CATALOG.length} SKUs</span>
+        {!mob&&<><span style={{fontSize:7.5,fontFamily:F.m,background:C.acc,color:"#fff",padding:"2px 5px",borderRadius:3}}>v8.8.0</span>
+        <span style={{fontSize:9,color:C.stL}}>{CATALOG.length} SKUs</span></>}
       </div>
-      <div style={{display:"flex",gap:4}}>
-        {!mob&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={newP}>+ New</button>}
-        <button className="bt bp" onClick={save} style={{fontSize:11}}>💾{!mob&&" Save"}</button>
-        <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowQuotesList(true)}>📂{!mob&&" Quotes"}</button>
-        {versions.length>0&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowHistory(true)}>📜{!mob&&" History"}</button>}
-        {profile?.role==="admin"&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold}} onClick={()=>setShowAdminPanel(true)}>⚙{!mob&&" Admin"}</button>}
-        {onBack&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold,fontWeight:600}} onClick={onBack}>🏠{!mob&&" Hub"}</button>}
-        <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={onLogout}>{!mob&&"Sign "}Out</button>
-        {mob&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream,fontSize:11,padding:"4px 8px"}} onClick={genOrder}>📋 Order</button>}
-        {mob&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream,fontSize:13}} onClick={()=>ssCf(true)}>⚙</button>}
-      </div>
+      {mob?<div style={{display:"flex",gap:3,overflowX:"auto",WebkitOverflowScrolling:"touch",msOverflowStyle:"none",scrollbarWidth:"none",paddingRight:2}}>
+        <button style={{background:C.acc,color:"#fff",border:"none",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={save}>💾</button>
+        <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>setShowQuotesList(true)}>📂 Quotes</button>
+        <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={genOrder}>📋 Order</button>
+        <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>ssCf(true)}>⚙</button>
+        {versions.length>0&&<button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>setShowHistory(true)}>📜</button>}
+        {onBack&&<button style={{background:"rgba(255,255,255,.12)",color:C.gold,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={onBack}>🏠</button>}
+        {profile?.role==="admin"&&<button style={{background:"rgba(255,255,255,.12)",color:C.gold,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>setShowAdminPanel(true)}>⚙A</button>}
+        <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={onLogout}>Out</button>
+      </div>:<div style={{display:"flex",gap:4}}>
+        <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={newP}>+ New</button>
+        <button className="bt bp" onClick={save} style={{fontSize:11}}>💾 Save</button>
+        <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowQuotesList(true)}>📂 Quotes</button>
+        {versions.length>0&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowHistory(true)}>📜 History</button>}
+        {profile?.role==="admin"&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold}} onClick={()=>setShowAdminPanel(true)}>⚙ Admin</button>}
+        {onBack&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold,fontWeight:600}} onClick={onBack}>🏠 Hub</button>}
+        <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={onLogout}>Sign Out</button>
+      </div>}
     </div>
 
-    {items.length>0&&<div style={{position:"sticky",top:mob?37:41,zIndex:99,background:C.acc,color:"#fff",padding:"4px 18px",display:"flex",alignItems:"center",justifyContent:"center",gap:mob?10:20,fontSize:mob?10:11,fontFamily:F.m,fontWeight:600,boxShadow:"0 2px 6px rgba(0,0,0,.15)"}}>
+    {items.length>0&&<div style={{position:"sticky",top:mob?54:41,zIndex:99,background:C.acc,color:"#fff",padding:mob?"5px 12px":"4px 18px",display:"flex",alignItems:"center",justifyContent:"center",gap:mob?8:20,fontSize:mob?10:11,fontFamily:F.m,fontWeight:600,boxShadow:"0 2px 6px rgba(0,0,0,.15)",flexWrap:mob?"wrap":"nowrap"}}>
       <span>{comp.n} item{comp.n!==1?"s":""}</span>
       <span style={{opacity:.5}}>·</span>
       <span>{comp.un} unit{comp.un!==1?"s":""}</span>
@@ -10144,16 +10146,16 @@ function App({user, profile, supabase, onLogout, onBack}){
 
       {!mob&&<div className="c" style={{marginBottom:10}}><div className="ch">Add Cabinets<span style={{fontSize:10.5,color:C.stone,fontFamily:F.b,fontWeight:400}}>Eclipse Catalog v8.8.0 · {CATALOG.length} SKUs</span></div><div className="cb"><AddUI onAdd={addIt} onAddCustom={addCustom}/></div></div>}
 
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,flexWrap:"wrap",gap:4}}>
-        <div style={{display:"flex",gap:3,alignItems:"center",overflowX:"auto"}}>
-          {[["all","All"],...Object.entries(TN)].map(([k,v])=><button key={k} className={`ch2 ${tf===k?"on":""}`} onClick={()=>sTf(k)} style={{flexShrink:0,...(k!=="all"&&tf===k?{borderColor:TC[k],color:TC[k],background:TC[k]+"14"}:{})}}>{v}</button>)}
-          {items.length>0&&<button className={`ch2 ${groupByZone?"on":""}`} onClick={()=>setGroupByZone(!groupByZone)} style={{flexShrink:0,...(groupByZone?{borderColor:C.acc,color:C.acc,background:C.acc+"14"}:{})}} title={groupByZone?"Grouped by zone":"Flat view"}>🏠{mob?"":" Zone"}</button>}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,flexWrap:"wrap",gap:mob?6:4}}>
+        <div style={{display:"flex",gap:mob?4:3,alignItems:"center",overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:mob?2:0}}>
+          {[["all","All"],...Object.entries(TN)].map(([k,v])=><button key={k} className={`ch2 ${tf===k?"on":""}`} onClick={()=>sTf(k)} style={{flexShrink:0,minHeight:mob?34:30,...(k!=="all"&&tf===k?{borderColor:TC[k],color:TC[k],background:TC[k]+"14"}:{})}}>{v}</button>)}
+          {items.length>0&&<button className={`ch2 ${groupByZone?"on":""}`} onClick={()=>setGroupByZone(!groupByZone)} style={{flexShrink:0,minHeight:mob?34:30,...(groupByZone?{borderColor:C.acc,color:C.acc,background:C.acc+"14"}:{})}} title={groupByZone?"Grouped by zone":"Flat view"}>🏠{mob?"":" Zone"}</button>}
         </div>
-        <div style={{display:"flex",gap:3}}>
-          <button className="bt bgl" onClick={()=>ssMg(true)} style={{fontSize:11}}>💰{mob?"":" Margin"}</button>
-          <button className="bt bg" onClick={csv} style={{fontSize:11}}>📄{mob?"":" CSV"}</button>
-          <button className="bt bp" onClick={()=>{if(items.length===0){fl("No items to generate order form");return;}if(!color){fl("⚠ Please select a Finish Color before generating");return;}setShowOrderReview(true)}} style={{fontSize:11,...(!color&&items.length>0?{opacity:0.7}:{})}}>📋{mob?"":" Order Form"}{!color&&items.length>0&&!mob?" ⚠":""}</button>
-          {mob&&<button className="bt bg" onClick={newP} style={{fontSize:11}}>+New</button>}
+        <div style={{display:"flex",gap:mob?4:3}}>
+          <button className="bt bgl" onClick={()=>ssMg(true)} style={{fontSize:11,minHeight:mob?38:undefined}}>💰{mob?"":" Margin"}</button>
+          <button className="bt bg" onClick={csv} style={{fontSize:11,minHeight:mob?38:undefined}}>📄{mob?"":" CSV"}</button>
+          <button className="bt bp" onClick={()=>{if(items.length===0){fl("No items to generate order form");return;}if(!color){fl("⚠ Please select a Finish Color before generating");return;}setShowOrderReview(true)}} style={{fontSize:11,minHeight:mob?38:undefined,...(!color&&items.length>0?{opacity:0.7}:{})}}>📋{mob?"":" Order Form"}{!color&&items.length>0&&!mob?" ⚠":""}</button>
+          {mob&&<button className="bt bg" onClick={newP} style={{fontSize:11,minHeight:38}}>+New</button>}
         </div>
       </div>
 
@@ -11005,7 +11007,7 @@ return(<div style={{marginBottom:5}}>
       </div>
     </div>
 
-    {mob&&<button onClick={()=>ssAd(true)} style={{position:"fixed",bottom:"calc(14px + env(safe-area-inset-bottom,0px))",right:14,zIndex:800,width:54,height:54,borderRadius:"50%",background:C.acc,color:"#fff",border:"none",fontSize:26,cursor:"pointer",boxShadow:"0 4px 14px rgba(0,0,0,.22)",display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>}
+    {mob&&<button onClick={()=>ssAd(true)} style={{position:"fixed",bottom:"calc(18px + env(safe-area-inset-bottom,0px))",right:16,zIndex:800,width:56,height:56,borderRadius:"50%",background:C.acc,color:"#fff",border:"none",fontSize:28,cursor:"pointer",boxShadow:"0 6px 20px rgba(0,0,0,.28)",display:"flex",alignItems:"center",justifyContent:"center",WebkitTapHighlightColor:"transparent",touchAction:"manipulation"}}>+</button>}
 
     {mob&&sAd&&<><div className="sbg" onClick={()=>ssAd(false)}/><div className="sht"><div className="shtH"/><div className="shtT"><span>Add Cabinets</span><button onClick={()=>ssAd(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>✕</button></div><div className="shtB"><AddUI onAdd={addIt} onAddCustom={addCustom}/></div></div></>}
 
