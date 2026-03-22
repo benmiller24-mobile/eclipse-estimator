@@ -8539,8 +8539,8 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("Job Name", sampleJobName || "");
       setText("Wood Species", sampleSp);
       setText("Color", sampleColor || "");
-      setText("Upper Door Style", sampleDoor);
-      setText("Lower Door Style", sampleDoor);
+      setText("Upper Door Style", "");
+      setText("Lower Door Style", "");
       setText("Drawer Front Style", "");
       setText("Order Date", new Date().toLocaleDateString());
       setText("Salesperson/Contact", contactName);
@@ -8552,8 +8552,8 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("Quantity 1", "1");
       setText("Item Number 1", "1");
       const fakeItem = { s: "SD81/2X11", t: "A", r: "U2", p: 65, q: 1, len: 0, sqin: 0, sqW: 0, sqH: 0, dc: 0, drc: 0, brot: 0, rbs: false, mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, so: null };
-      const { u: sdPrice } = cp(fakeItem, sampleSp, "Standard", sampleDoor, "DF-HNVR", "5/8-STD");
-      setText("Description 1", "Sample Door 8½×11 (" + samplePanel + ") — " + sampleSp + " / " + sampleDoor);
+      const { u: sdPrice } = cp(fakeItem, sampleSp, "Standard", "HNVR", "DF-HNVR", "5/8-STD");
+      setText("Description 1", "Sample Door 8½×11 (" + samplePanel + ") — " + sampleSp);
       setText("Price 1", fm(sdPrice));
 
       // X-marks: Glaze
@@ -9005,7 +9005,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
                 </div>}
                 <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10}}>
                   <div><label style={labelStyle}>Species</label><select value={sampleSp} onChange={e=>{setSampleSp(e.target.value);setSampleColor("")}} style={fieldStyle}>{Object.keys(SP).map(k=><option key={k} value={k}>{k}</option>)}</select></div>
-                  <div><label style={labelStyle}>Door Style</label><select value={sampleDoor} onChange={e=>setSampleDoor(e.target.value)} style={fieldStyle}>{DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}</option>)}</select></div>
+                  {activeType!=="sd85"&&<div><label style={labelStyle}>Door Style</label><select value={sampleDoor} onChange={e=>setSampleDoor(e.target.value)} style={fieldStyle}>{DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}</option>)}</select></div>}
                   {activeType==="sd85"&&<div><label style={labelStyle}>Panel Type</label><select value={samplePanel} onChange={e=>setSamplePanel(e.target.value)} style={fieldStyle}><option value="Raised">Raised</option><option value="Recessed">Recessed</option></select></div>}
                   <div><label style={labelStyle}>Color / Finish</label><select value={sampleColor} onChange={e=>setSampleColor(e.target.value)} style={fieldStyle}><option value="">-- Select --</option>{(FINISH_COLORS[sampleSp]||[]).map(c=><option key={c} value={c}>{c}</option>)}</select></div>
                   <div><label style={labelStyle}>Edge Profile</label><select value={sampleEdge} onChange={e=>setSampleEdge(e.target.value)} style={fieldStyle}>{["None","100","150","350","400","750"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
