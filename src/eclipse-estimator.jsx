@@ -8478,6 +8478,58 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       return;
     }
 
+    // SD 12½×15½ Express outputs on the actual Eclipse Sample 12½×15½ Door Form
+    if (activeType === "sd") {
+      const { PDFDocument } = await import("pdf-lib");
+      let templateBytes;
+      try {
+        const resp = await fetch("/forms/sample-door-express.pdf");
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        templateBytes = new Uint8Array(await resp.arrayBuffer());
+      } catch(e) { fl("Could not load express sample door form template"); return; }
+
+      const doc = await PDFDocument.load(templateBytes);
+      const form = doc.getForm();
+      const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
+      const clickBtn = (name) => { try { const b = form.getButton(name); b.enableReadOnly(); } catch(e) {} };
+
+      // Header fields
+      setText("Business Name", dealerName);
+      setText("Customer #", dealerCode);
+      setText("P.O. Number", "");
+      setText("Job Name", "");
+      setText("Wood Species", sampleSp);
+      setText("Color", sampleColor || "");
+      setText("Door Style", sampleDoor);
+      setText("Order Date", new Date().toLocaleDateString());
+      setText("Salesperson/Contact", contactName);
+      setText("Contact Phone", contactPhone);
+      setText("Contact Email", contactEmail);
+
+      // Ship-to fields
+      setText("Company Name", dealerName);
+      setText("Contact Name", contactName);
+      setText("Street Address", shipAddr);
+
+      // Character technique checkboxes (these are PDFButtons with OFF/ON naming)
+      if (sampleCharT === "Aged†" || sampleCharT === "Aged") { try { form.getButton("Aged† ON").enableReadOnly(); } catch(e) {} }
+      if (sampleCharT === "Wearing†" || sampleCharT === "Wearing") { try { form.getButton("Wearing† ON").enableReadOnly(); } catch(e) {} }
+      if (sampleCharT === "Sand-through‡" || sampleCharT === "Sand-through") { try { form.getButton("Sand-through‡ ON").enableReadOnly(); } catch(e) {} }
+      if (!sampleCharT || sampleCharT === "NONE") { try { form.getButton("None ON").enableReadOnly(); } catch(e) {} }
+
+      form.flatten();
+      const bytes = await doc.save();
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Eclipse-Sample-SD12-Express-${new Date().toISOString().slice(0,10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      fl("Express sample door order form downloaded!");
+      return;
+    }
+
     // Sample Door & Drawer Front 14½×24 outputs on the actual Eclipse Sample Door & Drawer Front Form
     if (activeType === "ffd") {
       const { PDFDocument } = await import("pdf-lib");
