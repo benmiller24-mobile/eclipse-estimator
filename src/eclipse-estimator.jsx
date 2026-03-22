@@ -6457,9 +6457,9 @@ const TC = { B:"#3d5a47", W:"#4a6178", T:"#6b5340", V:"#6b4a6b", C:"#8b5a8b", D:
 // Price book section names by ref letter
 const SEC={C:"Loose Doors & Drawer Fronts",E:"Wall Cabinets",F:"Pediments",G:"Range Hoods",H:"RH Accessories",I:"Base Cabinets",J:"Island End Caps",K:"Island Cabinets",L:"Utility Cabinets",M:"Tall Shelf Cabinets",N:"Vanity Cabinets",O:"ADA Compliant",P:"Vanity Tall Custom",Q:"Dressing Room",R:"GOLA Channel",S:"Accessories & Panels",T:"Moulding",U:"Samples & Displays"};
 const ZN = [
-  {id:"kitchen",l:"Kitchen",i:"🍳"},{id:"island",l:"Island",i:"🏝"},{id:"pantry",l:"Pantry",i:"🗄"},
-  {id:"bath",l:"Bath",i:"🚿"},{id:"laundry",l:"Laundry",i:"👕"},{id:"mudroom",l:"Mudroom",i:"🥾"},
-  {id:"bar",l:"Bar",i:"🍷"},{id:"office",l:"Office",i:"💼"},{id:"other",l:"Other",i:"📦"},
+  {id:"kitchen",l:"Kitchen",i:"K"},{id:"island",l:"Island",i:"I"},{id:"pantry",l:"Pantry",i:"P"},
+  {id:"bath",l:"Bath",i:"B"},{id:"laundry",l:"Laundry",i:"L"},{id:"mudroom",l:"Mudroom",i:"M"},
+  {id:"bar",l:"Bar",i:"Ba"},{id:"office",l:"Office",i:"O"},{id:"other",l:"Other",i:"+"},
 ];
 const F={d:"'Questrial','Helvetica Neue',sans-serif",b:"'Assistant','Helvetica Neue',sans-serif",m:"'JetBrains Mono','SF Mono',monospace"};
 // ── Supabase Client ──
@@ -6473,6 +6473,37 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 const C={ink:"#000000",warm:"#F7F6F5",cream:"#FAFAF9",paper:"#FFFFFF",stone:"#AFA497",stL:"#DFDFDB",bdr:"#DFDFDB",acc:"#4A4A4D",accS:"#F7F6F5",gold:"#AFA497",goldS:"#F7F6F5",red:"#b91c1c"};
 const fm=n=>"$"+Math.round(n||0).toLocaleString();
+/* ── Pinnacle Brand Icon System — inline SVGs, 1.5px stroke ── */
+const Ic=({n,sz=14,c=C.stone,style={}})=>{
+  const p={width:sz,height:sz,fill:"none",stroke:c,strokeWidth:1.5,strokeLinecap:"round",strokeLinejoin:"round",verticalAlign:"middle",display:"inline-block",flexShrink:0,...style};
+  switch(n){
+    /* clipboard / order form */
+    case"clip":return(<svg viewBox="0 0 24 24" style={p}><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="2" width="6" height="4" rx="1.5"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="15.5" x2="13" y2="15.5"/></svg>);
+    /* pencil-square / edit / custom quote */
+    case"edit":return(<svg viewBox="0 0 24 24" style={p}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>);
+    /* ruler / drafting / reference drawing */
+    case"ruler":return(<svg viewBox="0 0 24 24" style={p}><path d="M21.7 7.3l-5-5a1 1 0 0 0-1.4 0l-13 13a1 1 0 0 0 0 1.4l5 5a1 1 0 0 0 1.4 0l13-13a1 1 0 0 0 0-1.4z"/><line x1="7" y1="13" x2="10" y2="10"/><line x1="10" y1="16" x2="13" y2="13"/><line x1="13" y1="19" x2="16" y2="16"/></svg>);
+    /* door */
+    case"door":return(<svg viewBox="0 0 24 24" style={p}><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="4" y1="22" x2="20" y2="22"/><circle cx="15" cy="12" r="1" fill={c} stroke="none"/></svg>);
+    /* dollar / margin calculator */
+    case"dollar":return(<svg viewBox="0 0 24 24" style={p}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>);
+    /* bolt / express / lightning */
+    case"bolt":return(<svg viewBox="0 0 24 24" style={p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>);
+    /* shield / warranty */
+    case"shield":return(<svg viewBox="0 0 24 24" style={p}><path d="M12 2l7.5 3.5v5c0 5.25-3.19 10.15-7.5 11.5C7.69 20.65 4.5 15.75 4.5 10.5v-5L12 2z"/><polyline points="9 12.5 11 14.5 15 10.5"/></svg>);
+    /* drawer / cabinet front */
+    case"drawer":return(<svg viewBox="0 0 24 24" style={p}><rect x="3" y="3" width="18" height="8" rx="2"/><rect x="3" y="13" width="18" height="8" rx="2"/><line x1="10" y1="7" x2="14" y2="7"/><line x1="10" y1="17" x2="14" y2="17"/></svg>);
+    /* gear / settings / mods */
+    case"gear":return(<svg viewBox="0 0 24 24" style={p}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>);
+    /* warning / alert triangle */
+    case"warn":return(<svg viewBox="0 0 24 24" style={{...p,fill:"none",stroke:c||"#92400e"}}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="16.5" r=".5" fill={c||"#92400e"} stroke="none"/></svg>);
+    /* paper plane / send / express order */
+    case"send":return(<svg viewBox="0 0 24 24" style={p}><path d="M21.5 2.5l-9.1 18.8a.3.3 0 0 1-.5 0L8.8 14.1a.3.3 0 0 0-.2-.2L1.2 11a.3.3 0 0 1 0-.5L21.5 2.5z"/><line x1="21.5" y1="2.5" x2="8.7" y2="14"/></svg>);
+    /* swatch / samples */
+    case"swatch":return(<svg viewBox="0 0 24 24" style={p}><rect x="3" y="3" width="11" height="14" rx="2.5"/><rect x="10" y="7" width="11" height="14" rx="2.5"/><circle cx="8.5" cy="10" r="1.5" fill={c} stroke="none"/><circle cx="15.5" cy="14" r="1.5" fill={c} stroke="none"/></svg>);
+    default:return null;
+  }
+};
 const uid=()=>Math.random().toString(36).slice(2,10);
 // Per-sq-inch SKU prefixes (bar backs, finished panels, edge-banded panels, slat bar backs, finished tops)
 // Per-sq-inch items: S33 bar backs, S34 component bar backs, S35 slat bar backs, 
@@ -7077,7 +7108,7 @@ function MarginCalc({tot,onClose}){
   const[mt,sMt]=useState("markup"),[mp,sMp]=useState(35),[il,sIl]=useState(65),[lf,sLf]=useState(20),[cs,sCs]=useState(85),[sf,sSf]=useState(45),[df,sDf]=useState(750),[fr,sFr]=useState(450);
   const sell=mt==="markup"?tot*(1+mp/100):tot/(1-mp/100),gp=sell-tot,inst=il*lf,ct=cs*sf,pt=sell+inst+ct+df+fr;
   return(<div className="mbg" onClick={onClose}><div className="c" style={{width:"min(540px,94vw)",maxHeight:"90vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}>
-    <div className="ch" style={{background:C.goldS}}>💰 Margin Calculator<button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>✕</button></div>
+    <div className="ch" style={{background:C.goldS}}><Ic n="dollar" sz={14} c={C.gold}/> Margin Calculator<button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>×</button></div>
     <div className="cb">
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12,textAlign:"center"}}>
         <div><div className="lb">Cost</div><div className="mn" style={{fontSize:17,fontWeight:700}}>{fm(tot)}</div></div>
@@ -7127,7 +7158,7 @@ function AddUI({onAdd,onAddCustom}){
     </div>
     <div style={{maxHeight:"36vh",overflowY:"auto",border:`1px solid ${C.bdr}`,borderRadius:7,marginBottom:7,background:C.cream}}>
       {recentSkus.length>0&&!sr&&tf==="all"&&<div>
-        <div style={{padding:"4px 9px",background:"linear-gradient(90deg,#f59e0b22,#f59e0b08)",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:"#b45309",position:"sticky",top:0,zIndex:2,borderBottom:`1px solid #f59e0b33`,display:"flex",alignItems:"center",gap:5}}>⚡ Recently Used ({recentSkus.length})</div>
+        <div style={{padding:"4px 9px",background:"linear-gradient(90deg,#f59e0b22,#f59e0b08)",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:"#b45309",position:"sticky",top:0,zIndex:2,borderBottom:`1px solid #f59e0b33`,display:"flex",alignItems:"center",gap:5}}><Ic n="bolt" sz={10} c="#b45309"/> Recently Used ({recentSkus.length})</div>
         {recentSkus.map(s=>{const c=CATALOG.find(x=>x.s===s);if(!c)return null;return(<div key={"recent-"+c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"#fffbeb08",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid #f59e0b44"}}>
             <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s} <span style={{fontSize:9.5,color:C.stone,fontWeight:400}}>{c.r}</span></span>
             <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
@@ -7169,7 +7200,7 @@ function AddUI({onAdd,onAddCustom}){
       </div>
     </div>}
     {LSD_SKUS.has(sk)&&<div style={{marginBottom:7,padding:"8px 10px",background:"#fef3cd",borderRadius:7,border:"1px solid #f0c040"}}>
-      <div style={{fontSize:10,fontWeight:700,color:"#856404",marginBottom:3}}>⚠ Important Notes</div>
+      <div style={{fontSize:10,fontWeight:700,color:"#856404",marginBottom:3}}><Ic n="warn" sz={10} c="#856404"/> Important Notes</div>
       <div style={{fontSize:10,color:"#856404",lineHeight:1.5,whiteSpace:"pre-line"}}>{LSD_NOTE}</div>
     </div>}
     <div style={{display:"flex",gap:6,alignItems:"flex-end",flexWrap:"wrap"}}>
@@ -7180,7 +7211,7 @@ function AddUI({onAdd,onAddCustom}){
     {/* Custom Quote Section */}
     <div style={{marginTop:10,borderTop:`2px solid ${C.gold}`,paddingTop:10}}>
       <button onClick={()=>setShowCQ(!showCQ)} style={{width:"100%",background:showCQ?C.goldS:"#fff",border:`2px solid ${C.gold}`,borderRadius:8,padding:"8px 12px",cursor:"pointer",fontSize:12,fontWeight:700,color:C.gold,display:"flex",alignItems:"center",gap:6,justifyContent:"space-between",transition:"all .15s"}}>
-        <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:14}}>{showCQ?"▾":"▸"}</span><span>📝 Custom Quote Item</span></span>
+        <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:14}}>{showCQ?"▾":"▸"}</span><span><Ic n="edit" sz={14} c={C.ink}/> Custom Quote Item</span></span>
         <span style={{fontSize:10,fontWeight:400,color:C.stone}}>Factory special / custom pricing</span>
       </button>
       {showCQ&&<div style={{border:`1px solid ${C.gold}33`,borderTop:"none",borderRadius:"0 0 8px 8px",padding:"12px",background:C.goldS}}>
@@ -7207,7 +7238,7 @@ function AddUI({onAdd,onAddCustom}){
                 <input type="file" accept=".pdf" onChange={e=>{const f=e.target.files?.[0];if(f){setCqPdfName(f.name);const reader=new FileReader();reader.onload=ev=>setCqPdf(ev.target.result);reader.readAsDataURL(f)}}} style={{display:"none"}}/>
               </label>
               {cqPdfName&&<span style={{fontSize:10,color:C.stone}}>{cqPdfName}</span>}
-              {cqPdf&&<button onClick={()=>{setCqPdf(null);setCqPdfName("")}} style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:4,padding:"2px 6px",fontSize:10,color:C.red,cursor:"pointer"}}>✕</button>}
+              {cqPdf&&<button onClick={()=>{setCqPdf(null);setCqPdfName("")}} style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:4,padding:"2px 6px",fontSize:10,color:C.red,cursor:"pointer"}}>×</button>}
             </div>
           </div>
           <button className="bt bp" onClick={()=>{if(!cqDesc.trim()||!cqPrice){alert("Please enter a description and price.");return;}onAddCustom({desc:cqDesc.trim(),price:parseFloat(cqPrice)||0,quoteNum:cqNum.trim(),pdf:cqPdf,pdfName:cqPdfName,q:cqQ,z:cqZ});setCqDesc("");setCqPrice("");setCqNum("");setCqPdf(null);setCqPdfName("");setCqQ(1);}} style={{width:"100%",fontSize:12,padding:"10px",background:C.gold,borderColor:C.gold}}>+ Add Custom Quote Item</button>
@@ -7564,7 +7595,7 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
           <button onClick={() => setConfirmDeleteId(null)} style={{ background: C.warm, color: C.stone, border: `1px solid ${C.bdr}`, borderRadius: 6, padding: isMob ? "7px 14px" : "3px 8px", fontSize: isMob ? 12 : 10, cursor: "pointer", minHeight: isMob ? 36 : "auto" }}>Cancel</button>
         </div>
       ) : (
-        <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(quote.id); }} title="Delete quote" style={{ background: C.warm, border: `1px solid ${C.bdr}`, cursor: "pointer", fontSize: isMob ? 16 : 14, color: C.stone, padding: isMob ? "10px 12px" : "6px", borderRadius: 6, transition: "all 0.15s", minWidth: isMob ? 44 : "auto", minHeight: isMob ? 44 : "auto", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }} onMouseEnter={(e) => {if(!isMob) e.currentTarget.style.color = C.red}} onMouseLeave={(e) => {if(!isMob) e.currentTarget.style.color = C.stone}}>✕</button>
+        <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(quote.id); }} title="Delete quote" style={{ background: C.warm, border: `1px solid ${C.bdr}`, cursor: "pointer", fontSize: isMob ? 16 : 14, color: C.stone, padding: isMob ? "10px 12px" : "6px", borderRadius: 6, transition: "all 0.15s", minWidth: isMob ? 44 : "auto", minHeight: isMob ? 44 : "auto", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }} onMouseEnter={(e) => {if(!isMob) e.currentTarget.style.color = C.red}} onMouseLeave={(e) => {if(!isMob) e.currentTarget.style.color = C.stone}}>×</button>
       ))}
     </div>
   );
@@ -8660,7 +8691,7 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
             <div style={{padding:24,textAlign:"center",color:C.stone,fontSize:12}}>Loading...</div>
           ) : quotes.length === 0 ? (
             <div style={{padding:32,textAlign:"center"}}>
-              <div style={{fontSize:32,marginBottom:8}}>📋</div>
+              <div style={{marginBottom:8}}><Ic n="clip" sz={32} c={C.stL}/></div>
               <div style={{fontSize:13,color:C.stone,fontFamily:F.b}}>No projects yet — start your first order above!</div>
             </div>
           ) : (
@@ -8695,7 +8726,7 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
         {/* Admin access */}
         {profile?.role === "admin" && (
           <div style={{marginTop:16,textAlign:"center"}}>
-            <button onClick={() => onNavigate("admin")} style={{background:C.ink,border:"none",cursor:"pointer",fontSize:14,color:C.gold,fontFamily:F.d,fontWeight:700,padding:"12px 28px",borderRadius:8,letterSpacing:"0.03em"}}>⚙ Admin Dashboard</button>
+            <button onClick={() => onNavigate("admin")} style={{background:C.ink,border:"none",cursor:"pointer",fontSize:14,color:C.gold,fontFamily:F.d,fontWeight:700,padding:"12px 28px",borderRadius:8,letterSpacing:"0.03em"}}><Ic n="gear" sz={14} c={C.gold}/> Admin Dashboard</button>
           </div>
         )}
       </div>
@@ -9013,7 +9044,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
       {ntf && <div style={{position:"fixed",top:60,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:C.ink,color:C.gold,padding:"8px 18px",borderRadius:8,fontSize:12,fontFamily:F.b,boxShadow:"0 4px 20px rgba(0,0,0,.3)"}}>{ntf}</div>}
       <div style={{maxWidth:720,margin:"0 auto",padding:mob?"14px":"28px 20px"}}>
         <div style={{background:"#e0f2fe",border:"1px solid #0369a133",borderRadius:8,padding:"10px 14px",marginBottom:18,fontSize:11.5,color:"#0c4a6e",fontFamily:F.b}}>
-          🛡️ Warranty items ship at <strong>no charge</strong>. You must reference the original order number. SKU prices shown are for reference only.
+          <Ic n="shield" sz={13} c="#0369a1"/> Warranty items ship at <strong>no charge</strong>. You must reference the original order number. SKU prices shown are for reference only.
         </div>
 
         {/* Original Order Info */}
@@ -9103,7 +9134,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
 
         <div style={{display:"flex",gap:10,justifyContent:"center"}}>
           <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
-          <button onClick={()=>{const missing=[];if(!origOrderNum)missing.push("Original Order #");if(!dealerName)missing.push("Dealer Name");if(missing.length){fl(`⚠ Please fill: ${missing.join(", ")}`);return;}generateWarrantyPdf()}} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)",...(!origOrderNum?{opacity:0.7}:{})}}>🛡️ Generate Warranty PDF{!origOrderNum?" ⚠":""}</button>
+          <button onClick={()=>{const missing=[];if(!origOrderNum)missing.push("Original Order #");if(!dealerName)missing.push("Dealer Name");if(missing.length){fl(`Please fill: ${missing.join(", ")}`);return;}generateWarrantyPdf()}} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)",...(!origOrderNum?{opacity:0.7}:{})}}><Ic n="shield" sz={13} c="#0369a1"/> Generate Warranty PDF{!origOrderNum?" !":""}</button>
         </div>
       </div>
     </div>
@@ -9171,12 +9202,12 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
   const COLORS_LAMINATE = useMemo(() => COLORS_BY_SPECIES.filter(g => LAMINATE_SPECIES.has(g.species)), [COLORS_BY_SPECIES]);
 
   const sampleTypes = [
-    { id: "sd85", icon: "📋", title: "Sample Door 8½×11 (Standard)", price: "$65+", code: "ECL-SD-STD", desc: "8.5 x 11 inch standard sample door — $65 list + species & construction upcharges. Not available in Walnut, Rustic Walnut, Rift White Oak, QS White Oak, or TFL." },
-    { id: "sd12std", icon: "🚪", title: "Sample Door 12½×15½ (Standard)", price: "$155+", code: "ECL-SD-STD12", desc: "12.5 x 15.5 inch sample door — standard lead time. $155 list + species & construction upcharges." },
-    { id: "sd", icon: "⚡", title: "Sample Door 12½×15½ (Express)", price: "$350", code: "ECL-SD", desc: "12.5 x 15.5 inch sample door — express 5-day lead time" },
-    { id: "ffd", icon: "🗄️", title: "Sample Door & Drawer Front 14½×24", price: "Standard Lead Time", code: "ECL-SDD-F", desc: "14.5 x 24 inch pinned sample door and drawer front — standard lead time. Outputs on Eclipse Sample Door & Drawer Front order form." },
-    { id: "rcbs", icon: "🧱", title: "Color Block Samples", price: "$250/set", code: "ECL-RCBS", desc: "Set of up to 10 replacement color block samples" },
-    { id: "rccs", icon: "🎨", title: "Color Chip Samples", price: "Per 10", code: "ECL-RCCS", desc: "Set of up to 10 replacement color chip samples" },
+    { id: "sd85", icon: "clip", title: "Sample Door 8½×11 (Standard)", price: "$65+", code: "ECL-SD-STD", desc: "8.5 x 11 inch standard sample door — $65 list + species & construction upcharges. Not available in Walnut, Rustic Walnut, Rift White Oak, QS White Oak, or TFL." },
+    { id: "sd12std", icon: "door", title: "Sample Door 12½×15½ (Standard)", price: "$155+", code: "ECL-SD-STD12", desc: "12.5 x 15.5 inch sample door — standard lead time. $155 list + species & construction upcharges." },
+    { id: "sd", icon: "bolt", title: "Sample Door 12½×15½ (Express)", price: "$350", code: "ECL-SD", desc: "12.5 x 15.5 inch sample door — express 5-day lead time" },
+    { id: "ffd", icon: "drawer", title: "Sample Door & Drawer Front 14½×24", price: "Standard Lead Time", code: "ECL-SDD-F", desc: "14.5 x 24 inch pinned sample door and drawer front — standard lead time. Outputs on Eclipse Sample Door & Drawer Front order form." },
+    { id: "rcbs", icon: "swatch", title: "Color Block Samples", price: "$250/set", code: "ECL-RCBS", desc: "Set of up to 10 replacement color block samples" },
+    { id: "rccs", icon: "swatch", title: "Color Chip Samples", price: "Per 10", code: "ECL-RCCS", desc: "Set of up to 10 replacement color chip samples" },
   ];
 
   const generateSamplePdf = async () => {
@@ -9634,7 +9665,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
                 onMouseEnter={e => { e.currentTarget.style.borderColor = "#b45309"; e.currentTarget.style.boxShadow = "0 4px 16px #b4530918"; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.boxShadow = "none"; }}
                 >
-                  <div style={{fontSize:28,marginBottom:6}}>{st.icon}</div>
+                  <div style={{marginBottom:6}}><Ic n={st.icon} sz={28} c="#b45309"/></div>
                   <div style={{fontFamily:F.d,fontSize:15,fontWeight:700,color:C.ink}}>{st.title}</div>
                   <div style={{fontFamily:F.b,fontSize:11,color:C.stone,margin:"4px 0 8px",lineHeight:1.4}}>{st.desc}</div>
                   <div style={{fontFamily:F.m,fontSize:14,fontWeight:700,color:"#b45309"}}>{st.price}</div>
@@ -9650,7 +9681,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
             <button onClick={() => setActiveType(null)} style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.acc,fontFamily:F.b,fontWeight:600,marginBottom:14,display:"block"}}>← Back to sample types</button>
 
             <div style={{background:"#fef3c7",border:"1px solid #b4530933",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:11.5,color:"#92400e",fontFamily:F.b,display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontSize:18}}>{sampleTypes.find(s=>s.id===activeType)?.icon}</span>
+              <Ic n={sampleTypes.find(s=>s.id===activeType)?.icon} sz={18} c="#92400e"/>
               <span><strong>{sampleTypes.find(s=>s.id===activeType)?.title}</strong> — {sampleTypes.find(s=>s.id===activeType)?.price}</span>
             </div>
 
@@ -9732,7 +9763,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
             {/* Actions */}
             <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:18}}>
               <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
-              <button onClick={generateSamplePdf} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)"}}>🎨 Generate Sample Order PDF</button>
+              <button onClick={generateSamplePdf} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)"}}><Ic n="clip" sz={13} c="#fff"/> Generate Sample Order PDF</button>
             </div>
           </>
         )}
@@ -9865,9 +9896,9 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   const grandTotal = itemTotals.reduce((s, t) => s + t.total, 0);
 
   const expressTypes = [
-    { id: "ddf", icon: "🚪", title: "Door & Drawer Fronts Only", code: "ECL-EXP-DDF", desc: "Express order for doors and drawer fronts only — ships in 5 working days", ship: "UPS/FedEx" },
-    { id: "parcel", icon: "📦", title: "Express Parcel", code: "ECL-EXP-P", desc: "Smaller express orders that ship via UPS/FedEx in 5 working days", ship: "UPS/FedEx" },
-    { id: "truck", icon: "🚛", title: "Express Truck", code: "ECL-EXP-T", desc: "Larger express orders shipped via common carrier (freight collect) in 5 working days", ship: "Common Carrier (Freight Collect)" },
+    { id: "ddf", icon: "door", title: "Door & Drawer Fronts Only", code: "ECL-EXP-DDF", desc: "Express order for doors and drawer fronts only — ships in 5 working days", ship: "UPS/FedEx" },
+    { id: "parcel", icon: "send", title: "Express Parcel", code: "ECL-EXP-P", desc: "Smaller express orders that ship via UPS/FedEx in 5 working days", ship: "UPS/FedEx" },
+    { id: "truck", icon: "send", title: "Express Truck", code: "ECL-EXP-T", desc: "Larger express orders shipped via common carrier (freight collect) in 5 working days", ship: "Common Carrier (Freight Collect)" },
   ];
 
   const setMod = (itemId, code, val) => {
@@ -10067,7 +10098,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                 onMouseEnter={e => { e.currentTarget.style.borderColor = "#7c3aed"; e.currentTarget.style.boxShadow = "0 4px 16px #7c3aed18"; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.boxShadow = "none"; }}
                 >
-                  <span style={{fontSize:28,width:48,height:48,borderRadius:10,background:"#ede9fe",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{et.icon}</span>
+                  <span style={{width:48,height:48,borderRadius:10,background:"#ede9fe",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Ic n={et.icon} sz={24} c="#7c3aed"/></span>
                   <div>
                     <div style={{fontFamily:F.d,fontSize:15,fontWeight:700,color:C.ink}}>{et.title}</div>
                     <div style={{fontFamily:F.b,fontSize:11,color:C.stone,marginTop:2,lineHeight:1.4}}>{et.desc}</div>
@@ -10085,7 +10116,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
           <>
             <button onClick={() => setExpressType(null)} style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.acc,fontFamily:F.b,fontWeight:600,marginBottom:14,display:"block"}}>← Back to order types</button>
             <div style={{background:"#ede9fe",border:"1px solid #7c3aed33",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:11.5,color:"#5b21b6",fontFamily:F.b,display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontSize:16}}>⚡</span>
+              <Ic n="bolt" sz={16} c="#7c3aed"/>
               <span><strong>{expressTypes.find(e=>e.id===expressType)?.title}</strong> — Ships in 5 working days via {expressTypes.find(e=>e.id===expressType)?.ship}</span>
             </div>
             {expressType==="parcel"&&<div style={{background:"#fef3c7",border:"1px solid #f59e0b44",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:10.5,color:"#92400e",fontFamily:F.b,lineHeight:1.5}}>
@@ -10299,7 +10330,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                       {/* Modifications Panel */}
                       {applicableMods.length > 0 && <div style={{marginBottom:5}}>
                         <button onClick={()=>sModOpen(prev=>{const n=new Set(prev);if(modsExpanded)n.delete(item.id);else n.add(item.id);return n})} style={{background:activeMods.length>0?"#7c3aed18":"#f0edff",border:`2px solid ${activeMods.length>0?"#7c3aed":"#c4b5fd"}`,borderRadius:8,padding:"7px 10px",cursor:"pointer",fontSize:11,fontWeight:700,color:activeMods.length>0?"#7c3aed":"#6d28d9",display:"flex",alignItems:"center",gap:6,width:"100%",justifyContent:"space-between",transition:"all .15s"}}>
-                          <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:14}}>{modsExpanded?"▾":"▸"}</span><span>⚙ Modifications</span><span style={{background:activeMods.length>0?"#7c3aed":"#a78bfa",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:9,fontWeight:700}}>{activeMods.length>0?`${activeMods.length} active`:`${applicableMods.length} available`}</span></span>
+                          <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:14}}>{modsExpanded?"▾":"▸"}</span><span><Ic n="gear" sz={13} c="#6d28d9"/> Modifications</span><span style={{background:activeMods.length>0?"#7c3aed":"#a78bfa",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:9,fontWeight:700}}>{activeMods.length>0?`${activeMods.length} active`:`${applicableMods.length} available`}</span></span>
                           {(t.modCost||0)>0&&<span style={{fontFamily:F.m,fontWeight:700,color:"#7c3aed",fontSize:12}}>+{fm(t.modCost*item.q)}</span>}
                         </button>
                         {modsExpanded&&<div style={{borderLeft:"4px solid #7c3aed",borderRight:`1px solid #7c3aed33`,borderBottom:`1px solid #7c3aed33`,borderTop:"none",borderRadius:"0 0 8px 8px",padding:"10px 12px",marginTop:-1,background:"linear-gradient(135deg,#f8f5ff,#f0edff)"}}>
@@ -10361,7 +10392,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                             </div>);
                           })()}
                           {activeMods.length>0&&<div style={{borderTop:"2px solid #7c3aed33",paddingTop:8,marginTop:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                            <span style={{fontSize:10,color:"#6d28d9",fontWeight:700}}>⚙ {activeMods.length} mod{activeMods.length>1?"s":""} · +{fm(t.modCost||0)}/unit</span>
+                            <span style={{fontSize:10,color:"#6d28d9",fontWeight:700}}><Ic n="gear" sz={10} c="#6d28d9"/> {activeMods.length} mod{activeMods.length>1?"s":""} · +{fm(t.modCost||0)}/unit</span>
                             <button onClick={()=>updItem(item.id,{mods:{}})} style={{background:"#fff",border:"1px solid #dc262644",borderRadius:5,padding:"3px 10px",fontSize:9,color:C.red,cursor:"pointer",fontWeight:600}}>Clear All</button>
                           </div>}
                         </div>}
@@ -10373,7 +10404,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                         <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
                           {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
                             const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;
-                            return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}>⚙ {m.label}{m.input==="mxdf"?` x${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:m.input==="dims"&&typeof qty==="object"?` (${qty.w||"?"}x${qty.h||"?"}x${qty.d||"?"})`:qty>1?` x${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
+                            return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` x${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:m.input==="dims"&&typeof qty==="object"?` (${qty.w||"?"}x${qty.h||"?"}x${qty.d||"?"})`:qty>1?` x${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
                           })}
                         </div>
                       </div>}
@@ -10404,7 +10435,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
 
             <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:18}}>
               <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
-              <button onClick={()=>{const missing=[];if(!dealerName)missing.push("Dealer Name");if(!dealerCode)missing.push("Dealer Number");if(!contactName)missing.push("Contact");if(expressType!=="truck"&&!shipAddr)missing.push("Ship-To Address");if(missing.length){fl(`⚠ Please fill: ${missing.join(", ")}`);return;}generateExpressPdf()}} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)",...((!dealerName||!dealerCode||!contactName)?{opacity:0.7}:{})}}>⚡ Generate Express Order PDF{(!dealerName||!dealerCode||!contactName)?" ⚠":""}</button>
+              <button onClick={()=>{const missing=[];if(!dealerName)missing.push("Dealer Name");if(!dealerCode)missing.push("Dealer Number");if(!contactName)missing.push("Contact");if(expressType!=="truck"&&!shipAddr)missing.push("Ship-To Address");if(missing.length){fl(`Please fill: ${missing.join(", ")}`);return;}generateExpressPdf()}} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)",...((!dealerName||!dealerCode||!contactName)?{opacity:0.7}:{})}}><Ic n="bolt" sz={13} c="#fff"/> Generate Express Order PDF{(!dealerName||!dealerCode||!contactName)?" !":""}</button>
             </div>
           </>
         )}
@@ -10505,7 +10536,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
 
   const upd=useCallback((id,p)=>sItems(prev=>prev.map(it=>it.id===id?{...it,...p}:it)),[]);
   const rem=useCallback(id=>sItems(prev=>prev.filter(it=>it.id!==id)),[]);
-  const dup=useCallback(id=>{const newId=uid();sItems(p=>{const s=p.find(it=>it.id===id);return s?[...p,{...s,id:newId}]:p});sModOpen(prev=>{const n=new Set(prev);n.add(newId);return n});fl("Duplicated — edit below ✏️");setTimeout(()=>{const el=document.getElementById("item-"+newId);if(el)el.scrollIntoView({behavior:"smooth",block:"center"})},120)},[fl]);
+  const dup=useCallback(id=>{const newId=uid();sItems(p=>{const s=p.find(it=>it.id===id);return s?[...p,{...s,id:newId}]:p});sModOpen(prev=>{const n=new Set(prev);n.add(newId);return n});fl("Duplicated — edit below ️");setTimeout(()=>{const el=document.getElementById("item-"+newId);if(el)el.scrollIntoView({behavior:"smooth",block:"center"})},120)},[fl]);
 
   const comp=useMemo(()=>{
     let tot=0,un=0,ov=0;const zm={},tm={};
@@ -10764,21 +10795,21 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         <span style={{fontSize:9,color:C.stL}}>{CATALOG.length} SKUs</span></>}
       </div>
       {mob?<div style={{display:"flex",gap:3,overflowX:"auto",WebkitOverflowScrolling:"touch",msOverflowStyle:"none",scrollbarWidth:"none",paddingRight:2}}>
-        <button style={{background:C.acc,color:"#fff",border:"none",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={save}>💾</button>
-        <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>setShowQuotesList(true)}>📂 Quotes</button>
-        <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={genOrder}>📋 Order</button>
-        <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>ssCf(true)}>⚙</button>
-        {versions.length>0&&<button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>setShowHistory(true)}>📜</button>}
-        {onBack&&<button style={{background:"rgba(255,255,255,.12)",color:C.gold,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={onBack}>🏠</button>}
-        {profile?.role==="admin"&&<button style={{background:"rgba(255,255,255,.12)",color:C.gold,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>onAdmin&&onAdmin()}>⚙A</button>}
+        <button style={{background:C.acc,color:"#fff",border:"none",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={save}><Ic n="clip" sz={12} c="#fff"/></button>
+        <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>setShowQuotesList(true)}><Ic n="clip" sz={11} c={C.cream}/> Quotes</button>
+        <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={genOrder}><Ic n="clip" sz={12} c={C.cream}/> Order</button>
+        <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>ssCf(true)}><Ic n="gear" sz={13} c={C.cream}/></button>
+        {versions.length>0&&<button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>setShowHistory(true)}><Ic n="clip" sz={12} c={C.cream}/></button>}
+        {onBack&&<button style={{background:"rgba(255,255,255,.12)",color:C.gold,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={onBack}><Ic n="door" sz={12} c={C.gold}/></button>}
+        {profile?.role==="admin"&&<button style={{background:"rgba(255,255,255,.12)",color:C.gold,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>onAdmin&&onAdmin()}><Ic n="gear" sz={12} c={C.gold}/></button>}
         <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={onLogout}>Out</button>
       </div>:<div style={{display:"flex",gap:4}}>
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={newP}>+ New</button>
-        <button className="bt bp" onClick={save} style={{fontSize:11}}>💾 Save</button>
-        <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowQuotesList(true)}>📂 Quotes</button>
-        {versions.length>0&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowHistory(true)}>📜 History</button>}
-        {profile?.role==="admin"&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold}} onClick={()=>onAdmin&&onAdmin()}>⚙ Admin</button>}
-        {onBack&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold,fontWeight:600}} onClick={onBack}>🏠 Hub</button>}
+        <button className="bt bp" onClick={save} style={{fontSize:11}}><Ic n="clip" sz={11} c="#fff"/> Save</button>
+        <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowQuotesList(true)}><Ic n="clip" sz={11} c={C.cream}/> Quotes</button>
+        {versions.length>0&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowHistory(true)}><Ic n="clip" sz={11} c={C.cream}/> History</button>}
+        {profile?.role==="admin"&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold}} onClick={()=>onAdmin&&onAdmin()}><Ic n="gear" sz={12} c={C.gold}/> Admin</button>}
+        {onBack&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold,fontWeight:600}} onClick={onBack}><Ic n="door" sz={11} c={C.gold}/> Hub</button>}
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={onLogout}>Sign Out</button>
       </div>}
     </div>
@@ -10803,7 +10834,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
       <span style={{opacity:.5}}>·</span>
       <span style={{color:C.goldS,fontWeight:700}}>{fm(comp.tot)}</span>
       {dealerMult>0&&dealerMult<1&&<><span style={{opacity:.5}}>·</span><span style={{opacity:.85}}>Dealer {fm(comp.tot*dealerMult)}</span></>}
-      {!color&&<><span style={{opacity:.5}}>·</span><span style={{color:"#fcd34d"}}>⚠ No color</span></>}
+      {!color&&<><span style={{opacity:.5}}>·</span><span style={{color:"#fcd34d"}}><Ic n="warn" sz={10} c="#fcd34d"/> No color</span></>}
     </div>}
 
     <div style={{maxWidth:1320,margin:"0 auto",padding:mob?"10px 9px":"18px 18px 36px"}}>
@@ -10866,12 +10897,12 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,flexWrap:"wrap",gap:mob?6:4}}>
         <div style={{display:"flex",gap:mob?4:3,alignItems:"center",overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:mob?2:0}}>
           {[["all","All"],...Object.entries(TN)].map(([k,v])=><button key={k} className={`ch2 ${tf===k?"on":""}`} onClick={()=>sTf(k)} style={{flexShrink:0,minHeight:mob?34:30,...(k!=="all"&&tf===k?{borderColor:TC[k],color:TC[k],background:TC[k]+"14"}:{})}}>{v}</button>)}
-          {items.length>0&&<button className={`ch2 ${groupByZone?"on":""}`} onClick={()=>setGroupByZone(!groupByZone)} style={{flexShrink:0,minHeight:mob?34:30,...(groupByZone?{borderColor:C.acc,color:C.acc,background:C.acc+"14"}:{})}} title={groupByZone?"Grouped by zone":"Flat view"}>🏠{mob?"":" Zone"}</button>}
+          {items.length>0&&<button className={`ch2 ${groupByZone?"on":""}`} onClick={()=>setGroupByZone(!groupByZone)} style={{flexShrink:0,minHeight:mob?34:30,...(groupByZone?{borderColor:C.acc,color:C.acc,background:C.acc+"14"}:{})}} title={groupByZone?"Grouped by zone":"Flat view"}><Ic n="door" sz={11} c={C.gold}/>{mob?"":" Zone"}</button>}
         </div>
         <div style={{display:"flex",gap:mob?4:3}}>
-          <button className="bt bgl" onClick={()=>ssMg(true)} style={{fontSize:11,minHeight:mob?38:undefined}}>💰{mob?"":" Margin"}</button>
-          <button className="bt bg" onClick={csv} style={{fontSize:11,minHeight:mob?38:undefined}}>📄{mob?"":" CSV"}</button>
-          <button className="bt bp" onClick={()=>{if(items.length===0){fl("No items to generate order form");return;}if(!color){fl("⚠ Please select a Finish Color before generating");return;}setShowOrderReview(true)}} style={{fontSize:11,minHeight:mob?38:undefined,...(comp.pct===100?{background:"#16a34a",borderColor:"#16a34a"}:!color&&items.length>0?{opacity:0.7}:{})}}>📋{mob?"":" Order Form"}{comp.pct===100&&!mob?" ✓":!color&&items.length>0&&!mob?" ⚠":""}</button>
+          <button className="bt bgl" onClick={()=>ssMg(true)} style={{fontSize:11,minHeight:mob?38:undefined}}><Ic n="dollar" sz={12} c={C.acc}/>{mob?"":" Margin"}</button>
+          <button className="bt bg" onClick={csv} style={{fontSize:11,minHeight:mob?38:undefined}}><Ic n="clip" sz={11}/>{mob?"":" CSV"}</button>
+          <button className="bt bp" onClick={()=>{if(items.length===0){fl("No items to generate order form");return;}if(!color){fl("Please select a Finish Color before generating");return;}setShowOrderReview(true)}} style={{fontSize:11,minHeight:mob?38:undefined,...(comp.pct===100?{background:"#16a34a",borderColor:"#16a34a"}:!color&&items.length>0?{opacity:0.7}:{})}}><Ic n="clip" sz={12}/>{mob?"":" Order Form"}{comp.pct===100&&!mob?" ✓":!color&&items.length>0&&!mob?" !":""}</button>
           {mob&&<button className="bt bg" onClick={newP} style={{fontSize:11,minHeight:38}}>+New</button>}
         </div>
       </div>
@@ -10880,7 +10911,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
       {items.length>3&&<div style={{display:"flex",gap:6,marginBottom:8,alignItems:"center",flexWrap:"wrap"}}>
         <div style={{position:"relative",flex:"1 1 180px",minWidth:mob?140:180}}>
           <input className="inp" value={itemSearch} onChange={e=>setItemSearch(e.target.value)} placeholder="Search items (SKU, name, room)..." style={{paddingLeft:30,fontSize:mob?14:12,minHeight:mob?40:32}}/>
-          <span style={{position:"absolute",left:9,top:"50%",transform:"translateY(-50%)",fontSize:13,color:C.stone,pointerEvents:"none"}}>🔍</span>
+          <span style={{position:"absolute",left:9,top:"50%",transform:"translateY(-50%)",fontSize:13,color:C.stone,pointerEvents:"none"}}><svg viewBox="0 0 24 24" style={{width:13,height:13,fill:"none",stroke:C.stone,strokeWidth:1.5,strokeLinecap:"round",strokeLinejoin:"round",verticalAlign:"middle"}}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
           {itemSearch&&<button onClick={()=>setItemSearch("")} style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",fontSize:16,color:C.stone,cursor:"pointer",padding:4}}>×</button>}
         </div>
         {(()=>{const usedRooms=ZN.filter(z=>items.some(it=>it.z===z.id));return usedRooms.length>1?(<div style={{display:"flex",gap:3,overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:mob?2:0}}>
@@ -10923,7 +10954,7 @@ upd(item.id,{mods:newMods});
                 </div>
                 <div style={{display:"flex",gap:4,alignItems:"center"}}>
                   <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                  <button onClick={()=>{if(confirm("Remove this ref panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                  <button onClick={()=>{if(confirm("Remove this ref panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>
               </div>
               {/* ── Dimensions (1/16" precision) ── */}
@@ -10953,7 +10984,7 @@ upd(item.id,{mods:newMods});
               {/* ── PDF Uploads: Ref Specs + Sketch ── */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
                 <div style={{padding:"6px 8px",background:"#f8fafc",borderRadius:6,border:"1px solid #e2e8f0"}}>
-                  <label className="lb" style={{color:"#0369a1"}}>📄 Ref Specs PDF</label>
+                  <label className="lb" style={{color:"#0369a1"}}><Ic n="clip" sz={11} c="#0369a1"/> Ref Specs PDF</label>
                   {item.refSpecPdf?<div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                     <span style={{fontSize:10,color:"#0369a1",fontWeight:600}}>{item.refSpecPdfName||"Specs PDF"}</span>
                     <a href={item.refSpecPdf} download={item.refSpecPdfName||"ref-specs.pdf"} style={{fontSize:9.5,color:"#0369a1",textDecoration:"underline"}}>Download</a>
@@ -10961,7 +10992,7 @@ upd(item.id,{mods:newMods});
                   </div>:<input type="file" accept=".pdf" onChange={e=>{const f=e.target.files?.[0];if(f){const r=new FileReader();r.onload=ev=>upd(item.id,{refSpecPdf:ev.target.result,refSpecPdfName:f.name});r.readAsDataURL(f)}}} style={{fontSize:10}}/>}
                 </div>
                 <div style={{padding:"6px 8px",background:"#f8fafc",borderRadius:6,border:"1px solid #e2e8f0"}}>
-                  <label className="lb" style={{color:"#7c3aed"}}>✏️ Panel Sketch PDF</label>
+                  <label className="lb" style={{color:"#7c3aed"}}>️ Panel Sketch PDF</label>
                   {item.refSketchPdf?<div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                     <span style={{fontSize:10,color:"#7c3aed",fontWeight:600}}>{item.refSketchPdfName||"Sketch PDF"}</span>
                     <a href={item.refSketchPdf} download={item.refSketchPdfName||"ref-sketch.pdf"} style={{fontSize:9.5,color:"#7c3aed",textDecoration:"underline"}}>Download</a>
@@ -10981,7 +11012,7 @@ upd(item.id,{mods:newMods});
               {/* ── Reference Drawing (collapsible) ── */}
               <div style={{marginBottom:6}}>
                 <button onClick={()=>sModOpen(prev=>{const n=new Set(prev);const k="ref-dwg-"+item.id;n.has(k)?n.delete(k):n.add(k);return n})} style={{background:"#f8fafc",border:"1px solid #cbd5e1",borderRadius:6,padding:"6px 10px",cursor:"pointer",fontSize:11,fontWeight:600,color:"#475569",width:"100%",textAlign:"left",display:"flex",alignItems:"center",gap:6}}>
-                  <span>{showRefDwg?"▾":"▸"}</span><span>📐 Reference Drawing — Door / Spacer / Panel Detail</span>
+                  <span>{showRefDwg?"▾":"▸"}</span><span><Ic n="ruler" sz={13} c={C.ink}/> Reference Drawing — Door / Spacer / Panel Detail</span>
                 </button>
                 {showRefDwg&&<div style={{border:"1px solid #cbd5e1",borderTop:"none",borderRadius:"0 0 6px 6px",padding:8,background:"#fff",textAlign:"center"}}>
                   <img src={REF_DRAWING_B64} alt="Refrigerator Panel Reference Drawing" style={{maxWidth:"100%",height:"auto",borderRadius:4}}/>
@@ -10989,7 +11020,7 @@ upd(item.id,{mods:newMods});
               </div>
               {/* ── Notes ── */}
               <div style={{marginBottom:6,padding:"8px 10px",background:"#fffbeb",borderRadius:6,border:"1px solid #fcd34d"}}>
-                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}>⚠ Important Notes — Custom Refrigerator Panels</div>
+                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes — Custom Refrigerator Panels</div>
                 <div style={{fontSize:9.5,color:"#92400e",lineHeight:1.6,whiteSpace:"pre-line"}}>{REF_NOTE}</div>
               </div>
               {/* ── Qty & Total ── */}
@@ -11012,7 +11043,7 @@ upd(item.id,{mods:newMods});
                 </div>
                 <div style={{display:"flex",gap:4,alignItems:"center"}}>
                   <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                  <button onClick={()=>{if(confirm("Remove this dishwasher panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                  <button onClick={()=>{if(confirm("Remove this dishwasher panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>
               </div>
               {/* ── Dimensions (1/16" precision) ── */}
@@ -11035,7 +11066,7 @@ upd(item.id,{mods:newMods});
               </div>
               {/* ── PDF Upload: Dishwasher Specs ── */}
               <div style={{marginBottom:6,padding:"6px 8px",background:"#f8fafc",borderRadius:6,border:"1px solid #e2e8f0"}}>
-                <label className="lb" style={{color:"#0369a1"}}>📄 Dishwasher Spec Sheet (PDF)</label>
+                <label className="lb" style={{color:"#0369a1"}}><Ic n="clip" sz={11} c="#0369a1"/> Dishwasher Spec Sheet (PDF)</label>
                 {item.dpSpecPdf?<div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                   <span style={{fontSize:10,color:"#0369a1",fontWeight:600}}>{item.dpSpecPdfName||"Spec PDF"}</span>
                   <a href={item.dpSpecPdf} download={item.dpSpecPdfName||"dishwasher-specs.pdf"} style={{fontSize:9.5,color:"#0369a1",textDecoration:"underline"}}>Download</a>
@@ -11044,7 +11075,7 @@ upd(item.id,{mods:newMods});
               </div>
               {/* ── Notes ── */}
               <div style={{marginBottom:6,padding:"8px 10px",background:"#fffbeb",borderRadius:6,border:"1px solid #fcd34d"}}>
-                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}>⚠ Important Notes — Dishwasher Panels</div>
+                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes — Dishwasher Panels</div>
                 <div style={{fontSize:9.5,color:"#92400e",lineHeight:1.6,whiteSpace:"pre-line"}}>{DP_NOTE}</div>
               </div>
               {/* ── Qty & Total ── */}
@@ -11068,7 +11099,7 @@ upd(item.id,{mods:newMods});
                 </div>
                 <div style={{display:"flex",gap:4,alignItems:"center"}}>
                   <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                  <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                  <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>
               </div>
               {/* ── Dimensions (1/16" precision, max 24"W × 80"H) ── */}
@@ -11091,7 +11122,7 @@ upd(item.id,{mods:newMods});
               </div>
               {/* ── PDF Upload: Beverage Cooler Specs ── */}
               <div style={{marginBottom:6,padding:"6px 8px",background:"#f8fafc",borderRadius:6,border:"1px solid #e2e8f0"}}>
-                <label className="lb" style={{color:"#0369a1"}}>📄 Beverage Cooler Spec Sheet (PDF)</label>
+                <label className="lb" style={{color:"#0369a1"}}><Ic n="clip" sz={11} c="#0369a1"/> Beverage Cooler Spec Sheet (PDF)</label>
                 {item.bcftSpecPdf?<div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                   <span style={{fontSize:10,color:"#0369a1",fontWeight:600}}>{item.bcftSpecPdfName||"Spec PDF"}</span>
                   <a href={item.bcftSpecPdf} download={item.bcftSpecPdfName||"bev-cooler-specs.pdf"} style={{fontSize:9.5,color:"#0369a1",textDecoration:"underline"}}>Download</a>
@@ -11100,7 +11131,7 @@ upd(item.id,{mods:newMods});
               </div>
               {/* ── Notes ── */}
               <div style={{marginBottom:6,padding:"8px 10px",background:"#fffbeb",borderRadius:6,border:"1px solid #fcd34d"}}>
-                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}>⚠ Important Notes — Beverage Center Fronts w/ Aluminum Trim</div>
+                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes — Beverage Center Fronts w/ Aluminum Trim</div>
                 <div style={{fontSize:9.5,color:"#92400e",lineHeight:1.6,whiteSpace:"pre-line"}}>{BCFT_NOTE}</div>
               </div>
               {/* ── Qty & Total ── */}
@@ -11125,7 +11156,7 @@ upd(item.id,{mods:newMods});
                 </div>
                 <div style={{display:"flex",gap:4,alignItems:"center"}}>
                   <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                  <button onClick={()=>{if(confirm("Remove this column overlay?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                  <button onClick={()=>{if(confirm("Remove this column overlay?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>
               </div>
               {/* ── Height (per linear inch, 1/16" precision) ── */}
@@ -11145,7 +11176,7 @@ upd(item.id,{mods:newMods});
               {/* ── Reference Drawing (collapsible) ── */}
               <div style={{marginBottom:6}}>
                 <button onClick={()=>sModOpen(prev=>{const n=new Set(prev);const k="co-dwg-"+item.id;n.has(k)?n.delete(k):n.add(k);return n})} style={{background:"#f8fafc",border:"1px solid #cbd5e1",borderRadius:6,padding:"6px 10px",cursor:"pointer",fontSize:11,fontWeight:600,color:"#475569",width:"100%",textAlign:"left",display:"flex",alignItems:"center",gap:6}}>
-                  <span>{showCoDwg?"▾":"▸"}</span><span>📐 Reference Drawing — Column Overlay Profiles & Dimensions</span>
+                  <span>{showCoDwg?"▾":"▸"}</span><span><Ic n="ruler" sz={13} c={C.ink}/> Reference Drawing — Column Overlay Profiles & Dimensions</span>
                 </button>
                 {showCoDwg&&<div style={{border:"1px solid #cbd5e1",borderTop:"none",borderRadius:"0 0 6px 6px",padding:8,background:"#fff",textAlign:"center"}}>
                   <img src={CO_DRAWING_B64} alt="Column Overlay Reference Drawing" style={{maxWidth:"100%",height:"auto",borderRadius:4}}/>
@@ -11153,7 +11184,7 @@ upd(item.id,{mods:newMods});
               </div>
               {/* ── Notes ── */}
               <div style={{marginBottom:6,padding:"8px 10px",background:"#fffbeb",borderRadius:6,border:"1px solid #fcd34d"}}>
-                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}>⚠ Important Notes — Column Overlays</div>
+                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes — Column Overlays</div>
                 <div style={{fontSize:9.5,color:"#92400e",lineHeight:1.6,whiteSpace:"pre-line"}}>{CO_NOTE}</div>
               </div>
               {/* ── Qty & Total ── */}
@@ -11176,7 +11207,7 @@ upd(item.id,{mods:newMods});
                 </div>
                 <div style={{display:"flex",gap:4,alignItems:"center"}}>
                   <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                  <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                  <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>
               </div>
               {/* ── Dimensions (1/16" precision, max 24"W × 80"H) ── */}
@@ -11199,7 +11230,7 @@ upd(item.id,{mods:newMods});
               </div>
               {/* ── PDF Upload: Beverage Cooler Specs ── */}
               <div style={{marginBottom:6,padding:"6px 8px",background:"#f8fafc",borderRadius:6,border:"1px solid #e2e8f0"}}>
-                <label className="lb" style={{color:"#0369a1"}}>📄 Beverage Cooler Spec Sheet (PDF)</label>
+                <label className="lb" style={{color:"#0369a1"}}><Ic n="clip" sz={11} c="#0369a1"/> Beverage Cooler Spec Sheet (PDF)</label>
                 {item.bcfSpecPdf?<div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                   <span style={{fontSize:10,color:"#0369a1",fontWeight:600}}>{item.bcfSpecPdfName||"Spec PDF"}</span>
                   <a href={item.bcfSpecPdf} download={item.bcfSpecPdfName||"bev-cooler-specs.pdf"} style={{fontSize:9.5,color:"#0369a1",textDecoration:"underline"}}>Download</a>
@@ -11208,7 +11239,7 @@ upd(item.id,{mods:newMods});
               </div>
               {/* ── Notes ── */}
               <div style={{marginBottom:6,padding:"8px 10px",background:"#fffbeb",borderRadius:6,border:"1px solid #fcd34d"}}>
-                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}>⚠ Important Notes — Beverage Center Fronts</div>
+                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes — Beverage Center Fronts</div>
                 <div style={{fontSize:9.5,color:"#92400e",lineHeight:1.6,whiteSpace:"pre-line"}}>{BCF_NOTE}</div>
               </div>
               {/* ── Qty & Total ── */}
@@ -11232,7 +11263,7 @@ upd(item.id,{mods:newMods});
                 </div>
                 <div style={{display:"flex",gap:4,alignItems:"center"}}>
                   <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                  <button onClick={()=>{if(confirm("Remove this custom item?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                  <button onClick={()=>{if(confirm("Remove this custom item?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>
               </div>
               <div style={{marginBottom:6}}>
@@ -11255,7 +11286,7 @@ upd(item.id,{mods:newMods});
               </div>
               {item.cqPdf&&<div style={{marginBottom:6,padding:"6px 10px",background:"#f0f9ff",borderRadius:6,border:"1px solid #bae6fd",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
                 <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  <span style={{fontSize:16}}>📎</span>
+                  <span style={{fontSize:16}}><Ic n="clip" sz={16} c={C.stone}/></span>
                   <span style={{fontSize:11,color:"#0369a1",fontWeight:600}}>{item.cqPdfName||"Attached PDF"}</span>
                 </div>
                 <div style={{display:"flex",gap:4}}>
@@ -11292,10 +11323,10 @@ upd(item.id,{mods:newMods});
                 </div>
                 {!mob&&<div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
                   <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                  <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                  <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>}
               </div>
-              {(()=>{const w=[];if(!isMould&&!itemSQ&&!isCustom(item.s)){if(item.dc>0&&!item.hng)w.push("No hinge");if((item.t==="B"||item.t==="T"||item.t==="V")&&!item.fe)w.push("No fin. end");}if(itemSQ&&(item.sqin||0)===0)w.push("0 sq.in");if(isOven(item)){const oSpec=item.ovenSpec||{};const ot=OVEN_TYPE(item);const fields=OVEN_FIELDS[ot]||[];const filled=fields.filter(f=>oSpec[f.k]).length;if(filled===0)w.push("No oven spec");else if(filled<fields.length)w.push(`Spec ${filled}/${fields.length}`);}return w.length>0?<div style={{display:"flex",gap:3,marginTop:2,flexWrap:"wrap"}}>{w.map(x=><span key={x} style={{fontSize:9,padding:"1px 6px",borderRadius:3,background:"#fef3c7",color:"#92400e",fontWeight:600,border:"1px solid #f59e0b44"}}>⚠ {x}</span>)}</div>:null})()}
+              {(()=>{const w=[];if(!isMould&&!itemSQ&&!isCustom(item.s)){if(item.dc>0&&!item.hng)w.push("No hinge");if((item.t==="B"||item.t==="T"||item.t==="V")&&!item.fe)w.push("No fin. end");}if(itemSQ&&(item.sqin||0)===0)w.push("0 sq.in");if(isOven(item)){const oSpec=item.ovenSpec||{};const ot=OVEN_TYPE(item);const fields=OVEN_FIELDS[ot]||[];const filled=fields.filter(f=>oSpec[f.k]).length;if(filled===0)w.push("No oven spec");else if(filled<fields.length)w.push(`Spec ${filled}/${fields.length}`);}return w.length>0?<div style={{display:"flex",gap:3,marginTop:2,flexWrap:"wrap"}}>{w.map(x=><span key={x} style={{fontSize:9,padding:"1px 6px",borderRadius:3,background:"#fef3c7",color:"#92400e",fontWeight:600,border:"1px solid #f59e0b44"}}>{x}</span>)}</div>:null})()}
               <div style={{fontSize:10.5,color:C.stone,marginTop:1}}>{item.r} · {SEC[item.r.charAt(0)]||""}{isMould?` · $${item.p}/LF`:""}{!isMould&&!itemSQ&&modCost>0?` · Base ${fm(u-doorChg-rbsChg)} + Mods ${fm(modCost)} = ${fm(u+modCost)}/ea`:""}</div>
             </div>
             {isMould&&<div style={{display:"flex",gap:4,marginBottom:5}}>
@@ -11323,7 +11354,7 @@ upd(item.id,{mods:newMods});
             {isOven(item)&&(()=>{const ot=OVEN_TYPE(item);const fields=OVEN_FIELDS[ot]||[];const specExpanded=modOpen.has("oven-spec-"+item.id);const oSpec=item.ovenSpec||{};const filledCount=fields.filter(f=>oSpec[f.k]).length;
 return(<div style={{marginBottom:5}}>
   <button onClick={()=>{const n=new Set(modOpen);n.has("oven-spec-"+item.id)?n.delete("oven-spec-"+item.id):n.add("oven-spec-"+item.id);sModOpen(n)}} style={{width:"100%",textAlign:"left",background:"linear-gradient(135deg,#fef3c7,#fff7ed)",border:"1px solid #f59e0b",borderRadius:6,padding:"8px 10px",cursor:"pointer",fontSize:11,fontWeight:600,color:"#92400e",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-    <span>{specExpanded?"▼":"▶"} 📋 {OVEN_LABELS[ot]} Spec Form ({OVEN_FORM_CODES[ot]})</span>
+    <span>{specExpanded?"▼":"▶"} <Ic n="clip" sz={13} c={C.ink}/> {OVEN_LABELS[ot]} Spec Form ({OVEN_FORM_CODES[ot]})</span>
     <span style={{fontSize:10,fontWeight:500,color:filledCount===fields.length?"#059669":"#b45309"}}>{filledCount}/{fields.length} fields</span>
   </button>
   {specExpanded&&<div style={{border:"1px solid #f59e0b",borderTop:"none",borderRadius:"0 0 6px 6px",padding:"10px",background:"#fffbeb"}}>
@@ -11342,14 +11373,14 @@ return(<div style={{marginBottom:5}}>
       <div><label className="lb" style={{color:"#92400e",fontSize:9.5}}>Intermediate Rail Width</label><select className="sel" value={oSpec.ovenIntRail||""} onChange={e=>{const ns={...oSpec,ovenIntRail:e.target.value};upd(item.id,{ovenSpec:ns})}} style={{fontSize:11}}><option value="">Select...</option><option value='3"'>3"</option><option value='1 1/2"'>1 ½"</option></select></div>
     </div>}
     <div style={{marginTop:8,padding:"8px",background:"#fef3c7",borderRadius:6,border:"1px solid #f59e0b44"}}>
-      <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:2}}>⚠ Cutout Information</div>
+      <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:2}}><Ic n="warn" sz={10} c="#92400e"/> Cutout Information</div>
       <div style={{fontSize:9.5,color:"#92400e",lineHeight:1.5,whiteSpace:"pre-line"}}>{OVEN_NOTES[ot]}</div>
     </div>
   </div>}
 </div>)})()}
 
             {LSD_SKUS.has(item.s)&&<div style={{marginBottom:5,padding:"6px 8px",background:"#fef3cd",borderRadius:6,border:"1px solid #f0c040"}}>
-              <div style={{fontSize:9.5,fontWeight:700,color:"#856404",marginBottom:2}}>⚠ Important Notes</div>
+              <div style={{fontSize:9.5,fontWeight:700,color:"#856404",marginBottom:2}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes</div>
               <div style={{fontSize:9.5,color:"#856404",lineHeight:1.5,whiteSpace:"pre-line"}}>{LSD_NOTE}</div>
             </div>}
             <div style={{display:"grid",gridTemplateColumns:mob?"1fr 1fr":(isMould||itemSQ)?"1fr 1fr":"1fr 1fr 1fr",gap:6,marginBottom:5}}>
@@ -11451,7 +11482,7 @@ return(<div style={{marginBottom:5}}>
             {/* ─── MODIFICATIONS PANEL ─── */}
             {!isMould&&!itemSQ&&applicableMods.length>0&&<div style={{marginBottom:5}}>
               <button onClick={()=>sModOpen(prev=>{const n=new Set(prev);if(modsExpanded)n.delete(item.id);else n.add(item.id);return n})} style={{background:activeMods.length>0?"#7c3aed18":"#f0edff",border:`2px solid ${activeMods.length>0?"#7c3aed":"#c4b5fd"}`,borderRadius:8,padding:"8px 12px",cursor:"pointer",fontSize:12,fontWeight:700,color:activeMods.length>0?"#7c3aed":"#6d28d9",display:"flex",alignItems:"center",gap:6,width:"100%",justifyContent:"space-between",transition:"all .15s"}}>
-                <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:16}}>{modsExpanded?"▾":"▸"}</span><span>⚙ Modifications</span><span style={{background:activeMods.length>0?"#7c3aed":"#a78bfa",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:10,fontWeight:700}}>{activeMods.length>0?`${activeMods.length} active`:`${applicableMods.length} available`}</span></span>
+                <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:16}}>{modsExpanded?"▾":"▸"}</span><span><Ic n="gear" sz={13} c="#6d28d9"/> Modifications</span><span style={{background:activeMods.length>0?"#7c3aed":"#a78bfa",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:10,fontWeight:700}}>{activeMods.length>0?`${activeMods.length} active`:`${applicableMods.length} available`}</span></span>
                 {modCost>0&&<span style={{fontFamily:F.m,fontWeight:700,color:"#7c3aed",fontSize:13}}>+{fm(modTotal)}</span>}
               </button>
               {modsExpanded&&<div style={{borderLeft:"4px solid #7c3aed",borderRight:`1px solid #7c3aed33`,borderBottom:`1px solid #7c3aed33`,borderTop:"none",borderRadius:"0 0 8px 8px",padding:"10px 12px",marginTop:-1,background:"linear-gradient(135deg,#f8f5ff,#f0edff)"}}>
@@ -11512,7 +11543,7 @@ return(<div style={{marginBottom:5}}>
                   </div>);
                 })()}
                 {activeMods.length>0&&<div style={{borderTop:"2px solid #7c3aed33",paddingTop:8,marginTop:6,display:"flex",justifyContent:"space-between",alignItems:"center",background:"#7c3aed0a",margin:"6px -12px -10px",padding:"8px 12px",borderRadius:"0 0 4px 4px"}}>
-                  <span style={{fontSize:11,color:"#6d28d9",fontWeight:700}}>⚙ {activeMods.length} mod{activeMods.length>1?"s":""} · +{fm(modCost)}/unit</span>
+                  <span style={{fontSize:11,color:"#6d28d9",fontWeight:700}}><Ic n="gear" sz={10} c="#6d28d9"/> {activeMods.length} mod{activeMods.length>1?"s":""} · +{fm(modCost)}/unit</span>
                   <button onClick={()=>upd(item.id,{mods:{}})} style={{background:"#fff",border:"1px solid #dc262644",borderRadius:5,padding:"3px 10px",fontSize:10,color:C.red,cursor:"pointer",fontWeight:600}}>Clear All</button>
                 </div>}
               </div>}
@@ -11522,7 +11553,7 @@ return(<div style={{marginBottom:5}}>
               <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
               {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
                 const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;
-                return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}>⚙ {m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
+                return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
               })}
               </div>
             </div>}
@@ -11537,7 +11568,7 @@ return(<div style={{marginBottom:5}}>
             </div>
             {mob&&<div style={{display:"flex",gap:4,marginTop:6,borderTop:`1px solid ${C.bdr}`,paddingTop:6}}>
               <button onClick={()=>dup(item.id)} style={{flex:1,background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:6,cursor:"pointer",fontSize:12,color:C.stone,padding:"8px 10px",fontWeight:600,minHeight:38,display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>⧉ Duplicate</button>
-              <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} style={{flex:1,background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:6,cursor:"pointer",fontSize:12,color:C.red,padding:"8px 10px",fontWeight:600,minHeight:38,display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>✕ Delete</button>
+              <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} style={{flex:1,background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:6,cursor:"pointer",fontSize:12,color:C.red,padding:"8px 10px",fontWeight:600,minHeight:38,display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>× Delete</button>
             </div>}
           </div>);
         }):(()=>{
@@ -11545,7 +11576,7 @@ return(<div style={{marginBottom:5}}>
         const zoneGroups={};fi.forEach(item=>{if(!zoneGroups[item.z])zoneGroups[item.z]=[];zoneGroups[item.z].push(item)});
         const zoneEntries=Object.entries(zoneGroups);
         return zoneEntries.map(([zid,zItems])=>{
-          const zInfo=ZN.find(z=>z.id===zid)||{l:zid,i:"📦"};
+          const zInfo=ZN.find(z=>z.id===zid)||{l:zid,i:"+"};
           const isCollapsed=collapsedZones.has(zid);
           let zTotal=0;zItems.forEach(it=>{const{u,t,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);zTotal+=t+mcR*(1+plyPct/100)*it.q});
           return(<div key={zid} style={{marginBottom:8}}>
@@ -11563,7 +11594,7 @@ return(<div style={{marginBottom:5}}>
                     <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#059669"}}>Custom Ref Panel</span><span className="pl" style={{marginLeft:5,background:"#ecfdf5",color:"#059669"}}>REF</span>{item.refIce&&<span className="pl" style={{marginLeft:3,background:"#fef3c7",color:"#92400e"}}>Ice Cutout</span>}<span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}″×{(item.sqH||0)}″</span></div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
                       <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                      <button onClick={()=>{if(confirm("Remove this ref panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                      <button onClick={()=>{if(confirm("Remove this ref panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                     </div>
                   </div>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -11581,7 +11612,7 @@ return(<div style={{marginBottom:5}}>
                     <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#7c3aed"}}>Dishwasher Panel</span><span className="pl" style={{marginLeft:5,background:"#f0edff",color:"#7c3aed"}}>DP</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}″×{(item.sqH||0)}″</span></div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
                       <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                      <button onClick={()=>{if(confirm("Remove this dishwasher panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                      <button onClick={()=>{if(confirm("Remove this dishwasher panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                     </div>
                   </div>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -11599,7 +11630,7 @@ return(<div style={{marginBottom:5}}>
                     <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#b45309"}}>Bev Center Front</span><span className="pl" style={{marginLeft:5,background:"#fef3c7",color:"#92400e"}}>{item.s}</span><span className="pl" style={{marginLeft:3,background:"#f5f0e6",color:"#78716c"}}>{BCFT_LABELS[item.s]||""}</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}″×{(item.sqH||0)}″</span></div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
                       <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                      <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                      <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                     </div>
                   </div>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -11617,7 +11648,7 @@ return(<div style={{marginBottom:5}}>
                     <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#6d28d9"}}>Column Overlay</span><span className="pl" style={{marginLeft:5,background:"#ede9fe",color:"#6d28d9"}}>{item.s}</span><span className="pl" style={{marginLeft:3,background:"#f5f0e6",color:"#78716c"}}>{CO_LABELS[item.s]||""}</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqH||0)}″</span></div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
                       <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                      <button onClick={()=>{if(confirm("Remove this column overlay?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                      <button onClick={()=>{if(confirm("Remove this column overlay?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                     </div>
                   </div>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -11635,7 +11666,7 @@ return(<div style={{marginBottom:5}}>
                     <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#0d9488"}}>Bev Center Front</span><span className="pl" style={{marginLeft:5,background:"#ccfbf1",color:"#0d9488"}}>BCF</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}″×{(item.sqH||0)}″</span></div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
                       <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                      <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                      <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                     </div>
                   </div>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -11653,7 +11684,7 @@ return(<div style={{marginBottom:5}}>
                     <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#0369a1"}}>Custom Quote</span><span className="pl" style={{marginLeft:5,background:"#e0f2fe",color:"#0369a1"}}>CQ</span>{item.cqNum&&<span className="pl" style={{marginLeft:3,background:"#fef3c7",color:"#92400e"}}>#{item.cqNum}</span>}</div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
                       <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                      <button onClick={()=>{if(confirm("Remove this custom item?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                      <button onClick={()=>{if(confirm("Remove this custom item?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                     </div>
                   </div>
                   {item.cqDesc&&<div style={{fontSize:10.5,color:C.stone,marginBottom:3,whiteSpace:"pre-line"}}>{item.cqDesc}</div>}
@@ -11671,7 +11702,7 @@ return(<div style={{marginBottom:5}}>
                   <div style={{display:"flex",flexWrap:"wrap",gap:2,alignItems:"center"}}><span className="mn" style={{fontWeight:700,fontSize:12.5}}>{item.s}</span><span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>{isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}{item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}{item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng}</span>}{item.fe&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe}</span>}{activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;const modAmt=m.input==="mxdf"?m.price*mxdfCount:m.input==="side"?m.price*(qty==="B"?2:1):m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?m.price:m.price*(+qty||1);return <span key={code} className="pl" style={{background:"#7c3aed18",color:"#6d28d9"}}>{m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"L":"R"})`:typeof qty==="number"&&qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:modAmt>0?`+${fm(modAmt)}`:""}</span>})}{modCost>0&&<span style={{fontSize:9.5,color:C.stone}}>Base {fm(u)} + Mods {fm(modCost)}</span>}</div>
                   <div style={{display:"flex",gap:4,alignItems:"center"}}>
                     <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                    <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                    <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                   </div>
                 </div>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -11703,7 +11734,7 @@ return(<div style={{marginBottom:5}}>
         const thS={padding:"6px 8px",fontWeight:700,fontSize:9.5,textTransform:"uppercase",letterSpacing:".05em",color:C.stone};
         return(<div style={{marginTop:12}}>
           {zoneEntries.map(([zid,zItems],zi)=>{
-            const zInfo=ZN.find(z=>z.id===zid)||{l:zid,i:"📦"};
+            const zInfo=ZN.find(z=>z.id===zid)||{l:zid,i:"+"};
             let zTotal=0;zItems.forEach(it=>{const{u,t,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);zTotal+=t+mcR*(1+plyPct/100)*it.q});
             return(<div key={zid} className="c" style={{marginBottom:10,overflow:"hidden"}}>
               <div style={{background:C.ink,padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -11772,9 +11803,9 @@ return(<div style={{marginBottom:5}}>
 
     {mob&&<button onClick={()=>ssAd(true)} style={{position:"fixed",bottom:"calc(18px + env(safe-area-inset-bottom,0px))",right:16,zIndex:800,width:56,height:56,borderRadius:"50%",background:C.acc,color:"#fff",border:"none",fontSize:28,cursor:"pointer",boxShadow:"0 6px 20px rgba(0,0,0,.28)",display:"flex",alignItems:"center",justifyContent:"center",WebkitTapHighlightColor:"transparent",touchAction:"manipulation"}}>+</button>}
 
-    {mob&&sAd&&<><div className="sbg" onClick={()=>ssAd(false)}/><div className="sht"><div className="shtH"/><div className="shtT"><span>Add Cabinets</span><button onClick={()=>ssAd(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>✕</button></div><div className="shtB"><AddUI onAdd={addIt} onAddCustom={addCustom}/></div></div></>}
+    {mob&&sAd&&<><div className="sbg" onClick={()=>ssAd(false)}/><div className="sht"><div className="shtH"/><div className="shtT"><span>Add Cabinets</span><button onClick={()=>ssAd(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>×</button></div><div className="shtB"><AddUI onAdd={addIt} onAddCustom={addCustom}/></div></div></>}
 
-    {mob&&sCf&&<><div className="sbg" onClick={()=>ssCf(false)}/><div className="sht"><div className="shtH"/><div className="shtT"><span>Order Selections</span><button onClick={()=>ssCf(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>✕</button></div><div className="shtB">
+    {mob&&sCf&&<><div className="sbg" onClick={()=>ssCf(false)}/><div className="sht"><div className="shtH"/><div className="shtT"><span>Order Selections</span><button onClick={()=>ssCf(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>×</button></div><div className="shtB">
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
         <div><label className="lb">Species / Material</label><select className="sel" value={sp} onChange={e=>{sSp(e.target.value);sColor("")}}>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}</select></div>
         <div><label className="lb">Finish Color</label><select className="sel" value={color} onChange={e=>sColor(e.target.value)}><option value="">-- Select --</option>{(FINISH_COLORS[sp]||[]).map(c=><option key={c} value={c}>{c}</option>)}</select></div>
@@ -11823,13 +11854,13 @@ return(<div style={{marginBottom:5}}>
     {showOrderReview&&<><div className="sbg" onClick={()=>setShowOrderReview(false)} style={{zIndex:1100}}/><div style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:1101,width:mob?"95vw":"600px",maxHeight:"80vh",background:"#fff",borderRadius:12,boxShadow:"0 20px 60px rgba(0,0,0,.35)",overflow:"hidden",display:"flex",flexDirection:"column"}}>
       <div style={{background:C.ink,padding:"14px 18px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <span style={{fontFamily:F.d,fontSize:16,fontWeight:700,color:C.cream}}>Review Order Before Generating</span>
-        <button onClick={()=>setShowOrderReview(false)} style={{background:"none",border:"none",color:C.stL,cursor:"pointer",fontSize:18}}>✕</button>
+        <button onClick={()=>setShowOrderReview(false)} style={{background:"none",border:"none",color:C.stL,cursor:"pointer",fontSize:18}}>×</button>
       </div>
       <div style={{overflowY:"auto",padding:"14px 18px",flex:1}}>
         {(()=>{const rz={};items.forEach(it=>{const z=it.z||"other";if(!rz[z])rz[z]=[];rz[z].push(it)});const ze=Object.entries(rz);let warnings=0;
         return(<div>
           <div style={{fontSize:11,color:C.stone,marginBottom:10,fontFamily:F.b}}>Project: <strong style={{color:C.ink}}>{nm||"Untitled"}</strong> · {sp} · {door} · {items.length} item{items.length!==1?"s":""} · {comp.zc} room{comp.zc!==1?"s":""}</div>
-          {ze.map(([zid,zItems])=>{const zInfo=ZN.find(z=>z.id===zid)||{l:zid,i:"📦"};let zt=0;zItems.forEach(it=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);zt+=total+mcR*(1+plyPct/100)*it.q});
+          {ze.map(([zid,zItems])=>{const zInfo=ZN.find(z=>z.id===zid)||{l:zid,i:"+"};let zt=0;zItems.forEach(it=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);zt+=total+mcR*(1+plyPct/100)*it.q});
           return(<div key={zid} style={{marginBottom:10}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 10px",background:C.warm,borderRadius:6,marginBottom:4}}>
               <span style={{fontWeight:600,fontSize:12}}>{zInfo.i} {zInfo.l}</span>
@@ -11841,7 +11872,7 @@ return(<div style={{marginBottom:5}}>
                 <div style={{display:"flex",alignItems:"center",gap:6,flex:1}}>
                   <span style={{fontWeight:600,fontFamily:F.m,minWidth:32}}>{it.q}×</span>
                   <span style={{fontWeight:500}}>{SKU_LABELS[it.s]||it.s}{it.ds&&it.ds!==door?` (${it.ds})`:""}{iM?` ${it.len}ft`:""}{itemSQ?` ${it.sqin}sq.in`:""}</span>
-                  {iw.map(w=><span key={w} style={{fontSize:8.5,padding:"1px 5px",borderRadius:3,background:"#fef3c7",color:"#92400e",fontWeight:600,border:"1px solid #f59e0b44",marginLeft:3}}>⚠ {w}</span>)}
+                  {iw.map(w=><span key={w} style={{fontSize:8.5,padding:"1px 5px",borderRadius:3,background:"#fef3c7",color:"#92400e",fontWeight:600,border:"1px solid #f59e0b44",marginLeft:3}}><Ic n="warn" sz={8} c="#92400e"/> {w}</span>)}
                 </div>
                 <span style={{fontFamily:F.m,fontWeight:600,fontSize:11,color:C.ink}}>{fm(gt)}</span>
               </div>)})}
@@ -11850,12 +11881,12 @@ return(<div style={{marginBottom:5}}>
             <span style={{fontFamily:F.d,fontWeight:700,fontSize:14,color:C.cream}}>List Price Total</span>
             <span style={{fontFamily:F.m,fontWeight:700,fontSize:18,color:C.gold}}>{fm(comp.tot)}</span>
           </div>
-          {warnings>0&&<div style={{marginTop:8,padding:"8px 12px",background:"#fef3c7",borderRadius:6,border:"1px solid #f59e0b44",fontSize:11,color:"#92400e"}}>⚠ {warnings} warning{warnings!==1?"s":""} found — items may be missing hinge, finished end, or dimensions. You can still generate the order form.</div>}
+          {warnings>0&&<div style={{marginTop:8,padding:"8px 12px",background:"#fef3c7",borderRadius:6,border:"1px solid #f59e0b44",fontSize:11,color:"#92400e"}}><Ic n="warn" sz={11} c="#92400e"/> {warnings} warning{warnings!==1?"s":""} found — items may be missing hinge, finished end, or dimensions. You can still generate the order form.</div>}
         </div>)})()}
       </div>
       <div style={{padding:"12px 18px",borderTop:`1px solid ${C.bdr}`,display:"flex",justifyContent:"space-between",gap:8}}>
         <button onClick={()=>setShowOrderReview(false)} className="bt bg" style={{fontSize:12,flex:1}}>Cancel</button>
-        <button onClick={()=>{setShowOrderReview(false);genOrder()}} className="bt bp" style={{fontSize:12,flex:2,fontWeight:700}}>📋 Generate Order Form PDF</button>
+        <button onClick={()=>{setShowOrderReview(false);genOrder()}} className="bt bp" style={{fontSize:12,flex:2,fontWeight:700}}><Ic n="clip" sz={13} c="#fff"/> Generate Order Form PDF</button>
       </div>
     </div></>}
 
