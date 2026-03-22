@@ -8590,6 +8590,13 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   const [contactEmail, setContactEmail] = useState(profile?.email || "");
   const [shipAddr, setShipAddr] = useState("");
   const [poNumber, setPoNumber] = useState("");
+  // Truck ship-to fields
+  const [shipCompany, setShipCompany] = useState("");
+  const [shipContact, setShipContact] = useState("");
+  const [shipStreet, setShipStreet] = useState("");
+  const [shipCity, setShipCity] = useState("");
+  const [shipState, setShipState] = useState("");
+  const [shipZip, setShipZip] = useState("");
 
   const [sp, setSp] = useState("White Oak");
   const [door, setDoor] = useState("HNVR");
@@ -8761,8 +8768,12 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
 
     // Truck-specific: ship-to address fields
     if (expressType === "truck") {
-      setText("Special Instructions", shipAddr);
-      // Could also parse address into Street Address, City, State, Zip Code
+      setText("Company Name", shipCompany);
+      setText("Contact Name", shipContact);
+      setText("Street Address", shipStreet);
+      setText("City", shipCity);
+      setText("State", shipState);
+      setText("Zip Code", shipZip);
     } else {
       setText("Special Instructions", shipAddr || "");
     }
@@ -8856,9 +8867,22 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                 <div><label style={labelStyle}>Phone</label><input value={contactPhone} onChange={e=>setContactPhone(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>PO Number</label><input value={poNumber} onChange={e=>setPoNumber(e.target.value)} style={fieldStyle} /></div>
-                <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Ship-To Address</label><input value={shipAddr} onChange={e=>setShipAddr(e.target.value)} placeholder="Street, City, State, ZIP" style={fieldStyle} /></div>
+                {expressType!=="truck"&&<div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Ship-To Address</label><input value={shipAddr} onChange={e=>setShipAddr(e.target.value)} placeholder="Street, City, State, ZIP" style={fieldStyle} /></div>}
               </div>
             </div>
+
+            {/* Truck Ship-To Section */}
+            {expressType==="truck"&&<div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
+              <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Ship-To Information</div>
+              <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10}}>
+                <div><label style={labelStyle}>Company Name</label><input value={shipCompany} onChange={e=>setShipCompany(e.target.value)} placeholder="Receiving company" style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Contact Name</label><input value={shipContact} onChange={e=>setShipContact(e.target.value)} placeholder="On-site contact" style={fieldStyle} /></div>
+                <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Street Address</label><input value={shipStreet} onChange={e=>setShipStreet(e.target.value)} placeholder="123 Main St" style={fieldStyle} /></div>
+                <div><label style={labelStyle}>City</label><input value={shipCity} onChange={e=>setShipCity(e.target.value)} style={fieldStyle} /></div>
+                <div><label style={labelStyle}>State</label><input value={shipState} onChange={e=>setShipState(e.target.value)} style={{...fieldStyle,maxWidth:120}} /></div>
+                <div><label style={labelStyle}>Zip Code</label><input value={shipZip} onChange={e=>setShipZip(e.target.value)} style={{...fieldStyle,maxWidth:140}} /></div>
+              </div>
+            </div>}
 
             {/* Order Specs */}
             <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
