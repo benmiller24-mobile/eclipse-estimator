@@ -6841,7 +6841,7 @@ const calcModCost=(item,mods,baseUnitPrice)=>{
    then reads trailing digits as the width. */
 function _cabW(sku){
   let s=sku.toUpperCase().replace(/\s+/g,'');
-  for(let i=0;i<3;i++)s=s.replace(/-(RT|FHD|2D|1DR|WS|MC|SS|PH|S)$/,'');
+  for(let i=0;i<3;i++)s=s.replace(/-(RT|FHD|2D|2DR|1DR|WS|MC|SS|PH|S)$/,'');
   const m=s.match(/(\d+)$/);if(!m)return 0;
   const n=parseInt(m[1]);
   // If number is a valid width on its own (9–84), use it directly
@@ -6940,11 +6940,12 @@ function guessDrawers(sku,typeCode){
   const vb=s.match(/^VB(\d)D/);if(vb)return parseInt(vb[1]);
   if(s.startsWith('VTSD'))return 2;
   if(s.startsWith('VSD'))return 2;
+  if(/-2DR/.test(s))return 2;
   if(/-1DR/.test(s))return 1;
   if(/^(BBC|SBBC|PBBC)/.test(s))return 1;
   const w=_cabW(sku);
-  if(w>0){if(/^(BA|B|SBA|SBR|SBU|SB|PB|BBB)/.test(s)){return w>36?2:1;}}
-  if(/^(VB|VTB|VTSB|FLVB|VBW|VTBW|VBH|VTHB|VCSD)/.test(s))return 1;
+  if(w>0){if(/^(BA|B|SBA|SBR|SBU|SB|PB|BBB)/.test(s)){return w>24?2:1;}}
+  if(w>0){if(/^(VB|VTB|VTSB|FLVB|VBW|VTBW|VBH|VTHB|VCSD)/.test(s)){return w>24?2:1;}}
   if(typeCode==='B'||typeCode==='V')return 1;
   return 0;
 }
