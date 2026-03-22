@@ -8105,7 +8105,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
   const [shipAddr, setShipAddr] = useState("");
   const [prevWarranty, setPrevWarranty] = useState("No");
   const [warrantyNotes, setWarrantyNotes] = useState("");
-  const [items, setItems] = useState([{ id: uid(), sku: "", desc: "", qty: 1, reason: "", unitPrice: 0, hinge: "", cabNum: "" }]);
+  const [items, setItems] = useState([{ id: uid(), sku: "", desc: "", qty: 1, reason: "", unitPrice: 0, hinge: "", cabNum: "", itemNum: "" }]);
 
   const [sp, setSp] = useState("White Oak");
   const [door, setDoor] = useState("HNVR");
@@ -8125,7 +8125,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
   const [wJobName, setWJobName] = useState("");
   const [wPO, setWPO] = useState("");
 
-  const addItem = () => setItems(p => [...p, { id: uid(), sku: "", desc: "", qty: 1, reason: "", unitPrice: 0, hinge: "", cabNum: "" }]);
+  const addItem = () => setItems(p => [...p, { id: uid(), sku: "", desc: "", qty: 1, reason: "", unitPrice: 0, hinge: "", cabNum: "", itemNum: "" }]);
   const removeItem = (id) => setItems(p => p.filter(i => i.id !== id));
   const updateItem = (id, field, val) => setItems(p => p.map(i => i.id === id ? { ...i, [field]: val } : i));
 
@@ -8251,7 +8251,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
     validItems.slice(0, 6).forEach((item, idx) => {
       const n = idx + 1;
       setText("Cabinet Number " + n, item.cabNum || "");
-      setText("Item Number " + n, item.sku || "");
+      setText("Item Number " + n, item.itemNum || "");
       setText("Stock Number and Description " + n, (SKU_LABELS[item.sku] || item.sku || item.desc || "") + (item.qty > 1 ? " (\u00D7" + item.qty + ")" : ""));
       setText("Defective Component " + n, item.desc || item.sku || "");
       setText("Reason for Replacement " + n, item.reason || "");
@@ -8358,9 +8358,10 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
           <div style={{fontSize:10,color:C.stone,fontFamily:F.b,marginBottom:10}}>Search by SKU to auto-price from the catalog. All items ship at <strong>$0 warranty</strong>.</div>
           {items.map((item, idx) => (
             <div key={item.id} style={{padding:"10px 12px",background:idx%2===0?C.cream:"transparent",borderRadius:8,marginBottom:6,border:`1px solid ${C.bdr}44`}}>
-              <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"50px 70px 1fr 32px",gap:8,alignItems:"end"}}>
+              <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"50px 60px 70px 1fr 32px",gap:8,alignItems:"end"}}>
+                <div><label style={labelStyle}>Item #</label><input value={item.itemNum} onChange={e=>updateItem(item.id,"itemNum",e.target.value)} style={{...fieldStyle,textAlign:"center"}} /></div>
+                <div><label style={labelStyle}>Cab #</label><input value={item.cabNum} onChange={e=>updateItem(item.id,"cabNum",e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>Qty</label><input type="number" min="1" value={item.qty} onChange={e=>updateItem(item.id,"qty",parseInt(e.target.value)||1)} style={{...fieldStyle,textAlign:"center"}} /></div>
-                <div><label style={labelStyle}>Cab #</label><input value={item.cabNum} onChange={e=>updateItem(item.id,"cabNum",e.target.value)} placeholder="" style={fieldStyle} /></div>
                 <div><label style={labelStyle}>SKU (search catalog)</label><SkuSearchInput value={item.sku} sp={sp} cx={cx} door={door} drwF={drwF} drwBox={drwBox} placeholder="Type to search SKU..." onSelect={(cat, unitP) => { setItems(p => p.map(i => i.id === item.id ? { ...i, sku: cat.s, desc: SKU_LABELS[cat.s] || cat.s, unitPrice: unitP } : i)); }} /></div>
                 <button onClick={()=>removeItem(item.id)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.red,padding:"4px",alignSelf:"end",marginBottom:2}}>&times;</button>
               </div>
