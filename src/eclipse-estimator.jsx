@@ -6861,24 +6861,24 @@ function guessDoors(sku,typeCode){
   if(/^FLVB\d+HD/.test(s))return 0;
   if(/^SFDHD/.test(s))return 0;
   // === Utility/Tall 2-section types ===
-  if(/^(UVTD|UVD)\d/.test(s)){if(s.includes('-2D'))return 2;const w=_cabW(sku);return(w>=27)?2:1;}
+  if(/^(UVTD|UVD)\d/.test(s)){if(s.includes('-2D'))return 2;const w=_cabW(sku);return(w>24)?2:1;}
   if(/^(UVTH|UVH)\d/.test(s))return 2;
-  if(/^(UVT|UV)\d/.test(s)){if(s.includes('-2D'))return 4;const w=_cabW(sku);return(w>=27)?4:2;}
+  if(/^(UVT|UV)\d/.test(s)){if(s.includes('-2D'))return 4;const w=_cabW(sku);return(w>24)?4:2;}
   // === Suffix-based ===
   if(s.includes('-2D'))return 2;
-  if(s.includes('FHD')){const w=_cabW(sku);return w>=27?2:1;}
+  if(s.includes('FHD')){const w=_cabW(sku);return w>24?2:1;}
   // === Specific types ===
   if(/^(BBC|SBBC|PBBC)/.test(s))return 1;
   if(/^(BLE|BLSBE|BLSB|BL)/.test(s))return 2;
-  if(/^TB\d/.test(s)){const w=_cabW(sku);return w>=27?2:1;}
-  if(/^(B2HD|B2TD)/.test(s)){const w=_cabW(sku);return w>=27?2:1;}
-  if(/^BBB\d/.test(s)&&!/^BBB\dD/.test(s)){const w=_cabW(sku);return w>=27?2:1;}
+  if(/^TB\d/.test(s)){const w=_cabW(sku);return w>24?2:1;}
+  if(/^(B2HD|B2TD)/.test(s)){const w=_cabW(sku);return w>24?2:1;}
+  if(/^BBB\d/.test(s)&&!/^BBB\dD/.test(s)){const w=_cabW(sku);return w>24?2:1;}
   if(/^(VTSD|VSD)/.test(s))return 2;
   // === Width-based for std bases/sink/vanity/peninsula ===
   const wm=s.match(/^(?:BA|B|SBA|SBR|SBU|SB|PB|VBA|VB|VTB|FLVB|VSBR|VSB|VTSBR|VTSB|VCSD|VBW|VTBW|VBH|VTHB|VGO|VO)(\d+)/);
-  if(wm){const w=parseInt(wm[1]);return w>=27?2:1;}
+  if(wm){const w=parseInt(wm[1]);return w>24?2:1;}
   // Utility / Tall — 2 sections, width-based
-  if(/^(U\d|UT\d|CP)/.test(s)){if(s.includes('-2D'))return 4;const w=_cabW(sku);return(w>=27)?4:2;}
+  if(/^(U\d|UT\d|CP)/.test(s)){if(s.includes('-2D'))return 4;const w=_cabW(sku);return(w>24)?4:2;}
   // === Dressing Room (all TypeCode V) ===
   if(/^VTC/.test(s))return 0;
   if(/^(DRBOS|PDRBOS|DRUS|DRSU|DRSSU|DRAUS|DRARUS|DRCSU|DRSCSU|DRCR|DRFL|DRM-|DRSH|DREP|CBSK|PDCR)/.test(s))return 0;
@@ -6887,11 +6887,11 @@ function guessDoors(sku,typeCode){
   if(/^(DRTRU|DRDHU|DRMHU|DRTHU|DRPDRU)/.test(s))return 2;
   if(/^DRLDU/.test(s)){if(s.includes('-2D'))return 4;return 2;}
   if(/^DRTRB/.test(s))return 1;
-  if(/^(PDRBD|DRBD)/.test(s)){const w=_cabW(sku);return w>=27?2:1;}
-  if(/^(PDRBDO|DRBDO|DRSB)/.test(s)){const w=_cabW(sku);return w>=27?2:1;}
+  if(/^(PDRBD|DRBD)/.test(s)){const w=_cabW(sku);return w>24?2:1;}
+  if(/^(PDRBDO|DRBDO|DRSB)/.test(s)){const w=_cabW(sku);return w>24?2:1;}
   // Wall cabinets — width-based
   const ww=s.match(/^W(\d+)/);
-  if(ww){const w=parseInt(ww[1]);return w>=27?2:1;}
+  if(ww){const w=parseInt(ww[1]);return w>24?2:1;}
   if(s.startsWith('WBC'))return 1;
   return 1;
 }
