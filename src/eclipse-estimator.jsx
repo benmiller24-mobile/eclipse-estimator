@@ -8348,6 +8348,10 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       .map(([species, colors]) => ({ species, colors: [...colors].sort() }))
       .sort((a, b) => a.species.localeCompare(b.species));
   }, []);
+  // Same list but with OW (Olde World) colors removed — used for color chips
+  const COLORS_BY_SPECIES_NO_OW = useMemo(() => {
+    return COLORS_BY_SPECIES.map(g => ({ species: g.species, colors: g.colors.filter(c => !c.startsWith("OW-")) })).filter(g => g.colors.length > 0);
+  }, [COLORS_BY_SPECIES]);
 
   const sampleTypes = [
     { id: "sd85", icon: "📋", title: "Sample Door 8½×11 (Standard)", price: "$65+", code: "ECL-SD-STD", desc: "8.5 x 11 inch standard sample door — $65 list + species & construction upcharges. Not available in Walnut, Rustic Walnut, Rift White Oak, QS White Oak, or TFL." },
@@ -8723,9 +8727,10 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
                   </div>
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:8}}>
-                  {colorSelections.map((c, i) => (
-                    <div key={i}><label style={labelStyle}>Color {i+1}</label><select value={c} onChange={e=>{const n=[...colorSelections];n[i]=e.target.value;setColorSelections(n)}} style={fieldStyle}><option value="">— Select Color —</option>{COLORS_BY_SPECIES.map(g=><optgroup key={g.species} label={g.species}>{g.colors.map(clr=><option key={g.species+"-"+clr} value={clr}>{clr}</option>)}</optgroup>)}</select></div>
-                  ))}
+                  {colorSelections.map((c, i) => {
+                    const colorList = activeType === "rccs" ? COLORS_BY_SPECIES_NO_OW : COLORS_BY_SPECIES;
+                    return <div key={i}><label style={labelStyle}>Color {i+1}</label><select value={c} onChange={e=>{const n=[...colorSelections];n[i]=e.target.value;setColorSelections(n)}} style={fieldStyle}><option value="">— Select Color —</option>{colorList.map(g=><optgroup key={g.species} label={g.species}>{g.colors.map(clr=><option key={g.species+"-"+clr} value={clr}>{clr}</option>)}</optgroup>)}</select></div>;
+                  })}
                 </div>
               </div>
             )}
