@@ -8572,11 +8572,20 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
     load();
   }, [user.id, supabase]);
 
+  const WfIcon = ({type, color, size=20}) => {
+    const s = {width:size,height:size,fill:"none",stroke:color,strokeWidth:1.8,strokeLinecap:"round",strokeLinejoin:"round"};
+    if(type==="estimator") return (<svg viewBox="0 0 24 24" style={s}><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="15" x2="21" y2="15"/></svg>);
+    if(type==="express") return (<svg viewBox="0 0 24 24" style={s}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill={color+"22"}/></svg>);
+    if(type==="warranty") return (<svg viewBox="0 0 24 24" style={s}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill={color+"22"}/><polyline points="9 12 11 14 15 10"/></svg>);
+    if(type==="samples") return (<svg viewBox="0 0 24 24" style={s}><rect x="2" y="4" width="14" height="16" rx="2" fill={color+"22"}/><path d="M22 7l-5-3v16l5-3V7z"/><circle cx="9" cy="12" r="3"/></svg>);
+    return null;
+  };
+
   const workflows = [
-    { id: "estimator", icon: "📐", title: "Standard Order", desc: "Full cabinetry estimator — build complete kitchen, bath & closet orders", color: C.acc, bg: C.accS },
-    { id: "express", icon: "⚡", title: "Express Parts", desc: "Quick order for replacement doors, drawer fronts, or individual parts", color: "#7c3aed", bg: "#ede9fe" },
-    { id: "warranty", icon: "🛡️", title: "Warranty Request", desc: "Submit no-charge warranty replacements with original order reference", color: "#0369a1", bg: "#e0f2fe" },
-    { id: "samples", icon: "🎨", title: "Order Samples", desc: "Sample doors, drawer fronts, color blocks & color chips", color: "#b45309", bg: "#fef3c7" },
+    { id: "estimator", title: "Standard Order", desc: "Full cabinetry estimator — build complete kitchen, bath & closet orders", color: C.acc, bg: C.accS },
+    { id: "express", title: "Express Parts", desc: "Quick order for replacement doors, drawer fronts, or individual parts", color: "#7c3aed", bg: "#ede9fe" },
+    { id: "warranty", title: "Warranty Request", desc: "Submit no-charge warranty replacements with original order reference", color: "#0369a1", bg: "#e0f2fe" },
+    { id: "samples", title: "Order Samples", desc: "Sample doors, drawer fronts, color blocks & color chips", color: "#b45309", bg: "#fef3c7" },
   ];
 
   return (
@@ -8612,7 +8621,7 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
             onMouseLeave={e => { e.currentTarget.style.borderColor = C.bdr; e.currentTarget.style.boxShadow = "none"; }}
             >
               <div style={{display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:24,width:42,height:42,borderRadius:10,background:w.bg,display:"flex",alignItems:"center",justifyContent:"center"}}>{w.icon}</span>
+                <span style={{width:42,height:42,borderRadius:10,background:w.bg,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><WfIcon type={w.id} color={w.color} size={20}/></span>
                 <div>
                   <div style={{fontFamily:F.d,fontSize:16,fontWeight:700,color:C.ink}}>{w.title}</div>
                   <div style={{fontFamily:F.b,fontSize:11.5,color:C.stone,marginTop:2,lineHeight:1.4}}>{w.desc}</div>
