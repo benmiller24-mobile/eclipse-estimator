@@ -8737,7 +8737,8 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
       } else if (expressType === "ddf") {
         setText("Item Number " + n, item.s);
         setText("Quantity " + n, item.q);
-        const desc = (item.cabinetRef ? item.cabinetRef + " " : "") + (item.sqW && item.sqH ? item.sqW + '"×' + item.sqH + '"' : "") + (item.ddfDesc ? " " + item.ddfDesc : "");
+        const ddfLabel = item.s === "LSD" ? "Loose Door" : item.s === "SLBDF" ? "Loose Slab Drawer Front" : item.s === "5PDF" ? "Loose 5 Piece Drawer Front" : (DDF_TYPES.find(d => d.v === item.s)?.l || item.s);
+        const desc = (item.cabinetRef ? item.cabinetRef + " " : "") + ddfLabel + (item.sqW && item.sqH ? " " + item.sqW + '"×' + item.sqH + '"' : "") + (item.ddfDesc ? " " + item.ddfDesc : "");
         setText("Description " + n, desc);
         setText("Hinge " + n, item.hng || "");
         setText("Price " + n, fm(t.total || 0));
