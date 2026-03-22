@@ -8550,7 +8550,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 
       // Item line 1: the SD 8½×11
       setText("Quantity 1", "1");
-      setText("Item Number 1", "SD81/2X11");
+      setText("Item Number 1", "1");
       const fakeItem = { s: "SD81/2X11", t: "A", r: "U2", p: 65, q: 1, len: 0, sqin: 0, sqW: 0, sqH: 0, dc: 0, drc: 0, brot: 0, rbs: false, mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, so: null };
       const { u: sdPrice } = cp(fakeItem, sampleSp, "Standard", sampleDoor, "DF-HNVR", "5/8-STD");
       setText("Description 1", "Sample Door 8½×11 (" + samplePanel + ") — " + sampleSp + " / " + sampleDoor);
