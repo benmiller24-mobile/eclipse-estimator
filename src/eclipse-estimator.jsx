@@ -10351,6 +10351,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
   const[sMg,ssMg]=useState(false),[sAd,ssAd]=useState(false),[sCf,ssCf]=useState(false);
   const[dealerMult,setDealerMult]=useState(profile?.discount_pct||0);
   const[tf,sTf]=useState("all"),[ntf,sNtf]=useState(null),[mob,sMob]=useState(false);
+  const[itemSearch,setItemSearch]=useState(""),[roomFilter,setRoomFilter]=useState("all");
   const[modOpen,sModOpen]=useState(()=>new Set());
   const[showQuotesList,setShowQuotesList]=useState(false);
   // Admin panel is now a full-page view via onAdmin()
@@ -10435,10 +10436,33 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
 
   const comp=useMemo(()=>{
     let tot=0,un=0,ov=0;const zm={},tm={};
+    // Completeness tracking
+    let checks=0,passed=0,issues=[];
+    // Project-level checks
+    checks+=2; // color + items
+    if(color){passed++;}else if(items.length>0){issues.push("No finish color selected");}
+    if(items.length>0){passed++;}else{issues.push("No items added");}
+
     items.forEach(it=>{const{u,t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);const mc=mcRaw*(1+plyPct/100)*it.q;const itemTotal=total+mc;tot+=itemTotal;un+=it.q;tm[it.t]=(tm[it.t]||0)+it.q;
-    if(!zm[it.z])zm[it.z]={c:0,n:0};zm[it.z].c+=itemTotal;zm[it.z].n+=it.q;if(it.so)ov++});
-    return{tot,un,n:items.length,zm,tm,zc:Object.keys(zm).length,ov};
-  },[items,sp,cx,door]);
+    if(!zm[it.z])zm[it.z]={c:0,n:0};zm[it.z].c+=itemTotal;zm[it.z].n+=it.q;if(it.so)ov++;
+    // Item-level completeness checks
+    const isCab="BVTW".includes(it.t);
+    if(isCab){
+      checks++; // hinge check
+      if(it.hng&&it.hng!=="--"){passed++;}else{issues.push(it.s+": no hinge");}
+      checks++; // finished end check
+      if(it.fe&&it.fe!=="--"){passed++;}else{issues.push(it.s+": no finished end");}
+    }
+    if(it.t==="M"||it.t==="S"){
+      checks++; // length/sqin check
+      if(it.t==="M"&&it.len>0){passed++;}
+      else if(it.t==="S"&&it.sqin>0){passed++;}
+      else{issues.push(it.s+": missing dimensions");}
+    }
+    });
+    const pct=checks>0?Math.round(passed/checks*100):0;
+    return{tot,un,n:items.length,zm,tm,zc:Object.keys(zm).length,ov,pct,issues};
+  },[items,sp,cx,door,color]);
 
   const save=useCallback(async()=>{
     // Save to localStorage
@@ -10470,7 +10494,12 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
     const pr=ldPrefs();
     sSp(pr.sp||"White Oak");sCx(pr.cx||"Standard");
     sDoor(pr.door||"HNVR");sDrwF(pr.drwF||"DF-HNVR");sGlaze(pr.glaze||"NONE");sHL(pr.highlight||"NONE");sCT1(pr.charT1||"NONE");sCT2(pr.charT2||"NONE");sMat(pr.mat||"PB");sIntF(pr.intF||"STD-MAPL");sDrwBox(pr.drwBox||"5/8-STD");sItems([]);sColor(pr.color||"");fl("New project started — using your last selections")},[fl]);
-  const fi=useMemo(()=>tf==="all"?items:items.filter(it=>it.t===tf),[items,tf]);
+  const fi=useMemo(()=>{
+    let r=tf==="all"?items:items.filter(it=>it.t===tf);
+    if(roomFilter!=="all")r=r.filter(it=>it.z===roomFilter);
+    if(itemSearch){const s=itemSearch.toLowerCase();r=r.filter(it=>(it.s||"").toLowerCase().includes(s)||(SKU_LABELS[it.s]||"").toLowerCase().includes(s)||(it.z||"").toLowerCase().includes(s));}
+    return r;
+  },[items,tf,roomFilter,itemSearch]);
 
   const csv=useCallback(()=>{
     const dl=DOORS.find(d=>d.v===door)?.l||door;const dfl=DRW_FRONTS.find(d=>d.v===drwF)?.l||drwF;
@@ -10682,6 +10711,17 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
     </div>
 
     {items.length>0&&<div style={{position:"sticky",top:mob?54:41,zIndex:99,background:C.acc,color:"#fff",padding:mob?"5px 12px":"4px 18px",display:"flex",alignItems:"center",justifyContent:"center",gap:mob?8:20,fontSize:mob?10:11,fontFamily:F.m,fontWeight:600,boxShadow:"0 2px 6px rgba(0,0,0,.15)",flexWrap:mob?"wrap":"nowrap"}}>
+      {/* Completeness ring */}
+      <span style={{display:"inline-flex",alignItems:"center",gap:4}} title={comp.pct===100?"Order complete!":comp.issues.slice(0,5).join("\n")}>
+        <svg width={mob?18:20} height={mob?18:20} viewBox="0 0 20 20" style={{flexShrink:0}}>
+          <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,.25)" strokeWidth="2.5"/>
+          <circle cx="10" cy="10" r="8" fill="none" stroke={comp.pct===100?"#4ade80":comp.pct>=70?"#fcd34d":"#fca5a5"} strokeWidth="2.5" strokeDasharray={`${comp.pct/100*50.3} 50.3`} strokeLinecap="round" transform="rotate(-90 10 10)" style={{transition:"stroke-dasharray .4s"}}/>
+          {comp.pct===100&&<text x="10" y="10" textAnchor="middle" dominantBaseline="central" fill="#4ade80" fontSize="8" fontWeight="800">✓</text>}
+          {comp.pct<100&&<text x="10" y="10" textAnchor="middle" dominantBaseline="central" fill="#fff" fontSize="6.5" fontWeight="700">{comp.pct}</text>}
+        </svg>
+        <span style={{color:comp.pct===100?"#4ade80":comp.pct>=70?"#fcd34d":"#fca5a5",fontSize:mob?9:10}}>{comp.pct}%</span>
+      </span>
+      <span style={{opacity:.5}}>·</span>
       <span>{comp.n} item{comp.n!==1?"s":""}</span>
       <span style={{opacity:.5}}>·</span>
       <span>{comp.un} unit{comp.un!==1?"s":""}</span>
@@ -10702,9 +10742,9 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
               <input className="inp" value={nm} onChange={e=>sNm(e.target.value)} style={{fontFamily:F.d,fontSize:mob?14:16,fontWeight:600}}/>
             </div>
             <div style={{display:"flex",gap:12,justifyContent:mob?"center":"flex-end",flexWrap:"wrap"}}>
-              {[["Items",comp.n],["Units",comp.un],["Rooms",comp.zc],["List Price",fm(comp.tot)],...(dealerMult>0&&dealerMult<1?[["Dealer Cost",fm(comp.tot*dealerMult)]]:[])]
+              {[["Items",comp.n],["Units",comp.un],["Rooms",comp.zc],["List Price",fm(comp.tot)],...(dealerMult>0&&dealerMult<1?[["Dealer Cost",fm(comp.tot*dealerMult)]]:[]),["Ready",comp.pct+"%"]]
               .map(([l,v])=>
-                <div key={l} style={{textAlign:"center"}}><div className="lb">{l}</div><div className="mn" style={{fontSize:15,fontWeight:700,color:l==="List Price"||l==="Dealer Cost"?C.acc:C.ink}}>{v}</div></div>
+                <div key={l} style={{textAlign:"center"}}><div className="lb">{l}</div><div className="mn" style={{fontSize:15,fontWeight:700,color:l==="List Price"||l==="Dealer Cost"?C.acc:l==="Ready"?(comp.pct===100?"#16a34a":comp.pct>=70?"#f59e0b":"#dc2626"):C.ink}}>{l==="Ready"?(<span title={comp.issues.slice(0,5).join(", ")}>{v}</span>):v}</div></div>
               )}
             </div>
           </div>
@@ -10758,12 +10798,26 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         <div style={{display:"flex",gap:mob?4:3}}>
           <button className="bt bgl" onClick={()=>ssMg(true)} style={{fontSize:11,minHeight:mob?38:undefined}}>💰{mob?"":" Margin"}</button>
           <button className="bt bg" onClick={csv} style={{fontSize:11,minHeight:mob?38:undefined}}>📄{mob?"":" CSV"}</button>
-          <button className="bt bp" onClick={()=>{if(items.length===0){fl("No items to generate order form");return;}if(!color){fl("⚠ Please select a Finish Color before generating");return;}setShowOrderReview(true)}} style={{fontSize:11,minHeight:mob?38:undefined,...(!color&&items.length>0?{opacity:0.7}:{})}}>📋{mob?"":" Order Form"}{!color&&items.length>0&&!mob?" ⚠":""}</button>
+          <button className="bt bp" onClick={()=>{if(items.length===0){fl("No items to generate order form");return;}if(!color){fl("⚠ Please select a Finish Color before generating");return;}setShowOrderReview(true)}} style={{fontSize:11,minHeight:mob?38:undefined,...(comp.pct===100?{background:"#16a34a",borderColor:"#16a34a"}:!color&&items.length>0?{opacity:0.7}:{})}}>📋{mob?"":" Order Form"}{comp.pct===100&&!mob?" ✓":!color&&items.length>0&&!mob?" ⚠":""}</button>
           {mob&&<button className="bt bg" onClick={newP} style={{fontSize:11,minHeight:38}}>+New</button>}
         </div>
       </div>
 
-      {items.length>0&&(()=>{const rm={};items.forEach(it=>{if(!rm[it.z])rm[it.z]={n:0,c:0};rm[it.z].n+=it.q;const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);rm[it.z].c+=total+mcR*(1+plyPct/100)*it.q});const usedZones=ZN.filter(z=>rm[z.id]);const maxN=Math.max(...usedZones.map(z=>rm[z.id].n),1);return(<div style={{display:"flex",gap:6,marginBottom:8,overflowX:"auto",paddingBottom:2}}>{usedZones.map(z=>{const d=rm[z.id];const pct=Math.max(8,Math.round(d.n/maxN*100));return(<div key={z.id} style={{flex:"1 0 0",minWidth:mob?80:100,background:C.warm,borderRadius:8,padding:"8px 10px",border:`1px solid ${C.bdr}`}}><div style={{display:"flex",alignItems:"center",gap:4,marginBottom:4}}><span style={{fontSize:14}}>{z.i}</span><span style={{fontSize:10.5,fontWeight:600,fontFamily:F.b,color:C.ink}}>{z.l}</span></div><div style={{background:C.bdr,borderRadius:3,height:5,overflow:"hidden"}}><div style={{width:pct+"%",height:"100%",background:C.acc,borderRadius:3,transition:"width .3s"}}/></div><div style={{marginTop:3,fontSize:9.5,color:C.stone,fontFamily:F.m}}>{d.n} unit{d.n!==1?"s":""} · {fm(d.c)}</div></div>)})}</div>)})()}
+      {/* ── Search & Room Filter Bar ── */}
+      {items.length>3&&<div style={{display:"flex",gap:6,marginBottom:8,alignItems:"center",flexWrap:"wrap"}}>
+        <div style={{position:"relative",flex:"1 1 180px",minWidth:mob?140:180}}>
+          <input className="inp" value={itemSearch} onChange={e=>setItemSearch(e.target.value)} placeholder="Search items (SKU, name, room)..." style={{paddingLeft:30,fontSize:mob?14:12,minHeight:mob?40:32}}/>
+          <span style={{position:"absolute",left:9,top:"50%",transform:"translateY(-50%)",fontSize:13,color:C.stone,pointerEvents:"none"}}>🔍</span>
+          {itemSearch&&<button onClick={()=>setItemSearch("")} style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",fontSize:16,color:C.stone,cursor:"pointer",padding:4}}>×</button>}
+        </div>
+        {(()=>{const usedRooms=ZN.filter(z=>items.some(it=>it.z===z.id));return usedRooms.length>1?(<div style={{display:"flex",gap:3,overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:mob?2:0}}>
+          <button className={`ch2 ${roomFilter==="all"?"on":""}`} onClick={()=>setRoomFilter("all")} style={{flexShrink:0,minHeight:mob?36:28,fontSize:mob?12:11}}>All Rooms</button>
+          {usedRooms.map(z=><button key={z.id} className={`ch2 ${roomFilter===z.id?"on":""}`} onClick={()=>setRoomFilter(z.id)} style={{flexShrink:0,minHeight:mob?36:28,fontSize:mob?12:11,...(roomFilter===z.id?{borderColor:C.acc,color:C.acc,background:C.acc+"14"}:{})}}>{z.i} {z.l}</button>)}
+        </div>):null;})()}
+        {(itemSearch||roomFilter!=="all")&&<div style={{fontSize:11,color:C.stone,fontFamily:F.b}}>Showing {fi.length} of {items.length}</div>}
+      </div>}
+
+      {items.length>0&&(()=>{const rm={};items.forEach(it=>{if(!rm[it.z])rm[it.z]={n:0,c:0};rm[it.z].n+=it.q;const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);rm[it.z].c+=total+mcR*(1+plyPct/100)*it.q});const usedZones=ZN.filter(z=>rm[z.id]);const maxN=Math.max(...usedZones.map(z=>rm[z.id].n),1);return(<div style={{display:"flex",gap:6,marginBottom:8,overflowX:"auto",paddingBottom:2}}>{usedZones.map(z=>{const d=rm[z.id];const pct=Math.max(8,Math.round(d.n/maxN*100));return(<div key={z.id} onClick={()=>{setRoomFilter(roomFilter===z.id?"all":z.id);setItemSearch("")}} style={{flex:"1 0 0",minWidth:mob?80:100,background:roomFilter===z.id?C.acc+"14":C.warm,borderRadius:8,padding:"8px 10px",border:`1px solid ${roomFilter===z.id?C.acc:C.bdr}`,cursor:"pointer",transition:"all .15s"}}><div style={{display:"flex",alignItems:"center",gap:4,marginBottom:4}}><span style={{fontSize:14}}>{z.i}</span><span style={{fontSize:10.5,fontWeight:600,fontFamily:F.b,color:roomFilter===z.id?C.acc:C.ink}}>{z.l}</span></div><div style={{background:C.bdr,borderRadius:3,height:5,overflow:"hidden"}}><div style={{width:pct+"%",height:"100%",background:C.acc,borderRadius:3,transition:"width .3s"}}/></div><div style={{marginTop:3,fontSize:9.5,color:C.stone,fontFamily:F.m}}>{d.n} unit{d.n!==1?"s":""} · {fm(d.c)}</div></div>)})}</div>)})()}
 
       {items.length===0?(<div className="c" style={{padding:mob?28:44,textAlign:"center"}}>
         <div style={{fontSize:28,marginBottom:8}}>◻</div>
