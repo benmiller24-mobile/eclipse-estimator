@@ -8496,10 +8496,22 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
         templateBytes = new Uint8Array(await resp.arrayBuffer());
       } catch(e) { fl("Could not load express sample door form template"); return; }
 
+      const { PDFName: PN, PDFNumber: PNum } = await import("pdf-lib");
       const doc = await PDFDocument.load(templateBytes);
       const form = doc.getForm();
       const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
-      const clickBtn = (name) => { try { const b = form.getButton(name); b.enableReadOnly(); } catch(e) {} };
+
+      // Toggle ON/OFF button pair: show the ON version (F=4 visible), hide the OFF version (F=6 hidden)
+      const xOut = (name) => {
+        try {
+          const onBtn = form.getButton(name + " ON");
+          onBtn.acroField.getWidgets().forEach(w => w.dict.set(PN.of("F"), PNum.of(4)));
+        } catch(e) {}
+        try {
+          const offBtn = form.getButton(name + " OFF");
+          offBtn.acroField.getWidgets().forEach(w => w.dict.set(PN.of("F"), PNum.of(6)));
+        } catch(e) {}
+      };
 
       // Header fields
       setText("Business Name", dealerName);
@@ -8522,17 +8534,19 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("State", sampleState);
       setText("Zip Code", sampleZip);
 
-      // Glaze checkbox (PDFButtons with OFF/ON naming)
-      const glazeBtn = (name) => { try { form.getButton(name + " ON").enableReadOnly(); } catch(e) {} };
-      if (sampleGlaze && sampleGlaze !== "None") glazeBtn(sampleGlaze); else glazeBtn("None");
+      // Glaze — x out selected option
+      if (sampleGlaze && sampleGlaze !== "None") xOut(sampleGlaze); else xOut("None");
 
-      // Finish technique checkboxes
-      if (sampleCharT === "Aged†" || sampleCharT === "Aged") glazeBtn("Aged†");
-      else if (sampleCharT === "Wearing†" || sampleCharT === "Wearing") glazeBtn("Wearing†");
-      else if (sampleCharT === "Sand-through‡" || sampleCharT === "Sand-through") glazeBtn("Sand-through‡");
+      // Finish technique — x out selected option
+      if (sampleCharT === "Aged†" || sampleCharT === "Aged") xOut("Aged†");
+      else if (sampleCharT === "Wearing†" || sampleCharT === "Wearing") xOut("Wearing†");
+      else if (sampleCharT === "Sand-through‡" || sampleCharT === "Sand-through") xOut("Sand-through‡");
 
-      // Edge profile checkbox
-      if (sampleEdge && sampleEdge !== "None") glazeBtn(sampleEdge);
+      // Edge profile — x out selected option
+      if (sampleEdge && sampleEdge !== "None") xOut(sampleEdge);
+
+      // Hinge boring — x out Matching by default (can be extended later)
+      xOut("Matching");
 
       form.flatten();
       const bytes = await doc.save();
