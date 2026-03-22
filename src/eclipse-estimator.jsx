@@ -10545,24 +10545,26 @@ upd(item.id,{mods:newMods});
             </div>);
           }
           return(<div key={item.id} id={"item-"+item.id} className={`ic${ov?" ov":""}`}>
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-              <div>
-                <span className="mn" style={{fontWeight:700,fontSize:12.5}}>{SKU_LABELS[item.s]||item.s}</span>
-                <span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>
-                {isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}
-                {itemSQ&&<span className="pl" style={{marginLeft:3,background:"#e8f0ea",color:"#2c4a34"}}>{isFLS(item.s)?`${item.sqW||0}"D × ${item.sqH||0}"L`:""} {(item.sqin||0).toLocaleString()} sq.in</span>}
-                {item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}
-                {item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng}</span>}
-                {item.fe&&intF!=="LINEN"&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe==="L"?"Left":"Right"}</span>}
-                {item.rbs&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>RBS +$87</span>}
-                {activeMods.length>0&&activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;const modAmt=m.input==="mxdf"?m.price*mxdfCount:m.input==="side"?m.price*(qty==="B"?2:1):m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?m.price:m.price*(+qty||1);return <span key={code} className="pl" style={{marginLeft:3,background:"#7c3aed18",color:"#6d28d9"}}>{m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"L":"R"})`:typeof qty==="number"&&qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:modAmt>0?`+${fm(modAmt)}`:""}</span>})}
-                {(()=>{const w=[];if(!isMould&&!itemSQ&&!isCustom(item.s)){if(item.dc>0&&!item.hng)w.push("No hinge");if((item.t==="B"||item.t==="T"||item.t==="V")&&!item.fe)w.push("No fin. end");}if(itemSQ&&(item.sqin||0)===0)w.push("0 sq.in");if(isOven(item)){const oSpec=item.ovenSpec||{};const ot=OVEN_TYPE(item);const fields=OVEN_FIELDS[ot]||[];const filled=fields.filter(f=>oSpec[f.k]).length;if(filled===0)w.push("No oven spec");else if(filled<fields.length)w.push(`Spec ${filled}/${fields.length}`);}return w.length>0?<div style={{display:"flex",gap:3,marginTop:2,flexWrap:"wrap"}}>{w.map(x=><span key={x} style={{fontSize:9,padding:"1px 6px",borderRadius:3,background:"#fef3c7",color:"#92400e",fontWeight:600,border:"1px solid #f59e0b44"}}>⚠ {x}</span>)}</div>:null})()}
-                <div style={{fontSize:10.5,color:C.stone,marginTop:1}}>{item.r} · {SEC[item.r.charAt(0)]||""}{isMould?` · $${item.p}/LF`:""}{!isMould&&!itemSQ&&modCost>0?` · Base ${fm(u-doorChg-rbsChg)} + Mods ${fm(modCost)} = ${fm(u+modCost)}/ea`:""}</div>
+            <div style={{marginBottom:mob?6:4}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                <div style={{flex:1,minWidth:0}}>
+                  <span className="mn" style={{fontWeight:700,fontSize:mob?13.5:12.5}}>{SKU_LABELS[item.s]||item.s}</span>
+                  <span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>
+                  {isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}
+                  {itemSQ&&<span className="pl" style={{marginLeft:3,background:"#e8f0ea",color:"#2c4a34"}}>{isFLS(item.s)?`${item.sqW||0}"D × ${item.sqH||0}"L`:""} {(item.sqin||0).toLocaleString()} sq.in</span>}
+                  {item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}
+                  {item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng}</span>}
+                  {item.fe&&intF!=="LINEN"&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe==="L"?"Left":"Right"}</span>}
+                  {item.rbs&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>RBS +$87</span>}
+                  {activeMods.length>0&&activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;const modAmt=m.input==="mxdf"?m.price*mxdfCount:m.input==="side"?m.price*(qty==="B"?2:1):m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?m.price:m.price*(+qty||1);return <span key={code} className="pl" style={{marginLeft:3,background:"#7c3aed18",color:"#6d28d9"}}>{m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"L":"R"})`:typeof qty==="number"&&qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:modAmt>0?`+${fm(modAmt)}`:""}</span>})}
+                </div>
+                {!mob&&<div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
+                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                  <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
+                </div>}
               </div>
-              <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
-                <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>✕ Del</button>
-              </div>
+              {(()=>{const w=[];if(!isMould&&!itemSQ&&!isCustom(item.s)){if(item.dc>0&&!item.hng)w.push("No hinge");if((item.t==="B"||item.t==="T"||item.t==="V")&&!item.fe)w.push("No fin. end");}if(itemSQ&&(item.sqin||0)===0)w.push("0 sq.in");if(isOven(item)){const oSpec=item.ovenSpec||{};const ot=OVEN_TYPE(item);const fields=OVEN_FIELDS[ot]||[];const filled=fields.filter(f=>oSpec[f.k]).length;if(filled===0)w.push("No oven spec");else if(filled<fields.length)w.push(`Spec ${filled}/${fields.length}`);}return w.length>0?<div style={{display:"flex",gap:3,marginTop:2,flexWrap:"wrap"}}>{w.map(x=><span key={x} style={{fontSize:9,padding:"1px 6px",borderRadius:3,background:"#fef3c7",color:"#92400e",fontWeight:600,border:"1px solid #f59e0b44"}}>⚠ {x}</span>)}</div>:null})()}
+              <div style={{fontSize:10.5,color:C.stone,marginTop:1}}>{item.r} · {SEC[item.r.charAt(0)]||""}{isMould?` · $${item.p}/LF`:""}{!isMould&&!itemSQ&&modCost>0?` · Base ${fm(u-doorChg-rbsChg)} + Mods ${fm(modCost)} = ${fm(u+modCost)}/ea`:""}</div>
             </div>
             {isMould&&<div style={{display:"flex",gap:4,marginBottom:5}}>
               <button className={`ch2 ${item.len===5?"on":""}`} onClick={()=>upd(item.id,{len:5})} style={item.len===5?{borderColor:C.gold,color:C.gold,background:C.gold+"14"}:{}}>5 ft</button>
@@ -10618,16 +10620,40 @@ return(<div style={{marginBottom:5}}>
               <div style={{fontSize:9.5,fontWeight:700,color:"#856404",marginBottom:2}}>⚠ Important Notes</div>
               <div style={{fontSize:9.5,color:"#856404",lineHeight:1.5,whiteSpace:"pre-line"}}>{LSD_NOTE}</div>
             </div>}
-            <div style={{display:"grid",gridTemplateColumns:(isMould||itemSQ)?"1fr 1fr":"1fr 1fr 1fr",gap:6,marginBottom:5}}>
-              <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
-              <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
+            <div style={{display:"grid",gridTemplateColumns:mob?"1fr 1fr":(isMould||itemSQ)?"1fr 1fr":"1fr 1fr 1fr",gap:6,marginBottom:5}}>
+              <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:mob?12:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
+              <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:mob?12:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
                 <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
               </select></div>
-              {!isMould&&!itemSQ&&<div><label className="lb">Door Style</label><select className="sel" value={item.ds||""} onChange={e=>upd(item.id,{ds:e.target.value||""})} style={{fontSize:11.5,...(item.ds?{border:"2px solid #5a6b4a",fontWeight:600}:{})}}>
+              {!isMould&&!itemSQ&&<div style={mob?{gridColumn:"1 / -1"}:{}}><label className="lb">Door Style</label><select className="sel" value={item.ds||""} onChange={e=>upd(item.id,{ds:e.target.value||""})} style={{fontSize:mob?12:11.5,...(item.ds?{border:"2px solid #5a6b4a",fontWeight:600}:{})}}>
                 <option value="">— global ({door}) —</option>{DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} — ${DG[d.g]||0}{d.x?`+${d.x}`:""}/dr</option>)}
               </select></div>}
             </div>
-            {!isMould&&!itemSQ&&<div style={{display:"flex",gap:6,marginBottom:5,flexWrap:"wrap"}}>
+            {!isMould&&!itemSQ&&(mob?<div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:5}}>
+              <div style={{display:"grid",gridTemplateColumns:isWall?"1fr 1fr 1fr":"1fr 1fr",gap:6}}>
+                <div><label className="lb">Doors</label>
+                  <input type="number" className="inp" min={0} max={6} value={item.dc} onChange={e=>upd(item.id,{dc:Math.max(0,+e.target.value)})} style={{textAlign:"center",padding:8,fontSize:14,...(item.dc>0&&doorChg>0?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}/>
+                </div>
+                <div><label className="lb">Drawers</label>
+                  <input type="number" className="inp" min={0} max={10} value={item.drc||0} onChange={e=>upd(item.id,{drc:Math.max(0,+e.target.value)})} style={{textAlign:"center",padding:8,fontSize:14,...(item.drc>0&&(dfChg>0||dbChg>0)?{border:"2px solid #7c3aed",fontWeight:600}:{})}}/>
+                </div>
+                {isWall&&<div><label className="lb">RBS</label>
+                  <button className={`ch2 ${item.rbs?"on":""}`} onClick={()=>upd(item.id,{rbs:!item.rbs})} style={{width:"100%",justifyContent:"center",fontSize:12,minHeight:40,...(item.rbs?{borderColor:"#4a6178",color:"#4a6178",background:"#4a617814"}:{})}}>{item.rbs?"Yes":"No"}</button>
+                </div>}
+              </div>
+              <div><label className="lb">Hinge</label>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:4}}>
+                  {[["","None"],["L","Left"],["R","Right"]].map(([v,l])=><button key={v} className={`ch2 ${item.hng===v?"on":""}`} onClick={()=>upd(item.id,{hng:v})} style={{justifyContent:"center",fontSize:12,minHeight:40,padding:"8px 4px",...(item.hng===v&&v?{borderColor:"#4a6178",color:"#4a6178",background:"#4a617814"}:{})}}>{l}</button>)}
+                </div>
+              </div>
+              {intF!=="LINEN"?<div><label className="lb">Finished End</label>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:4}}>
+                  {[["","None"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} className={`ch2 ${item.fe===v?"on":""}`} onClick={()=>upd(item.id,{fe:v})} style={{justifyContent:"center",fontSize:12,minHeight:40,padding:"8px 4px",...(item.fe===v&&v?{borderColor:"#6b5340",color:"#6b5340",background:"#6b534014"}:{})}}>{l}</button>)}
+                </div>
+              </div>:<div><label className="lb" style={{color:C.red}}>Finished End</label>
+                <div style={{fontSize:11,color:C.stone,padding:"8px 0"}}>N/A — Linen Interior</div>
+              </div>}
+            </div>:<div style={{display:"flex",gap:6,marginBottom:5,flexWrap:"wrap"}}>
               <div style={{flex:"0 0 55px"}}><label className="lb">Doors</label>
                 <input type="number" className="inp" min={0} max={6} value={item.dc} onChange={e=>upd(item.id,{dc:Math.max(0,+e.target.value)})} style={{textAlign:"center",padding:5,fontSize:12,...(item.dc>0&&doorChg>0?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}/>
               </div>
@@ -10649,7 +10675,7 @@ return(<div style={{marginBottom:5}}>
               </div>:<div style={{flex:"1 1 130px"}}><label className="lb" style={{color:C.red}}>Finished End</label>
                 <div style={{fontSize:10,color:C.stone,padding:"6px 0"}}>N/A — Linen Interior</div>
               </div>}
-            </div>}
+            </div>)}
             {!isMould&&doorChg>0&&<div style={{fontSize:10,color:C.gold,marginBottom:4}}>Door upcharge: {fm(doorChg)} ({item.dc} door{item.dc>1?"s":""} × ${(doorChg/item.dc).toFixed(0)}/door — {(item.ds||door)})</div>}
             {!isMould&&dfChg>0&&<div style={{fontSize:10,color:"#7c3aed",marginBottom:2}}>DF upcharge: {fm(dfChg)} ({item.drc} drw × {(dfChg/(item.drc||1)).toFixed(0)}/drw — {drwF})</div>}
             {!isMould&&dbChg>0&&(()=>{const rQ=(item.rot&&item.rotQ>0)?item.rotQ:0;const r2Q=(item.rot2&&item.rot2Q>0)?item.rot2Q:0;const br=item.brot||0;const dbP=DRW_BOX.find(d=>d.v===drwBox)?.price||0;const tot=(item.drc||0)+rQ+r2Q+br;return<div style={{fontSize:10,color:"#0369a1",marginBottom:2}}>Drw box/guide: {fm(dbChg)} ({item.drc||0} drw{br>0?` + ${br} built-in ROT`:""}{rQ>0?` + ${rQ} ROT`:""}{r2Q>0?` + ${r2Q} FM-ROT`:""} = {tot} × ${'{'}dbP}/ea — {drwBox})</div>})()}
@@ -10768,13 +10794,19 @@ return(<div style={{marginBottom:5}}>
               })}
               </div>
             </div>}
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div style={{display:"flex",alignItems:"center",gap:6}}>
-                <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                <span style={{fontSize:10.5,color:C.stone}}>{isMould?`pcs × ${fm(u)}/pc`:itemSQ?`pcs × ${fm(u)}/pc`:`× ${fm(u+modCost)}${doorChg>0||rbsChg>0||modCost>0?` (base ${fm(u-doorChg-rbsChg)}${doorChg>0?` + doors ${fm(doorChg)}`:""}${rbsChg>0?" + RBS $87":""}${modCost>0?` + mods ${fm(modCost)}`:""})`:" (stock "+fm(item.p)+")"}`}</span>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:mob?4:0}}>
+              <div style={{display:"flex",alignItems:"center",gap:mob?4:6}}>
+                {mob&&<button onClick={()=>upd(item.id,{q:Math.max(1,item.q-1)})} style={{width:36,height:36,borderRadius:8,border:`1px solid ${C.bdr}`,background:C.warm,fontSize:18,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:C.ink}}>−</button>}
+                <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:mob?44:50,textAlign:"center",padding:mob?7:5,fontSize:mob?14:13}}/>
+                {mob&&<button onClick={()=>upd(item.id,{q:Math.min(999,item.q+1)})} style={{width:36,height:36,borderRadius:8,border:`1px solid ${C.bdr}`,background:C.warm,fontSize:18,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:C.ink}}>+</button>}
+                <span style={{fontSize:mob?9.5:10.5,color:C.stone}}>{mob?`× ${fm(u+modCost)}`:`${isMould?`pcs × ${fm(u)}/pc`:itemSQ?`pcs × ${fm(u)}/pc`:`× ${fm(u+modCost)}${doorChg>0||rbsChg>0||modCost>0?` (base ${fm(u-doorChg-rbsChg)}${doorChg>0?` + doors ${fm(doorChg)}`:""}${rbsChg>0?" + RBS $87":""}${modCost>0?` + mods ${fm(modCost)}`:""})`:" (stock "+fm(item.p)+")"}`}`}</span>
               </div>
-              <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
+              <span className="mn" style={{fontWeight:700,fontSize:mob?15:14}}>{fm(grandTotal)}</span>
             </div>
+            {mob&&<div style={{display:"flex",gap:4,marginTop:6,borderTop:`1px solid ${C.bdr}`,paddingTop:6}}>
+              <button onClick={()=>dup(item.id)} style={{flex:1,background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:6,cursor:"pointer",fontSize:12,color:C.stone,padding:"8px 10px",fontWeight:600,minHeight:38,display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>⧉ Duplicate</button>
+              <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} style={{flex:1,background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:6,cursor:"pointer",fontSize:12,color:C.red,padding:"8px 10px",fontWeight:600,minHeight:38,display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>✕ Delete</button>
+            </div>}
           </div>);
         }):(()=>{
         // Grouped by zone view for fi filtered items
