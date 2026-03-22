@@ -6843,7 +6843,14 @@ function _cabW(sku){
   let s=sku.toUpperCase().replace(/\s+/g,'');
   for(let i=0;i<3;i++)s=s.replace(/-(RT|FHD|2D|1DR|WS|MC|SS|PH|S)$/,'');
   const m=s.match(/(\d+)$/);if(!m)return 0;
-  const w=parseInt(m[1]);return(w>=9&&w<=84)?w:0;
+  const n=parseInt(m[1]);
+  // If number is a valid width on its own (9–84), use it directly
+  if(n>=9&&n<=84)return n;
+  // Otherwise it's concatenated width+height (e.g. "1230" = 12 wide × 30 tall)
+  // — strip the last 2 digits (height) to get the width
+  const ds=m[1];
+  if(ds.length>=3){const w=parseInt(ds.slice(0,ds.length-2));return(w>=9&&w<=84)?w:0;}
+  return 0;
 }
 
 /* ── guessDoors ────────────────────────────────────────────── */
@@ -6875,8 +6882,7 @@ function guessDoors(sku,typeCode){
   if(/^BBB\d/.test(s)&&!/^BBB\dD/.test(s)){const w=_cabW(sku);return w>24?2:1;}
   if(/^(VTSD|VSD)/.test(s))return 2;
   // === Width-based for std bases/sink/vanity/peninsula ===
-  const wm=s.match(/^(?:BA|B|SBA|SBR|SBU|SB|PB|VBA|VB|VTB|FLVB|VSBR|VSB|VTSBR|VTSB|VCSD|VBW|VTBW|VBH|VTHB|VGO|VO)(\d+)/);
-  if(wm){const w=parseInt(wm[1]);return w>24?2:1;}
+  if(/^(?:BA|B|SBA|SBR|SBU|SB|PB|VBA|VB|VTB|FLVB|VSBR|VSB|VTSBR|VTSB|VCSD|VBW|VTBW|VBH|VTHB|VGO|VO)\d/.test(s)){const w=_cabW(sku);return w>24?2:1;}
   // Utility / Tall — 2 sections, width-based
   if(/^(U\d|UT\d|CP)/.test(s)){if(s.includes('-2D'))return 4;const w=_cabW(sku);return(w>24)?4:2;}
   // === Dressing Room (all TypeCode V) ===
@@ -6890,8 +6896,7 @@ function guessDoors(sku,typeCode){
   if(/^(PDRBD|DRBD)/.test(s)){const w=_cabW(sku);return w>24?2:1;}
   if(/^(PDRBDO|DRBDO|DRSB)/.test(s)){const w=_cabW(sku);return w>24?2:1;}
   // Wall cabinets — width-based
-  const ww=s.match(/^W(\d+)/);
-  if(ww){const w=parseInt(ww[1]);return w>24?2:1;}
+  if(/^W\d/.test(s)){const w=_cabW(sku);return w>24?2:1;}
   if(s.startsWith('WBC'))return 1;
   return 1;
 }
