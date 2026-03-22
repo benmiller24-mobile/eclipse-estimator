@@ -8332,8 +8332,9 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
   const [sampleSp, setSampleSp] = useState("White Oak");
   const [sampleDoor, setSampleDoor] = useState("HNVR");
   const [sampleColor, setSampleColor] = useState("");
-  const [sampleEdge, setSampleEdge] = useState("");
+  const [sampleEdge, setSampleEdge] = useState("None");
   const [sampleCharT, setSampleCharT] = useState("NONE");
+  const [sampleGlaze, setSampleGlaze] = useState("None");
 
   const [samplePO, setSamplePO] = useState("");
   const [sampleJobName, setSampleJobName] = useState("");
@@ -8521,11 +8522,17 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("State", sampleState);
       setText("Zip Code", sampleZip);
 
-      // Character technique checkboxes (these are PDFButtons with OFF/ON naming)
-      if (sampleCharT === "Aged†" || sampleCharT === "Aged") { try { form.getButton("Aged† ON").enableReadOnly(); } catch(e) {} }
-      if (sampleCharT === "Wearing†" || sampleCharT === "Wearing") { try { form.getButton("Wearing† ON").enableReadOnly(); } catch(e) {} }
-      if (sampleCharT === "Sand-through‡" || sampleCharT === "Sand-through") { try { form.getButton("Sand-through‡ ON").enableReadOnly(); } catch(e) {} }
-      if (!sampleCharT || sampleCharT === "NONE") { try { form.getButton("None ON").enableReadOnly(); } catch(e) {} }
+      // Glaze checkbox (PDFButtons with OFF/ON naming)
+      const glazeBtn = (name) => { try { form.getButton(name + " ON").enableReadOnly(); } catch(e) {} };
+      if (sampleGlaze && sampleGlaze !== "None") glazeBtn(sampleGlaze); else glazeBtn("None");
+
+      // Finish technique checkboxes
+      if (sampleCharT === "Aged†" || sampleCharT === "Aged") glazeBtn("Aged†");
+      else if (sampleCharT === "Wearing†" || sampleCharT === "Wearing") glazeBtn("Wearing†");
+      else if (sampleCharT === "Sand-through‡" || sampleCharT === "Sand-through") glazeBtn("Sand-through‡");
+
+      // Edge profile checkbox
+      if (sampleEdge && sampleEdge !== "None") glazeBtn(sampleEdge);
 
       form.flatten();
       const bytes = await doc.save();
@@ -8775,8 +8782,9 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
                   <div><label style={labelStyle}>Species</label><input value={sampleSp} onChange={e=>setSampleSp(e.target.value)} style={fieldStyle} /></div>
                   <div><label style={labelStyle}>Door Style</label><input value={sampleDoor} onChange={e=>setSampleDoor(e.target.value)} style={fieldStyle} /></div>
                   <div><label style={labelStyle}>Color / Finish</label><input value={sampleColor} onChange={e=>setSampleColor(e.target.value)} style={fieldStyle} /></div>
-                  <div><label style={labelStyle}>Edge Profile</label><input value={sampleEdge} onChange={e=>setSampleEdge(e.target.value)} style={fieldStyle} /></div>
-                  <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Character Technique</label><input value={sampleCharT} onChange={e=>setSampleCharT(e.target.value)} placeholder="NONE" style={fieldStyle} /></div>
+                  <div><label style={labelStyle}>Edge Profile</label><select value={sampleEdge} onChange={e=>setSampleEdge(e.target.value)} style={fieldStyle}>{["None","100","150","350","400","750"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+                  <div><label style={labelStyle}>Glaze</label><select value={sampleGlaze} onChange={e=>setSampleGlaze(e.target.value)} style={fieldStyle}>{["None","Black","Mocha","Van Dyke","Nickel","Café","Slate","Graphite"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+                  <div><label style={labelStyle}>Finish Technique</label><select value={sampleCharT} onChange={e=>setSampleCharT(e.target.value)} style={fieldStyle}>{["NONE","Aged","Wearing","Sand-through"].map(v=><option key={v} value={v}>{v === "NONE" ? "None" : v}</option>)}</select></div>
                 </div>
               </div>
             )}
