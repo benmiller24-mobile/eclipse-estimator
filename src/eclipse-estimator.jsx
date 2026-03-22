@@ -8096,6 +8096,9 @@ function AuthWrapper() {
   if (activeView === "dashboard") {
     return <Dashboard user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onNavigate={(view, data) => { setActiveView(view); setWorkflowData(data || null); }} />;
   }
+  if (activeView === "admin" && profile?.role === "admin") {
+    return <AdminDashboard user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onNavigate={(view, data) => { setActiveView(view); setWorkflowData(data || null); }} />;
+  }
   if (activeView === "warranty") {
     return <WarrantyRequest user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onBack={() => setActiveView("dashboard")} />;
   }
@@ -8105,9 +8108,398 @@ function AuthWrapper() {
   if (activeView === "express") {
     return <ExpressPartsOrder user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onBack={() => setActiveView("dashboard")} />;
   }
-  return <App user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onBack={() => setActiveView("dashboard")} />;
+  return <App user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onBack={() => setActiveView("dashboard")} onAdmin={() => setActiveView("admin")} />;
 }
 
+
+// ═══════════════════════════════════════════════════
+// ██ ADMIN DASHBOARD — Full-page admin view
+// ═══════════════════════════════════════════════════
+function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
+  const sb = supabase;
+  const [users, setUsers] = useState([]);
+  const [dealers, setDealers] = useState([]);
+  const [allQuotes, setAllQuotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("quotes"); // quotes | users | dealers
+  const [toast, setToast] = useState("");
+  const [mob, setMob] = useState(false);
+
+  // Invite user state
+  const [invEmail, setInvEmail] = useState("");
+  const [invName, setInvName] = useState("");
+  const [invRole, setInvRole] = useState("designer");
+  const [invDealer, setInvDealer] = useState("");
+  const [inviting, setInviting] = useState(false);
+  // New dealer state
+  const [newDealerName, setNewDealerName] = useState("");
+  const [newDealerCode, setNewDealerCode] = useState("");
+  const [dlrLoading, setDlrLoading] = useState(false);
+
+  useEffect(() => {
+    const c = () => setMob(window.innerWidth <= 768);
+    c(); window.addEventListener("resize", c);
+    return () => window.removeEventListener("resize", c);
+  }, []);
+
+  useEffect(() => { loadAll(); }, []);
+
+  const flash = (msg) => { setToast(msg); setTimeout(()=>setToast(""), 2400); };
+
+  const loadAll = async () => {
+    setLoading(true);
+    try {
+      const [uRes, dRes, qRes] = await Promise.all([
+        sb.from("profiles").select("id,email,role,dealer_id,discount_pct,full_name,business_name"),
+        sb.from("dealers").select("id,name,code"),
+        sb.from("quotes").select("id,name,updated_at,user_id,data").order("updated_at", { ascending: false }).limit(100),
+      ]);
+      setUsers(uRes.data || []);
+      setDealers(dRes.data || []);
+      setAllQuotes(qRes.data || []);
+    } catch (e) { console.error(e); }
+    setLoading(false);
+  };
+
+  /* ── User helpers ── */
+  const updateUser = async (userId, fields) => {
+    try {
+      const { error } = await sb.from("profiles").update(fields).eq("id", userId);
+      if (error) throw error;
+      loadAll();
+      return true;
+    } catch (err) { console.error(err); return false; }
+  };
+  const approveUser = async (id, role) => { if (await updateUser(id, { role })) flash("User approved as " + role); };
+  const updateUserRole = async (id, r) => { if (await updateUser(id, { role: r })) flash("Role updated"); };
+  const updateUserMultiplier = async (id, m) => { if (await updateUser(id, { discount_pct: m })) flash("Multiplier saved"); };
+  const assignDealer = async (id, did) => { if (await updateUser(id, { dealer_id: did || null })) flash("Dealer assigned"); };
+  const deactivateUser = async (id) => {
+    if (!window.confirm("Set this user to pending? They will lose access until re-approved.")) return;
+    if (await updateUser(id, { role: "pending" })) flash("User deactivated");
+  };
+
+  /* ── Invite ── */
+  const inviteUser = async () => {
+    if (!invEmail) return;
+    setInviting(true);
+    try {
+      const tempPw = "Tmp_" + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2) + "!1";
+      const { data: signUpData, error: signUpErr } = await sb.auth.signUp({
+        email: invEmail, password: tempPw,
+        options: { data: { full_name: invName, business_name: "" } },
+      });
+      if (signUpErr) throw signUpErr;
+      const newUid = signUpData.user?.id;
+      if (newUid) {
+        let retries = 0;
+        while (retries < 5) {
+          const { error: profErr } = await sb.from("profiles").update({
+            role: invRole, dealer_id: invDealer ? parseInt(invDealer) : null, full_name: invName,
+          }).eq("id", newUid);
+          if (!profErr) break;
+          retries++; await new Promise(r => setTimeout(r, 600));
+        }
+      }
+      const { error: resetErr } = await sb.auth.resetPasswordForEmail(invEmail, { redirectTo: window.location.origin });
+      if (resetErr) console.warn("Reset email error:", resetErr.message);
+      setInvEmail(""); setInvName(""); setInvRole("designer"); setInvDealer("");
+      loadAll();
+      flash("Invite sent to " + invEmail);
+    } catch (err) { flash("Error: " + err.message); }
+    finally { setInviting(false); }
+  };
+
+  /* ── Dealer helpers ── */
+  const createDealer = async () => {
+    if (!newDealerName || !newDealerCode) return;
+    setDlrLoading(true);
+    try {
+      const { error } = await sb.from("dealers").insert([{ name: newDealerName, code: newDealerCode }]);
+      if (error) throw error;
+      setNewDealerName(""); setNewDealerCode("");
+      loadAll(); flash("Dealer created");
+    } catch (err) { console.error(err); }
+    finally { setDlrLoading(false); }
+  };
+  const deleteDealer = async (id, name) => {
+    if (!window.confirm("Delete dealer \"" + name + "\"?")) return;
+    try {
+      await sb.from("profiles").update({ dealer_id: null }).eq("dealer_id", id);
+      const { error } = await sb.from("dealers").delete().eq("id", id);
+      if (error) throw error;
+      loadAll(); flash("Dealer deleted");
+    } catch (err) { console.error(err); }
+  };
+
+  /* ── Derived data ── */
+  const pendingUsers = users.filter(u => u.role === "pending");
+  const activeUsers = users.filter(u => u.role !== "pending");
+  const userMap = {}; users.forEach(u => { userMap[u.id] = u; });
+  const dealerMap = {}; dealers.forEach(d => { dealerMap[d.id] = d; });
+  const pendingCount = pendingUsers.length;
+
+  /* ── Styles ── */
+  const sectionHead = { fontSize:13, fontWeight:700, color:C.ink, textTransform:"uppercase", letterSpacing:"0.05em", marginBottom:10 };
+  const cardStyle = { background:C.paper, border:`1px solid ${C.bdr}`, borderRadius:10, padding:mob?10:14 };
+  const tabBtn = (id, label, badge) => (
+    <button key={id} onClick={()=>setTab(id)} style={{
+      flex:1, padding:mob?"10px 4px":"10px 16px", fontSize:mob?12:14, fontWeight:600,
+      background:tab===id?C.ink:"transparent", color:tab===id?"#fff":C.stone,
+      border:`1px solid ${tab===id?C.ink:C.bdr}`, borderRadius:8, cursor:"pointer",
+      minHeight:44, transition:"all 0.15s", whiteSpace:"nowrap",
+    }}>{label}{badge>0 && <span style={{
+      display:"inline-block", background:tab===id?"#ef4444":C.red, color:"#fff",
+      borderRadius:10, fontSize:10, fontWeight:700, padding:"1px 6px", marginLeft:5,
+    }}>{badge}</span>}</button>
+  );
+
+  /* ── User card ── */
+  const UserCard = ({u, showApprove}) => (
+    <div style={{...cardStyle, ...(showApprove?{borderLeft:`4px solid ${C.acc}`}:{})}}>
+      <div style={{marginBottom:8}}>
+        <div style={{fontSize:14,fontWeight:700,color:C.ink}}>{u.full_name || u.email}</div>
+        {u.full_name && <div style={{fontSize:12,color:C.stone,marginTop:1}}>{u.email}</div>}
+        {u.business_name && <div style={{fontSize:12,color:C.acc,marginTop:2,fontWeight:600}}>{u.business_name}</div>}
+      </div>
+      {showApprove && (
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          <button onClick={()=>approveUser(u.id,"designer")} className="bt bp" style={{flex:1,minHeight:44,fontSize:14,fontWeight:700,background:"#16a34a",border:"none"}}>Approve Designer</button>
+          <button onClick={()=>approveUser(u.id,"dealer")} className="bt bp" style={{flex:1,minHeight:44,fontSize:14,fontWeight:700,background:C.acc,border:"none"}}>Approve Dealer</button>
+        </div>
+      )}
+      {!showApprove && (<>
+        <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:8,marginBottom:u.role==="dealer"?8:4}}>
+          <div>
+            <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Role</label>
+            <select value={u.role} onChange={e=>updateUserRole(u.id,e.target.value)} className="sel" style={{width:"100%",minHeight:40,fontSize:14}}>
+              <option value="pending">Pending</option><option value="designer">Designer</option><option value="dealer">Dealer</option><option value="admin">Admin</option>
+            </select>
+          </div>
+          <div>
+            <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Dealer</label>
+            <select value={u.dealer_id||""} onChange={e=>assignDealer(u.id,e.target.value?parseInt(e.target.value):null)} className="sel" style={{width:"100%",minHeight:40,fontSize:14}}>
+              <option value="">— None —</option>
+              {dealers.map(d=><option key={d.id} value={d.id}>{d.name} ({d.code})</option>)}
+            </select>
+          </div>
+        </div>
+        {u.role==="dealer"&&(
+          <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+            <label style={{fontSize:12,fontWeight:600,color:C.ink}}>Multiplier %</label>
+            <input type="number" className="inp" min={0} max={100} step={0.1}
+              value={u.discount_pct ? Math.round(u.discount_pct*1000)/10 : ""}
+              placeholder="e.g. 53.9"
+              onChange={e=>{const v=parseFloat(e.target.value);if(!isNaN(v))updateUserMultiplier(u.id,Math.max(0,Math.min(1,v/100)));}}
+              style={{width:100,minHeight:40,padding:"6px 10px",fontSize:14}}/>
+            <span style={{fontSize:12,color:C.stone}}>{u.discount_pct ? "×"+u.discount_pct : ""}</span>
+          </div>
+        )}
+        <div style={{display:"flex",justifyContent:"flex-end",marginTop:6}}>
+          <button onClick={()=>deactivateUser(u.id)} style={{background:"none",border:`1px solid ${C.red}`,color:C.red,borderRadius:8,padding:"6px 12px",fontSize:12,fontWeight:600,cursor:"pointer",minHeight:36}}>Deactivate</button>
+        </div>
+      </>)}
+    </div>
+  );
+
+  return (
+    <div style={{minHeight:"100vh",background:C.warm}}>
+      {/* Header */}
+      <div style={{background:C.ink,padding:"14px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontFamily:F.d,fontSize:mob?16:22,fontWeight:700,color:C.cream,letterSpacing:1}}>Eclipse Cabinetry</span>
+          <span style={{fontSize:10,padding:"3px 8px",borderRadius:4,background:C.gold+"22",color:C.gold,fontWeight:600,border:`1px solid ${C.gold}44`}}>ADMIN</span>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+          <button onClick={()=>onNavigate("dashboard")} style={{background:"rgba(255,255,255,.12)",color:"#fff",border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 12px",fontSize:12,fontWeight:600,cursor:"pointer",minHeight:36}}>← Hub</button>
+          <button onClick={()=>onNavigate("estimator")} style={{background:"rgba(255,255,255,.12)",color:"#fff",border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 12px",fontSize:12,fontWeight:600,cursor:"pointer",minHeight:36}}>Estimator</button>
+          <span style={{fontSize:11,color:C.stL,fontFamily:F.b}}>{profile?.email || ""}</span>
+          <button onClick={onLogout} style={{background:"none",border:`1px solid ${C.stL}44`,borderRadius:6,padding:"5px 12px",color:C.stL,cursor:"pointer",fontSize:11}}>Logout</button>
+        </div>
+      </div>
+
+      {/* Toast */}
+      {toast && <div style={{background:"#16a34a",color:"#fff",padding:"10px 16px",fontSize:13,fontWeight:600,textAlign:"center"}}>{toast}</div>}
+
+      <div style={{maxWidth:960,margin:"0 auto",padding:mob?"14px":"28px 24px"}}>
+        {/* Summary cards */}
+        <div style={{display:"grid",gridTemplateColumns:mob?"1fr 1fr":"1fr 1fr 1fr 1fr",gap:10,marginBottom:20}}>
+          {[
+            {label:"Pending",val:pendingCount,color:pendingCount>0?"#ef4444":C.stone},
+            {label:"Active Users",val:activeUsers.length,color:C.acc},
+            {label:"Dealers",val:dealers.length,color:C.gold},
+            {label:"Total Quotes",val:allQuotes.length,color:"#7c3aed"},
+          ].map((c,i)=>(
+            <div key={i} style={{background:C.paper,border:`1px solid ${C.bdr}`,borderRadius:10,padding:"14px 16px",textAlign:"center"}}>
+              <div style={{fontSize:24,fontWeight:800,color:c.color,fontFamily:F.d}}>{c.val}</div>
+              <div style={{fontSize:11,color:C.stone,fontWeight:600,marginTop:2}}>{c.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Tab bar */}
+        <div style={{display:"flex",gap:6,marginBottom:16}}>
+          {tabBtn("quotes","All Quotes",0)}
+          {tabBtn("pending","Pending",pendingCount)}
+          {tabBtn("users","Users",0)}
+          {tabBtn("dealers","Dealers",0)}
+        </div>
+
+        {/* ── QUOTES TAB ── */}
+        {tab==="quotes" && (
+          <div style={{background:C.paper,borderRadius:12,border:`1px solid ${C.bdr}`,overflow:"hidden"}}>
+            <div style={{padding:"14px 20px",borderBottom:`1px solid ${C.bdr}`}}>
+              <h2 style={{fontFamily:F.d,fontSize:16,fontWeight:700,color:C.ink,margin:0}}>All Quotes — All Users</h2>
+            </div>
+            {loading ? (
+              <div style={{padding:24,textAlign:"center",color:C.stone}}>Loading...</div>
+            ) : allQuotes.length === 0 ? (
+              <div style={{padding:32,textAlign:"center",color:C.stone}}>No quotes yet</div>
+            ) : (
+              <div style={{overflowX:"auto"}}>
+                <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+                  <thead>
+                    <tr style={{background:C.cream,textAlign:"left"}}>
+                      <th style={{padding:"10px 14px",fontWeight:700,color:C.ink,fontSize:11,textTransform:"uppercase",letterSpacing:"0.04em"}}>Quote Name</th>
+                      {!mob&&<th style={{padding:"10px 14px",fontWeight:700,color:C.ink,fontSize:11,textTransform:"uppercase"}}>User</th>}
+                      <th style={{padding:"10px 14px",fontWeight:700,color:C.ink,fontSize:11,textTransform:"uppercase"}}>Items</th>
+                      {!mob&&<th style={{padding:"10px 14px",fontWeight:700,color:C.ink,fontSize:11,textTransform:"uppercase"}}>Species</th>}
+                      {!mob&&<th style={{padding:"10px 14px",fontWeight:700,color:C.ink,fontSize:11,textTransform:"uppercase"}}>Door</th>}
+                      <th style={{padding:"10px 14px",fontWeight:700,color:C.ink,fontSize:11,textTransform:"uppercase"}}>Updated</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {allQuotes.map(q => {
+                      const u = userMap[q.user_id];
+                      const itemCount = q.data?.items?.length || 0;
+                      const sp = q.data?.sp || "";
+                      const door = q.data?.door || "";
+                      return (
+                        <tr key={q.id} style={{borderBottom:`1px solid ${C.bdr}`,cursor:"pointer"}}
+                          onClick={()=>onNavigate("estimator",{quoteId:q.id})}
+                          onMouseEnter={e=>e.currentTarget.style.background=C.cream}
+                          onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                          <td style={{padding:"10px 14px"}}>
+                            <div style={{fontWeight:600,color:C.ink}}>{q.name || "Untitled"}</div>
+                            {mob && <div style={{fontSize:11,color:C.stone,marginTop:2}}>{u?.full_name || u?.email || "—"}</div>}
+                          </td>
+                          {!mob&&<td style={{padding:"10px 14px",color:C.stone}}>{u?.full_name || u?.email || "—"}</td>}
+                          <td style={{padding:"10px 14px",color:C.stone}}>{itemCount}</td>
+                          {!mob&&<td style={{padding:"10px 14px",color:C.stone}}>{sp}</td>}
+                          {!mob&&<td style={{padding:"10px 14px",color:C.stone}}>{door}</td>}
+                          <td style={{padding:"10px 14px",color:C.stone,fontSize:11}}>{new Date(q.updated_at).toLocaleDateString()}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── PENDING TAB ── */}
+        {tab==="pending" && (
+          <div>
+            {pendingUsers.length===0 ? (
+              <div style={{textAlign:"center",padding:"40px 20px",color:C.stone,fontSize:14}}>No pending requests</div>
+            ) : (
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                {pendingUsers.map(u=><UserCard key={u.id} u={u} showApprove={true}/>)}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── USERS TAB ── */}
+        {tab==="users" && (
+          <div>
+            {/* Invite form */}
+            <div style={sectionHead}>Invite New User</div>
+            <div style={{...cardStyle, marginBottom:20, borderLeft:`4px solid #16a34a`}}>
+              <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:8,marginBottom:8}}>
+                <div>
+                  <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Email *</label>
+                  <input type="email" className="inp" placeholder="jane@company.com" value={invEmail} onChange={e=>setInvEmail(e.target.value)} style={{width:"100%",minHeight:44,fontSize:14,padding:"8px 12px"}}/>
+                </div>
+                <div>
+                  <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Full Name</label>
+                  <input type="text" className="inp" placeholder="Jane Smith" value={invName} onChange={e=>setInvName(e.target.value)} style={{width:"100%",minHeight:44,fontSize:14,padding:"8px 12px"}}/>
+                </div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:8,marginBottom:12}}>
+                <div>
+                  <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Role</label>
+                  <select value={invRole} onChange={e=>setInvRole(e.target.value)} className="sel" style={{width:"100%",minHeight:44,fontSize:14}}>
+                    <option value="designer">Designer</option><option value="dealer">Dealer</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Assign to Dealer</label>
+                  <select value={invDealer} onChange={e=>setInvDealer(e.target.value)} className="sel" style={{width:"100%",minHeight:44,fontSize:14}}>
+                    <option value="">— None —</option>
+                    {dealers.map(d=><option key={d.id} value={d.id}>{d.name} ({d.code})</option>)}
+                  </select>
+                </div>
+              </div>
+              <button onClick={inviteUser} disabled={inviting||!invEmail} className="bt bp" style={{width:"100%",minHeight:48,fontSize:15,fontWeight:700,background:"#16a34a",border:"none",opacity:!invEmail?0.5:1}}>
+                {inviting ? "Sending invite..." : "Send Invite"}
+              </button>
+              <div style={{fontSize:11,color:C.stone,marginTop:8,lineHeight:1.4}}>User will receive an email to set their password. Pre-approved — no pending step.</div>
+            </div>
+
+            <div style={sectionHead}>{activeUsers.length} Active User{activeUsers.length!==1?"s":""}</div>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              {activeUsers.map(u=><UserCard key={u.id} u={u} showApprove={false}/>)}
+            </div>
+          </div>
+        )}
+
+        {/* ── DEALERS TAB ── */}
+        {tab==="dealers" && (
+          <div>
+            <div style={sectionHead}>Add New Dealer</div>
+            <div style={{...cardStyle, marginBottom:20}}>
+              <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:8,marginBottom:10}}>
+                <div>
+                  <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Dealer Name *</label>
+                  <input type="text" className="inp" placeholder="Eclipse Kitchen & Bath" value={newDealerName} onChange={e=>setNewDealerName(e.target.value)} style={{width:"100%",minHeight:44,fontSize:14,padding:"8px 12px"}}/>
+                </div>
+                <div>
+                  <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Dealer Code *</label>
+                  <input type="text" className="inp" placeholder="EKB" value={newDealerCode} onChange={e=>setNewDealerCode(e.target.value)} style={{width:"100%",minHeight:44,fontSize:14,padding:"8px 12px"}}/>
+                </div>
+              </div>
+              <button onClick={createDealer} disabled={dlrLoading||!newDealerName||!newDealerCode} className="bt bp" style={{width:"100%",minHeight:48,fontSize:15,fontWeight:700,opacity:(!newDealerName||!newDealerCode)?0.5:1}}>
+                {dlrLoading ? "Creating..." : "+ Add Dealer"}
+              </button>
+            </div>
+
+            <div style={sectionHead}>{dealers.length} Dealer{dealers.length!==1?"s":""}</div>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {dealers.map(d => {
+                const linked = users.filter(u=>u.dealer_id===d.id);
+                return (
+                  <div key={d.id} style={cardStyle}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                      <div>
+                        <div style={{fontSize:14,fontWeight:700,color:C.ink}}>{d.name}</div>
+                        <div style={{fontSize:12,color:C.stone,marginTop:2}}>Code: {d.code}</div>
+                        {linked.length>0 && <div style={{fontSize:11,color:C.acc,marginTop:4,fontWeight:600}}>{linked.length} user{linked.length!==1?"s":""}: {linked.map(u=>u.full_name||u.email).join(", ")}</div>}
+                        {linked.length===0 && <div style={{fontSize:11,color:C.stone,marginTop:4,fontStyle:"italic"}}>No users linked</div>}
+                      </div>
+                      <button onClick={()=>deleteDealer(d.id,d.name)} style={{background:"none",border:`1px solid ${C.red}`,color:C.red,borderRadius:8,padding:"6px 10px",fontSize:12,fontWeight:600,cursor:"pointer",minHeight:36,flexShrink:0}}>Delete</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // ═══════════════════════════════════════════════════
 // ██ DASHBOARD — Hub Landing Page
@@ -8230,7 +8622,7 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
         {/* Admin access */}
         {profile?.role === "admin" && (
           <div style={{marginTop:16,textAlign:"center"}}>
-            <button onClick={() => onNavigate("estimator")} style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.stone,fontFamily:F.b,textDecoration:"underline"}}>Open Admin Panel →</button>
+            <button onClick={() => onNavigate("admin")} style={{background:C.ink,border:"none",cursor:"pointer",fontSize:14,color:C.gold,fontFamily:F.d,fontWeight:700,padding:"12px 28px",borderRadius:8,letterSpacing:"0.03em"}}>⚙ Admin Dashboard</button>
           </div>
         )}
       </div>
@@ -9948,7 +10340,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   );
 }
 
-function App({user, profile, supabase, onLogout, onBack}){
+function App({user, profile, supabase, onLogout, onBack, onAdmin}){
   const[nm,sNm]=useState("Untitled Project"),[pid,sPid]=useState(uid());
   const[sp,sSp]=useState("White Oak"),[cx,sCx]=useState("Standard");
   const[door,sDoor]=useState("HNVR"),[drwF,sDrwF]=useState("DF-HNVR"),[glaze,sGlaze]=useState("NONE");
@@ -9961,7 +10353,7 @@ function App({user, profile, supabase, onLogout, onBack}){
   const[tf,sTf]=useState("all"),[ntf,sNtf]=useState(null),[mob,sMob]=useState(false);
   const[modOpen,sModOpen]=useState(()=>new Set());
   const[showQuotesList,setShowQuotesList]=useState(false);
-  const[showAdminPanel,setShowAdminPanel]=useState(false);
+  // Admin panel is now a full-page view via onAdmin()
   const[currentQuoteId,setCurrentQuoteId]=useState(null);
   const[versions,setVersions]=useState([]);
   const[showHistory,setShowHistory]=useState(false);
@@ -10276,14 +10668,14 @@ function App({user, profile, supabase, onLogout, onBack}){
         <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>ssCf(true)}>⚙</button>
         {versions.length>0&&<button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>setShowHistory(true)}>📜</button>}
         {onBack&&<button style={{background:"rgba(255,255,255,.12)",color:C.gold,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={onBack}>🏠</button>}
-        {profile?.role==="admin"&&<button style={{background:"rgba(255,255,255,.12)",color:C.gold,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>setShowAdminPanel(true)}>⚙A</button>}
+        {profile?.role==="admin"&&<button style={{background:"rgba(255,255,255,.12)",color:C.gold,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>onAdmin&&onAdmin()}>⚙A</button>}
         <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={onLogout}>Out</button>
       </div>:<div style={{display:"flex",gap:4}}>
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={newP}>+ New</button>
         <button className="bt bp" onClick={save} style={{fontSize:11}}>💾 Save</button>
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowQuotesList(true)}>📂 Quotes</button>
         {versions.length>0&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowHistory(true)}>📜 History</button>}
-        {profile?.role==="admin"&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold}} onClick={()=>setShowAdminPanel(true)}>⚙ Admin</button>}
+        {profile?.role==="admin"&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold}} onClick={()=>onAdmin&&onAdmin()}>⚙ Admin</button>}
         {onBack&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold,fontWeight:600}} onClick={onBack}>🏠 Hub</button>}
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={onLogout}>Sign Out</button>
       </div>}
@@ -11276,7 +11668,7 @@ return(<div style={{marginBottom:5}}>
     {sMg&&<MarginCalc tot={comp.tot} onClose={()=>ssMg(false)}/>}
 
     {showQuotesList&&<QuotesList user={user} profile={profile} onLoadQuote={loadQuoteFromList} onClose={()=>setShowQuotesList(false)}/>}
-    {showAdminPanel&&profile?.role==="admin"&&<AdminPanel supabaseClient={supabase} onClose={()=>setShowAdminPanel(false)}/>}
+    {/* Admin panel now uses full-page AdminDashboard view via onAdmin() */}
 
     {showHistory&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,backdropFilter:"blur(3px)",padding:"14px",overflow:"auto"}}>
       <div style={{background:C.paper,borderRadius:"12px",padding:"20px",width:"100%",maxWidth:"500px",maxHeight:"80vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,0.3)"}}>
