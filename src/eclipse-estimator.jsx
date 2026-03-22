@@ -8350,6 +8350,65 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 
   const generateSamplePdf = async () => {
     if (!activeType) return;
+    const st = sampleTypes.find(s => s.id === activeType);
+
+    // SD 8½×11 outputs on the actual Express Parcel form
+    if (activeType === "sd85") {
+      const { PDFDocument } = await import("pdf-lib");
+      let templateBytes;
+      try {
+        const resp = await fetch("/forms/parcel.pdf");
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        templateBytes = new Uint8Array(await resp.arrayBuffer());
+      } catch(e) { fl("Could not load parcel form template"); return; }
+
+      const doc = await PDFDocument.load(templateBytes);
+      const form = doc.getForm();
+      const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
+      const setCheck = (name) => { try { form.getCheckBox(name).check(); } catch(e) {} };
+
+      // Header fields
+      setText("Business Name", dealerName);
+      setText("Customer #", dealerCode);
+      setText("P.O. Number", "");
+      setText("Job Name", "");
+      setText("Wood Species", sampleSp);
+      setText("Color", sampleColor || "");
+      setText("Upper Door Style", sampleDoor);
+      setText("Lower Door Style", sampleDoor);
+      setText("Drawer Front Style", "");
+      setText("Order Date", new Date().toLocaleDateString());
+      setText("Salesperson/Contact", contactName);
+      setText("Contact Phone", contactPhone);
+      setText("Contact Email", contactEmail);
+      setText("Special Instructions", [
+        sampleEdge ? "Edge: " + sampleEdge : "",
+        sampleCharT && sampleCharT !== "NONE" ? "Char Technique: " + sampleCharT : "",
+        shipAddr ? "Ship To: " + shipAddr : ""
+      ].filter(Boolean).join(" | "));
+
+      // Item line 1: the SD 8½×11
+      setText("Quantity 1", "1");
+      setText("Item Number 1", "SD81/2X11");
+      const fakeItem = { s: "SD81/2X11", t: "A", r: "U2", p: 65, q: 1, len: 0, sqin: 0, sqW: 0, sqH: 0, dc: 0, drc: 0, brot: 0, rbs: false, mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, so: null };
+      const { u: sdPrice } = cp(fakeItem, sampleSp, "Standard", sampleDoor, "DF-HNVR", "5/8-STD");
+      setText("Description 1", "Sample Door 8½×11 — " + sampleSp + " / " + sampleDoor);
+      setText("Price 1", fm(sdPrice));
+
+      form.flatten();
+      const bytes = await doc.save();
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Eclipse-Sample-SD85-${new Date().toISOString().slice(0,10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      fl("Sample door order form downloaded!");
+      return;
+    }
+
+    // All other sample types: generate custom PDF
     const { PDFDocument, rgb, StandardFonts } = await import("pdf-lib");
     const doc = await PDFDocument.create();
     const font = await doc.embedFont(StandardFonts.Helvetica);
@@ -8358,7 +8417,6 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
     let y = 740;
     const ln = (text, x, sz, f) => { page.drawText(text || "", { x, y, size: sz || 11, font: f || font, color: rgb(0.1, 0.09, 0.08) }); y -= (sz || 11) + 6; };
 
-    const st = sampleTypes.find(s => s.id === activeType);
     page.drawText("ECLIPSE CABINETRY", { x: 50, y: 760, size: 20, font: fontB, color: rgb(0.1, 0.09, 0.08) });
     page.drawText("SAMPLE ORDER — " + (st?.title || "").toUpperCase(), { x: 50, y: 740, size: 12, font: fontB, color: rgb(0.72, 0.59, 0.24) });
     page.drawText("Form: " + (st?.code || ""), { x: 420, y: 760, size: 9, font, color: rgb(0.54, 0.49, 0.44) });
@@ -8373,19 +8431,14 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
     if (shipAddr) ln("Ship To: " + shipAddr, 50);
     y -= 10;
 
-    if (activeType === "sd" || activeType === "ffd" || activeType === "sd85") {
+    if (activeType === "sd" || activeType === "ffd") {
       ln("Species: " + sampleSp, 50, 11, fontB);
       ln("Door Style: " + sampleDoor, 50);
       if (sampleColor) ln("Color: " + sampleColor, 50);
       if (sampleEdge) ln("Edge Profile: " + sampleEdge, 50);
       if (sampleCharT && sampleCharT !== "NONE") ln("Character Technique: " + sampleCharT, 50);
       y -= 10;
-      if (activeType === "sd85") {
-        ln("Base Price: $65 + species & construction upcharges", 50, 11, fontB);
-        if (SD_BLOCKED_SP.has(sampleSp)) ln("WARNING: Not available in " + sampleSp, 50, 10);
-      } else {
-        ln("Price: " + (st?.price || ""), 50, 13, fontB);
-      }
+      ln("Price: " + (st?.price || ""), 50, 13, fontB);
     } else {
       ln("Sample Type: " + (blockType === "RLVSB" ? "LVS Block" : "Standard Block"), 50, 11, fontB);
       ln("Order Type: " + orderType, 50);
