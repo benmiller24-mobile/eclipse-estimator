@@ -8199,8 +8199,8 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
     setText("Original Order Number", origOrderNum);
     setText("Previous Warranty Order Number", prevWarranty === "Yes" ? "Yes — see notes" : "");
 
-    // Page 2 — Item List: header + special instructions
-    setText("Special Instructions", warrantyNotes || "");
+    // Page 2 — Item List: header + special instructions (smaller font)
+    try { const siField = form.getTextField("Special Instructions"); siField.setFontSize(7); siField.setText(String(warrantyNotes || "")); } catch(e) {}
 
     // Glaze
     if (wGlaze && wGlaze !== "None") collectX(wGlaze); else collectX("None");
