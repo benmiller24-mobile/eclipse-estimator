@@ -9068,6 +9068,11 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   const [drwF, setDrwF] = useState("DF-HNVR");
   const [cx, setCx] = useState("Standard");
   const [drwBox, setDrwBox] = useState("5/8-STD");
+  const [expGlaze, setExpGlaze] = useState("None");
+  const [expEdge, setExpEdge] = useState("None");
+  const [expCharT, setExpCharT] = useState("NONE");
+  const [expMetro, setExpMetro] = useState("");
+  const [expColor, setExpColor] = useState("");
 
   // Items are now full item objects like the estimator
   const [items, setItems] = useState([]);
@@ -9245,8 +9250,54 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
       setText("Special Instructions", shipAddr || "");
     }
 
-    // Flatten the form so fields look filled in printed form
-    form.flatten();
+    // DDF-specific: fill color, glaze/edge/technique/metro X-marks
+    if (expressType === "ddf") {
+      setText("Color", expColor || "");
+
+      const { PDFName: PN, rgb: RGB } = await import("pdf-lib");
+      const page = doc.getPages()[0];
+      const xRects = [];
+      const collectX = (name) => {
+        try {
+          const btn = form.getButton(name + " ON");
+          const w = btn.acroField.getWidgets()[0];
+          const rect = w.dict.get(PN.of("Rect")).asArray().map(v => v.numberValue);
+          xRects.push(rect);
+        } catch(e) {}
+      };
+
+      // Glaze
+      if (expGlaze && expGlaze !== "None") collectX(expGlaze); else collectX("None");
+      // Edge Profile
+      if (expEdge && expEdge !== "None") {
+        const edgeMap = {"Matching":"Matching"};
+        collectX(edgeMap[expEdge] || expEdge);
+      }
+      // Finish Technique
+      if (expCharT === "Aged" || expCharT === "Aged\u2020") collectX("Aged\u2020");
+      else if (expCharT === "Wearing" || expCharT === "Wearing\u2020") collectX("Wearing\u2020");
+      else if (expCharT === "Sand-through" || expCharT === "Sand-through\u2021") collectX("Sand-through\u2021");
+      // Metro GFD Trim
+      if (expMetro) collectX(expMetro);
+
+      // Remove all buttons so they don't render on top
+      const allFields = form.getFields();
+      for (const f of allFields) {
+        if (f.constructor.name === "PDFButton") form.removeField(f);
+      }
+
+      form.flatten();
+
+      // Draw X marks after flatten
+      for (const [x1, y1, x2, y2] of xRects) {
+        const pad = 3;
+        page.drawLine({ start: {x: x1+pad, y: y1+pad}, end: {x: x2-pad, y: y2-pad}, thickness: 2, color: RGB(0,0,0) });
+        page.drawLine({ start: {x: x1+pad, y: y2-pad}, end: {x: x2-pad, y: y1+pad}, thickness: 2, color: RGB(0,0,0) });
+      }
+    } else {
+      // Parcel & Truck: simple flatten
+      form.flatten();
+    }
 
     const bytes = await doc.save();
     const blob = new Blob([bytes], { type: "application/pdf" });
@@ -9355,6 +9406,13 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
             <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
               <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Order Specifications</div>
               <SpecBar sp={sp} setSp={setSp} cx={cx} setCx={setCx} door={door} setDoor={setDoor} drwF={drwF} setDrwF={setDrwF} drwBox={drwBox} setDrwBox={setDrwBox} mob={mob} labelStyle={labelStyle} fieldStyle={fieldStyle} />
+              {expressType==="ddf"&&<div style={{display:"grid",gridTemplateColumns:mob?"1fr 1fr":"1fr 1fr 1fr 1fr",gap:8,marginTop:10}}>
+                <div><label style={labelStyle}>Finish Color</label><select value={expColor} onChange={e=>setExpColor(e.target.value)} style={fieldStyle}><option value="">-- Select --</option>{(FINISH_COLORS[sp]||[]).map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+                <div><label style={labelStyle}>Glaze</label><select value={expGlaze} onChange={e=>setExpGlaze(e.target.value)} style={fieldStyle}>{["None","Black","Mocha","Van Dyke","Nickel","Caf\u00E9","Slate","Graphite"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+                <div><label style={labelStyle}>Edge Profile</label><select value={expEdge} onChange={e=>setExpEdge(e.target.value)} style={fieldStyle}>{["None","100","150","350","400","750","Matching","B-Alum","S-Alum","3D"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+                <div><label style={labelStyle}>Finish Technique</label><select value={expCharT} onChange={e=>setExpCharT(e.target.value)} style={fieldStyle}>{["NONE","Aged","Wearing","Sand-through"].map(v=><option key={v} value={v}>{v==="NONE"?"None":v}</option>)}</select></div>
+                <div><label style={labelStyle}>Metro GFD Trim</label><select value={expMetro} onChange={e=>setExpMetro(e.target.value)} style={fieldStyle}>{["","Natural Aluminum","Black Aluminum","Matte Brass"].map(v=><option key={v} value={v}>{v||"N/A"}</option>)}</select></div>
+              </div>}
             </div>
 
             {/* Items */}
