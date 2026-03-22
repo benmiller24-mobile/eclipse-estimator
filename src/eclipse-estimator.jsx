@@ -8342,11 +8342,11 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
   const [blockType, setBlockType] = useState("RCSB"); // RCSB or RLVSB
   const [orderType, setOrderType] = useState("Standard"); // Standard or Express
 
-  // Flat sorted list of all unique Eclipse finish colors for dropdown
-  const ALL_COLORS = useMemo(() => {
-    const set = new Set();
-    Object.values(FINISH_COLORS).forEach(arr => arr.forEach(c => set.add(c)));
-    return [...set].sort();
+  // Colors grouped by species for dropdown with optgroups
+  const COLORS_BY_SPECIES = useMemo(() => {
+    return Object.entries(FINISH_COLORS)
+      .map(([species, colors]) => ({ species, colors: [...colors].sort() }))
+      .sort((a, b) => a.species.localeCompare(b.species));
   }, []);
 
   const sampleTypes = [
@@ -8724,7 +8724,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:8}}>
                   {colorSelections.map((c, i) => (
-                    <div key={i}><label style={labelStyle}>Color {i+1}</label><select value={c} onChange={e=>{const n=[...colorSelections];n[i]=e.target.value;setColorSelections(n)}} style={fieldStyle}><option value="">— Select Color —</option>{ALL_COLORS.map(clr=><option key={clr} value={clr}>{clr}</option>)}</select></div>
+                    <div key={i}><label style={labelStyle}>Color {i+1}</label><select value={c} onChange={e=>{const n=[...colorSelections];n[i]=e.target.value;setColorSelections(n)}} style={fieldStyle}><option value="">— Select Color —</option>{COLORS_BY_SPECIES.map(g=><optgroup key={g.species} label={g.species}>{g.colors.map(clr=><option key={g.species+"-"+clr} value={clr}>{clr}</option>)}</optgroup>)}</select></div>
                   ))}
                 </div>
               </div>
