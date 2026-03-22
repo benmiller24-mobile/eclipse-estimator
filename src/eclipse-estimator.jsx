@@ -8105,15 +8105,27 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
   const [shipAddr, setShipAddr] = useState("");
   const [prevWarranty, setPrevWarranty] = useState("No");
   const [warrantyNotes, setWarrantyNotes] = useState("");
-  const [items, setItems] = useState([{ id: uid(), sku: "", desc: "", qty: 1, reason: "", unitPrice: 0, hinge: "" }]);
+  const [items, setItems] = useState([{ id: uid(), sku: "", desc: "", qty: 1, reason: "", unitPrice: 0, hinge: "", cabNum: "" }]);
 
   const [sp, setSp] = useState("White Oak");
   const [door, setDoor] = useState("HNVR");
+  const [lowerDoor, setLowerDoor] = useState("HNVR");
   const [drwF, setDrwF] = useState("DF-HNVR");
   const [cx, setCx] = useState("Standard");
   const [drwBox, setDrwBox] = useState("5/8-STD");
+  const [wColor, setWColor] = useState("");
+  const [wGlaze, setWGlaze] = useState("None");
+  const [wEdge, setWEdge] = useState("None");
+  const [wCharT, setWCharT] = useState("NONE");
+  const [wInterior, setWInterior] = useState("White Laminate");
+  const [wDrawerGuide, setWDrawerGuide] = useState("Blum Tandem Edge");
+  const [wTipOn, setWTipOn] = useState("No");
+  const [wMaterial, setWMaterial] = useState("Particle Board");
+  const [wMetroTrim, setWMetroTrim] = useState("");
+  const [wJobName, setWJobName] = useState("");
+  const [wPO, setWPO] = useState("");
 
-  const addItem = () => setItems(p => [...p, { id: uid(), sku: "", desc: "", qty: 1, reason: "", unitPrice: 0, hinge: "" }]);
+  const addItem = () => setItems(p => [...p, { id: uid(), sku: "", desc: "", qty: 1, reason: "", unitPrice: 0, hinge: "", cabNum: "" }]);
   const removeItem = (id) => setItems(p => p.filter(i => i.id !== id));
   const updateItem = (id, field, val) => setItems(p => p.map(i => i.id === id ? { ...i, [field]: val } : i));
 
@@ -8135,7 +8147,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
     if (!origOrderNum) { fl("Please enter the original order number"); return; }
     if (items.every(i => !i.sku && !i.desc)) { fl("Please add at least one item"); return; }
 
-    const { PDFDocument } = await import("pdf-lib");
+    const { PDFDocument, PDFName: PN, rgb: RGB } = await import("pdf-lib");
 
     let templateBytes;
     try {
@@ -8146,61 +8158,121 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
 
     const doc = await PDFDocument.load(templateBytes);
     const form = doc.getForm();
+    const pages = doc.getPages();
 
     const setText = (name, value) => {
-      try { const f = form.getTextField(name); f.setText(String(value || "")); } catch(e) {}
-    };
-    const setCheck = (name) => {
-      try { const f = form.getCheckBox(name); f.check(); } catch(e) {}
+      try { form.getTextField(name).setText(String(value || "")); } catch(e) {}
     };
 
-    // Fill common header fields
+    // Collect button rects for X marks (page index + coords)
+    const xRects = [];
+    const collectX = (name) => {
+      try {
+        const btn = form.getButton(name + " ON");
+        const w = btn.acroField.getWidgets()[0];
+        const rect = w.dict.get(PN.of("Rect")).asArray().map(v => v.numberValue);
+        const pageRef = w.dict.get(PN.of("P"));
+        let pgIdx = 0;
+        if (pageRef) {
+          for (let i = 0; i < pages.length; i++) {
+            if (pages[i].ref === pageRef) { pgIdx = i; break; }
+          }
+        }
+        xRects.push({ rect, pgIdx });
+      } catch(e) {}
+    };
+
+    // Page 1 — Cover Sheet: Order Information
     setText("Business Name", dealerName);
     setText("Customer #", dealerCode);
-    setText("P.O. Number", "");
-    setText("Job Name", "");
+    setText("P.O. Number", wPO);
+    setText("Job Name", wJobName);
     setText("Wood Species", sp);
-    setText("Color", "");
+    setText("Color", wColor);
     setText("Upper Door Style", door);
-    setText("Lower Door Style", door);
+    setText("Lower Door Style", lowerDoor);
     setText("Drawer Front Style", drwF);
     setText("Order Date", new Date().toLocaleDateString());
     setText("Salesperson/Contact", contactName);
     setText("Contact Phone", contactPhone);
     setText("Contact Email", contactEmail);
-    setText("Special Instructions", warrantyNotes || "");
     setText("Original Order Number", origOrderNum);
     setText("Previous Warranty Order Number", prevWarranty === "Yes" ? "Yes — see notes" : "");
 
-    // Construction type checkbox
-    if (cx === "Standard") setCheck("Standard");
+    // Page 2 — Item List: header + special instructions
+    setText("Special Instructions", warrantyNotes || "");
 
-    // Drawer box type checkbox
-    const drwBoxMap = {
-      "5/8-STD": "⅝\" Hardwood",
-      "3/4-PREM": "¾\" Hardwood",
-      "5/8-SM": "⅝\" Sim. Metal",
-      "LEGRA": "Blum Legrabox"
-    };
-    if (drwBoxMap[drwBox]) setCheck(drwBoxMap[drwBox]);
+    // Glaze
+    if (wGlaze && wGlaze !== "None") collectX(wGlaze); else collectX("None");
 
-    // Previous warranty: Yes 2 / No 2 checkboxes
-    if (prevWarranty === "Yes") setCheck("Yes 2");
-    else setCheck("No 2");
+    // Edge Profile
+    if (wEdge && wEdge !== "None") collectX(wEdge);
+
+    // Drawer Box Type
+    const drwBoxBtnMap = { "5/8-STD": "\u215D\" Hardwood", "3/4-PREM": "\u00BE\" Hardwood", "5/8-SM": "\u215D\" Sim. Metal", "LEGRA": "Blum Legrabox" };
+    if (drwBoxBtnMap[drwBox]) collectX(drwBoxBtnMap[drwBox]);
+
+    // Drawer Guide
+    if (wDrawerGuide === "Blum Tandem Edge") collectX("Blum Tandem Edge");
+    else if (wDrawerGuide === "Blum Tandem Full Extension") collectX("Blum Tandem Full Extension");
+
+    // Tip-On
+    if (wTipOn === "Yes") collectX("Yes"); else collectX("No");
+
+    // Material Type
+    if (wMaterial === "Particle Board") collectX("Particle Board");
+    else collectX("Plywood");
+
+    // Interior Finish
+    if (wInterior === "White Laminate") collectX("White Laminate");
+    else if (wInterior === "Maple Laminate") collectX("Maple Laminate");
+    else if (wInterior === "Natural Linen") collectX("Natural Linen");
+
+    // Construction Type
+    if (cx === "Standard") collectX("Standard");
+    else if (cx === "Mixed") collectX("Mixed");
+    else if (cx === "Wrapped") collectX("Wrapped");
+
+    // Character Technique
+    if (wCharT === "Aged" || wCharT === "Aged\u2020") collectX("Aged\u2020");
+    else if (wCharT === "Wearing" || wCharT === "Wearing\u2020") collectX("Wearing\u2020");
+    else if (wCharT === "Sand-through" || wCharT === "Sand-through\u2021") collectX("Sand-through\u2021");
+
+    // METRO GFD Trim Color
+    if (wMetroTrim === "Natural Aluminum") collectX("Natural Aluminum");
+    else if (wMetroTrim === "Black Aluminum") collectX("Black Aluminum");
+    else if (wMetroTrim === "Matte Brass") collectX("Matte Brass");
+
+    // Previous warranty: Yes 2 / No 2
+    if (prevWarranty === "Yes") collectX("Yes 2"); else collectX("No 2");
 
     // Fill warranty item rows (up to 6)
     const validItems = items.filter(i => i.sku || i.desc);
     validItems.slice(0, 6).forEach((item, idx) => {
       const n = idx + 1;
-      setText("Cabinet Number " + n, "");
+      setText("Cabinet Number " + n, item.cabNum || "");
       setText("Item Number " + n, item.sku || "");
-      setText("Stock Number and Description " + n, (SKU_LABELS[item.sku] || item.sku || item.desc || "") + (item.qty > 1 ? " (×" + item.qty + ")" : ""));
+      setText("Stock Number and Description " + n, (SKU_LABELS[item.sku] || item.sku || item.desc || "") + (item.qty > 1 ? " (\u00D7" + item.qty + ")" : ""));
       setText("Defective Component " + n, item.desc || item.sku || "");
       setText("Reason for Replacement " + n, item.reason || "");
       setText("Hinge(s) " + n, item.hinge || "");
     });
 
+    // Remove all buttons so they don't render on top of X marks
+    const allFields = form.getFields();
+    for (const f of allFields) {
+      if (f.constructor.name === "PDFButton") form.removeField(f);
+    }
+
     form.flatten();
+
+    // Draw X marks after flattening
+    for (const { rect: [x1, y1, x2, y2], pgIdx } of xRects) {
+      const pg = pages[pgIdx] || pages[0];
+      const pad = 3;
+      pg.drawLine({ start: {x: x1+pad, y: y1+pad}, end: {x: x2-pad, y: y2-pad}, thickness: 2, color: RGB(0,0,0) });
+      pg.drawLine({ start: {x: x1+pad, y: y2-pad}, end: {x: x2-pad, y: y1+pad}, thickness: 2, color: RGB(0,0,0) });
+    }
 
     const bytes = await doc.save();
     const blob = new Blob([bytes], { type: "application/pdf" });
@@ -8253,8 +8325,9 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
             <div><label style={labelStyle}>Dealer Number</label><input value={dealerCode} onChange={e=>setDealerCode(e.target.value)} style={fieldStyle} /></div>
             <div><label style={labelStyle}>Contact Name</label><input value={contactName} onChange={e=>setContactName(e.target.value)} style={fieldStyle} /></div>
             <div><label style={labelStyle}>Phone</label><input value={contactPhone} onChange={e=>setContactPhone(e.target.value)} style={fieldStyle} /></div>
-            <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
-            <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Ship-To Address</label><input value={shipAddr} onChange={e=>setShipAddr(e.target.value)} placeholder="Street, City, State, ZIP" style={fieldStyle} /></div>
+            <div><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
+            <div><label style={labelStyle}>PO #</label><input value={wPO} onChange={e=>setWPO(e.target.value)} style={fieldStyle} /></div>
+            <div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Job Name</label><input value={wJobName} onChange={e=>setWJobName(e.target.value)} style={fieldStyle} /></div>
           </div>
         </div>
 
@@ -8262,6 +8335,18 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
         <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
           <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Original Order Specs</div>
           <SpecBar sp={sp} setSp={setSp} cx={cx} setCx={setCx} door={door} setDoor={setDoor} drwF={drwF} setDrwF={setDrwF} drwBox={drwBox} setDrwBox={setDrwBox} mob={mob} labelStyle={labelStyle} fieldStyle={fieldStyle} />
+          <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10,marginTop:10}}>
+            <div><label style={labelStyle}>Lower Door Style</label><input value={lowerDoor} onChange={e=>setLowerDoor(e.target.value)} style={fieldStyle} /></div>
+            <div><label style={labelStyle}>Color</label><input value={wColor} onChange={e=>setWColor(e.target.value)} style={fieldStyle} /></div>
+            <div><label style={labelStyle}>Glaze</label><select value={wGlaze} onChange={e=>setWGlaze(e.target.value)} style={fieldStyle}>{["None","Black","Mocha","Van Dyke","Nickel","Caf\u00E9","Slate","Graphite"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+            <div><label style={labelStyle}>Edge Profile</label><select value={wEdge} onChange={e=>setWEdge(e.target.value)} style={fieldStyle}>{["None","100","150","350","400","750","Match","B-Alum","S-Alum","3D"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+            <div><label style={labelStyle}>Character Technique</label><select value={wCharT} onChange={e=>setWCharT(e.target.value)} style={fieldStyle}>{["NONE","Aged","Wearing","Sand-through"].map(v=><option key={v} value={v}>{v === "NONE" ? "None" : v}</option>)}</select></div>
+            <div><label style={labelStyle}>Drawer Guide</label><select value={wDrawerGuide} onChange={e=>setWDrawerGuide(e.target.value)} style={fieldStyle}>{["Blum Tandem Edge","Blum Tandem Full Extension"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+            <div><label style={labelStyle}>Interior Finish</label><select value={wInterior} onChange={e=>setWInterior(e.target.value)} style={fieldStyle}>{["White Laminate","Maple Laminate","Natural Linen"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+            <div><label style={labelStyle}>Material Type</label><select value={wMaterial} onChange={e=>setWMaterial(e.target.value)} style={fieldStyle}>{["Particle Board","Plywood/Partial Plywood"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+            <div><label style={labelStyle}>Tip-On?</label><select value={wTipOn} onChange={e=>setWTipOn(e.target.value)} style={fieldStyle}>{["No","Yes"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+            <div><label style={labelStyle}>METRO GFD Trim Color</label><select value={wMetroTrim} onChange={e=>setWMetroTrim(e.target.value)} style={fieldStyle}>{["","Natural Aluminum","Black Aluminum","Matte Brass"].map(v=><option key={v} value={v}>{v || "N/A"}</option>)}</select></div>
+          </div>
         </div>
 
         {/* Item List */}
@@ -8273,11 +8358,16 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
           <div style={{fontSize:10,color:C.stone,fontFamily:F.b,marginBottom:10}}>Search by SKU to auto-price from the catalog. All items ship at <strong>$0 warranty</strong>.</div>
           {items.map((item, idx) => (
             <div key={item.id} style={{padding:"10px 12px",background:idx%2===0?C.cream:"transparent",borderRadius:8,marginBottom:6,border:`1px solid ${C.bdr}44`}}>
-              <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"50px 1fr 1fr 32px",gap:8,alignItems:"end"}}>
+              <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"50px 70px 1fr 32px",gap:8,alignItems:"end"}}>
                 <div><label style={labelStyle}>Qty</label><input type="number" min="1" value={item.qty} onChange={e=>updateItem(item.id,"qty",parseInt(e.target.value)||1)} style={{...fieldStyle,textAlign:"center"}} /></div>
+                <div><label style={labelStyle}>Cab #</label><input value={item.cabNum} onChange={e=>updateItem(item.id,"cabNum",e.target.value)} placeholder="" style={fieldStyle} /></div>
                 <div><label style={labelStyle}>SKU (search catalog)</label><SkuSearchInput value={item.sku} sp={sp} cx={cx} door={door} drwF={drwF} drwBox={drwBox} placeholder="Type to search SKU..." onSelect={(cat, unitP) => { setItems(p => p.map(i => i.id === item.id ? { ...i, sku: cat.s, desc: SKU_LABELS[cat.s] || cat.s, unitPrice: unitP } : i)); }} /></div>
-                <div><label style={labelStyle}>Reason</label><input value={item.reason} onChange={e=>updateItem(item.id,"reason",e.target.value)} placeholder="Damaged, wrong size, etc." style={fieldStyle} /></div>
                 <button onClick={()=>removeItem(item.id)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.red,padding:"4px",alignSelf:"end",marginBottom:2}}>&times;</button>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr 120px",gap:8,marginTop:6}}>
+                <div><label style={labelStyle}>Defective Component</label><input value={item.desc} onChange={e=>updateItem(item.id,"desc",e.target.value)} placeholder="e.g. Door, Drawer Front" style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Reason for Replacement</label><input value={item.reason} onChange={e=>updateItem(item.id,"reason",e.target.value)} placeholder="Damaged, wrong size, etc." style={fieldStyle} /></div>
+                <div><label style={labelStyle}>Hinge(s)</label><input value={item.hinge} onChange={e=>updateItem(item.id,"hinge",e.target.value)} placeholder="" style={fieldStyle} /></div>
               </div>
               {item.sku && <div style={{marginTop:6,display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:11,fontFamily:F.m}}>
                 <span style={{color:C.stone}}>{SKU_LABELS[item.sku] || item.sku} × {item.qty}</span>
