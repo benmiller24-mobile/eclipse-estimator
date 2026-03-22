@@ -8502,16 +8502,14 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       const page = doc.getPages()[0];
       const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
 
-      // Draw an X over a button's rect area on the page
-      const xOut = (name) => {
+      // Collect rect coordinates for buttons we need to X out (before removing them)
+      const xRects = [];
+      const collectX = (name) => {
         try {
           const btn = form.getButton(name + " ON");
           const w = btn.acroField.getWidgets()[0];
           const rect = w.dict.get(PN.of("Rect")).asArray().map(v => v.numberValue);
-          const [x1, y1, x2, y2] = rect;
-          const pad = 3;
-          page.drawLine({ start: {x: x1+pad, y: y1+pad}, end: {x: x2-pad, y: y2-pad}, thickness: 2, color: RGB(0,0,0) });
-          page.drawLine({ start: {x: x1+pad, y: y2-pad}, end: {x: x2-pad, y: y1+pad}, thickness: 2, color: RGB(0,0,0) });
+          xRects.push(rect);
         } catch(e) {}
       };
 
@@ -8536,24 +8534,31 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("State", sampleState);
       setText("Zip Code", sampleZip);
 
-      // Glaze — draw X on selected option
-      if (sampleGlaze && sampleGlaze !== "None") xOut(sampleGlaze); else xOut("None");
+      // Collect rects for selections that need an X
+      // Glaze
+      if (sampleGlaze && sampleGlaze !== "None") collectX(sampleGlaze); else collectX("None");
+      // Finish technique
+      if (sampleCharT === "Aged\u2020" || sampleCharT === "Aged") collectX("Aged\u2020");
+      else if (sampleCharT === "Wearing\u2020" || sampleCharT === "Wearing") collectX("Wearing\u2020");
+      else if (sampleCharT === "Sand-through\u2021" || sampleCharT === "Sand-through") collectX("Sand-through\u2021");
+      // Edge profile
+      if (sampleEdge && sampleEdge !== "None") collectX(sampleEdge);
 
-      // Finish technique — draw X on selected option
-      if (sampleCharT === "Aged†" || sampleCharT === "Aged") xOut("Aged\u2020");
-      else if (sampleCharT === "Wearing†" || sampleCharT === "Wearing") xOut("Wearing\u2020");
-      else if (sampleCharT === "Sand-through‡" || sampleCharT === "Sand-through") xOut("Sand-through\u2021");
-
-      // Edge profile — draw X on selected option
-      if (sampleEdge && sampleEdge !== "None") xOut(sampleEdge);
-
-      // Remove all buttons so they don't cover the X marks after flattening
+      // Remove all buttons so they don't render on top
       const allFields = form.getFields();
       for (const f of allFields) {
         if (f.constructor.name === "PDFButton") form.removeField(f);
       }
 
+      // Flatten text fields first
       form.flatten();
+
+      // Now draw X marks on top of everything
+      for (const [x1, y1, x2, y2] of xRects) {
+        const pad = 3;
+        page.drawLine({ start: {x: x1+pad, y: y1+pad}, end: {x: x2-pad, y: y2-pad}, thickness: 2, color: RGB(0,0,0) });
+        page.drawLine({ start: {x: x1+pad, y: y2-pad}, end: {x: x2-pad, y: y1+pad}, thickness: 2, color: RGB(0,0,0) });
+      }
       const bytes = await doc.save();
       const blob = new Blob([bytes], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
