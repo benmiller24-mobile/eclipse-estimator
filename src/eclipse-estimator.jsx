@@ -8463,6 +8463,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
   const [sampleEdge, setSampleEdge] = useState("None");
   const [sampleCharT, setSampleCharT] = useState("NONE");
   const [sampleGlaze, setSampleGlaze] = useState("None");
+  const [samplePanel, setSamplePanel] = useState("Raised");
 
   const [samplePO, setSamplePO] = useState("");
   const [sampleJobName, setSampleJobName] = useState("");
@@ -8552,7 +8553,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("Item Number 1", "SD81/2X11");
       const fakeItem = { s: "SD81/2X11", t: "A", r: "U2", p: 65, q: 1, len: 0, sqin: 0, sqW: 0, sqH: 0, dc: 0, drc: 0, brot: 0, rbs: false, mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, so: null };
       const { u: sdPrice } = cp(fakeItem, sampleSp, "Standard", sampleDoor, "DF-HNVR", "5/8-STD");
-      setText("Description 1", "Sample Door 8½×11 — " + sampleSp + " / " + sampleDoor);
+      setText("Description 1", "Sample Door 8½×11 (" + samplePanel + ") — " + sampleSp + " / " + sampleDoor);
       setText("Price 1", fm(sdPrice));
 
       // X-marks: Glaze
@@ -9005,6 +9006,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
                 <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10}}>
                   <div><label style={labelStyle}>Species</label><input value={sampleSp} onChange={e=>setSampleSp(e.target.value)} style={fieldStyle} /></div>
                   <div><label style={labelStyle}>Door Style</label><input value={sampleDoor} onChange={e=>setSampleDoor(e.target.value)} style={fieldStyle} /></div>
+                  {activeType==="sd85"&&<div><label style={labelStyle}>Panel Type</label><select value={samplePanel} onChange={e=>setSamplePanel(e.target.value)} style={fieldStyle}><option value="Raised">Raised</option><option value="Recessed">Recessed</option></select></div>}
                   <div><label style={labelStyle}>Color / Finish</label><input value={sampleColor} onChange={e=>setSampleColor(e.target.value)} style={fieldStyle} /></div>
                   <div><label style={labelStyle}>Edge Profile</label><select value={sampleEdge} onChange={e=>setSampleEdge(e.target.value)} style={fieldStyle}>{["None","100","150","350","400","750"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
                   <div><label style={labelStyle}>Glaze</label><select value={sampleGlaze} onChange={e=>setSampleGlaze(e.target.value)} style={fieldStyle}>{["None","Black","Mocha","Van Dyke","Nickel","Café","Slate","Graphite"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
