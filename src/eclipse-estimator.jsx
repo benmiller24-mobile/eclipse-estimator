@@ -8342,7 +8342,8 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 
   const sampleTypes = [
     { id: "sd85", icon: "📋", title: "Sample Door 8½×11 (Standard)", price: "$65+", code: "ECL-SD-STD", desc: "8.5 x 11 inch standard sample door — $65 list + species & construction upcharges. Not available in Walnut, Rustic Walnut, Rift White Oak, QS White Oak, or TFL." },
-    { id: "sd", icon: "🚪", title: "Sample Door 12½×15½", price: "$350", code: "ECL-SD", desc: "12.5 x 15.5 inch sample door in your selected species and style" },
+    { id: "sd12std", icon: "🚪", title: "Sample Door 12½×15½ (Standard)", price: "$155+", code: "ECL-SD-STD12", desc: "12.5 x 15.5 inch sample door — standard lead time. $155 list + species & construction upcharges." },
+    { id: "sd", icon: "⚡", title: "Sample Door 12½×15½ (Express)", price: "$350", code: "ECL-SD", desc: "12.5 x 15.5 inch sample door — express 5-day lead time" },
     { id: "ffd", icon: "🗄️", title: "Sample Door & Drawer Front", price: "$475", code: "ECL-FFD", desc: "14.5 x 24 inch pinned sample door and drawer front" },
     { id: "rcbs", icon: "🧱", title: "Color Block Samples", price: "$250/set", code: "ECL-RCBS", desc: "Set of up to 10 replacement color block samples" },
     { id: "rccs", icon: "🎨", title: "Color Chip Samples", price: "Per 10", code: "ECL-RCCS", desc: "Set of up to 10 replacement color chip samples" },
@@ -8402,6 +8403,57 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       const a = document.createElement("a");
       a.href = url;
       a.download = `Eclipse-Sample-SD85-${new Date().toISOString().slice(0,10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      fl("Sample door order form downloaded!");
+      return;
+    }
+
+    // SD 12½×15½ Standard outputs on the actual Eclipse Sample Door Form
+    if (activeType === "sd12std") {
+      const { PDFDocument } = await import("pdf-lib");
+      let templateBytes;
+      try {
+        const resp = await fetch("/forms/sample-door.pdf");
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        templateBytes = new Uint8Array(await resp.arrayBuffer());
+      } catch(e) { fl("Could not load sample door form template"); return; }
+
+      const doc = await PDFDocument.load(templateBytes);
+      const form = doc.getForm();
+      const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
+      const setCheck = (name) => { try { form.getCheckBox(name).check(); } catch(e) {} };
+
+      // Header fields
+      setText("Business Name", dealerName);
+      setText("Customer #", dealerCode);
+      setText("P.O. Number", "");
+      setText("Job Name", "");
+      setText("Wood Species", sampleSp);
+      setText("Color", sampleColor || "");
+      setText("Door Style", sampleDoor);
+      setText("Order Date", new Date().toLocaleDateString());
+      setText("Salesperson/Contact", contactName);
+      setText("Contact Phone", contactPhone);
+      setText("Contact Email", contactEmail);
+
+      // Ship-to fields
+      setText("Company Name", dealerName);
+      setText("Contact Name", contactName);
+      setText("Street Address", shipAddr);
+
+      // Character technique checkboxes
+      if (sampleCharT === "Aged†" || sampleCharT === "Aged") setCheck("Aged†");
+      if (sampleCharT === "Wearing†" || sampleCharT === "Wearing") setCheck("Wearing†");
+      if (sampleCharT === "Sand-through‡" || sampleCharT === "Sand-through") setCheck("Sand-through‡");
+
+      form.flatten();
+      const bytes = await doc.save();
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Eclipse-Sample-SD12-STD-${new Date().toISOString().slice(0,10)}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
       fl("Sample door order form downloaded!");
@@ -8530,7 +8582,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
             </div>
 
             {/* Specs — varies by type */}
-            {(activeType === "sd" || activeType === "ffd" || activeType === "sd85") && (
+            {(activeType === "sd" || activeType === "ffd" || activeType === "sd85" || activeType === "sd12std") && (
               <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
                 <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Sample Specifications</div>
                 {activeType==="sd85"&&SD_BLOCKED_SP.has(sampleSp)&&<div style={{background:"#fef2f2",border:"1px solid #ef444444",borderRadius:8,padding:"10px 14px",marginBottom:12,fontSize:11,color:"#991b1b",fontFamily:F.b,lineHeight:1.5}}>
