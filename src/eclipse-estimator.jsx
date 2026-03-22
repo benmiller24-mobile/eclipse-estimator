@@ -8512,60 +8512,101 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       return;
     }
 
-    // All other sample types: generate custom PDF
-    const { PDFDocument, rgb, StandardFonts } = await import("pdf-lib");
-    const doc = await PDFDocument.create();
-    const font = await doc.embedFont(StandardFonts.Helvetica);
-    const fontB = await doc.embedFont(StandardFonts.HelveticaBold);
-    const page = doc.addPage([612, 792]);
-    let y = 740;
-    const ln = (text, x, sz, f) => { page.drawText(text || "", { x, y, size: sz || 11, font: f || font, color: rgb(0.1, 0.09, 0.08) }); y -= (sz || 11) + 6; };
+    // Color Block Samples — fill actual Eclipse Replacement Color Block Samples Form
+    if (activeType === "rcbs") {
+      const { PDFDocument } = await import("pdf-lib");
+      let templateBytes;
+      try {
+        const resp = await fetch("/forms/color-blocks.pdf");
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        templateBytes = new Uint8Array(await resp.arrayBuffer());
+      } catch(e) { fl("Could not load color block form template"); return; }
 
-    page.drawText("ECLIPSE CABINETRY", { x: 50, y: 760, size: 20, font: fontB, color: rgb(0.1, 0.09, 0.08) });
-    page.drawText("SAMPLE ORDER — " + (st?.title || "").toUpperCase(), { x: 50, y: 740, size: 12, font: fontB, color: rgb(0.72, 0.59, 0.24) });
-    page.drawText("Form: " + (st?.code || ""), { x: 420, y: 760, size: 9, font, color: rgb(0.54, 0.49, 0.44) });
-    y = 710;
+      const doc = await PDFDocument.load(templateBytes);
+      const form = doc.getForm();
+      const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
+      const setCheck = (name) => { try { form.getCheckBox(name).check(); } catch(e) {} };
 
-    page.drawRectangle({ x: 50, y, width: 512, height: 1, color: rgb(0.9, 0.87, 0.84) });
-    y -= 20;
+      setText("Business Name", dealerName);
+      setText("Customer #", dealerCode);
+      setText("P.O. Number", "");
+      setText("Job Name", "");
+      setText("Order Date", new Date().toLocaleDateString());
+      setText("Salesperson/Contact", contactName);
+      setText("Contact Phone", contactPhone);
+      setText("Contact Email", contactEmail);
+      setText("Special Instructions", shipAddr ? "Ship To: " + shipAddr : "");
 
-    ln("Dealer: " + dealerName + (dealerCode ? " (" + dealerCode + ")" : ""), 50);
-    ln("Contact: " + contactName + (contactPhone ? " | " + contactPhone : ""), 50);
-    ln("Email: " + contactEmail, 50);
-    if (shipAddr) ln("Ship To: " + shipAddr, 50);
-    y -= 10;
+      // Block type checkbox
+      if (blockType === "RLVSB") setCheck("RLVSB = $250 List (Per 10)");
+      else setCheck("RCSB = $250 List (Per 10)");
 
-    if (activeType === "sd" || activeType === "ffd") {
-      ln("Species: " + sampleSp, 50, 11, fontB);
-      ln("Door Style: " + sampleDoor, 50);
-      if (sampleColor) ln("Color: " + sampleColor, 50);
-      if (sampleEdge) ln("Edge Profile: " + sampleEdge, 50);
-      if (sampleCharT && sampleCharT !== "NONE") ln("Character Technique: " + sampleCharT, 50);
-      y -= 10;
-      ln("Price: " + (st?.price || ""), 50, 13, fontB);
-    } else {
-      ln("Sample Type: " + (blockType === "RLVSB" ? "LVS Block" : "Standard Block"), 50, 11, fontB);
-      ln("Order Type: " + orderType, 50);
-      y -= 6;
-      ln("Color Selections:", 50, 11, fontB);
-      colorSelections.forEach((c, i) => {
-        if (c) ln("  " + (i + 1) + ". " + c, 55, 10);
-      });
-      y -= 10;
-      ln("Price: " + (st?.price || ""), 50, 13, fontB);
+      // Order type checkbox
+      if (orderType === "Express") setCheck("Express Order");
+      else setCheck("Standard Order");
+
+      // Color selections 1-10
+      colorSelections.forEach((c, i) => { if (c) setText("Color " + (i + 1), c); });
+
+      form.flatten();
+      const bytes = await doc.save();
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url;
+      a.download = `Eclipse-Color-Blocks-${new Date().toISOString().slice(0,10)}.pdf`;
+      a.click(); URL.revokeObjectURL(url);
+      fl("Color block sample form downloaded!");
+      return;
     }
 
-    page.drawText("Generated " + new Date().toLocaleDateString(), { x: 50, y: 50, size: 8, font, color: rgb(0.54, 0.49, 0.44) });
+    // Color Chip Samples — fill actual Eclipse Replacement Color Chip Samples Form
+    if (activeType === "rccs") {
+      const { PDFDocument } = await import("pdf-lib");
+      let templateBytes;
+      try {
+        const resp = await fetch("/forms/color-chips.pdf");
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        templateBytes = new Uint8Array(await resp.arrayBuffer());
+      } catch(e) { fl("Could not load color chip form template"); return; }
 
-    const bytes = await doc.save();
-    const blob = new Blob([bytes], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Eclipse-Sample-${st?.code || "ORD"}-${new Date().toISOString().slice(0,10)}.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
-    fl("Sample order PDF downloaded!");
+      const doc = await PDFDocument.load(templateBytes);
+      const form = doc.getForm();
+      const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
+      const setCheck = (name) => { try { form.getCheckBox(name).check(); } catch(e) {} };
+
+      setText("Business Name", dealerName);
+      setText("Customer #", dealerCode);
+      setText("P.O. Number", "");
+      setText("Job Name", "");
+      setText("Order Date", new Date().toLocaleDateString());
+      setText("Salesperson/Contact", contactName);
+      setText("Contact Phone", contactPhone);
+      setText("Contact Email", contactEmail);
+      setText("Special Instructions", shipAddr ? "Ship To: " + shipAddr : "");
+
+      // Chip type checkbox
+      setCheck("CCS10 = List Price (Per 10)");
+
+      // Order type checkbox
+      if (orderType === "Express") setCheck("Express Order");
+      else setCheck("Standard Order");
+
+      // Color selections 1-10
+      colorSelections.forEach((c, i) => { if (c) setText("Color " + (i + 1), c); });
+
+      form.flatten();
+      const bytes = await doc.save();
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url;
+      a.download = `Eclipse-Color-Chips-${new Date().toISOString().slice(0,10)}.pdf`;
+      a.click(); URL.revokeObjectURL(url);
+      fl("Color chip sample form downloaded!");
+      return;
+    }
+
+    // Fallback for any remaining sample types
+    fl("Unknown sample type");
   };
 
   const fieldStyle = { width: "100%", padding: "8px 10px", border: `1px solid ${C.bdr}`, borderRadius: 6, fontSize: 12, fontFamily: F.b, background: C.cream, outline: "none" };
