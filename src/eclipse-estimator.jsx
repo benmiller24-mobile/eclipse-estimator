@@ -8512,7 +8512,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 
     // SD 8½×11 outputs on the actual Express Parcel form
     if (activeType === "sd85") {
-      const { PDFDocument } = await import("pdf-lib");
+      const { PDFDocument, PDFName: PN, rgb: RGB } = await import("pdf-lib");
       let templateBytes;
       try {
         const resp = await fetch("/forms/parcel.pdf");
@@ -8522,14 +8522,25 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 
       const doc = await PDFDocument.load(templateBytes);
       const form = doc.getForm();
+      const page = doc.getPages()[0];
       const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
-      const setCheck = (name) => { try { form.getCheckBox(name).check(); } catch(e) {} };
+
+      // Collect X-mark rects
+      const xRects = [];
+      const collectX = (name) => {
+        try {
+          const btn = form.getButton(name + " ON");
+          const w = btn.acroField.getWidgets()[0];
+          const rect = w.dict.get(PN.of("Rect")).asArray().map(v => v.numberValue);
+          xRects.push(rect);
+        } catch(e) {}
+      };
 
       // Header fields
       setText("Business Name", dealerName);
       setText("Customer #", dealerCode);
-      setText("P.O. Number", "");
-      setText("Job Name", "");
+      setText("P.O. Number", samplePO || "");
+      setText("Job Name", sampleJobName || "");
       setText("Wood Species", sampleSp);
       setText("Color", sampleColor || "");
       setText("Upper Door Style", sampleDoor);
@@ -8539,11 +8550,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("Salesperson/Contact", contactName);
       setText("Contact Phone", contactPhone);
       setText("Contact Email", contactEmail);
-      setText("Special Instructions", [
-        sampleEdge ? "Edge: " + sampleEdge : "",
-        sampleCharT && sampleCharT !== "NONE" ? "Char Technique: " + sampleCharT : "",
-        shipAddr ? "Ship To: " + shipAddr : ""
-      ].filter(Boolean).join(" | "));
+      setText("Special Instructions", shipAddr ? "Ship To: " + shipAddr : "");
 
       // Item line 1: the SD 8½×11
       setText("Quantity 1", "1");
@@ -8553,7 +8560,25 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("Description 1", "Sample Door 8½×11 — " + sampleSp + " / " + sampleDoor);
       setText("Price 1", fm(sdPrice));
 
+      // X-marks: Glaze
+      if (sampleGlaze && sampleGlaze !== "None") collectX(sampleGlaze); else collectX("None");
+      // Edge Profile
+      if (sampleEdge && sampleEdge !== "None") collectX(sampleEdge);
+      // Finish Technique
+      if (sampleCharT === "Aged" || sampleCharT === "Aged\u2020") collectX("Aged\u2020");
+      else if (sampleCharT === "Wearing" || sampleCharT === "Wearing\u2020") collectX("Wearing\u2020");
+      else if (sampleCharT === "Sand-through" || sampleCharT === "Sand-through\u2021") collectX("Sand-through\u2021");
+
+      // Remove all buttons, flatten, draw X marks
+      const allFields85 = form.getFields();
+      for (const f of allFields85) { if (f.constructor.name === "PDFButton") form.removeField(f); }
       form.flatten();
+      for (const [x1, y1, x2, y2] of xRects) {
+        const pad = 3;
+        page.drawLine({ start: {x: x1+pad, y: y1+pad}, end: {x: x2-pad, y: y2-pad}, thickness: 2, color: RGB(0,0,0) });
+        page.drawLine({ start: {x: x1+pad, y: y2-pad}, end: {x: x2-pad, y: y1+pad}, thickness: 2, color: RGB(0,0,0) });
+      }
+
       const bytes = await doc.save();
       const blob = new Blob([bytes], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
@@ -8568,7 +8593,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 
     // SD 12½×15½ Standard outputs on the actual Eclipse Sample Door Form
     if (activeType === "sd12std") {
-      const { PDFDocument } = await import("pdf-lib");
+      const { PDFDocument, PDFName: PN, rgb: RGB } = await import("pdf-lib");
       let templateBytes;
       try {
         const resp = await fetch("/forms/sample-door.pdf");
@@ -8578,8 +8603,18 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 
       const doc = await PDFDocument.load(templateBytes);
       const form = doc.getForm();
+      const page = doc.getPages()[0];
       const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
-      const setCheck = (name) => { try { form.getCheckBox(name).check(); } catch(e) {} };
+
+      const xRects = [];
+      const collectX = (name) => {
+        try {
+          const btn = form.getButton(name + " ON");
+          const w = btn.acroField.getWidgets()[0];
+          const rect = w.dict.get(PN.of("Rect")).asArray().map(v => v.numberValue);
+          xRects.push(rect);
+        } catch(e) {}
+      };
 
       // Header fields
       setText("Business Name", dealerName);
@@ -8602,12 +8637,25 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("State", sampleState);
       setText("Zip Code", sampleZip);
 
-      // Character technique checkboxes
-      if (sampleCharT === "Aged†" || sampleCharT === "Aged") setCheck("Aged†");
-      if (sampleCharT === "Wearing†" || sampleCharT === "Wearing") setCheck("Wearing†");
-      if (sampleCharT === "Sand-through‡" || sampleCharT === "Sand-through") setCheck("Sand-through‡");
+      // X-marks: Glaze
+      if (sampleGlaze && sampleGlaze !== "None") collectX(sampleGlaze); else collectX("None");
+      // Edge Profile
+      if (sampleEdge && sampleEdge !== "None") collectX(sampleEdge);
+      // Finish Technique
+      if (sampleCharT === "Aged" || sampleCharT === "Aged\u2020") collectX("Aged\u2020");
+      else if (sampleCharT === "Wearing" || sampleCharT === "Wearing\u2020") collectX("Wearing\u2020");
+      else if (sampleCharT === "Sand-through" || sampleCharT === "Sand-through\u2021") collectX("Sand-through\u2021");
 
+      // Remove all buttons, flatten, draw X marks
+      const allFields12 = form.getFields();
+      for (const f of allFields12) { if (f.constructor.name === "PDFButton") form.removeField(f); }
       form.flatten();
+      for (const [x1, y1, x2, y2] of xRects) {
+        const pad = 3;
+        page.drawLine({ start: {x: x1+pad, y: y1+pad}, end: {x: x2-pad, y: y2-pad}, thickness: 2, color: RGB(0,0,0) });
+        page.drawLine({ start: {x: x1+pad, y: y2-pad}, end: {x: x2-pad, y: y1+pad}, thickness: 2, color: RGB(0,0,0) });
+      }
+
       const bytes = await doc.save();
       const blob = new Blob([bytes], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
@@ -8707,7 +8755,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 
     // Sample Door & Drawer Front 14½×24 outputs on the actual Eclipse Sample Door & Drawer Front Form
     if (activeType === "ffd") {
-      const { PDFDocument } = await import("pdf-lib");
+      const { PDFDocument, PDFName: PN, rgb: RGB } = await import("pdf-lib");
       let templateBytes;
       try {
         const resp = await fetch("/forms/sample-ddf.pdf");
@@ -8717,8 +8765,18 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 
       const doc = await PDFDocument.load(templateBytes);
       const form = doc.getForm();
+      const page = doc.getPages()[0];
       const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
-      const setCheck = (name) => { try { form.getCheckBox(name).check(); } catch(e) {} };
+
+      const xRects = [];
+      const collectX = (name) => {
+        try {
+          const btn = form.getButton(name + " ON");
+          const w = btn.acroField.getWidgets()[0];
+          const rect = w.dict.get(PN.of("Rect")).asArray().map(v => v.numberValue);
+          xRects.push(rect);
+        } catch(e) {}
+      };
 
       // Header fields
       setText("Business Name", dealerName);
@@ -8742,12 +8800,25 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("State", sampleState);
       setText("Zip Code", sampleZip);
 
-      // Character technique checkboxes
-      if (sampleCharT === "Aged†" || sampleCharT === "Aged") setCheck("Aged†");
-      if (sampleCharT === "Wearing†" || sampleCharT === "Wearing") setCheck("Wearing†");
-      if (sampleCharT === "Sand-through‡" || sampleCharT === "Sand-through") setCheck("Sand-through‡");
+      // X-marks: Glaze
+      if (sampleGlaze && sampleGlaze !== "None") collectX(sampleGlaze); else collectX("None");
+      // Edge Profile
+      if (sampleEdge && sampleEdge !== "None") collectX(sampleEdge);
+      // Finish Technique
+      if (sampleCharT === "Aged" || sampleCharT === "Aged\u2020") collectX("Aged\u2020");
+      else if (sampleCharT === "Wearing" || sampleCharT === "Wearing\u2020") collectX("Wearing\u2020");
+      else if (sampleCharT === "Sand-through" || sampleCharT === "Sand-through\u2021") collectX("Sand-through\u2021");
 
+      // Remove all buttons, flatten, draw X marks
+      const allFieldsFfd = form.getFields();
+      for (const f of allFieldsFfd) { if (f.constructor.name === "PDFButton") form.removeField(f); }
       form.flatten();
+      for (const [x1, y1, x2, y2] of xRects) {
+        const pad = 3;
+        page.drawLine({ start: {x: x1+pad, y: y1+pad}, end: {x: x2-pad, y: y2-pad}, thickness: 2, color: RGB(0,0,0) });
+        page.drawLine({ start: {x: x1+pad, y: y2-pad}, end: {x: x2-pad, y: y1+pad}, thickness: 2, color: RGB(0,0,0) });
+      }
+
       const bytes = await doc.save();
       const blob = new Blob([bytes], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
