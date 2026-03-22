@@ -9591,7 +9591,7 @@ function App({user, profile, supabase, onLogout, onBack}){
   const[color,sColor]=useState("");
   const[mat,sMat]=useState("PB"),[intF,sIntF]=useState("STD-MAPL"),[drwBox,sDrwBox]=useState("5/8-STD");
   const[items,sItems]=useState([]),[vw,sVw]=useState("list");
-  const[sMg,ssMg]=useState(false),[sSv,ssSv]=useState(false),[sAd,ssAd]=useState(false),[sCf,ssCf]=useState(false);
+  const[sMg,ssMg]=useState(false),[sAd,ssAd]=useState(false),[sCf,ssCf]=useState(false);
   const[dealerMult,setDealerMult]=useState(profile?.discount_pct||0);
   const[tf,sTf]=useState("all"),[ntf,sNtf]=useState(null),[mob,sMob]=useState(false);
   const[modOpen,sModOpen]=useState(()=>new Set());
@@ -9903,8 +9903,7 @@ function App({user, profile, supabase, onLogout, onBack}){
       <div style={{display:"flex",gap:4}}>
         {!mob&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={newP}>+ New</button>}
         <button className="bt bp" onClick={save} style={{fontSize:11}}>💾{!mob&&" Save"}</button>
-        <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>ssSv(true)}>📂</button>
-        <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowQuotesList(true)}>📋{!mob&&" Quotes"}</button>
+        <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowQuotesList(true)}>📂{!mob&&" Quotes"}</button>
         {versions.length>0&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowHistory(true)}>📜{!mob&&" History"}</button>}
         {profile?.role==="admin"&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold}} onClick={()=>setShowAdminPanel(true)}>⚙{!mob&&" Admin"}</button>}
         {onBack&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold,fontWeight:600}} onClick={onBack}>🏠{!mob&&" Hub"}</button>}
@@ -10853,20 +10852,6 @@ return(<div style={{marginBottom:5}}>
       </div>
     </div></div></>}
 
-    {sSv&&<div className="mbg" onClick={()=>ssSv(false)}><div className="c" style={{width:"min(400px,92vw)",maxHeight:"78vh",display:"flex",flexDirection:"column"}} onClick={e=>e.stopPropagation()}>
-      <div className="ch">📂 Saved<button onClick={()=>ssSv(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>✕</button></div>
-      <div style={{flex:1,overflowY:"auto"}}>
-        {ldS().length===0?<div style={{textAlign:"center",color:C.stone,padding:28,fontSize:12.5}}>No saved estimates</div>:
-          ldS().map(e=><div key={e.id} style={{padding:"10px 14px",borderBottom:`1px solid ${C.bdr}`,display:"flex",alignItems:"center",gap:8}}>
-            <div style={{flex:1,minWidth:0}}>
-              <div style={{fontWeight:600,fontSize:12.5,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.nm}</div>
-              <div style={{fontSize:10.5,color:C.stone}}>{e.n||0} items · {fm(e.tot||0)} · {new Date(e.at).toLocaleDateString()}</div>
-            </div>
-            <button className="bt bp" style={{fontSize:10.5,padding:"5px 10px",minHeight:30}} onClick={()=>{load(e);ssSv(false)}}>Load</button>
-          </div>)
-        }
-      </div>
-    </div></div>}
 
     {sMg&&<MarginCalc tot={comp.tot} onClose={()=>ssMg(false)}/>}
 
