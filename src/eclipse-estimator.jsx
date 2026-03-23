@@ -7090,9 +7090,10 @@ const INTERIOR=[
   {v:"STD-MAPL",l:"Std Maple Laminate Interior"},{v:"LINEN",l:"Linen Interior (No Charge)"},{v:"FI",l:"Finished Interior (+25%)"},
 ];
 const DRW_BOX=[
-  {v:"5/8-STD",l:'5/8" Std Hdwd Dovetail / Blum Tandem Edge'},{v:"5/8-SM",l:'5/8" Simulated Metal / Blum Tandem Edge'},
-  {v:"3/4-PREM",l:'3/4" Premium Dovetail (+$57/drw)'},{v:"LEGRA",l:'Legrabox SS (+$372/drw)'},
-  {v:"5/8-STD-FE",l:'5/8" Std Hdwd / Blum Full Ext (+$72/drw)'},{v:"5/8-SM-FE",l:'5/8" Sim Metal / Blum Full Ext (+$72/drw)'},
+  {v:"5/8-STD",l:'5/8" Std Hdwd Dovetail / Blum Tandem Edge',price:0},{v:"5/8-SM",l:'5/8" Simulated Metal / Blum Tandem Edge',price:0},
+  {v:"3/4-PREM",l:'3/4" Premium Dovetail (+$57/drw)',price:57},{v:"LEGRA",l:'Legrabox SS (+$372/drw)',price:372},
+  {v:"5/8-STD-FE",l:'5/8" Std Hdwd / Blum Full Ext (+$72/drw)',price:72},{v:"5/8-SM-FE",l:'5/8" Sim Metal / Blum Full Ext (+$72/drw)',price:72},
+  {v:"3/4-PREM-FE",l:'3/4" Premium Dovetail / Blum Full Ext (+$129/drw)',price:129},
 ];
 
 const CSS=`@import url('https://fonts.googleapis.com/css2?family=Questrial&family=Assistant:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
@@ -8995,7 +8996,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
     if (wEdge && wEdge !== "None") collectX(wEdge);
 
     // Drawer Box Type
-    const drwBoxBtnMap = { "5/8-STD": "\u215D\" Hardwood", "3/4-PREM": "\u00BE\" Hardwood", "5/8-SM": "\u215D\" Sim. Metal", "LEGRA": "Blum Legrabox" };
+    const drwBoxBtnMap = { "5/8-STD": "\u215D\" Hardwood", "3/4-PREM": "\u00BE\" Hardwood", "3/4-PREM-FE": "\u00BE\" Hardwood", "5/8-SM": "\u215D\" Sim. Metal", "5/8-STD-FE": "\u215D\" Hardwood", "5/8-SM-FE": "\u215D\" Sim. Metal", "LEGRA": "Blum Legrabox" };
     if (drwBoxBtnMap[drwBox]) collectX(drwBoxBtnMap[drwBox]);
 
     // Drawer Guide
@@ -10079,7 +10080,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
     if (cx === "Standard") collectX("Standard");
     else if (cx === "Plywood") collectX("Plywood");
     // Drawer Box / Guide
-    const drwBoxXMap = {"5/8-STD":"\u215D\" Hardwood","3/4-PREM":"\u00BE\" Hardwood","5/8-SM":"\u215D\" Sim. Metal","LEGRA":"Blum Legrabox"};
+    const drwBoxXMap = {"5/8-STD":"\u215D\" Hardwood","3/4-PREM":"\u00BE\" Hardwood","3/4-PREM-FE":"\u00BE\" Hardwood","5/8-SM":"\u215D\" Sim. Metal","5/8-STD-FE":"\u215D\" Hardwood","5/8-SM-FE":"\u215D\" Sim. Metal","LEGRA":"Blum Legrabox"};
     if (drwBoxXMap[drwBox]) collectX(drwBoxXMap[drwBox]);
 
     // Remove all buttons so they don't render on top
@@ -10722,7 +10723,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         // Edge Profile
         if(edgePro&&edgePro!=="None")collectX(edgePro);
         // Drawer Box
-        const dbMap={"5/8-STD":"\u215D\" Hardwood","3/4-PREM":"\u00BE\" Hardwood","5/8-SM":"\u215D\" Sim. Metal","5/8-STD-FE":"\u215D\" Hardwood","5/8-SM-FE":"\u215D\" Sim. Metal","LEGRA":"Blum Legrabox"};
+        const dbMap={"5/8-STD":"\u215D\" Hardwood","3/4-PREM":"\u00BE\" Hardwood","3/4-PREM-FE":"\u00BE\" Hardwood","5/8-SM":"\u215D\" Sim. Metal","5/8-STD-FE":"\u215D\" Hardwood","5/8-SM-FE":"\u215D\" Sim. Metal","LEGRA":"Blum Legrabox"};
         if(dbMap[drwBox])collectX(dbMap[drwBox]);
         // Drawer Guide
         if(!drwBox.includes("FE")&&drwBox!=="LEGRA")collectX("Blum Tandem Edge");
