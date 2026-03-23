@@ -10492,6 +10492,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
   const[highlight,sHL]=useState("NONE"),[charT1,sCT1]=useState("NONE"),[charT2,sCT2]=useState("NONE");
   const[color,sColor]=useState("");
   const[mat,sMat]=useState("PB"),[intF,sIntF]=useState("STD-MAPL"),[drwBox,sDrwBox]=useState("5/8-STD");
+  const[edgePro,sEdgePro]=useState("None");
   const[items,sItems]=useState([]),[vw,sVw]=useState("list");
   const[sMg,ssMg]=useState(false),[sAd,ssAd]=useState(false),[sCf,ssCf]=useState(false);
   const[dealerMult,setDealerMult]=useState(profile?.discount_pct||0);
@@ -10519,8 +10520,8 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         let tot=0;items.forEach(it=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);tot+=total+mcRaw*(1+plyPct/100)*it.q});
         const lastVersion=versions[versions.length-1];const meaningfulChange=!lastVersion||items.length!==lastVersion.items||Math.abs(tot-lastVersion.total)/Math.max(1,lastVersion.total)>0.05;
         let newVersions=versions;
-        if(meaningfulChange){newVersions=[...versions,{at:new Date().toISOString(),items:items.length,total:tot,snapshot:{nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items}}].slice(-10);}
-        const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,versions:newVersions};
+        if(meaningfulChange){newVersions=[...versions,{at:new Date().toISOString(),items:items.length,total:tot,snapshot:{nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,edgePro,items}}].slice(-10);}
+        const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,edgePro,items,versions:newVersions};
         if(currentQuoteId){
           await supabase.from("quotes").update({name:nm,data:stateData,updated_at:new Date().toISOString()}).eq("id",currentQuoteId);
           if(meaningfulChange)setVersions(newVersions);
@@ -10531,7 +10532,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
       }catch(e){console.error("Auto-save error:",e)}
     },2000);
     return()=>clearTimeout(t);
-  },[nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,currentQuoteId,supabase,user,versions]);
+  },[nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,edgePro,items,currentQuoteId,supabase,user,versions]);
 
   // ── Start fresh new order on login — user loads saved orders manually ──
   useEffect(()=>{
@@ -10539,7 +10540,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
     setCurrentQuoteId(null);setVersions([]);sPid(uid());sNm("Untitled Project");
     sSp("White Oak");sCx("Standard");sDoor("HNVR");sDrwF("DF-HNVR");
     sGlaze("NONE");sHL("NONE");sCT1("NONE");sCT2("NONE");
-    sMat("PB");sIntF("STD-MAPL");sDrwBox("5/8-STD");sItems([]);sColor("");
+    sMat("PB");sIntF("STD-MAPL");sDrwBox("5/8-STD");sEdgePro("None");sItems([]);sColor("");
   },[supabase,user]);
 
   // ── Load a specific quote from the quotes list ──
@@ -10555,7 +10556,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         if(d.door)sDoor(d.door);if(d.drwF)sDrwF(d.drwF);if(d.glaze)sGlaze(d.glaze);
         if(d.highlight)sHL(d.highlight);if(d.charT1)sCT1(d.charT1);if(d.charT2)sCT2(d.charT2);
         if(d.color!==undefined)sColor(d.color);if(d.mat)sMat(d.mat);if(d.intF)sIntF(d.intF);
-        if(d.drwBox)sDrwBox(d.drwBox);if(d.items)sItems(d.items);
+        if(d.drwBox)sDrwBox(d.drwBox);if(d.edgePro)sEdgePro(d.edgePro);if(d.items)sItems(d.items);
         setShowQuotesList(false);
         fl("Quote loaded");
       }
@@ -10713,7 +10714,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         ["Black","Mocha","Van Dyke","Nickel"].forEach(g=>setCB(`${g} ON`,glazeMap[glaze]===g));
         ["Graphite","Café","Slate"].forEach(h=>setCB(`${h} ON`,hlMap[highlight]===h));
         setCB("None ON",!glaze&&!highlight);
-        ["100","150","350","400","750","Matching"].forEach(e=>setCB(`${e} ON`,e==="750"));
+        ["100","150","350","400","750","Matching","B-Alum","S-Alum","3D"].forEach(e=>setCB(`${e} ON`,e===(edgePro==="None"?"":edgePro)));
         const dbMap={"5/8-STD":"⅝\" Hardwood","3/4-STD":"¾\" Hardwood","5/8-SM":"⅝\" Sim. Metal","5/8-FE":"⅝\" Hardwood","3/4-FE":"¾\" Hardwood","LB":"Blum Legrabox"};
         ["⅝\" Hardwood","¾\" Hardwood","⅝\" Sim. Metal","Blum Legrabox"].forEach(d=>setCB(`${d} ON`,dbMap[drwBox]===d));
         setCB("Blum Tandem Edge ON",!drwBox.includes("FE")&&drwBox!=="LB");
@@ -10927,6 +10928,9 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
               </select></div>
               <div><label className="lb">Drawer Box / Guide</label><select className="sel" value={drwBox} onChange={e=>sDrwBox(e.target.value)}>
                 {DRW_BOX.map(d=><option key={d.v} value={d.v}>{d.l}</option>)}
+              </select></div>
+              <div><label className="lb">Edge Profile</label><select className="sel" value={edgePro} onChange={e=>sEdgePro(e.target.value)}>
+                {["None","100","150","350","400","750","Matching","B-Alum","S-Alum","3D"].map(v=><option key={v} value={v}>{v}</option>)}
               </select></div>
             </div>
             <div style={{marginTop:6,fontSize:10.5,color:C.stone}}>Effective multiplier: ×{((1+spp/100)*(1+cxp/100)).toFixed(3)}{mat==="PLY"?" (plywood)":""}<Tip text={`Species ${sp} (${spp>=0?"+":""}${spp}%) × Construction ${cx} (${cxp>=0?"+":""}${cxp}%) applied to all base cabinet prices`}/></div>
@@ -11859,6 +11863,7 @@ return(<div style={{marginBottom:5}}>
         <div><label className="lb">Material / Construction</label><select className="sel" value={mat} onChange={e=>{sMat(e.target.value);sCx(e.target.value==="PLY"?"Plywood":"Standard")}}>{MATERIAL.map(m=><option key={m.v} value={m.v}>{m.l}</option>)}</select></div>
         <div><label className="lb">Interior</label><select className="sel" value={intF} onChange={e=>{sIntF(e.target.value);if(e.target.value==="LINEN")sItems(p=>p.map(it=>({...it,fe:""})))}}>{INTERIOR.map(i=><option key={i.v} value={i.v}>{i.l}</option>)}</select></div>
         <div><label className="lb">Drawer Box / Guide</label><select className="sel" value={drwBox} onChange={e=>sDrwBox(e.target.value)}>{DRW_BOX.map(d=><option key={d.v} value={d.v}>{d.l}</option>)}</select></div>
+        <div><label className="lb">Edge Profile</label><select className="sel" value={edgePro} onChange={e=>sEdgePro(e.target.value)}>{["None","100","150","350","400","750","Matching","B-Alum","S-Alum","3D"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
         <div style={{fontSize:10.5,color:C.stone}}>Effective: ×{((1+spp/100)*(1+cxp/100)).toFixed(3)}</div>
       </div>
     </div></div></>}
@@ -11883,7 +11888,7 @@ return(<div style={{marginBottom:5}}>
                   <div style={{fontSize:"13px",fontWeight:"600",color:C.ink}}>{new Date(v.at).toLocaleString()}</div>
                   <div style={{fontSize:"11px",color:C.stone,marginTop:"2px"}}>{v.items} items · {fm(v.total)}</div>
                 </div>
-                <button className="bt bp" onClick={()=>{if(v.snapshot){const s=v.snapshot;sNm(s.nm);sPid(s.pid);sSp(s.sp);sCx(s.cx);sDoor(s.door);sDrwF(s.drwF);sGlaze(s.glaze);sHL(s.highlight);sCT1(s.charT1);sCT2(s.charT2);sColor(s.color);sMat(s.mat);sIntF(s.intF);sDrwBox(s.drwBox);sItems(s.items);setShowHistory(false);fl("Restored version");}}} style={{fontSize:10.5,padding:"5px 10px"}}>Restore</button>
+                <button className="bt bp" onClick={()=>{if(v.snapshot){const s=v.snapshot;sNm(s.nm);sPid(s.pid);sSp(s.sp);sCx(s.cx);sDoor(s.door);sDrwF(s.drwF);sGlaze(s.glaze);sHL(s.highlight);sCT1(s.charT1);sCT2(s.charT2);sColor(s.color);sMat(s.mat);sIntF(s.intF);sDrwBox(s.drwBox);if(s.edgePro)sEdgePro(s.edgePro);sItems(s.items);setShowHistory(false);fl("Restored version");}}} style={{fontSize:10.5,padding:"5px 10px"}}>Restore</button>
               </div>
             </div>))
           }
