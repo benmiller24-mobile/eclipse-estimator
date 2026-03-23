@@ -10693,11 +10693,15 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
           return{description:`${it.s}${it.ds?` (${it.ds})`:""}`+(iM?` ${it.len}ft`:"")+(isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":"")+ovenTag+modStr,qty:String(it.q),finishedEnd:it.fe==="B"?"Both":it.fe||"",hinge:it.hng||"",price:`$${Math.round(total).toLocaleString()}`};
         });
         const zoneTot=zoneItems.reduce((s,it)=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);return s+total+mcRaw*(1+plyPct/100)*it.q},0);
+        const { PDFName: PN, rgb: RGB } = await import("pdf-lib");
         const pdfBytes=Uint8Array.from(atob(BLANK_ORDER_FORM_B64),c=>c.charCodeAt(0));
         const pdfDoc=await PDFDocument.load(pdfBytes,{ignoreEncryption:true});
         const form=pdfDoc.getForm();
+        const pages=pdfDoc.getPages();
         const setTF=(name,val)=>{try{form.getTextField(name).setText(val||"");}catch(e){}};
-        const setCB=(name,on)=>{try{const f=form.getCheckBox(name);on?f.check():f.uncheck();}catch(e){}};
+        // Collect X-mark rectangles (same approach as warranty/express/sample forms)
+        const xRects=[];
+        const collectX=(name)=>{try{const btn=form.getButton(name+" ON");const w=btn.acroField.getWidgets()[0];const rect=w.dict.get(PN.of("Rect")).asArray().map(v=>v.numberValue);const pageRef=w.dict.get(PN.of("P"));let pgIdx=0;if(pageRef){for(let i=0;i<pages.length;i++){if(pages[i].ref===pageRef){pgIdx=i;break;}}}xRects.push({rect,pgIdx});}catch(e){}};
         setTF("Wood Species",sp);
         setTF("Color",color||"");
         setTF("Upper Door Style",door);
@@ -10709,26 +10713,33 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         setTF("Job Name",nm||"");
         setTF("Contact Email",user?.email||"");
         setTF("Contact Phone",profile?.phone||"");
+        // Glaze / Highlight
         const glazeMap={"BLK-GL":"Black","MCH-GL":"Mocha","VDK-GL":"Van Dyke","NKL-GL":"Nickel"};
         const hlMap={"GRPH-HL":"Graphite","CAFE-HL":"Café","SLATE-HL":"Slate"};
-        ["Black","Mocha","Van Dyke","Nickel"].forEach(g=>setCB(`${g} ON`,glazeMap[glaze]===g));
-        ["Graphite","Café","Slate"].forEach(h=>setCB(`${h} ON`,hlMap[highlight]===h));
-        setCB("None ON",!glaze&&!highlight);
-        ["100","150","350","400","750","Matching","B-Alum","S-Alum","3D"].forEach(e=>setCB(`${e} ON`,e===(edgePro==="None"?"":edgePro)));
-        const dbMap={"5/8-STD":"⅝\" Hardwood","3/4-STD":"¾\" Hardwood","5/8-SM":"⅝\" Sim. Metal","5/8-FE":"⅝\" Hardwood","3/4-FE":"¾\" Hardwood","LB":"Blum Legrabox"};
-        ["⅝\" Hardwood","¾\" Hardwood","⅝\" Sim. Metal","Blum Legrabox"].forEach(d=>setCB(`${d} ON`,dbMap[drwBox]===d));
-        setCB("Blum Tandem Edge ON",!drwBox.includes("FE")&&drwBox!=="LB");
-        setCB("Blum Tandem Full Extension ON",drwBox.includes("FE"));
-        setCB("Yes ON",false);setCB("No ON",true);
-        setCB("Particle Board ON",mat!=="PLY");
-        setCB("Plywood ON",mat==="PLY");
-        const intMap={"WL":"White Laminate","ML":"Maple Laminate","NL":"Natural Linen"};
-        ["White Laminate","Maple Laminate","Natural Linen"].forEach(i=>setCB(`${i} ON`,intMap[intF]===i));
-        setCB("Standard ON",true);
-        if(charT1){const ctMap={"aged":"Aged†","wearing":"Wearing†","sand":"Sand-through‡"};
-          Object.entries(ctMap).forEach(([k,v])=>setCB(`${v} ON`,charT1.toLowerCase().includes(k)||charT2?.toLowerCase().includes(k)));
-        }
-        setCB("New ON",true);setCB("Remodel ON",false);
+        if(glazeMap[glaze])collectX(glazeMap[glaze]);
+        if(hlMap[highlight])collectX(hlMap[highlight]);
+        if(!glazeMap[glaze]&&!hlMap[highlight])collectX("None");
+        // Edge Profile
+        if(edgePro&&edgePro!=="None")collectX(edgePro);
+        // Drawer Box
+        const dbMap={"5/8-STD":"\u215D\" Hardwood","3/4-PREM":"\u00BE\" Hardwood","5/8-SM":"\u215D\" Sim. Metal","5/8-STD-FE":"\u215D\" Hardwood","5/8-SM-FE":"\u215D\" Sim. Metal","LEGRA":"Blum Legrabox"};
+        if(dbMap[drwBox])collectX(dbMap[drwBox]);
+        // Drawer Guide
+        if(!drwBox.includes("FE")&&drwBox!=="LEGRA")collectX("Blum Tandem Edge");
+        else if(drwBox.includes("FE"))collectX("Blum Tandem Full Extension");
+        // Tip-On
+        collectX("No");
+        // Material
+        if(mat==="PLY")collectX("Plywood");else collectX("Particle Board");
+        // Interior Finish
+        const intMap={"STD-MAPL":"Maple Laminate","LINEN":"Natural Linen","FI":"Maple Laminate"};
+        if(intMap[intF])collectX(intMap[intF]);else collectX("Maple Laminate");
+        // Construction
+        collectX("Standard");
+        // Character Technique
+        if(charT1&&charT1!=="NONE"){const ctMap={"aged":"Aged\u2020","wearing":"Wearing\u2020","sand":"Sand-through\u2021"};Object.entries(ctMap).forEach(([k,v])=>{if(charT1.toLowerCase().includes(k)||charT2?.toLowerCase().includes(k))collectX(v);});}
+        // New/Remodel
+        collectX("New");
         const itemsToShow=Math.min(orderItems.length,59);
         const totalItemPages=Math.ceil(orderItems.length/20)||1;
         setTF("Number of Pages In Order",String(totalItemPages));
@@ -10748,7 +10759,11 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         setTF(`Description ${totalLine}`,"LIST PRICE TOTAL");
         setTF(`Price ${totalLine}`,`$${Math.round(zoneTot).toLocaleString()}`);
         setTF("Page Number 1","1");setTF("Page Number 2","2");setTF("Page Number 3","3");
+        // Remove button fields before flattening (they served as position markers for X-marks)
+        const allFields=form.getFields();for(const f of allFields){if(f.constructor.name==="PDFButton")form.removeField(f);}
         form.flatten();
+        // Draw X marks after flattening
+        for(const{rect:[x1,y1,x2,y2],pgIdx}of xRects){const pg=pages[pgIdx]||pages[0];const pad=3;pg.drawLine({start:{x:x1+pad,y:y1+pad},end:{x:x2-pad,y:y2-pad},thickness:2,color:RGB(0,0,0)});pg.drawLine({start:{x:x1+pad,y:y2-pad},end:{x:x2-pad,y:y1+pad},thickness:2,color:RGB(0,0,0)});}
         
         // Append oven spec form pages for oven items in this zone
         const ovenItems=zoneItems.filter(it=>isOven(it)&&it.ovenSpec&&Object.keys(it.ovenSpec).length>0);
