@@ -8996,7 +8996,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
     if (wEdge && wEdge !== "None") collectX(wEdge);
 
     // Drawer Box Type
-    const drwBoxBtnMap = { "5/8-STD": "\u215D\" Hardwood", "3/4-PREM": "\u00BE\" Hardwood", "3/4-PREM-FE": "\u00BE\" Hardwood", "5/8-SM": "\u215D\" Sim. Metal", "5/8-STD-FE": "\u215D\" Hardwood", "5/8-SM-FE": "\u215D\" Sim. Metal", "LEGRA": "Blum Legrabox" };
+    const drwBoxBtnMap = { "5/8-STD": "\u215D\u201D Hardwood", "3/4-PREM": "\u00BE\u201D Hardwood", "3/4-PREM-FE": "\u00BE\u201D Hardwood", "5/8-SM": "\u215D\u201D Sim. Metal", "5/8-STD-FE": "\u215D\u201D Hardwood", "5/8-SM-FE": "\u215D\u201D Sim. Metal", "LEGRA": "Blum Legrabox" };
     if (drwBoxBtnMap[drwBox]) collectX(drwBoxBtnMap[drwBox]);
 
     // Drawer Guide
@@ -10080,7 +10080,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
     if (cx === "Standard") collectX("Standard");
     else if (cx === "Plywood") collectX("Plywood");
     // Drawer Box / Guide
-    const drwBoxXMap = {"5/8-STD":"\u215D\" Hardwood","3/4-PREM":"\u00BE\" Hardwood","3/4-PREM-FE":"\u00BE\" Hardwood","5/8-SM":"\u215D\" Sim. Metal","5/8-STD-FE":"\u215D\" Hardwood","5/8-SM-FE":"\u215D\" Sim. Metal","LEGRA":"Blum Legrabox"};
+    const drwBoxXMap = {"5/8-STD":"\u215D\u201D Hardwood","3/4-PREM":"\u00BE\u201D Hardwood","3/4-PREM-FE":"\u00BE\u201D Hardwood","5/8-SM":"\u215D\u201D Sim. Metal","5/8-STD-FE":"\u215D\u201D Hardwood","5/8-SM-FE":"\u215D\u201D Sim. Metal","LEGRA":"Blum Legrabox"};
     if (drwBoxXMap[drwBox]) collectX(drwBoxXMap[drwBox]);
 
     // Remove all buttons so they don't render on top
@@ -10723,7 +10723,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         // Edge Profile
         if(edgePro&&edgePro!=="None")collectX(edgePro);
         // Drawer Box
-        const dbMap={"5/8-STD":"\u215D\" Hardwood","3/4-PREM":"\u00BE\" Hardwood","3/4-PREM-FE":"\u00BE\" Hardwood","5/8-SM":"\u215D\" Sim. Metal","5/8-STD-FE":"\u215D\" Hardwood","5/8-SM-FE":"\u215D\" Sim. Metal","LEGRA":"Blum Legrabox"};
+        const dbMap={"5/8-STD":"\u215D\u201D Hardwood","3/4-PREM":"\u00BE\u201D Hardwood","3/4-PREM-FE":"\u00BE\u201D Hardwood","5/8-SM":"\u215D\u201D Sim. Metal","5/8-STD-FE":"\u215D\u201D Hardwood","5/8-SM-FE":"\u215D\u201D Sim. Metal","LEGRA":"Blum Legrabox"};
         if(dbMap[drwBox])collectX(dbMap[drwBox]);
         // Drawer Guide
         if(!drwBox.includes("FE")&&drwBox!=="LEGRA")collectX("Blum Tandem Edge");
