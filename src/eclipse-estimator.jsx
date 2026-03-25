@@ -1011,6 +1011,12 @@ RW33|429|E11|W
 RW33-27|625|E11|W
 RW33-30|685|E11|W
 RW36|459|E11|W
+RW3621|595|E11|W
+RW3624|661|E11|W
+RW3627|717|E11|W
+RW3630|773|E11|W
+RW3633|829|E11|W
+RW3636|885|E11|W
 RW36-27|655|E11|W
 RW36-30|715|E11|W
 RW37|482|E11|W
@@ -1734,13 +1740,37 @@ RH56CH 61|1174|G49|A
 RH56CH 67|1220|G49|A
 RH56CH 73|1266|G49|A
 RH57 31|4294|G50|A
+RH57 31(24)|4294|G50|A
+RH57 31(30)|4294|G50|A
+RH57 31(36)|4294|G50|A
 RH57 37|4444|G50|A
+RH57 37(24)|4444|G50|A
+RH57 37(30)|4444|G50|A
+RH57 37(36)|4444|G50|A
 RH57 43|4594|G50|A
+RH57 43(24)|4594|G50|A
+RH57 43(30)|4594|G50|A
+RH57 43(36)|4594|G50|A
 RH57 49|4744|G50|A
+RH57 49(24)|4744|G50|A
+RH57 49(30)|4744|G50|A
+RH57 49(36)|4744|G50|A
 RH57 55|4894|G50|A
+RH57 55(24)|4894|G50|A
+RH57 55(30)|4894|G50|A
+RH57 55(36)|4894|G50|A
 RH57 61|5044|G50|A
+RH57 61(24)|5044|G50|A
+RH57 61(30)|5044|G50|A
+RH57 61(36)|5044|G50|A
 RH57 67|5194|G50|A
+RH57 67(24)|5194|G50|A
+RH57 67(30)|5194|G50|A
+RH57 67(36)|5194|G50|A
 RH57 73|5344|G50|A
+RH57 73(24)|5344|G50|A
+RH57 73(30)|5344|G50|A
+RH57 73(36)|5344|G50|A
 RH58 30|3895|G51|A
 RH58 36|4047|G51|A
 RH58 42|4092|G51|A
@@ -2783,6 +2813,9 @@ O27-30|1523|L15|T
 O30|1406|L15|T
 O30-27|1547|L15|T
 O30-30|1607|L15|T
+O3093|1505|L15|T
+O3093-27|1538|L15|T
+O3093-30|1571|L15|T
 O33|1475|L15|T
 O33-27|1623|L15|T
 O36|1551|L15|T
@@ -6406,6 +6439,7 @@ FM-1|21|T6|M
 FM-2|21|T6|M
 FM-3|21|T6|M
 RCM3|17.39|T7|M
+3/4TK|11.07|T5|M
 SD81/2X11|65|U2|A
 SD121/2151/2|155|U2|A
 ADCSN|31|U3|A
@@ -6576,7 +6610,7 @@ const isBCF=(s)=>s==="BCF";
 const BCF_NOTE="• Door frame for use on front of glass front beverage coolers\n• Cut for glass will be filled with trim of same wood species\n• BCF available in Cherry, Maple, Red Oak, Select American Poplar, Hickory & Alder & are solid wood construction. No vertical or horizontal grain orientation available. Solid wood color tones may vary from veneer doors.\n• BCF will match those of the lower cabinet door style of adjoining components\n• Lower door style required if not ordered with adjoining components.\n• BCF with painted finishes as Metro will be MDF\n• Available up to 24\" wide and 80\" tall. Specify width and height when ordering\n• Custom rail widths available on all except mitered door styles\n• No custom grooving, notching, or drilling available";
 const CO_NOTE="• Column overlays are sent loose and must be field installed to cabinets\n• Column overlays are matching finish hardwood and attached to a 3\" wide hardwood filler\n• Pricing is per linear inch for each individual column\n• Plinth blocks are 3\" wide by 2 1/2\" tall at top and bottom (Except for use with flush toe kick)\n• Flush toe kick columns have a 6 1/2\" tall plinth block on bottom\n• Column overlays may also be applied to 3\" × 3\" angle fillers, 3\" columns and 3\" end panels\n• Column overlays will cause frameless overlay doors to bump plinth block when opened past 90°\n• Column overlays may also necessitate special counter tops when used with base cabinets\n• Width and depth modifications not available\n• Spindle modifications not available\n• Plinth blocks width modifications not available\n• Custom height of plinth blocks is available for $400 list Upcharge per column\n• Plinth blocks only available on top and bottom of column overlays\n• Column overlay may be ordered unassembled, must specify wall, base, or utility height, sold in complete sets only, field miter and assembly required\n• Column overlays may be ordered in a different color than the cabinet. Contact customer service for price and availability\n• Not available in: TFL, Reconstituted White Oak, Reconstituted Walnut, HPL & PV, Acrylic";
 let CO_DRAWING_B64=null;async function load_CO_DRAWING_B64(){if(!CO_DRAWING_B64){const m=await import("./pdf-co-drawing.js");CO_DRAWING_B64=m.default;}return CO_DRAWING_B64;};
-const SKU_LABELS={"LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts","CUSTOM":"Custom Quote","REF":"Custom Refrigerator Panel","DP":"Dishwasher Panel","BCFTA":"Bev Center Front (Natural Aluminum)","BCFTBL":"Bev Center Front (Matte Black Aluminum)","BCFTMB":"Bev Center Front (Matte Brass)","BCF":"Beverage Center Front","COS":"Column Overlay — Smooth","COF":"Column Overlay — Fluted","COR":"Column Overlay — Rope","SD81/2X11":"Sample Door 8½×11 (Standard)","SD121/2151/2":"Sample Door 12½×15½","CM 8 1/2 x 11":"Color Match Sample 8½×11","CM 12 1/2 x 15 1/2":"Color Match Sample 12½×15½"};
+const SKU_LABELS={"W2436-2D":"Wall 24x36 Two-Door (see W24-2D36)","RW3624":"Refrigerator Wall 36x24","RW36":"Refrigerator Wall 36","RH57":"Range Hood 57\" Width","O3093":"Oven Cabinet 30x93","3/4TK":"3/4 Toe Kick Moulding","WBC33":"Wall Blind Corner 33","LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts","CUSTOM":"Custom Quote","REF":"Custom Refrigerator Panel","DP":"Dishwasher Panel","BCFTA":"Bev Center Front (Natural Aluminum)","BCFTBL":"Bev Center Front (Matte Black Aluminum)","BCFTMB":"Bev Center Front (Matte Brass)","BCF":"Beverage Center Front","COS":"Column Overlay — Smooth","COF":"Column Overlay — Fluted","COR":"Column Overlay — Rope","SD81/2X11":"Sample Door 8½×11 (Standard)","SD121/2151/2":"Sample Door 12½×15½","CM 8 1/2 x 11":"Color Match Sample 8½×11","CM 12 1/2 x 15 1/2":"Color Match Sample 12½×15½"};
 const isCustom=(s)=>s==="CUSTOM";
 
 // ── Oven Cutout Spec Forms ──
@@ -6838,9 +6872,9 @@ const CABINET_MODS=[
   {code:"FTK",label:"Flush Toe Kick",price:89,unit:"/face",types:["B","V","C","D","T"],group:"Toe Kick",input:"qty",max:4,excGroup:"tk"},
   {code:"NTK",label:"No Toe Kick (box reduced 4\")",price:89,unit:"/cab",types:["B","V","C","D","T"],group:"Toe Kick",input:"check",excGroup:"tk"},
   {code:"RCK",label:"Custom Recessed Toe Kick",price:146,unit:"/side",types:["B","V","C","D","T"],group:"Toe Kick",input:"side",excGroup:"tk"},
-  {code:"FWBA",label:"Fill Wall Blind Area",price:146,unit:"/cab",types:["W"],group:"Blind Area",input:"check",skuMatch:/BL|BC/i},
-  {code:"FBBA",label:"Fill Base Blind Area",price:232,unit:"/cab",types:["B"],group:"Blind Area",input:"check",skuMatch:/BL|BC/i},
-  {code:"FDS",label:"Upgrade to Full Depth Shelves",price:89,unit:"/cab",types:["B","V","C","D","T"],group:"Shelves & ROT",input:"check"},
+  {code:"FWBA",label:"Fill Wall Blind Area",price:146,unit:"/cab",types:["W"],group:"Blind Area",input:"check",skuMatch:/BL|BC|WBC/i},
+  {code:"FBBA",label:"Fill Base Blind Area",price:232,unit:"/cab",types:["B"],group:"Blind Area",input:"check",skuMatch:/BL|BC|BBC/i},
+  {code:"FDS",label:"Upgrade to Full Depth Shelves",price:89,unit:"/cab",types:["B","V","C","D","T","W"],group:"Shelves & ROT",input:"check"},
   {code:"CROT",label:"Custom Height ROT (4\" & 7\")",price:42,unit:"/ROT",types:["B","V","C","D","T"],group:"Shelves & ROT",input:"qty",max:10},
   {code:"FHD",label:"Full Height Door",price:0,unit:"",types:["B","V","C","D","T","W"],group:"Door Mods",input:"check"},
   {code:"SEND_LOOSE",label:"Ship Doors/Drawer Fronts Loose",price:100,unit:"/ea",types:["B","V","C","D","T","W"],group:"Door Mods",input:"qty",max:20},
@@ -6868,7 +6902,8 @@ const CABINET_MODS=[
   {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/cab",types:["W"],group:"Lighting Prep",input:"check"},
   {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/shelf",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^FLS$/},
   {code:"FLED_FEP",label:"LED Lighting Prep — Flush End Panel",price:60,unit:"/panel",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^F(WEP|BEP|VEP|VTEP|REP)/},
-  {code:"FF_TOP",label:"False Front Top (removes top drawer)",price:100,unit:"/cab",types:["B","V","C","D","T"],group:"Other",input:"check"},
+  {code:"PFG",label:"Prep for Glass (door prep)",price:0,unit:"/door",types:["B","V","C","D","T","W"],group:"Door Mods",input:"check"},
+{code:"FF_TOP",label:"False Front Top (removes top drawer)",price:100,unit:"/cab",types:["B","V","C","D","T"],group:"Other",input:"check"},
   // Aventos Top Hinge Modifications (E3) — Wall cabinets only
   {code:"AVENTOS_HK",label:"Aventos HK Stay Lift Door",price:435,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
   {code:"AVENTOS_HKSD",label:"Aventos HK w/ Servo-Drive",price:1695,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
@@ -9872,6 +9907,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
   const [contactEmail, setContactEmail] = useState(profile?.email || "");
   const [shipAddr, setShipAddr] = useState("");
   const [poNumber, setPoNumber] = useState("");
+const [poLocation, setPoLocation] = useState("");
   // Truck ship-to fields
   const [shipCompany, setShipCompany] = useState("");
   const [shipContact, setShipContact] = useState("");
@@ -9985,6 +10021,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
     setText("Business Name", dealerName);
     setText("Customer #", dealerCode);
     setText("P.O. Number", poNumber);
+setText("P.O. Location", poLocation);
     setText("Job Name", ""); // not captured in current UI
     setText("Wood Species", sp);
     setText("Color", ""); // not captured separately
@@ -10185,6 +10222,7 @@ function ExpressPartsOrder({user, profile, supabase, onLogout, onBack}) {
                 <div><label style={labelStyle}>Phone</label><input value={contactPhone} onChange={e=>setContactPhone(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>Email</label><input value={contactEmail} onChange={e=>setContactEmail(e.target.value)} style={fieldStyle} /></div>
                 <div><label style={labelStyle}>PO Number</label><input value={poNumber} onChange={e=>setPoNumber(e.target.value)} style={fieldStyle} /></div>
+<div><label style={labelStyle}>PO Location</label><input value={poLocation} onChange={e=>setPoLocation(e.target.value)} style={fieldStyle} placeholder="Location" /></div>
                 {expressType!=="truck"&&<div style={{gridColumn:mob?"":"1 / -1"}}><label style={labelStyle}>Ship-To Address *</label><input value={shipAddr} onChange={e=>setShipAddr(e.target.value)} placeholder="Street, City, State, ZIP" style={{...fieldStyle,...(!shipAddr?{borderColor:"#f59e0b",background:"#fffbeb"}:{})}} /></div>}
               </div>
             </div>
