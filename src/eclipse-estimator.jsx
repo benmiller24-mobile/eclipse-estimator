@@ -6258,238 +6258,238 @@ WFC3(43-96)-15|971|S9|A
 WFC3(43-96)-15-CL|1351|S9|A
 WFC6(12-42)-15-CL|1078|S9|A
 WFC6(43-96)-15-CL|1351|S9|A
-F3102|170|S11|A
-F3102-Fluted|370|S11|A
-F3108|170|S11|A
-F3108-Fluted|370|S11|A
-F3114|170|S11|A
-F3114-Fluted|370|S11|A
-F326 1/2|65|S11|A
-F326 1/2-Fluted|265|S11|A
-F330|65|S11|A
-F330-Fluted|265|S11|A
-F333|65|S11|A
-F333-Fluted|265|S11|A
-F334 1/2|65|S11|A
-F334 1/2-Fluted|265|S11|A
-F336|73|S11|A
-F336-Fluted|273|S11|A
-F339|77|S11|A
-F339-Fluted|277|S11|A
-F342|81|S11|A
-F342-Fluted|281|S11|A
-F345|90|S11|A
-F345-Fluted|290|S11|A
-F348|90|S11|A
-F348-Fluted|290|S11|A
-F351|99|S11|A
-F351-Fluted|299|S11|A
-F354|99|S11|A
-F354-Fluted|299|S11|A
-F357|108|S11|A
-F357-Fluted|308|S11|A
-F360|108|S11|A
-F360-Fluted|308|S11|A
-F363|117|S11|A
-F363-Fluted|317|S11|A
-F366|117|S11|A
-F366-Fluted|317|S11|A
-F369|123|S11|A
-F369-Fluted|323|S11|A
-F372|123|S11|A
-F372-Fluted|323|S11|A
-F375|126|S11|A
-F375-Fluted|326|S11|A
-F378|126|S11|A
-F378-Fluted|326|S11|A
-F380|128|S11|A
-F380-Fluted|328|S11|A
-F384|128|S11|A
-F384-Fluted|328|S11|A
-F386|133|S11|A
-F386-Fluted|333|S11|A
-F387|133|S11|A
-F387-Fluted|333|S11|A
-F390|133|S11|A
-F390-Fluted|333|S11|A
-F392|136|S11|A
-F392-Fluted|336|S11|A
-F393|136|S11|A
-F393-Fluted|336|S11|A
-F396|136|S11|A
-F396-Fluted|336|S11|A
-F4 1/4 102|200|S11|A
-F4 1/4 102-Fluted|400|S11|A
-F4 1/4 108|200|S11|A
-F4 1/4 108-Fluted|400|S11|A
-F4 1/4 114|200|S11|A
-F4 1/4 114-Fluted|400|S11|A
-F4 1/4 26 1/2|89|S11|A
-F4 1/4 26 1/2-Fluted|289|S11|A
-F4 1/4 30|89|S11|A
-F4 1/4 30-Fluted|289|S11|A
-F4 1/4 33|89|S11|A
-F4 1/4 33-Fluted|289|S11|A
-F4 1/4 34 1/2|89|S11|A
-F4 1/4 34 1/2-Fluted|289|S11|A
-F4 1/4 36|96|S11|A
-F4 1/4 36-Fluted|296|S11|A
-F4 1/4 39|100|S11|A
-F4 1/4 39-Fluted|300|S11|A
-F4 1/4 42|104|S11|A
-F4 1/4 42-Fluted|304|S11|A
-F4 1/4 45|113|S11|A
-F4 1/4 45-Fluted|313|S11|A
-F4 1/4 48|113|S11|A
-F4 1/4 48-Fluted|313|S11|A
-F4 1/4 51|122|S11|A
-F4 1/4 51-Fluted|322|S11|A
-F4 1/4 54|122|S11|A
-F4 1/4 54-Fluted|322|S11|A
-F4 1/4 57|131|S11|A
-F4 1/4 57-Fluted|331|S11|A
-F4 1/4 60|131|S11|A
-F4 1/4 60-Fluted|331|S11|A
-F4 1/4 63|140|S11|A
-F4 1/4 63-Fluted|340|S11|A
-F4 1/4 66|140|S11|A
-F4 1/4 66-Fluted|340|S11|A
-F4 1/4 69|146|S11|A
-F4 1/4 69-Fluted|346|S11|A
-F4 1/4 72|146|S11|A
-F4 1/4 72-Fluted|346|S11|A
-F4 1/4 75|149|S11|A
-F4 1/4 75-Fluted|349|S11|A
-F4 1/4 78|149|S11|A
-F4 1/4 78-Fluted|349|S11|A
-F4 1/4 80|152|S11|A
-F4 1/4 80-Fluted|352|S11|A
-F4 1/4 84|152|S11|A
-F4 1/4 84-Fluted|352|S11|A
-F4 1/4 86|157|S11|A
-F4 1/4 86-Fluted|357|S11|A
-F4 1/4 87|157|S11|A
-F4 1/4 87-Fluted|357|S11|A
-F4 1/4 90|157|S11|A
-F4 1/4 90-Fluted|357|S11|A
-F4 1/4 92|160|S11|A
-F4 1/4 92-Fluted|360|S11|A
-F4 1/4 93|160|S11|A
-F4 1/4 93-Fluted|360|S11|A
-F4 1/4 96|160|S11|A
-F4 1/4 96-Fluted|360|S11|A
-F6102|204|S11|A
-F6102-Fluted|404|S11|A
-F6108|204|S11|A
-F6108-Fluted|404|S11|A
-F6114|204|S11|A
-F6114-Fluted|404|S11|A
-F626 1/2|104|S11|A
-F626 1/2-Fluted|304|S11|A
-F630|104|S11|A
-F630-Fluted|304|S11|A
-F633|104|S11|A
-F633-Fluted|304|S11|A
-F634 1/2|104|S11|A
-F634 1/2-Fluted|304|S11|A
-F636|108|S11|A
-F636-Fluted|308|S11|A
-F639|110|S11|A
-F639-Fluted|310|S11|A
-F642|111|S11|A
-F642-Fluted|311|S11|A
-F645|119|S11|A
-F645-Fluted|319|S11|A
-F648|119|S11|A
-F648-Fluted|319|S11|A
-F651|127|S11|A
-F651-Fluted|327|S11|A
-F654|127|S11|A
-F654-Fluted|327|S11|A
-F657|135|S11|A
-F657-Fluted|335|S11|A
-F660|135|S11|A
-F660-Fluted|335|S11|A
-F663|143|S11|A
-F663-Fluted|343|S11|A
-F666|143|S11|A
-F666-Fluted|343|S11|A
-F669|148|S11|A
-F669-Fluted|348|S11|A
-F672|148|S11|A
-F672-Fluted|348|S11|A
-F675|150|S11|A
-F675-Fluted|350|S11|A
-F678|150|S11|A
-F678-Fluted|350|S11|A
-F680|152|S11|A
-F680-Fluted|352|S11|A
-F684|152|S11|A
-F684-Fluted|352|S11|A
-F686|157|S11|A
-F686-Fluted|357|S11|A
-F687|157|S11|A
-F687-Fluted|357|S11|A
-F690|157|S11|A
-F690-Fluted|357|S11|A
-F692|163|S11|A
-F692-Fluted|363|S11|A
-F693|163|S11|A
-F693-Fluted|363|S11|A
-F696|163|S11|A
-F696-Fluted|363|S11|A
-OVF3104|440|S12|A
-OVF3110|440|S12|A
-OVF326 1/2|230|S12|A
-OVF330 1/2-Base|230|S12|A
-OVF330 1/2-Wall|230|S12|A
-OVF333|230|S12|A
-OVF336|245|S12|A
-OVF339|254|S12|A
-OVF342|261|S12|A
-OVF345|280|S12|A
-OVF348|280|S12|A
-OVF351|298|S12|A
-OVF354|298|S12|A
-OVF357|316|S12|A
-OVF360|316|S12|A
-OVF363|334|S12|A
-OVF366|334|S12|A
-OVF369|339|S12|A
-OVF372|344|S12|A
-OVF375|349|S12|A
-OVF378|353|S12|A
-OVF380|356|S12|A
-OVF386|366|S12|A
-OVF389|369|S12|A
-OVF392|372|S12|A
-OVF398|440|S12|A
-OVF6104|508|S12|A
-OVF6110|508|S12|A
-OVF626 1/2|309|S12|A
-OVF630 1/2-Base|309|S12|A
-OVF630 1/2-Wall|309|S12|A
-OVF633|309|S12|A
-OVF636|315|S12|A
-OVF639|320|S12|A
-OVF642|321|S12|A
-OVF645|338|S12|A
-OVF648|338|S12|A
-OVF651|354|S12|A
-OVF654|354|S12|A
-OVF657|370|S12|A
-OVF660|370|S12|A
-OVF663|386|S12|A
-OVF666|386|S12|A
-OVF669|392|S12|A
-OVF672|398|S12|A
-OVF675|400|S12|A
-OVF678|402|S12|A
-OVF680|404|S12|A
-OVF686|413|S12|A
-OVF689|419|S12|A
-OVF692|426|S12|A
-OVF698|508|S12|A
+F3102|170|S11|F
+F3102-Fluted|370|S11|F
+F3108|170|S11|F
+F3108-Fluted|370|S11|F
+F3114|170|S11|F
+F3114-Fluted|370|S11|F
+F326 1/2|65|S11|F
+F326 1/2-Fluted|265|S11|F
+F330|65|S11|F
+F330-Fluted|265|S11|F
+F333|65|S11|F
+F333-Fluted|265|S11|F
+F334 1/2|65|S11|F
+F334 1/2-Fluted|265|S11|F
+F336|73|S11|F
+F336-Fluted|273|S11|F
+F339|77|S11|F
+F339-Fluted|277|S11|F
+F342|81|S11|F
+F342-Fluted|281|S11|F
+F345|90|S11|F
+F345-Fluted|290|S11|F
+F348|90|S11|F
+F348-Fluted|290|S11|F
+F351|99|S11|F
+F351-Fluted|299|S11|F
+F354|99|S11|F
+F354-Fluted|299|S11|F
+F357|108|S11|F
+F357-Fluted|308|S11|F
+F360|108|S11|F
+F360-Fluted|308|S11|F
+F363|117|S11|F
+F363-Fluted|317|S11|F
+F366|117|S11|F
+F366-Fluted|317|S11|F
+F369|123|S11|F
+F369-Fluted|323|S11|F
+F372|123|S11|F
+F372-Fluted|323|S11|F
+F375|126|S11|F
+F375-Fluted|326|S11|F
+F378|126|S11|F
+F378-Fluted|326|S11|F
+F380|128|S11|F
+F380-Fluted|328|S11|F
+F384|128|S11|F
+F384-Fluted|328|S11|F
+F386|133|S11|F
+F386-Fluted|333|S11|F
+F387|133|S11|F
+F387-Fluted|333|S11|F
+F390|133|S11|F
+F390-Fluted|333|S11|F
+F392|136|S11|F
+F392-Fluted|336|S11|F
+F393|136|S11|F
+F393-Fluted|336|S11|F
+F396|136|S11|F
+F396-Fluted|336|S11|F
+F4 1/4 102|200|S11|F
+F4 1/4 102-Fluted|400|S11|F
+F4 1/4 108|200|S11|F
+F4 1/4 108-Fluted|400|S11|F
+F4 1/4 114|200|S11|F
+F4 1/4 114-Fluted|400|S11|F
+F4 1/4 26 1/2|89|S11|F
+F4 1/4 26 1/2-Fluted|289|S11|F
+F4 1/4 30|89|S11|F
+F4 1/4 30-Fluted|289|S11|F
+F4 1/4 33|89|S11|F
+F4 1/4 33-Fluted|289|S11|F
+F4 1/4 34 1/2|89|S11|F
+F4 1/4 34 1/2-Fluted|289|S11|F
+F4 1/4 36|96|S11|F
+F4 1/4 36-Fluted|296|S11|F
+F4 1/4 39|100|S11|F
+F4 1/4 39-Fluted|300|S11|F
+F4 1/4 42|104|S11|F
+F4 1/4 42-Fluted|304|S11|F
+F4 1/4 45|113|S11|F
+F4 1/4 45-Fluted|313|S11|F
+F4 1/4 48|113|S11|F
+F4 1/4 48-Fluted|313|S11|F
+F4 1/4 51|122|S11|F
+F4 1/4 51-Fluted|322|S11|F
+F4 1/4 54|122|S11|F
+F4 1/4 54-Fluted|322|S11|F
+F4 1/4 57|131|S11|F
+F4 1/4 57-Fluted|331|S11|F
+F4 1/4 60|131|S11|F
+F4 1/4 60-Fluted|331|S11|F
+F4 1/4 63|140|S11|F
+F4 1/4 63-Fluted|340|S11|F
+F4 1/4 66|140|S11|F
+F4 1/4 66-Fluted|340|S11|F
+F4 1/4 69|146|S11|F
+F4 1/4 69-Fluted|346|S11|F
+F4 1/4 72|146|S11|F
+F4 1/4 72-Fluted|346|S11|F
+F4 1/4 75|149|S11|F
+F4 1/4 75-Fluted|349|S11|F
+F4 1/4 78|149|S11|F
+F4 1/4 78-Fluted|349|S11|F
+F4 1/4 80|152|S11|F
+F4 1/4 80-Fluted|352|S11|F
+F4 1/4 84|152|S11|F
+F4 1/4 84-Fluted|352|S11|F
+F4 1/4 86|157|S11|F
+F4 1/4 86-Fluted|357|S11|F
+F4 1/4 87|157|S11|F
+F4 1/4 87-Fluted|357|S11|F
+F4 1/4 90|157|S11|F
+F4 1/4 90-Fluted|357|S11|F
+F4 1/4 92|160|S11|F
+F4 1/4 92-Fluted|360|S11|F
+F4 1/4 93|160|S11|F
+F4 1/4 93-Fluted|360|S11|F
+F4 1/4 96|160|S11|F
+F4 1/4 96-Fluted|360|S11|F
+F6102|204|S11|F
+F6102-Fluted|404|S11|F
+F6108|204|S11|F
+F6108-Fluted|404|S11|F
+F6114|204|S11|F
+F6114-Fluted|404|S11|F
+F626 1/2|104|S11|F
+F626 1/2-Fluted|304|S11|F
+F630|104|S11|F
+F630-Fluted|304|S11|F
+F633|104|S11|F
+F633-Fluted|304|S11|F
+F634 1/2|104|S11|F
+F634 1/2-Fluted|304|S11|F
+F636|108|S11|F
+F636-Fluted|308|S11|F
+F639|110|S11|F
+F639-Fluted|310|S11|F
+F642|111|S11|F
+F642-Fluted|311|S11|F
+F645|119|S11|F
+F645-Fluted|319|S11|F
+F648|119|S11|F
+F648-Fluted|319|S11|F
+F651|127|S11|F
+F651-Fluted|327|S11|F
+F654|127|S11|F
+F654-Fluted|327|S11|F
+F657|135|S11|F
+F657-Fluted|335|S11|F
+F660|135|S11|F
+F660-Fluted|335|S11|F
+F663|143|S11|F
+F663-Fluted|343|S11|F
+F666|143|S11|F
+F666-Fluted|343|S11|F
+F669|148|S11|F
+F669-Fluted|348|S11|F
+F672|148|S11|F
+F672-Fluted|348|S11|F
+F675|150|S11|F
+F675-Fluted|350|S11|F
+F678|150|S11|F
+F678-Fluted|350|S11|F
+F680|152|S11|F
+F680-Fluted|352|S11|F
+F684|152|S11|F
+F684-Fluted|352|S11|F
+F686|157|S11|F
+F686-Fluted|357|S11|F
+F687|157|S11|F
+F687-Fluted|357|S11|F
+F690|157|S11|F
+F690-Fluted|357|S11|F
+F692|163|S11|F
+F692-Fluted|363|S11|F
+F693|163|S11|F
+F693-Fluted|363|S11|F
+F696|163|S11|F
+F696-Fluted|363|S11|F
+OVF3104|440|S12|F
+OVF3110|440|S12|F
+OVF326 1/2|230|S12|F
+OVF330 1/2-Base|230|S12|F
+OVF330 1/2-Wall|230|S12|F
+OVF333|230|S12|F
+OVF336|245|S12|F
+OVF339|254|S12|F
+OVF342|261|S12|F
+OVF345|280|S12|F
+OVF348|280|S12|F
+OVF351|298|S12|F
+OVF354|298|S12|F
+OVF357|316|S12|F
+OVF360|316|S12|F
+OVF363|334|S12|F
+OVF366|334|S12|F
+OVF369|339|S12|F
+OVF372|344|S12|F
+OVF375|349|S12|F
+OVF378|353|S12|F
+OVF380|356|S12|F
+OVF386|366|S12|F
+OVF389|369|S12|F
+OVF392|372|S12|F
+OVF398|440|S12|F
+OVF6104|508|S12|F
+OVF6110|508|S12|F
+OVF626 1/2|309|S12|F
+OVF630 1/2-Base|309|S12|F
+OVF630 1/2-Wall|309|S12|F
+OVF633|309|S12|F
+OVF636|315|S12|F
+OVF639|320|S12|F
+OVF642|321|S12|F
+OVF645|338|S12|F
+OVF648|338|S12|F
+OVF651|354|S12|F
+OVF654|354|S12|F
+OVF657|370|S12|F
+OVF660|370|S12|F
+OVF663|386|S12|F
+OVF666|386|S12|F
+OVF669|392|S12|F
+OVF672|398|S12|F
+OVF675|400|S12|F
+OVF678|402|S12|F
+OVF680|404|S12|F
+OVF686|413|S12|F
+OVF689|419|S12|F
+OVF692|426|S12|F
+OVF698|508|S12|F
 CRVAL36|134|S13|A
 CRVAL39|145|S13|A
 CRVAL42|155|S13|A
@@ -6541,7 +6541,7 @@ EXVAL75|437|S13|A
 EXVAL78|445|S13|A
 EXVAL81|453|S13|A
 EXVAL84|461|S13|A
-PROFILE FILLER|0.711|S13|A
+PROFILE FILLER|0.711|S13|F
 STVAL36|108|S13|A
 STVAL39|118|S13|A
 STVAL42|127|S13|A
@@ -7544,8 +7544,8 @@ const SP = {
   "Custom Paint (SW)": 28, "Rustic Walnut": 25,
 };
 const CX = { "Standard": 0, "Plywood": 10 };
-const TN = { B:"Base", W:"Wall", T:"Tall", V:"Vanity", C:"Vanity Tall", D:"Dressing Room", A:"Accessory", G:"GOLA", M:"Moulding", X:"Other" };
-const TC = { B:"#3d5a47", W:"#4a6178", T:"#6b5340", V:"#6b4a6b", C:"#8b5a8b", D:"#5a7b6b", A:"#6b6b6b", G:"#5a6b4a", M:"#8b6b3d", X:"#999" };
+const TN = { B:"Base", W:"Wall", T:"Tall", V:"Vanity", C:"Vanity Tall", D:"Dressing Room", A:"Accessory", G:"GOLA", M:"Moulding", F:"Fillers", X:"Other" };
+const TC = { B:"#3d5a47", W:"#4a6178", T:"#6b5340", V:"#6b4a6b", C:"#8b5a8b", D:"#5a7b6b", A:"#6b6b6b", G:"#5a6b4a", M:"#8b6b3d", F:"#7b5ea7", X:"#999" };
 // Price book section names by ref letter
 const SEC={C:"Loose Doors & Drawer Fronts",E:"Wall Cabinets",F:"Pediments",G:"Range Hoods",H:"RH Accessories",I:"Base Cabinets",J:"Island End Caps",K:"Island Cabinets",L:"Utility Cabinets",M:"Tall Shelf Cabinets",N:"Vanity Cabinets",O:"ADA Compliant",P:"Vanity Tall Custom",Q:"Dressing Room",R:"GOLA Channel",S:"Accessories & Panels",T:"Moulding",U:"Samples & Displays"};
 const ZN = [
@@ -7627,7 +7627,7 @@ const isBCF=(s)=>s==="BCF";
 const BCF_NOTE="• Door frame for use on front of glass front beverage coolers\n• Cut for glass will be filled with trim of same wood species\n• BCF available in Cherry, Maple, Red Oak, Select American Poplar, Hickory & Alder & are solid wood construction. No vertical or horizontal grain orientation available. Solid wood color tones may vary from veneer doors.\n• BCF will match those of the lower cabinet door style of adjoining components\n• Lower door style required if not ordered with adjoining components.\n• BCF with painted finishes as Metro will be MDF\n• Available up to 24\" wide and 80\" tall. Specify width and height when ordering\n• Custom rail widths available on all except mitered door styles\n• No custom grooving, notching, or drilling available";
 const CO_NOTE="• Column overlays are sent loose and must be field installed to cabinets\n• Column overlays are matching finish hardwood and attached to a 3\" wide hardwood filler\n• Pricing is per linear inch for each individual column\n• Plinth blocks are 3\" wide by 2 1/2\" tall at top and bottom (Except for use with flush toe kick)\n• Flush toe kick columns have a 6 1/2\" tall plinth block on bottom\n• Column overlays may also be applied to 3\" × 3\" angle fillers, 3\" columns and 3\" end panels\n• Column overlays will cause frameless overlay doors to bump plinth block when opened past 90°\n• Column overlays may also necessitate special counter tops when used with base cabinets\n• Width and depth modifications not available\n• Spindle modifications not available\n• Plinth blocks width modifications not available\n• Custom height of plinth blocks is available for $400 list Upcharge per column\n• Plinth blocks only available on top and bottom of column overlays\n• Column overlay may be ordered unassembled, must specify wall, base, or utility height, sold in complete sets only, field miter and assembly required\n• Column overlays may be ordered in a different color than the cabinet. Contact customer service for price and availability\n• Not available in: TFL, Reconstituted White Oak, Reconstituted Walnut, HPL & PV, Acrylic";
 let CO_DRAWING_B64=null;async function load_CO_DRAWING_B64(){if(!CO_DRAWING_B64){const m=await import("./pdf-co-drawing.js");CO_DRAWING_B64=m.default;}return CO_DRAWING_B64;};
-const SKU_LABELS={"W2436-2D":"Wall 24x36 Two-Door (see W24-2D36)","RW3624":"Refrigerator Wall 36x24","RW36":"Refrigerator Wall 36","RH57":"Range Hood 57\" Width","O3093":"Oven Cabinet 30x93","3/4TK":"3/4 Toe Kick Moulding","WBC33":"Wall Blind Corner 33","LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts","CUSTOM":"Custom Quote","REF":"Custom Refrigerator Panel","DP":"Dishwasher Panel","BCFTA":"Bev Center Front (Natural Aluminum)","BCFTBL":"Bev Center Front (Matte Black Aluminum)","BCFTMB":"Bev Center Front (Matte Brass)","BCF":"Beverage Center Front","COS":"Column Overlay — Smooth","COF":"Column Overlay — Fluted","COR":"Column Overlay — Rope","SD81/2X11":"Sample Door 8½×11 (Standard)","SD121/2151/2":"Sample Door 12½×15½","CM 8 1/2 x 11":"Color Match Sample 8½×11","CM 12 1/2 x 15 1/2":"Color Match Sample 12½×15½"};
+const SKU_LABELS={"F3":"Filler","OVF3":"Overlay Filler","PROFILE FILLER":"Profile Filler","W2436-2D":"Wall 24x36 Two-Door (see W24-2D36)","RW3624":"Refrigerator Wall 36x24","RW36":"Refrigerator Wall 36","RH57":"Range Hood 57\" Width","O3093":"Oven Cabinet 30x93","3/4TK":"3/4 Toe Kick Moulding","WBC33":"Wall Blind Corner 33","LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts","CUSTOM":"Custom Quote","REF":"Custom Refrigerator Panel","DP":"Dishwasher Panel","BCFTA":"Bev Center Front (Natural Aluminum)","BCFTBL":"Bev Center Front (Matte Black Aluminum)","BCFTMB":"Bev Center Front (Matte Brass)","BCF":"Beverage Center Front","COS":"Column Overlay — Smooth","COF":"Column Overlay — Fluted","COR":"Column Overlay — Rope","SD81/2X11":"Sample Door 8½×11 (Standard)","SD121/2151/2":"Sample Door 12½×15½","CM 8 1/2 x 11":"Color Match Sample 8½×11","CM 12 1/2 x 15 1/2":"Color Match Sample 12½×15½"};
 const isCustom=(s)=>s==="CUSTOM";
 
 // ── Oven Cutout Spec Forms ──
