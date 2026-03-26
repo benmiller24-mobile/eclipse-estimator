@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { PDFDocument } from "pdf-lib";
 import { createClient } from "@supabase/supabase-js";
 // PDF form templates served from /forms/*.pdf (loaded at runtime)
@@ -9196,40 +9196,52 @@ function AuthWrapper() {
 
   useEffect(() => {
     let mounted = true;
+    let authResolved = false;
+
+    const withTimeout = (promise, ms) =>
+      Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms))]);
 
     const checkAuth = async () => {
       try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
+        const { data: { session } } = await withTimeout(supabaseClient.auth.getSession(), 5000);
         const currentUser = session?.user || null;
         if (!mounted) return;
         setUser(currentUser);
         if (currentUser) {
-          const prof = await fetchProfile(currentUser.id);
+          const prof = await withTimeout(fetchProfile(currentUser.id), 5000);
           if (mounted) setProfile(prof);
         }
-      } catch (e) { console.error("Auth check error:", e); }
-      if (mounted) setLoading(false);
+      } catch (e) {
+        console.error("Auth check error:", e);
+      }
+      if (mounted) { setLoading(false); authResolved = true; }
     };
 
     checkAuth();
 
+    // Safety net: force loading off after 6s no matter what
+    const safetyTimer = setTimeout(() => {
+      if (mounted && !authResolved) {
+        console.warn("Auth check timed out, forcing load");
+        setLoading(false);
+        authResolved = true;
+      }
+    }, 6000);
+
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(async (event, session) => {
       const sessionUser = session?.user || null;
       if (!mounted) return;
-      if (event === "PASSWORD_RECOVERY") {
-        setShowResetPw(true);
-      }
+      if (event === "PASSWORD_RECOVERY") { setShowResetPw(true); }
       setUser(sessionUser);
       if (sessionUser) {
         const prof = await fetchProfile(sessionUser.id);
         if (mounted) setProfile(prof);
-      } else {
-        setProfile(null);
-      }
+      } else { setProfile(null); }
       setLoading(false);
+      authResolved = true;
     });
 
-    return () => { mounted = false; subscription?.unsubscribe(); };
+    return () => { mounted = false; clearTimeout(safetyTimer); subscription?.unsubscribe(); };
   }, []);
 
   const handleLogout = async () => {
@@ -9835,25 +9847,28 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
 function SkuSearchInput({value, onSelect, placeholder, sp, cx, door, drwF, drwBox, catalogFilter}) {
   const [sr, setSr] = useState("");
   const [open, setOpen] = useState(false);
-  const blurTimer = useRef(null);
+  const ref = useCallback(node => { if(node) node.focus(); }, []);
+
   const results = useMemo(() => {
     if (!sr || sr.length < 1) return [];
     const s = sr.toLowerCase();
     const pool = catalogFilter ? CATALOG.filter(catalogFilter) : CATALOG;
     return pool.filter(c => c.s.toLowerCase().includes(s) || (SKU_LABELS[c.s]||"").toLowerCase().includes(s) || c.r.toLowerCase().includes(s)).slice(0, 40);
   }, [sr, catalogFilter]);
+
   const priceFor = (cat) => {
     const item = { s: cat.s, t: cat.t, r: cat.r, p: cat.p, q: 1, len: cat.t === "M" ? 10 : 0, sqin: 0, sqW: 0, sqH: 0, dc: guessDoors(cat.s, cat.t), drc: guessDrawers(cat.s, cat.t), ds: door, dfs: drwF, so: null, hng: "", fe: "", mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, brot: guessBuiltInROT(cat.s), rbs: false };
     const { u } = cp(item, sp, cx, door, drwF, drwBox);
     return u;
   };
+
   return (
     <div style={{position:"relative",width:"100%"}}>
       <input
         value={open ? sr : (value ? (SKU_LABELS[value] || value) : "")}
         onChange={e => { setSr(e.target.value); setOpen(true); }}
-        onFocus={() => { if(blurTimer.current){clearTimeout(blurTimer.current);blurTimer.current=null;} setOpen(true); setSr(""); }}
-        onBlur={() => { blurTimer.current = setTimeout(() => { setOpen(false); blurTimer.current=null; }, 200); }}
+        onFocus={() => { setOpen(true); setSr(""); }}
+        onBlur={() => setTimeout(() => setOpen(false), 200)}
         placeholder={placeholder || "Search SKU..."}
         style={{width:"100%",padding:"8px 10px",border:`1px solid ${C.bdr}`,borderRadius:6,fontSize:12,fontFamily:F.b,background:C.cream,outline:"none"}}
       />
@@ -9862,7 +9877,7 @@ function SkuSearchInput({value, onSelect, placeholder, sp, cx, door, drwF, drwBo
           {results.map(c => {
             const unitP = priceFor(c);
             return (
-              <div key={c.s} onMouseDown={(e) => { e.preventDefault(); if(blurTimer.current){clearTimeout(blurTimer.current);blurTimer.current=null;} onSelect(c, unitP); setOpen(false); setSr(""); }}
+              <div key={c.s} onMouseDown={(e) => { e.preventDefault(); onSelect(c, unitP); setOpen(false); setSr(""); }}
                 style={{padding:"6px 10px",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:11,fontFamily:F.b}}
                 onMouseEnter={e => e.currentTarget.style.background = C.accS}
                 onMouseLeave={e => e.currentTarget.style.background = "transparent"}
