@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { PDFDocument } from "pdf-lib";
 import { createClient } from "@supabase/supabase-js";
 // PDF form templates served from /forms/*.pdf (loaded at runtime)
 
-// ââ Eclipse Order Form (base64 encoded blank PDF) ââ
+// ── Eclipse Order Form (base64 encoded blank PDF) ──
 let BLANK_ORDER_FORM_B64=null;async function load_BLANK_ORDER_FORM_B64(){if(!BLANK_ORDER_FORM_B64){const m=await import("./pdf-blank-order-form.js");BLANK_ORDER_FORM_B64=m.default;}return BLANK_ORDER_FORM_B64;};
 
-// âââ ECLIPSE CABINETRY ESTIMATOR â Complete v8.8.0 Price Book âââ
+// ═══ ECLIPSE CABINETRY ESTIMATOR — Complete v8.8.0 Price Book ═══
 // 4,262 SKUs (incl. wall height grid) extracted from Eclipse Interactive Catalog 8.8.0
 // Format: SKU|StockPrice|CatalogRef|TypeCode
 // Types: B=Base, W=Wall, T=Tall, V=Vanity, A=Accessory, G=GOLA, M=Moulding
@@ -1217,7 +1217,7 @@ A21|568|E26|W
 A24|587|E26|W
 AAGD21|730|E26|W
 AAGD24|756|E26|W
-AAGD27-16âD|1169|E26|W
+AAGD27-16”D|1169|E26|W
 SA21 --(12)|1048|E27|W
 SA21 --(15)|1120|E27|W
 SA21--(18)|1192|E27|W
@@ -7556,7 +7556,7 @@ const ZN = [
   {id:"bar",l:"Bar",i:"Ba"},{id:"office",l:"Office",i:"O"},{id:"other",l:"Other",i:"+"},
 ];
 const F={d:"'Questrial','Helvetica Neue',sans-serif",b:"'Assistant','Helvetica Neue',sans-serif",m:"'JetBrains Mono','SF Mono',monospace"};
-// ââ Supabase Client ââ
+// ── Supabase Client ──
 const SUPABASE_URL = "https://rljpgudmvbaocomktone.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsanBndWRtdmJhb2NvbWt0b25lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTk5ODYsImV4cCI6MjA4OTU5NTk4Nn0.YqtoSBM0utOmZlKWvd8OQ2w9m3iytkGwP9LRqpbqa1w";
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -7567,7 +7567,7 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 const C={ink:"#000000",warm:"#F7F6F5",cream:"#FAFAF9",paper:"#FFFFFF",stone:"#AFA497",stL:"#DFDFDB",bdr:"#DFDFDB",acc:"#4A4A4D",accS:"#F7F6F5",gold:"#AFA497",goldS:"#F7F6F5",red:"#b91c1c"};
 const fm=n=>"$"+Math.round(n||0).toLocaleString();
-/* ââ Pinnacle Brand Icon System â inline SVGs, 1.5px stroke ââ */
+/* ── Pinnacle Brand Icon System — inline SVGs, 1.5px stroke ── */
 const LazyImg=({loader,alt})=>{const[src,setSrc]=useState(null);useEffect(()=>{loader().then(setSrc)},[]);return <div style={{border:"1px solid #cbd5e1",borderTop:"none",borderRadius:"0 0 6px 6px",padding:8,background:"#fff",textAlign:"center"}}>{src?<img src={src} alt={alt} style={{maxWidth:"100%",height:"auto",borderRadius:4}}/>:<span style={{color:"#94a3b8",fontSize:12}}>Loading...</span>}</div>};
 const Ic=({n,sz=14,c=C.stone,style={}})=>{
   const p={width:sz,height:sz,fill:"none",stroke:c,strokeWidth:1.5,strokeLinecap:"round",strokeLinejoin:"round",verticalAlign:"middle",display:"inline-block",flexShrink:0,...style};
@@ -7612,27 +7612,27 @@ const isCO=(s)=>CO_SKUS.has(s);
 const CO_LABELS={"COS":"Smooth","COF":"Fluted","COR":"Rope"};
 const isFLS=(s)=>s==="FLS";
 const FLS_DEPTH_MIN=6,FLS_DEPTH_MAX=24,FLS_LEN_MIN=12,FLS_LEN_MAX=96;
-const LSD_NOTE="Doors not available over 84\" tall, or over 30\" wide\nâ¢ Doors over 66\" tall will have no warranty\nâ¢ One panel tall doors over 48\" tall will have no warranty\nâ¢ One panel wide doors over 24\" wide will have no warranty\nâ¢ Doors 66\" to 84\" tall will not be bored for hinges\nâ¢ Doors over 24\" wide will not be bored for hinges";
+const LSD_NOTE="Doors not available over 84\" tall, or over 30\" wide\n• Doors over 66\" tall will have no warranty\n• One panel tall doors over 48\" tall will have no warranty\n• One panel wide doors over 24\" wide will have no warranty\n• Doors 66\" to 84\" tall will not be bored for hinges\n• Doors over 24\" wide will not be bored for hinges";
 const LSD_SKUS=new Set(["LSD"]);
 const isREF=(s)=>s==="REF";
 const REF_ICE_CUTOUT=200;
-const REF_NOTE="â¢ Doors mounted on 1/4\" panel with available 1/8\" spacer\nâ¢ Send all specifications that apply to custom panel. Circle appropriate appliance model number on specification sheet\nâ¢ Verify the specifications with appliance manufacturer. W.W. Wood Products is not responsible for discrepancies between supplied manufacturer specifications and actual appliance.\nâ¢ Shop drawings will be supplied with confirmation. Check specifications to assure they match appliance sheets\nâ¢ Finish warranty voided for custom refrigerator door panels with ice maker or water dispenser cut outs\nâ¢ Ice maker cut out available for $200 list.\nâ¢ Refrigerator Panels with painted finishes As Metro will be MDF\nâ¢ No custom grooving, notching, or drilling available\nâ¢ Not available with horizontal grain.";
-const REF_PANEL_TABLE="Panel Height: Up to 47 15/16\" â 1 panel | 48\" - 81 15/16\" â 2 panels | 82\" & Over â 3 panels";
+const REF_NOTE="• Doors mounted on 1/4\" panel with available 1/8\" spacer\n• Send all specifications that apply to custom panel. Circle appropriate appliance model number on specification sheet\n• Verify the specifications with appliance manufacturer. W.W. Wood Products is not responsible for discrepancies between supplied manufacturer specifications and actual appliance.\n• Shop drawings will be supplied with confirmation. Check specifications to assure they match appliance sheets\n• Finish warranty voided for custom refrigerator door panels with ice maker or water dispenser cut outs\n• Ice maker cut out available for $200 list.\n• Refrigerator Panels with painted finishes As Metro will be MDF\n• No custom grooving, notching, or drilling available\n• Not available with horizontal grain.";
+const REF_PANEL_TABLE="Panel Height: Up to 47 15/16\" → 1 panel | 48\" - 81 15/16\" → 2 panels | 82\" & Over → 3 panels";
 let REF_DRAWING_B64=null;async function load_REF_DRAWING_B64(){if(!REF_DRAWING_B64){const m=await import("./pdf-ref-drawing.js");REF_DRAWING_B64=m.default;}return REF_DRAWING_B64;};
 const isDP=(s)=>s==="DP";
-const DP_NOTE="â¢ DP is a door only for use on front of dishwashers\nâ¢ DP As Metro will be MDF\nâ¢ Dishwasher Panels will match those of the lower cabinet door style of adjoining components\nâ¢ Lower door style required if not ordered with adjoining components\nâ¢ No custom grooving, notching, or drilling available";
+const DP_NOTE="• DP is a door only for use on front of dishwashers\n• DP As Metro will be MDF\n• Dishwasher Panels will match those of the lower cabinet door style of adjoining components\n• Lower door style required if not ordered with adjoining components\n• No custom grooving, notching, or drilling available";
 const BCFT_SKUS=new Set(["BCFTA","BCFTBL","BCFTMB"]);
 const isBCFT=(s)=>BCFT_SKUS.has(s);
 const BCFT_LABELS={"BCFTA":"Natural Aluminum","BCFTBL":"Matte Black Aluminum","BCFTMB":"Matte Brass"};
-const BCFT_NOTE="â¢ Door frame for use on front of glass front beverage coolers\nâ¢ BCFT required with all Beverage Center Fronts except painted METRO\nâ¢ Available up to 24\" wide and 80\" tall. Specify width and height when ordering\nâ¢ Custom rail widths available on all except mitered door styles\nâ¢ No custom grooving, notching, or drilling available";
+const BCFT_NOTE="• Door frame for use on front of glass front beverage coolers\n• BCFT required with all Beverage Center Fronts except painted METRO\n• Available up to 24\" wide and 80\" tall. Specify width and height when ordering\n• Custom rail widths available on all except mitered door styles\n• No custom grooving, notching, or drilling available";
 const isBCF=(s)=>s==="BCF";
-const BCF_NOTE="â¢ Door frame for use on front of glass front beverage coolers\nâ¢ Cut for glass will be filled with trim of same wood species\nâ¢ BCF available in Cherry, Maple, Red Oak, Select American Poplar, Hickory & Alder & are solid wood construction. No vertical or horizontal grain orientation available. Solid wood color tones may vary from veneer doors.\nâ¢ BCF will match those of the lower cabinet door style of adjoining components\nâ¢ Lower door style required if not ordered with adjoining components.\nâ¢ BCF with painted finishes as Metro will be MDF\nâ¢ Available up to 24\" wide and 80\" tall. Specify width and height when ordering\nâ¢ Custom rail widths available on all except mitered door styles\nâ¢ No custom grooving, notching, or drilling available";
-const CO_NOTE="â¢ Column overlays are sent loose and must be field installed to cabinets\nâ¢ Column overlays are matching finish hardwood and attached to a 3\" wide hardwood filler\nâ¢ Pricing is per linear inch for each individual column\nâ¢ Plinth blocks are 3\" wide by 2 1/2\" tall at top and bottom (Except for use with flush toe kick)\nâ¢ Flush toe kick columns have a 6 1/2\" tall plinth block on bottom\nâ¢ Column overlays may also be applied to 3\" Ã 3\" angle fillers, 3\" columns and 3\" end panels\nâ¢ Column overlays will cause frameless overlay doors to bump plinth block when opened past 90Â°\nâ¢ Column overlays may also necessitate special counter tops when used with base cabinets\nâ¢ Width and depth modifications not available\nâ¢ Spindle modifications not available\nâ¢ Plinth blocks width modifications not available\nâ¢ Custom height of plinth blocks is available for $400 list Upcharge per column\nâ¢ Plinth blocks only available on top and bottom of column overlays\nâ¢ Column overlay may be ordered unassembled, must specify wall, base, or utility height, sold in complete sets only, field miter and assembly required\nâ¢ Column overlays may be ordered in a different color than the cabinet. Contact customer service for price and availability\nâ¢ Not available in: TFL, Reconstituted White Oak, Reconstituted Walnut, HPL & PV, Acrylic";
+const BCF_NOTE="• Door frame for use on front of glass front beverage coolers\n• Cut for glass will be filled with trim of same wood species\n• BCF available in Cherry, Maple, Red Oak, Select American Poplar, Hickory & Alder & are solid wood construction. No vertical or horizontal grain orientation available. Solid wood color tones may vary from veneer doors.\n• BCF will match those of the lower cabinet door style of adjoining components\n• Lower door style required if not ordered with adjoining components.\n• BCF with painted finishes as Metro will be MDF\n• Available up to 24\" wide and 80\" tall. Specify width and height when ordering\n• Custom rail widths available on all except mitered door styles\n• No custom grooving, notching, or drilling available";
+const CO_NOTE="• Column overlays are sent loose and must be field installed to cabinets\n• Column overlays are matching finish hardwood and attached to a 3\" wide hardwood filler\n• Pricing is per linear inch for each individual column\n• Plinth blocks are 3\" wide by 2 1/2\" tall at top and bottom (Except for use with flush toe kick)\n• Flush toe kick columns have a 6 1/2\" tall plinth block on bottom\n• Column overlays may also be applied to 3\" × 3\" angle fillers, 3\" columns and 3\" end panels\n• Column overlays will cause frameless overlay doors to bump plinth block when opened past 90°\n• Column overlays may also necessitate special counter tops when used with base cabinets\n• Width and depth modifications not available\n• Spindle modifications not available\n• Plinth blocks width modifications not available\n• Custom height of plinth blocks is available for $400 list Upcharge per column\n• Plinth blocks only available on top and bottom of column overlays\n• Column overlay may be ordered unassembled, must specify wall, base, or utility height, sold in complete sets only, field miter and assembly required\n• Column overlays may be ordered in a different color than the cabinet. Contact customer service for price and availability\n• Not available in: TFL, Reconstituted White Oak, Reconstituted Walnut, HPL & PV, Acrylic";
 let CO_DRAWING_B64=null;async function load_CO_DRAWING_B64(){if(!CO_DRAWING_B64){const m=await import("./pdf-co-drawing.js");CO_DRAWING_B64=m.default;}return CO_DRAWING_B64;};
-const SKU_LABELS={"F3":"Filler","OVF3":"Overlay Filler","PROFILE FILLER":"Profile Filler","W2436-2D":"Wall 24x36 Two-Door (see W24-2D36)","RW3624":"Refrigerator Wall 36x24","RW36":"Refrigerator Wall 36","RH57":"Range Hood 57\" Width","O3093":"Oven Cabinet 30x93","3/4TK":"3/4 Toe Kick Moulding","WBC33":"Wall Blind Corner 33","LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts","CUSTOM":"Custom Quote","REF":"Custom Refrigerator Panel","DP":"Dishwasher Panel","BCFTA":"Bev Center Front (Natural Aluminum)","BCFTBL":"Bev Center Front (Matte Black Aluminum)","BCFTMB":"Bev Center Front (Matte Brass)","BCF":"Beverage Center Front","COS":"Column Overlay â Smooth","COF":"Column Overlay â Fluted","COR":"Column Overlay â Rope","SD81/2X11":"Sample Door 8Â½Ã11 (Standard)","SD121/2151/2":"Sample Door 12Â½Ã15Â½","CM 8 1/2 x 11":"Color Match Sample 8Â½Ã11","CM 12 1/2 x 15 1/2":"Color Match Sample 12Â½Ã15Â½"};
+const SKU_LABELS={"F3":"Filler","OVF3":"Overlay Filler","PROFILE FILLER":"Profile Filler","W2436-2D":"Wall 24x36 Two-Door (see W24-2D36)","RW3624":"Refrigerator Wall 36x24","RW36":"Refrigerator Wall 36","RH57":"Range Hood 57\" Width","O3093":"Oven Cabinet 30x93","3/4TK":"3/4 Toe Kick Moulding","WBC33":"Wall Blind Corner 33","LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts","CUSTOM":"Custom Quote","REF":"Custom Refrigerator Panel","DP":"Dishwasher Panel","BCFTA":"Bev Center Front (Natural Aluminum)","BCFTBL":"Bev Center Front (Matte Black Aluminum)","BCFTMB":"Bev Center Front (Matte Brass)","BCF":"Beverage Center Front","COS":"Column Overlay — Smooth","COF":"Column Overlay — Fluted","COR":"Column Overlay — Rope","SD81/2X11":"Sample Door 8½×11 (Standard)","SD121/2151/2":"Sample Door 12½×15½","CM 8 1/2 x 11":"Color Match Sample 8½×11","CM 12 1/2 x 15 1/2":"Color Match Sample 12½×15½"};
 const isCustom=(s)=>s==="CUSTOM";
 
-// ââ Oven Cutout Spec Forms ââ
+// ── Oven Cutout Spec Forms ──
 const OVEN_REFS=new Set(["L15","L16","L17","L18","I26","I27","I28","I29"]);
 const isMWC=(item)=>item.s&&item.s.startsWith("MWC");
 const isOven=(item)=>OVEN_REFS.has(item.r)||isMWC(item);
@@ -7651,15 +7651,15 @@ const OVEN_TYPE=(item)=>{
 const OVEN_LABELS={"O":"Oven Cutout","OM":"Oven Microwave Cutout","FIO":"Flush Inset Oven Cutout","FIOM":"Flush Inset Oven Microwave Cutout","MWC":"Wall Microwave Custom Cutout","BO":"Base Oven Cutout","BWD":"Base Warming Drawer Cutout","FIBO":"Flush Inset Base Oven Cutout","FIBWD":"Flush Inset Base Warming Drawer Cutout"};
 const OVEN_FORM_CODES={"O":"ECL-CO-O-AI","OM":"ECL-CO-OM-AI","FIO":"ECL-CO-FIO-AI","FIOM":"ECL-CO-FIOM-AI","MWC":"ECL-CO-MWC-AI","BO":"ECL-CO-BO-AI","BWD":"ECL-CO-BWD-AI","FIBO":"ECL-CO-FIBO-AI","FIBWD":"ECL-CO-FIBWD-AI"};
 const OVEN_NOTES={
-"O":"â¢ Cutout widths will be obtained by the use of an overlay frame or an overlay frame with fillers\nâ¢ To avoid the use of overlay frames, the cabinets should be ordered 1 Â½\" wider than the cutout width\nâ¢ Cutout dimensions or make & model of unit must be supplied\nâ¢ If no intermediate rail(s) size is selected, intermediate rail(s) will be 3\"\nâ¢ For oven cabinets, the distance from the bottom of the oven to the floor is required\nâ¢ Oven clearance requirements are the purchaser's responsibility\nâ¢ W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\nâ¢ This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\nâ¢ This specification sheet will not be accepted singularly or as an order form",
-"OM":"â¢ Cutout widths will be obtained by the use of an overlay frame or an overlay frame with fillers\nâ¢ To avoid the use of overlay frames, the cabinets should be ordered 1 Â½\" wider than the cutout width\nâ¢ Cutout dimensions or make & model of unit must be supplied\nâ¢ If no intermediate rail(s) size is selected, intermediate rail(s) will be 3\"\nâ¢ For oven microwave cabinets, the distance from the bottom of the oven to the floor is required\nâ¢ Oven and microwave clearance requirements are the purchaser's responsibility\nâ¢ W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\nâ¢ This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\nâ¢ This specification sheet will not be accepted singularly or as an order form",
-"FIO":"â¢ Overlay frame rails are 1 â\" only and not adjustable\nâ¢ Cabinet must be ordered 3 Â½\" wider than minimum flush inset oven width cutout on manufacturer's specification sheet\nâ¢ Subframe's depth is adjustable using slotted brackets and is black painted hardwood\nâ¢ Manufacture's appliance flush installation specifications must be supplied with order\nâ¢ For flush inset oven cabinets, the distance from the bottom of the oven to the floor is required\nâ¢ Oven clearance requirements are the purchaser's responsibility\nâ¢ W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\nâ¢ This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\nâ¢ This specification sheet will not be accepted singularly or as an order form",
-"FIOM":"â¢ Overlay frame rails are 1 â\" only and not adjustable\nâ¢ Cabinet must be ordered 3 Â½\" wider than minimum flush inset oven width cutout on manufacturer's specification sheet\nâ¢ Subframe's depth is adjustable using slotted brackets and is black painted hardwood\nâ¢ Manufacture's appliance flush installation specifications must be supplied with order\nâ¢ For flush inset oven microwave cabinets, the distance from the bottom of the oven to the floor is required\nâ¢ Oven and microwave clearance requirements are the purchaser's responsibility\nâ¢ W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\nâ¢ This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\nâ¢ This specification sheet will not be accepted singularly or as an order form",
-"MWC":"â¢ Cutout widths will be obtained by the use of an overlay frame or an overlay frame with fillers\nâ¢ To avoid the use of overlay frames, the cabinets should be ordered 1 Â½\" wider than the cutout width\nâ¢ Cutout dimensions or make & model of unit must be supplied\nâ¢ If no intermediate rail size is selected, intermediate rail will be 3\"\nâ¢ Microwave clearance requirements are the purchaser's responsibility\nâ¢ W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\nâ¢ This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\nâ¢ This specification sheet will not be accepted singularly or as an order form",
-"BO":"â¢ Cutout widths will be obtained by the use of an overlay frame or an overlay frame with fillers\nâ¢ To avoid the use of overlay frames, the cabinets should be ordered 1 Â½\" wider than the cutout width\nâ¢ Cutout dimensions or make & model of unit must be supplied\nâ¢ If no intermediate rail size is selected, intermediate rail will be 3\"\nâ¢ For base oven cabinets, the distance from the bottom of the oven to the floor is required\nâ¢ Oven clearance requirements are the purchaser's responsibility\nâ¢ W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\nâ¢ This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\nâ¢ This specification sheet will not be accepted singularly or as an order form",
-"BWD":"â¢ Cutout widths will be obtained by the use of an overlay frame or an overlay frame with fillers\nâ¢ To avoid the use of overlay frames, the cabinets should be ordered 1 Â½\" wider than the cutout width\nâ¢ Cutout dimensions or make & model of unit must be supplied\nâ¢ If no intermediate rail size is selected, intermediate rail will be 3\"\nâ¢ For base warming drawer cabinets, the distance from the bottom of the warming drawer to the floor is required\nâ¢ Warming drawer clearance requirements are the purchaser's responsibility\nâ¢ W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\nâ¢ This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\nâ¢ This specification sheet will not be accepted singularly or as an order form",
-"FIBO":"â¢ Overlay frame rails are 1 â\" only and not adjustable\nâ¢ Cabinet must be ordered 3 Â½\" wider than minimum flush inset oven width cutout on manufacturer's specification sheet\nâ¢ Subframe's depth is adjustable using slotted brackets and is black painted hardwood\nâ¢ Manufacture's appliance flush installation specifications must be supplied with order\nâ¢ For flush inset base oven cabinets, the distance from the bottom of the oven to the floor is required\nâ¢ Oven clearance requirements are the purchaser's responsibility\nâ¢ W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\nâ¢ This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\nâ¢ This specification sheet will not be accepted singularly or as an order form",
-"FIBWD":"â¢ Overlay frame rails are 1 â\" only and not adjustable\nâ¢ Cabinet must be ordered 3 Â½\" wider than minimum flush inset oven width cutout on manufacturer's specification sheet\nâ¢ Subframe's depth is adjustable using slotted brackets and is black painted hardwood\nâ¢ Manufacture's appliance flush installation specifications must be supplied with order\nâ¢ For flush inset base warming drawer cabinets, the distance from the bottom of the warming drawer to the floor is required\nâ¢ Warming drawer clearance requirements are the purchaser's responsibility\nâ¢ W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\nâ¢ This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\nâ¢ This specification sheet will not be accepted singularly or as an order form"
+"O":"• Cutout widths will be obtained by the use of an overlay frame or an overlay frame with fillers\n• To avoid the use of overlay frames, the cabinets should be ordered 1 ½\" wider than the cutout width\n• Cutout dimensions or make & model of unit must be supplied\n• If no intermediate rail(s) size is selected, intermediate rail(s) will be 3\"\n• For oven cabinets, the distance from the bottom of the oven to the floor is required\n• Oven clearance requirements are the purchaser's responsibility\n• W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\n• This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\n• This specification sheet will not be accepted singularly or as an order form",
+"OM":"• Cutout widths will be obtained by the use of an overlay frame or an overlay frame with fillers\n• To avoid the use of overlay frames, the cabinets should be ordered 1 ½\" wider than the cutout width\n• Cutout dimensions or make & model of unit must be supplied\n• If no intermediate rail(s) size is selected, intermediate rail(s) will be 3\"\n• For oven microwave cabinets, the distance from the bottom of the oven to the floor is required\n• Oven and microwave clearance requirements are the purchaser's responsibility\n• W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\n• This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\n• This specification sheet will not be accepted singularly or as an order form",
+"FIO":"• Overlay frame rails are 1 ⅛\" only and not adjustable\n• Cabinet must be ordered 3 ½\" wider than minimum flush inset oven width cutout on manufacturer's specification sheet\n• Subframe's depth is adjustable using slotted brackets and is black painted hardwood\n• Manufacture's appliance flush installation specifications must be supplied with order\n• For flush inset oven cabinets, the distance from the bottom of the oven to the floor is required\n• Oven clearance requirements are the purchaser's responsibility\n• W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\n• This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\n• This specification sheet will not be accepted singularly or as an order form",
+"FIOM":"• Overlay frame rails are 1 ⅛\" only and not adjustable\n• Cabinet must be ordered 3 ½\" wider than minimum flush inset oven width cutout on manufacturer's specification sheet\n• Subframe's depth is adjustable using slotted brackets and is black painted hardwood\n• Manufacture's appliance flush installation specifications must be supplied with order\n• For flush inset oven microwave cabinets, the distance from the bottom of the oven to the floor is required\n• Oven and microwave clearance requirements are the purchaser's responsibility\n• W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\n• This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\n• This specification sheet will not be accepted singularly or as an order form",
+"MWC":"• Cutout widths will be obtained by the use of an overlay frame or an overlay frame with fillers\n• To avoid the use of overlay frames, the cabinets should be ordered 1 ½\" wider than the cutout width\n• Cutout dimensions or make & model of unit must be supplied\n• If no intermediate rail size is selected, intermediate rail will be 3\"\n• Microwave clearance requirements are the purchaser's responsibility\n• W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\n• This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\n• This specification sheet will not be accepted singularly or as an order form",
+"BO":"• Cutout widths will be obtained by the use of an overlay frame or an overlay frame with fillers\n• To avoid the use of overlay frames, the cabinets should be ordered 1 ½\" wider than the cutout width\n• Cutout dimensions or make & model of unit must be supplied\n• If no intermediate rail size is selected, intermediate rail will be 3\"\n• For base oven cabinets, the distance from the bottom of the oven to the floor is required\n• Oven clearance requirements are the purchaser's responsibility\n• W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\n• This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\n• This specification sheet will not be accepted singularly or as an order form",
+"BWD":"• Cutout widths will be obtained by the use of an overlay frame or an overlay frame with fillers\n• To avoid the use of overlay frames, the cabinets should be ordered 1 ½\" wider than the cutout width\n• Cutout dimensions or make & model of unit must be supplied\n• If no intermediate rail size is selected, intermediate rail will be 3\"\n• For base warming drawer cabinets, the distance from the bottom of the warming drawer to the floor is required\n• Warming drawer clearance requirements are the purchaser's responsibility\n• W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\n• This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\n• This specification sheet will not be accepted singularly or as an order form",
+"FIBO":"• Overlay frame rails are 1 ⅛\" only and not adjustable\n• Cabinet must be ordered 3 ½\" wider than minimum flush inset oven width cutout on manufacturer's specification sheet\n• Subframe's depth is adjustable using slotted brackets and is black painted hardwood\n• Manufacture's appliance flush installation specifications must be supplied with order\n• For flush inset base oven cabinets, the distance from the bottom of the oven to the floor is required\n• Oven clearance requirements are the purchaser's responsibility\n• W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\n• This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\n• This specification sheet will not be accepted singularly or as an order form",
+"FIBWD":"• Overlay frame rails are 1 ⅛\" only and not adjustable\n• Cabinet must be ordered 3 ½\" wider than minimum flush inset oven width cutout on manufacturer's specification sheet\n• Subframe's depth is adjustable using slotted brackets and is black painted hardwood\n• Manufacture's appliance flush installation specifications must be supplied with order\n• For flush inset base warming drawer cabinets, the distance from the bottom of the warming drawer to the floor is required\n• Warming drawer clearance requirements are the purchaser's responsibility\n• W. W. Wood Products, Inc. is not responsible for any clearance or venting requirements\n• This completed specification sheet must be submitted with a standard Eclipse order form (ECL-SOF)\n• This specification sheet will not be accepted singularly or as an order form"
 };
 
 // Oven spec form fields definition per type
@@ -7805,7 +7805,7 @@ let OVEN_FORM_FIBO_B64=null;async function load_OVEN_FORM_FIBO_B64(){if(!OVEN_FO
 let OVEN_FORM_FIBWD_B64=null;async function load_OVEN_FORM_FIBWD_B64(){if(!OVEN_FORM_FIBWD_B64){const m=await import("./pdf-oven-form-fibwd.js");OVEN_FORM_FIBWD_B64=m.default;}return OVEN_FORM_FIBWD_B64;};
 const OVEN_FORM_LOADERS={"O":load_OVEN_FORM_O_B64,"OM":load_OVEN_FORM_OM_B64,"FIO":load_OVEN_FORM_FIO_B64,"FIOM":load_OVEN_FORM_FIOM_B64,"MWC":load_OVEN_FORM_MWC_B64,"BO":load_OVEN_FORM_BO_B64,"BWD":load_OVEN_FORM_BWD_B64,"FIBO":load_OVEN_FORM_FIBO_B64,"FIBWD":load_OVEN_FORM_FIBWD_B64};
 
-// Flat-price refs: samples, displays, stain/touch-up kits, casters â no species/construction markups
+// Flat-price refs: samples, displays, stain/touch-up kits, casters — no species/construction markups
 const FLAT_REFS=new Set(["U2","U3","U4","U5","U6","U7","U8","U9","U10","S45","S46","D17"]);
 // Species NOT available for SD 8.5x11 standard sample
 const SD_BLOCKED_SP=new Set(["Walnut","Rustic Walnut","Rift White Oak","QS White Oak","TFL","PV","Rauvisio noir Matte HPL","Acrylic HG","Acrylic Matte","Recon White Oak","Recon Walnut"]);
@@ -7831,40 +7831,57 @@ const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{
   const u=prePly*(1+cm/100);
   return{u,t:u*item.q,stockBase,prePly,doorChg,dfChg,dbChg,itemSQ,rbsChg,plyPct:cm}};
 
-// âââ ORDER SELECTION OPTIONS (from Eclipse order form, pages B1âB15, C3) ââ
+// ─── ORDER SELECTION OPTIONS (from Eclipse order form, pages B1–B15, C3) ──
 // Door Group Charges (C3): A=$0, B=$44, C=$88, D=$150 PER DOOR
 const DG={A:0,B:44,C:88,D:150};
 const DOORS=[
-  // One Piece (B1)
+  // Standard door styles (alphabetical)
+  {v:"AFP",l:"Arch Flat Panel",g:"A"},
+  {v:"ARP",l:"Arch Raised Panel",g:"A"},
+  {v:"ASPN",l:"Aspen Flat Panel",g:"A"},
+  {v:"ASVL",l:"Asherville Miter RP",g:"B"},
+  {v:"BCP",l:"Beaded Century",g:"B"},
+  {v:"BDFD",l:"Bradford Miter RP",g:"B"},
+  {v:"BRST",l:"Bristol Flat Panel",g:"A"},
+  {v:"CHRS",l:"Charleston Appl. Mould.",g:"B"},
+  {v:"CNCD",l:"Concord Flat Panel",g:"A"},
+  {v:"CFP",l:"Crown Flat Panel",g:"A"},
+  {v:"CRP",l:"Crown Raised Panel",g:"A"},
+  {v:"DLTN",l:"Dalton Miter FP",g:"B"},
+  {v:"ESSX",l:"Essex Miter FP",g:"B"},
+  {v:"GLBK",l:"Glenbrook Miter FP",g:"B"},
+  {v:"GRNS",l:"Greensboro Flat Panel",g:"A"},
+  {v:"HMLN",l:"Hamlin Raised Panel",g:"A"},
+  {v:"HNVR",l:"Hanover Flat Panel",g:"A"},
+  {v:"HTFD",l:"Hartford Flat Panel",g:"A"},
+  {v:"HRTG",l:"Heritage Flat Panel",g:"A"},
+  {v:"KNDL",l:"Kendall Miter FP",g:"B"},
+  {v:"LNCR",l:"Lancaster Flat Panel",g:"A"},
+  {v:"LNDS",l:"Landes Miter FP",g:"B"},
+  {v:"MLBU",l:"Malibu Flat Panel",g:"A"},
+  {v:"MNCH",l:"Manchester Miter RP",g:"B"},
   {v:"METRO",l:"Metropolitan (Slab)",g:"A"},
-  // 2Â½" Rails (B3âB5)
-  {v:"AFP",l:"Arch Flat Panel",g:"A"},{v:"ARP",l:"Arch Raised Panel",g:"A"},
-  {v:"BCP",l:"Beaded Century",g:"B"},{v:"CHRS",l:"Charleston Appl. Mould.",g:"B"},
-  {v:"CFP",l:"Crown Flat Panel",g:"A"},{v:"CRP",l:"Crown Raised Panel",g:"A"},
-  {v:"GRNS",l:"Greensboro Flat Panel",g:"A"},{v:"HNVR",l:"Hanover Flat Panel",g:"A"},
-  {v:"MNTG",l:"Montgomery Appl. Mould.",g:"B"},{v:"NHVN",l:"New Haven Flat Panel",g:"A"},
-  {v:"OXRP",l:"Oxford Raised Panel",g:"A"},{v:"RCMD",l:"Richmond Raised Panel",g:"A"},
-  {v:"SFP",l:"Square Flat Panel",g:"A"},{v:"SMST",l:"Somerset Flat Panel",g:"A"},
-  {v:"SRP",l:"Square Raised Panel",g:"A"},{v:"WARD",l:"Ward Flat Panel",g:"A"},
-  {v:"SCDL",l:"Scottsdale Flat Panel",g:"A"},{v:"WMTN",l:"Wilmington Flat Panel",g:"A"},
-  // 3Â¼" Rails (B6âB7)
-  {v:"ASPN",l:"Aspen Flat Panel",g:"A"},{v:"BRST",l:"Bristol Flat Panel",g:"A"},
-  {v:"HRTG",l:"Heritage Flat Panel",g:"A"},{v:"HTFD",l:"Hartford Flat Panel",g:"A"},
-  {v:"LNCR",l:"Lancaster Flat Panel",g:"A"},{v:"HMLN",l:"Hamlin Raised Panel",g:"A"},
-  {v:"TAHOE",l:"Tahoe Flat Panel",g:"A"},{v:"SUMT",l:"Summit Raised Panel",g:"A"},
-  {v:"STSVL",l:"Statesville Flat Panel",g:"A"},
-  // Narrow Rails (B7âB8)
-  {v:"MLBU",l:"Malibu Flat Panel",g:"A"},{v:"NAPA-H",l:"Napa Horizontal",g:"A"},
-  {v:"NAPA-V",l:"Napa Vertical",g:"A"},{v:"CNCD",l:"Concord Flat Panel",g:"A"},
+  {v:"MNTG",l:"Montgomery Appl. Mould.",g:"B"},
+  {v:"NAPA-H",l:"Napa Horizontal",g:"A"},
+  {v:"NAPA-V",l:"Napa Vertical",g:"A"},
+  {v:"NHVN",l:"New Haven Flat Panel",g:"A"},
+  {v:"OXRP",l:"Oxford Raised Panel",g:"A"},
+  {v:"PTLN",l:"Portland Miter RP",g:"B"},
+  {v:"RCMD",l:"Richmond Raised Panel",g:"A"},
   {v:"RMLB",l:"Reeded Malibu",g:"B"},
-  // Mitered (B8âB10)
-  {v:"ASVL",l:"Asherville Miter RP",g:"B"},{v:"BDFD",l:"Bradford Miter RP",g:"B"},
-  {v:"DLTN",l:"Dalton Miter FP",g:"B"},{v:"ESSX",l:"Essex Miter FP",g:"B"},
-  {v:"GLBK",l:"Glenbrook Miter FP",g:"B"},{v:"KNDL",l:"Kendall Miter FP",g:"B"},
-  {v:"LNDS",l:"Landes Miter FP",g:"B"},{v:"PTLN",l:"Portland Miter RP",g:"B"},
-  {v:"MNCH",l:"Manchester Miter RP",g:"B"},{v:"SVNH",l:"Savannah Miter RP",g:"B"},
-  {v:"WNSR",l:"Windsor Miter FP",g:"B"},{v:"SHBY",l:"Shelby Miter FP",g:"B"},
-  // Mullion doors (B10âB13) â flat per-door charge (on top of base door group)
+  {v:"SVNH",l:"Savannah Miter RP",g:"B"},
+  {v:"SCDL",l:"Scottsdale Flat Panel",g:"A"},
+  {v:"SHBY",l:"Shelby Miter FP",g:"B"},
+  {v:"SFP",l:"Square Flat Panel",g:"A"},
+  {v:"SMST",l:"Somerset Flat Panel",g:"A"},
+  {v:"SRP",l:"Square Raised Panel",g:"A"},
+  {v:"STSVL",l:"Statesville Flat Panel",g:"A"},
+  {v:"SUMT",l:"Summit Raised Panel",g:"A"},
+  {v:"TAHOE",l:"Tahoe Flat Panel",g:"A"},
+  {v:"WARD",l:"Ward Flat Panel",g:"A"},
+  {v:"WMTN",l:"Wilmington Flat Panel",g:"A"},
+  {v:"WNSR",l:"Windsor Miter FP",g:"B"},
+  // Mullion doors — flat per-door charge (on top of base door group)
   {v:"GFD",l:"Glass Frame Door",g:"A",x:0},{v:"CMD",l:"Country Mullion (9 lite)",g:"A",x:210},
   {v:"FMD",l:"Fairfield Mullion (11 lite)",g:"A",x:210},{v:"MD",l:"Mullion Door",g:"A",x:210},
   {v:"OEMD",l:"Old English Mullion",g:"A",x:210},{v:"TMD",l:"Triple Mullion",g:"A",x:210},
@@ -7873,16 +7890,16 @@ const DOORS=[
   {v:"TXHMD",l:"Triple X Horiz. Mullion",g:"A",x:1540},{v:"DBMD",l:"Double Bow Mullion",g:"A",x:1254},
   {v:"SEMD",l:"Single Elliptical Mullion",g:"A",x:1558},{v:"DEMD",l:"Double Elliptical Mullion",g:"A",x:1844},
   {v:"DLMD",l:"Diamond Left Mullion",g:"A",x:1844},{v:"DRMD",l:"Diamond Right Mullion",g:"A",x:1844},
-  // Pane doors (B12âB13)
+  // Pane doors
   {v:"Pane7-P",l:"Pane 7\" Solid Panel",g:"A",x:29},{v:"Pane7-1",l:"Pane 7\" GFD",g:"A",x:29},
   {v:"Pane12-P",l:"Pane 12\" Solid Panel",g:"A",x:29},{v:"Pane12-1",l:"Pane 12\" GFD",g:"A",x:29},
   {v:"Pane7-2",l:"Pane 7\" 2-Lite Mullion",g:"A",x:76},{v:"Pane7-4",l:"Pane 7\" 4-Lite Mullion",g:"A",x:76},
   {v:"Pane12-2",l:"Pane 12\" 2-Lite Mullion",g:"A",x:107},{v:"Pane12-4",l:"Pane 12\" 4-Lite Mullion",g:"A",x:107},
-  // Specialty per-door (B4)
+  // Specialty per-door
   {v:"LAGFD",l:"Left Arch Glass Frame",g:"A",x:121},{v:"RAGFD",l:"Right Arch Glass Frame",g:"A",x:121},
   {v:"LARP",l:"Left Arch Raised Panel",g:"A",x:242},{v:"RARP",l:"Right Arch Raised Panel",g:"A",x:242},
   {v:"LCTD",l:"Left Contour Door",g:"A",x:90},{v:"RCTD",l:"Right Contour Door",g:"A",x:90},
-  // Bridged (B16) â no upcharge
+  // Bridged — no upcharge
   {v:"BD1",l:"Bridged - Drawer+Door",g:"A"},{v:"BD2",l:"Bridged - 2 Drawer Stack",g:"A"},
   {v:"BD3",l:"Bridged - 3 Drawer Stack",g:"A"},{v:"BD4",l:"Bridged - 4 Drawer Stack",g:"A"},
 ];
@@ -7904,12 +7921,12 @@ const CABINET_MODS=[
   {code:"TIP_ONDR",label:"Tip-On for Drawers (15\"+ wide/deep)",price:189,unit:"/drw",types:["B","V","C","D","T"],group:"Drawer Mods",input:"qty",max:10},
   {code:"MXDF",label:"Mixed Drawer Front",price:105,unit:"/position",types:["B","V","T"],group:"Drawer Mods",input:"mxdf",max:3},
   {code:"BBP",label:"Beaded Back Panel (req. FI, not TFL/HPL)",price:100,unit:"/cab",types:["B","V","C","D","T","W"],group:"Structure",input:"check"},
-  {code:"MOD_SQ",label:"Square Cabinet Mod (h,d) â 30% min",price:0,unit:"%",types:["B","V","C","D","T","W"],group:"Structure",input:"dims",pct:30,excGroup:"mod"},
-  {code:"MOD_ANG",label:"Angle Cabinet Mod (h,d,w) â 50% min",price:0,unit:"%",types:["B","V","C","D","T","W"],group:"Structure",input:"dims",pct:50,excGroup:"mod"},  {code:"FREE_W",label:"Free Width Modification",price:0,unit:"",types:["B","V","C","D","T","W"],group:"Structure",input:"width",note:"Only available on approx. 30% of cabinets"},
+  {code:"MOD_SQ",label:"Square Cabinet Mod (h,d) — 30% min",price:0,unit:"%",types:["B","V","C","D","T","W"],group:"Structure",input:"dims",pct:30,excGroup:"mod"},
+  {code:"MOD_ANG",label:"Angle Cabinet Mod (h,d,w) — 50% min",price:0,unit:"%",types:["B","V","C","D","T","W"],group:"Structure",input:"dims",pct:50,excGroup:"mod"},  {code:"FREE_W",label:"Free Width Modification",price:0,unit:"",types:["B","V","C","D","T","W"],group:"Structure",input:"width",note:"Only available on approx. 30% of cabinets"},
 
   {code:"FREE_D",label:"Free Depth Modification",price:0,unit:"",types:["B","T"],group:"Structure",input:"select",options:["13\"","15\"","18\"","21\""]},
-  {code:"ESFL",label:"Extended Side to Floor â Left",price:89,unit:"/side",types:["B","V","C","D","T"],group:"Side Mods",input:"check"},
-  {code:"ESFR",label:"Extended Side to Floor â Right",price:89,unit:"/side",types:["B","V","C","D","T"],group:"Side Mods",input:"check"},
+  {code:"ESFL",label:"Extended Side to Floor — Left",price:89,unit:"/side",types:["B","V","C","D","T"],group:"Side Mods",input:"check"},
+  {code:"ESFR",label:"Extended Side to Floor — Right",price:89,unit:"/side",types:["B","V","C","D","T"],group:"Side Mods",input:"check"},
   {code:"WSL",label:"Wide Stile Left (up to 6\")",price:290,unit:"/side",types:["B","V","C","D","T","W"],group:"Side Mods",input:"check"},
   {code:"WSR",label:"Wide Stile Right (up to 6\")",price:290,unit:"/side",types:["B","V","C","D","T","W"],group:"Side Mods",input:"check"},
   {code:"CENTER_STILE",label:"Add Center Stile (3\")",price:200,unit:"/cab",types:["B","V","C","D","T","W"],group:"Side Mods",input:"check"},
@@ -7920,10 +7937,10 @@ const CABINET_MODS=[
   {code:"PWL",label:"Prep Wall Cabinet Lighting",price:60,unit:"/panel",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^F(WEP|BEP|VEP|VTEP|REP)/},
   {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/cab",types:["W"],group:"Lighting Prep",input:"check"},
   {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/shelf",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^FLS$/},
-  {code:"FLED_FEP",label:"LED Lighting Prep â Flush End Panel",price:60,unit:"/panel",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^F(WEP|BEP|VEP|VTEP|REP)/},
+  {code:"FLED_FEP",label:"LED Lighting Prep — Flush End Panel",price:60,unit:"/panel",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^F(WEP|BEP|VEP|VTEP|REP)/},
   {code:"PFG",label:"Prep for Glass (door prep)",price:0,unit:"/door",types:["B","V","C","D","T","W"],group:"Door Mods",input:"check"},
 {code:"FF_TOP",label:"False Front Top (removes top drawer)",price:100,unit:"/cab",types:["B","V","C","D","T"],group:"Other",input:"check"},
-  // Aventos Top Hinge Modifications (E3) â Wall cabinets only
+  // Aventos Top Hinge Modifications (E3) — Wall cabinets only
   {code:"AVENTOS_HK",label:"Aventos HK Stay Lift Door",price:435,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
   {code:"AVENTOS_HKSD",label:"Aventos HK w/ Servo-Drive",price:1695,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
   {code:"AVENTOS_HL",label:"Aventos HL Lift Up Door",price:680,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
@@ -7963,7 +7980,7 @@ const calcModCost=(item,mods,baseUnitPrice)=>{
 };
 
 
-/* ââ Cabinet width extractor âââââââââââââââââââââââââââââââââ
+/* ── Cabinet width extractor ─────────────────────────────────
    Strips suffixes (-RT, -FHD, -2D, -1DR, -WS, -MC, -S, -PH, -SS)
    then reads trailing digits as the width. */
 function _cabW(sku){
@@ -7971,19 +7988,34 @@ function _cabW(sku){
   for(let i=0;i<3;i++)s=s.replace(/-(RT|FHD|2D|2DR|1DR|WS|MC|SS|PH|S)$/,'');
   const m=s.match(/(\d+)$/);if(!m)return 0;
   const n=parseInt(m[1]);
-  // If number is a valid width on its own (9â84), use it directly
+  // If number is a valid width on its own (9–84), use it directly
   if(n>=9&&n<=84)return n;
-  // Otherwise it's concatenated width+height (e.g. "1230" = 12 wide Ã 30 tall)
-  // â strip the last 2 digits (height) to get the width
+  // Otherwise it's concatenated width+height (e.g. "1230" = 12 wide × 30 tall)
+  // — strip the last 2 digits (height) to get the width
   const ds=m[1];
   if(ds.length>=3){const w=parseInt(ds.slice(0,ds.length-2));return(w>=9&&w<=84)?w:0;}
   return 0;
 }
 
-/* ââ guessDoors ââââââââââââââââââââââââââââââââââââââââââââââ */
+/* ── Cabinet height extractor (for tall cabinets) ────────── */
+function _cabH(sku,typeCode){
+  if(typeCode!=="T")return 0;
+  let s=sku.toUpperCase().replace(/\s+/g,'');
+  for(let i=0;i<3;i++)s=s.replace(/-(RT|FHD|2D|2DR|1DR|WS|MC|SS|PH|S)$/,'');
+  const m=s.match(/(\d+)$/);if(!m)return 0;
+  const n=parseInt(m[1]);
+  const ds=m[1];
+  // Concatenated width+height (e.g. "2484" = 24 wide × 84 tall, "3093" = 30 wide × 93 tall)
+  if(ds.length>=4){const h=parseInt(ds.slice(-2));if(h>=80&&h<=96)return h;}
+  // Tall cabs with suffix like U12-27 = 12 wide, 27 deep → default 84" height
+  // Standalone width number (U12, U24) → default 84" height
+  return 84;
+}
+
+/* ── guessDoors ────────────────────────────────────────────── */
 function guessDoors(sku,typeCode){
   const s=sku.toUpperCase().replace(/\s+/g,'');
-  // Non-cabinet types (A,G,M,S,X) â 0 doors
+  // Non-cabinet types (A,G,M,S,X) — 0 doors
   if(typeCode&&!'BVTW'.includes(typeCode))return 0;
   // === Zero-door types ===
   if(/^(BBBD\dD|BBD\dD|BBB\dD|B[2-5]D|STB4D)/.test(s))return 0;
@@ -8010,7 +8042,7 @@ function guessDoors(sku,typeCode){
   if(/^(VTSD|VSD)/.test(s))return 2;
   // === Width-based for std bases/sink/vanity/peninsula ===
   if(/^(?:BA|B|SBA|SBR|SBU|SB|PB|VBA|VB|VTB|FLVB|VSBR|VSB|VTSBR|VTSB|VCSD|VBW|VTBW|VBH|VTHB|VGO|VO)\d/.test(s)){const w=_cabW(sku);return w>24?2:1;}
-  // Utility / Tall â 2 sections, width-based
+  // Utility / Tall — 2 sections, width-based
   if(/^(U\d|UT\d|CP)/.test(s)){if(s.includes('-2D'))return 4;const w=_cabW(sku);return(w>24)?4:2;}
   // === Dressing Room (all TypeCode V) ===
   if(/^VTC/.test(s))return 0;
@@ -8022,13 +8054,13 @@ function guessDoors(sku,typeCode){
   if(/^DRTRB/.test(s))return 1;
   if(/^(PDRBD|DRBD)/.test(s)){const w=_cabW(sku);return w>24?2:1;}
   if(/^(PDRBDO|DRBDO|DRSB)/.test(s)){const w=_cabW(sku);return w>24?2:1;}
-  // Wall cabinets â width-based
+  // Wall cabinets — width-based
   if(/^W\d/.test(s)){const w=_cabW(sku);return w>24?2:1;}
   if(s.startsWith('WBC'))return 1;
   return 1;
 }
 
-/* ââ guessDrawers ââââââââââââââââââââââââââââââââââââââââââââ */
+/* ── guessDrawers ──────────────────────────────────────────── */
 function guessDrawers(sku,typeCode){
   const s=sku.toUpperCase().replace(/\s+/g,'');
   if(!'BVT'.includes(typeCode))return 0;
@@ -8077,7 +8109,7 @@ function guessDrawers(sku,typeCode){
   return 0;
 }
 
-/* ââ guessBuiltInROT âââ built-in roll-out trays from SKU ââ */
+/* ── guessBuiltInROT ─── built-in roll-out trays from SKU ── */
 function guessBuiltInROT(sku){
   const s=sku.toUpperCase().replace(/\s+/g,'');
   if(/-RT/.test(s)){
@@ -8088,9 +8120,9 @@ function guessBuiltInROT(sku){
   return 0;
 }
 const DRW_FRONTS=[
-  // One Piece â Group A
+  // One Piece — Group A
   {v:"DF-MET",l:"Metropolitan (Slab)",g:"A"},{v:"DF-S",l:"Slab",g:"A"},{v:"DF-SCLPT",l:"Sculpted",g:"A"},
-  // 2 1/2" Rail â Group B
+  // 2 1/2" Rail — Group B
   {v:"DF-BCP",l:"Beaded Century",g:"B"},{v:"DF2.5-BCP",l:"Beaded Century (2.5 rail)",g:"B"},
   {v:"DF-CHRS",l:"Charleston",g:"B"},
   {v:"DF-FP",l:"Flat Panel",g:"B"},{v:"DF2.5-SFP",l:"Square Flat Panel (2.5 rail)",g:"B"},
@@ -8107,22 +8139,22 @@ const DRW_FRONTS=[
   {v:"DF-WMTN",l:"Wilmington",g:"B"},{v:"DF2.5-WMTN",l:"Wilmington (2.5 rail)",g:"B"},
   {v:"DF-AFP",l:"Arch Flat Panel",g:"B"},{v:"DF-ARP",l:"Arch Raised Panel",g:"B"},
   {v:"DF-CFP",l:"Crown Flat Panel",g:"B"},{v:"DF-CRP",l:"Crown Raised Panel",g:"B"},
-  // 3 1/4" Rail â Group B
+  // 3 1/4" Rail — Group B
   {v:"DF-ASPN",l:"Aspen",g:"B"},{v:"DF-BRST",l:"Bristol",g:"B"},{v:"DF-HMLN",l:"Hamlin",g:"B"},
   {v:"DF-HRTG",l:"Heritage",g:"B"},{v:"DF-HTFD",l:"Hartford",g:"B"},{v:"DF-LNCR",l:"Lancaster",g:"B"},
   {v:"DF-TAHOE",l:"Tahoe",g:"B"},{v:"DF-SUMT",l:"Summit",g:"B"},{v:"DF-STSVL",l:"Statesville",g:"B"},
-  // Narrow Rail â Group B
+  // Narrow Rail — Group B
   {v:"DF-CNCD",l:"Concord",g:"B"},{v:"DF-RMLB",l:"Reeded Malibu",g:"B"},
   {v:"DF-NAPA-V",l:"Napa 5-Piece (Vertical)",g:"B"},{v:"DF-NAPA-H",l:"Napa 5-Piece (Horizontal)",g:"B"},
   {v:"DF-MLBU",l:"Malibu 5-Piece",g:"B"},
-  // Mitered â Group B
+  // Mitered — Group B
   {v:"DF-ASVL",l:"Asherville Miter",g:"B"},{v:"DF-BDFD",l:"Bradford Miter",g:"B"},
   {v:"DF-DLTN",l:"Dalton Miter",g:"B"},{v:"DF-ESSX",l:"Essex Miter",g:"B"},
   {v:"DF-GLBK",l:"Glenbrook Miter",g:"B"},{v:"DF-KNDL",l:"Kendall Miter",g:"B"},
   {v:"DF-LNDS",l:"Landes Miter",g:"B"},{v:"DF-PTLN",l:"Portland Miter",g:"B"},
   {v:"DF-MNCH",l:"Manchester Miter",g:"B"},{v:"DF-SVNH",l:"Savannah Miter",g:"B"},
   {v:"DF-WNSR",l:"Windsor Miter",g:"B"},{v:"DF-SHBY",l:"Shelby Miter",g:"B"},
-  // Shaped â Group A
+  // Shaped — Group A
   {v:"DFS-OXRP",l:"Shaped Oxford",g:"A"},{v:"DFS-RCMD",l:"Shaped Richmond",g:"A"},{v:"DFS-SRP",l:"Shaped Shaker",g:"A"},
 ];
 const GLAZES=[
@@ -8131,7 +8163,7 @@ const GLAZES=[
 ];
 const HIGHLIGHTS=[
   {v:"NONE",l:"No Highlight"},{v:"GRPH-HL",l:"Graphite Highlight"},
-  {v:"CAFE-HL",l:"CafÃ© Highlight"},{v:"SLATE-HL",l:"Slate Highlight"},
+  {v:"CAFE-HL",l:"Café Highlight"},{v:"SLATE-HL",l:"Slate Highlight"},
 ];
 const CHAR_TECH=[
   {v:"NONE",l:"No Character Technique"},{v:"AGED",l:"Aged"},{v:"SNDTHRU",l:"Sand-Through"},
@@ -8205,7 +8237,7 @@ function MarginCalc({tot,onClose}){
   const[mt,sMt]=useState("markup"),[mp,sMp]=useState(35),[il,sIl]=useState(65),[lf,sLf]=useState(20),[cs,sCs]=useState(85),[sf,sSf]=useState(45),[df,sDf]=useState(750),[fr,sFr]=useState(450);
   const sell=mt==="markup"?tot*(1+mp/100):tot/(1-mp/100),gp=sell-tot,inst=il*lf,ct=cs*sf,pt=sell+inst+ct+df+fr;
   return(<div className="mbg" onClick={onClose}><div className="c" style={{width:"min(540px,94vw)",maxHeight:"90vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}>
-    <div className="ch" style={{background:C.goldS}}><Ic n="dollar" sz={14} c={C.gold}/> Margin Calculator<button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>Ã</button></div>
+    <div className="ch" style={{background:C.goldS}}><Ic n="dollar" sz={14} c={C.gold}/> Margin Calculator<button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>×</button></div>
     <div className="cb">
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12,textAlign:"center"}}>
         <div><div className="lb">Cost</div><div className="mn" style={{fontSize:17,fontWeight:700}}>{fm(tot)}</div></div>
@@ -8218,8 +8250,8 @@ function MarginCalc({tot,onClose}){
       <div style={{height:1,background:C.bdr,margin:"10px 0"}}/>
       <div className="lb" style={{marginBottom:6}}>Project Add-ons</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
-        <div><label style={{fontSize:10.5,color:C.stone}}>Install $/LF Ã LF</label><div style={{display:"flex",gap:3,marginTop:2}}><input type="number" className="inp" value={il} onChange={e=>sIl(+e.target.value)} style={{width:"50%"}}/><input type="number" className="inp" value={lf} onChange={e=>sLf(+e.target.value)} style={{width:"50%"}}/></div><div style={{fontSize:9.5,color:C.stone,marginTop:1}}>={fm(inst)}</div></div>
-        <div><label style={{fontSize:10.5,color:C.stone}}>Countertop $/SF Ã SF</label><div style={{display:"flex",gap:3,marginTop:2}}><input type="number" className="inp" value={cs} onChange={e=>sCs(+e.target.value)} style={{width:"50%"}}/><input type="number" className="inp" value={sf} onChange={e=>sSf(+e.target.value)} style={{width:"50%"}}/></div><div style={{fontSize:9.5,color:C.stone,marginTop:1}}>={fm(ct)}</div></div>
+        <div><label style={{fontSize:10.5,color:C.stone}}>Install $/LF × LF</label><div style={{display:"flex",gap:3,marginTop:2}}><input type="number" className="inp" value={il} onChange={e=>sIl(+e.target.value)} style={{width:"50%"}}/><input type="number" className="inp" value={lf} onChange={e=>sLf(+e.target.value)} style={{width:"50%"}}/></div><div style={{fontSize:9.5,color:C.stone,marginTop:1}}>={fm(inst)}</div></div>
+        <div><label style={{fontSize:10.5,color:C.stone}}>Countertop $/SF × SF</label><div style={{display:"flex",gap:3,marginTop:2}}><input type="number" className="inp" value={cs} onChange={e=>sCs(+e.target.value)} style={{width:"50%"}}/><input type="number" className="inp" value={sf} onChange={e=>sSf(+e.target.value)} style={{width:"50%"}}/></div><div style={{fontSize:9.5,color:C.stone,marginTop:1}}>={fm(ct)}</div></div>
         <div><label style={{fontSize:10.5,color:C.stone}}>Design Fee</label><input type="number" className="inp" value={df} onChange={e=>sDf(+e.target.value)} style={{marginTop:2}}/></div>
         <div><label style={{fontSize:10.5,color:C.stone}}>Freight</label><input type="number" className="inp" value={fr} onChange={e=>sFr(+e.target.value)} style={{marginTop:2}}/></div>
       </div>
@@ -8256,29 +8288,29 @@ function AddUI({onAdd,onAddCustom}){
     <div style={{maxHeight:"36vh",overflowY:"auto",border:`1px solid ${C.bdr}`,borderRadius:7,marginBottom:7,background:C.cream}}>
       {recentSkus.length>0&&!sr&&tf==="all"&&<div>
         <div style={{padding:"4px 9px",background:"linear-gradient(90deg,#f59e0b22,#f59e0b08)",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:"#b45309",position:"sticky",top:0,zIndex:2,borderBottom:`1px solid #f59e0b33`,display:"flex",alignItems:"center",gap:5}}><Ic n="bolt" sz={10} c="#b45309"/> Recently Used ({recentSkus.length})</div>
-        {recentSkus.map(s=>{const c=CATALOG.find(x=>x.s===s);if(!c)return null;return(<div key={"recent-"+c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"#fffbeb08",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid #f59e0b44"}}>
-            <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s} <span style={{fontSize:9.5,color:C.stone,fontWeight:400}}>{c.r}</span></span>
+        {recentSkus.map(s=>{const c=CATALOG.find(x=>x.s===s);if(!c)return null;const w=_cabW(c.s);const h=_cabH(c.s,c.t);return(<div key={"recent-"+c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"#fffbeb08",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid #f59e0b44"}}>
+            <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s} <span style={{fontSize:9.5,color:C.stone,fontWeight:400}}>{c.r}{w>0?` · ${w}″W${h>0?`×${h}″H`:""}`:"" }</span></span>
             <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
           </div>)})}
       </div>}
       {grouped.map(([ref,items])=><div key={ref}>
         <div style={{padding:"4px 9px",background:C.warm,fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:C.stone,position:"sticky",top:0,zIndex:1,borderBottom:`1px solid ${C.bdr}`}}>
-          {ref} â {SEC[ref.charAt(0)]||TN[items[0]?.t]||""} ({items.length})
+          {ref} — {SEC[ref.charAt(0)]||TN[items[0]?.t]||""} ({items.length})
         </div>
-        {items.map(c=><div key={c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"transparent",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid transparent"}}>
-          <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s}</span>
+        {items.map(c=>{const w=_cabW(c.s);const h=_cabH(c.s,c.t);return(<div key={c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"transparent",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid transparent"}}>
+          <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s}{w>0&&<span style={{fontSize:9,color:C.stone,fontWeight:400,marginLeft:4}}>{w}″W{h>0?` × ${h}″H`:""}</span>}</span>
           <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
-        </div>)}
+        </div>)})}
       </div>)}
-      {fl.length===0&&<div style={{padding:18,textAlign:"center",color:C.stone,fontSize:12}}>No match â try different search</div>}
-      {fl.length>=200&&<div style={{padding:8,textAlign:"center",color:C.gold,fontSize:10.5}}>Showing first 200 results â refine search</div>}
+      {fl.length===0&&<div style={{padding:18,textAlign:"center",color:C.stone,fontSize:12}}>No match — try different search</div>}
+      {fl.length>=200&&<div style={{padding:8,textAlign:"center",color:C.gold,fontSize:10.5}}>Showing first 200 results — refine search</div>}
     </div>
     {isM&&<div style={{marginBottom:7,padding:"8px 10px",background:C.goldS,borderRadius:7,border:`1px solid ${C.gold}33`}}>
       <label className="lb" style={{color:C.gold}}>Moulding Length</label>
       <div style={{display:"flex",gap:6,marginTop:3}}>
         <button className={`ch2 ${len===5?"on":""}`} onClick={()=>sLen(5)} style={len===5?{borderColor:C.gold,color:C.gold,background:C.gold+"14"}:{}}>5 ft</button>
         <button className={`ch2 ${len===10?"on":""}`} onClick={()=>sLen(10)} style={len===10?{borderColor:C.gold,color:C.gold,background:C.gold+"14"}:{}}>10 ft</button>
-        <span style={{fontSize:11,color:C.stone,alignSelf:"center",marginLeft:4}}>{selCat?`$${selCat.p}/LF Ã ${len}ft = $${(selCat.p*len).toFixed(2)}/pc`:""}</span>
+        <span style={{fontSize:11,color:C.stone,alignSelf:"center",marginLeft:4}}>{selCat?`$${selCat.p}/LF × ${len}ft = $${(selCat.p*len).toFixed(2)}/pc`:""}</span>
       </div>
     </div>}
     {isSQ&&<div style={{marginBottom:7,padding:"8px 10px",background:"#e8f0ea",borderRadius:7,border:"1px solid #2c4a3433"}}>
@@ -8287,11 +8319,11 @@ function AddUI({onAdd,onAddCustom}){
         {isFLS(sk)?<>
           <div style={{display:"flex",gap:4,alignItems:"center"}}>
             <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}><span style={{fontSize:9,color:C.stone,marginBottom:1}}>Depth</span><input type="number" className="inp" min={FLS_DEPTH_MIN} max={FLS_DEPTH_MAX} value={sqW} onChange={e=>sSqW(Math.max(FLS_DEPTH_MIN,Math.min(FLS_DEPTH_MAX,+e.target.value)))} style={{width:60,textAlign:"center"}} placeholder="D"/></div>
-            <span style={{color:C.stone,marginTop:12}}>Ã</span>
+            <span style={{color:C.stone,marginTop:12}}>×</span>
             <div style={{display:"flex",flexDirection:"column",alignItems:"center"}}><span style={{fontSize:9,color:C.stone,marginBottom:1}}>Length</span><input type="number" className="inp" min={FLS_LEN_MIN} max={FLS_LEN_MAX} value={sqH} onChange={e=>sSqH(Math.max(FLS_LEN_MIN,Math.min(FLS_LEN_MAX,+e.target.value)))} style={{width:60,textAlign:"center"}} placeholder="L"/></div>
           </div>
-          <span style={{fontSize:10,color:C.stone}}>{FLS_DEPTH_MIN}â{FLS_DEPTH_MAX}" deep, {FLS_LEN_MIN}â{FLS_LEN_MAX}" long</span>
-        </>:<div style={{display:"flex",gap:4,alignItems:"center"}}><input type="number" className="inp" min={1} max={120} value={sqW} onChange={e=>sSqW(Math.max(1,+e.target.value))} style={{width:60,textAlign:"center"}} placeholder="W"/><span style={{color:C.stone}}>Ã</span><input type="number" className="inp" min={1} max={120} value={sqH} onChange={e=>sSqH(Math.max(1,+e.target.value))} style={{width:60,textAlign:"center"}} placeholder="H"/></div>}
+          <span style={{fontSize:10,color:C.stone}}>{FLS_DEPTH_MIN}–{FLS_DEPTH_MAX}" deep, {FLS_LEN_MIN}–{FLS_LEN_MAX}" long</span>
+        </>:<div style={{display:"flex",gap:4,alignItems:"center"}}><input type="number" className="inp" min={1} max={120} value={sqW} onChange={e=>sSqW(Math.max(1,+e.target.value))} style={{width:60,textAlign:"center"}} placeholder="W"/><span style={{color:C.stone}}>×</span><input type="number" className="inp" min={1} max={120} value={sqH} onChange={e=>sSqH(Math.max(1,+e.target.value))} style={{width:60,textAlign:"center"}} placeholder="H"/></div>}
         <span style={{fontSize:11,color:C.stone}}>= {(sqW*sqH).toLocaleString()} sq.in</span>
         {selCat&&<span style={{fontSize:11,color:"#2c4a34",fontWeight:600}}>${(selCat.p*sqW*sqH).toFixed(2)}/pc</span>}
       </div>
@@ -8308,13 +8340,13 @@ function AddUI({onAdd,onAddCustom}){
     {/* Custom Quote Section */}
     <div style={{marginTop:10,borderTop:`2px solid ${C.gold}`,paddingTop:10}}>
       <button onClick={()=>setShowCQ(!showCQ)} style={{width:"100%",background:showCQ?C.goldS:"#fff",border:`2px solid ${C.gold}`,borderRadius:8,padding:"8px 12px",cursor:"pointer",fontSize:12,fontWeight:700,color:C.gold,display:"flex",alignItems:"center",gap:6,justifyContent:"space-between",transition:"all .15s"}}>
-        <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:14}}>{showCQ?"â¾":"â¸"}</span><span><Ic n="edit" sz={14} c={C.ink}/> Custom Quote Item</span></span>
+        <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:14}}>{showCQ?"▾":"▸"}</span><span><Ic n="edit" sz={14} c={C.ink}/> Custom Quote Item</span></span>
         <span style={{fontSize:10,fontWeight:400,color:C.stone}}>Factory special / custom pricing</span>
       </button>
       {showCQ&&<div style={{border:`1px solid ${C.gold}33`,borderTop:"none",borderRadius:"0 0 8px 8px",padding:"12px",background:C.goldS}}>
         <div style={{display:"flex",flexDirection:"column",gap:8}}>
           <div><label className="lb" style={{color:C.gold}}>Description</label>
-            <textarea value={cqDesc} onChange={e=>setCqDesc(e.target.value)} placeholder="Describe the custom item â e.g. Custom island with waterfall edge, modified 48&quot; pantry..." rows={2} style={{width:"100%",padding:"6px 8px",fontSize:11,border:`1px solid ${C.bdr}`,borderRadius:5,fontFamily:F.b,boxSizing:"border-box",resize:"vertical"}}/>
+            <textarea value={cqDesc} onChange={e=>setCqDesc(e.target.value)} placeholder="Describe the custom item — e.g. Custom island with waterfall edge, modified 48&quot; pantry..." rows={2} style={{width:"100%",padding:"6px 8px",fontSize:11,border:`1px solid ${C.bdr}`,borderRadius:5,fontFamily:F.b,boxSizing:"border-box",resize:"vertical"}}/>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
             <div><label className="lb" style={{color:C.gold}}>List Price ($)</label>
@@ -8335,7 +8367,7 @@ function AddUI({onAdd,onAddCustom}){
                 <input type="file" accept=".pdf" onChange={e=>{const f=e.target.files?.[0];if(f){setCqPdfName(f.name);const reader=new FileReader();reader.onload=ev=>setCqPdf(ev.target.result);reader.readAsDataURL(f)}}} style={{display:"none"}}/>
               </label>
               {cqPdfName&&<span style={{fontSize:10,color:C.stone}}>{cqPdfName}</span>}
-              {cqPdf&&<button onClick={()=>{setCqPdf(null);setCqPdfName("")}} style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:4,padding:"2px 6px",fontSize:10,color:C.red,cursor:"pointer"}}>Ã</button>}
+              {cqPdf&&<button onClick={()=>{setCqPdf(null);setCqPdfName("")}} style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:4,padding:"2px 6px",fontSize:10,color:C.red,cursor:"pointer"}}>×</button>}
             </div>
           </div>
           <button className="bt bp" onClick={()=>{if(!cqDesc.trim()||!cqPrice){alert("Please enter a description and price.");return;}onAddCustom({desc:cqDesc.trim(),price:parseFloat(cqPrice)||0,quoteNum:cqNum.trim(),pdf:cqPdf,pdfName:cqPdfName,q:cqQ,z:cqZ});setCqDesc("");setCqPrice("");setCqNum("");setCqPdf(null);setCqPdfName("");setCqQ(1);}} style={{width:"100%",fontSize:12,padding:"10px",background:C.gold,borderColor:C.gold}}>+ Add Custom Quote Item</button>
@@ -8352,7 +8384,7 @@ const PREFS_SK="ecl_prefs";
 const ldPrefs=()=>{try{return JSON.parse(localStorage.getItem(PREFS_SK)||"{}")}catch{return{}}};
 const svPrefs=p=>{try{localStorage.setItem(PREFS_SK,JSON.stringify(p))}catch{}};
 
-// ââ LoginForm Component ââ
+// ── LoginForm Component ──
 function LoginForm({onLoginSuccess}) {
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState("");
@@ -8508,7 +8540,7 @@ function LoginForm({onLoginSuccess}) {
               try{
                 const{error:e}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin});
                 if(e)throw e;
-                setError("Password reset link sent â check your email");
+                setError("Password reset link sent — check your email");
               }catch(e){setError(e.message);}
               finally{setLoading(false);}
             }} style={{ background:"none", border:"none", color:C.stone, cursor:"pointer", fontSize:13, textDecoration:"underline" }}>
@@ -8545,7 +8577,7 @@ function LoginForm({onLoginSuccess}) {
   );
 }
 
-// ââ PendingApproval Component ââ
+// ── PendingApproval Component ──
 function PendingApproval({user, onLogout}) {
   return (
     <div style={{
@@ -8592,7 +8624,7 @@ function PendingApproval({user, onLogout}) {
   );
 }
 
-// ââ QuotesList Component ââ
+// ── QuotesList Component ──
 function QuotesList({user, profile, onLoadQuote, onClose}) {
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -8692,7 +8724,7 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
           <button onClick={() => setConfirmDeleteId(null)} style={{ background: C.warm, color: C.stone, border: `1px solid ${C.bdr}`, borderRadius: 6, padding: isMob ? "7px 14px" : "3px 8px", fontSize: isMob ? 12 : 10, cursor: "pointer", minHeight: isMob ? 36 : "auto" }}>Cancel</button>
         </div>
       ) : (
-        <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(quote.id); }} title="Delete quote" style={{ background: C.warm, border: `1px solid ${C.bdr}`, cursor: "pointer", fontSize: isMob ? 16 : 14, color: C.stone, padding: isMob ? "10px 12px" : "6px", borderRadius: 6, transition: "all 0.15s", minWidth: isMob ? 44 : "auto", minHeight: isMob ? 44 : "auto", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }} onMouseEnter={(e) => {if(!isMob) e.currentTarget.style.color = C.red}} onMouseLeave={(e) => {if(!isMob) e.currentTarget.style.color = C.stone}}>Ã</button>
+        <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(quote.id); }} title="Delete quote" style={{ background: C.warm, border: `1px solid ${C.bdr}`, cursor: "pointer", fontSize: isMob ? 16 : 14, color: C.stone, padding: isMob ? "10px 12px" : "6px", borderRadius: 6, transition: "all 0.15s", minWidth: isMob ? 44 : "auto", minHeight: isMob ? 44 : "auto", display: "flex", alignItems: "center", justifyContent: "center", WebkitTapHighlightColor: "transparent" }} onMouseEnter={(e) => {if(!isMob) e.currentTarget.style.color = C.red}} onMouseLeave={(e) => {if(!isMob) e.currentTarget.style.color = C.stone}}>×</button>
       ))}
     </div>
   );
@@ -8744,7 +8776,7 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
                 justifyContent: "center",
                 WebkitTapHighlightColor: "transparent",
               }}
-            >Ã</button>
+            >×</button>
           </div>
         </div>
 
@@ -8758,7 +8790,7 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
               {grouped.map((group, gi) => (
                 <div key={gi}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: C.stone, textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 8, padding: "4px 0", borderBottom: `1px solid ${C.bdr}` }}>
-                    {group.label}{group.business ? ` Â· ${group.business}` : ""} <span style={{ fontWeight: 400 }}>({group.quotes.length})</span>
+                    {group.label}{group.business ? ` · ${group.business}` : ""} <span style={{ fontWeight: 400 }}>({group.quotes.length})</span>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: isMob ? "8px" : "6px" }}>
                     {group.quotes.map((quote) => (
@@ -8781,7 +8813,7 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
   );
 }
 
-// ââ AdminPanel Component ââ
+// ── AdminPanel Component ──
 function AdminPanel({supabaseClient: sb, onClose}) {
   const [users, setUsers] = useState([]);
   const [dealers, setDealers] = useState([]);
@@ -8886,7 +8918,7 @@ function AdminPanel({supabaseClient: sb, onClose}) {
       });
       if (signUpErr) throw signUpErr;
       const newUid = signUpData.user?.id;
-      // 2. Update profile with role + dealer (profile may be created by trigger â retry briefly)
+      // 2. Update profile with role + dealer (profile may be created by trigger — retry briefly)
       if (newUid) {
         let retries = 0;
         while (retries < 5) {
@@ -8933,7 +8965,7 @@ function AdminPanel({supabaseClient: sb, onClose}) {
     }}>{count}</span>}</button>
   );
 
-  /* ââ User card sub-component ââ */
+  /* ── User card sub-component ── */
   const UserCard = ({u, showApprove}) => {
     const dl = u.dealer_id ? dealerMap[u.dealer_id] : null;
     return (
@@ -8968,7 +9000,7 @@ function AdminPanel({supabaseClient: sb, onClose}) {
             <div>
               <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Dealer</label>
               <select value={u.dealer_id||""} onChange={e=>assignDealer(u.id,e.target.value?parseInt(e.target.value):null)} className="sel" style={{width:"100%",minHeight:40,fontSize:14}}>
-                <option value="">â None â</option>
+                <option value="">— None —</option>
                 {dealers.map(d=><option key={d.id} value={d.id}>{d.name} ({d.code})</option>)}
               </select>
             </div>
@@ -8984,7 +9016,7 @@ function AdminPanel({supabaseClient: sb, onClose}) {
               placeholder="e.g. 53.9"
               onChange={e=>{const v=parseFloat(e.target.value);if(!isNaN(v))updateUserMultiplier(u.id,Math.max(0,Math.min(1,v/100)));}}
               style={{width:100,minHeight:40,padding:"6px 10px",fontSize:14}}/>
-            <span style={{fontSize:12,color:C.stone}}>{u.discount_pct ? "Ã"+u.discount_pct : ""}</span>
+            <span style={{fontSize:12,color:C.stone}}>{u.discount_pct ? "×"+u.discount_pct : ""}</span>
             <button onClick={()=>deactivateUser(u.id)} title="Deactivate user" style={{marginLeft:"auto",background:"none",border:`1px solid ${C.red}`,color:C.red,borderRadius:8,padding:"6px 12px",fontSize:12,fontWeight:600,cursor:"pointer",minHeight:36}}>Deactivate</button>
           </div>
         )}
@@ -9011,7 +9043,7 @@ function AdminPanel({supabaseClient: sb, onClose}) {
         {/* Header */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16, paddingBottom:12, borderBottom:`1px solid ${C.bdr}` }}>
           <h3 style={{ fontFamily:F.d, fontSize:isMob?18:20, fontWeight:700, color:C.ink }}>Admin Panel</h3>
-          <button onClick={onClose} style={{ background:"none", border:"none", fontSize:28, cursor:"pointer", color:C.stone, minWidth:44, minHeight:44, display:"flex", alignItems:"center", justifyContent:"center" }}>Ã</button>
+          <button onClick={onClose} style={{ background:"none", border:"none", fontSize:28, cursor:"pointer", color:C.stone, minWidth:44, minHeight:44, display:"flex", alignItems:"center", justifyContent:"center" }}>×</button>
         </div>
 
         {/* Toast */}
@@ -9024,7 +9056,7 @@ function AdminPanel({supabaseClient: sb, onClose}) {
           {tabBtn("dealers","Dealers",0)}
         </div>
 
-        {/* ââ PENDING TAB ââ */}
+        {/* ── PENDING TAB ── */}
         {tab==="pending" && (
           <div>
             {pendingUsers.length===0 ? (
@@ -9037,7 +9069,7 @@ function AdminPanel({supabaseClient: sb, onClose}) {
           </div>
         )}
 
-        {/* ââ USERS TAB ââ */}
+        {/* ── USERS TAB ── */}
         {tab==="users" && (
           <div>
             {/* Invite User form */}
@@ -9064,7 +9096,7 @@ function AdminPanel({supabaseClient: sb, onClose}) {
                 <div>
                   <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Assign to Dealer</label>
                   <select value={invDealer} onChange={e=>setInvDealer(e.target.value)} className="sel" style={{width:"100%",minHeight:44,fontSize:14}}>
-                    <option value="">â None â</option>
+                    <option value="">— None —</option>
                     {dealers.map(d=><option key={d.id} value={d.id}>{d.name} ({d.code})</option>)}
                   </select>
                 </div>
@@ -9073,7 +9105,7 @@ function AdminPanel({supabaseClient: sb, onClose}) {
                 {inviting ? "Sending invite..." : "Send Invite"}
               </button>
               <div style={{fontSize:11,color:C.stone,marginTop:8,lineHeight:1.4}}>
-                User will receive an email to set their password. They'll be pre-approved with the role and dealer you select â no pending step.
+                User will receive an email to set their password. They'll be pre-approved with the role and dealer you select — no pending step.
               </div>
             </div>
 
@@ -9084,7 +9116,7 @@ function AdminPanel({supabaseClient: sb, onClose}) {
           </div>
         )}
 
-        {/* ââ DEALERS TAB ââ */}
+        {/* ── DEALERS TAB ── */}
         {tab==="dealers" && (
           <div>
             <div style={sectionHead}>Add New Dealer</div>
@@ -9130,8 +9162,8 @@ function AdminPanel({supabaseClient: sb, onClose}) {
   );
 }
 
-// ââ AuthWrapper Component ââ
-/* ââ SetPasswordForm â shown after user clicks password-reset link ââ */
+// ── AuthWrapper Component ──
+/* ── SetPasswordForm — shown after user clicks password-reset link ── */
 function SetPasswordForm({onDone}) {
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
@@ -9298,9 +9330,9 @@ function AuthWrapper() {
 }
 
 
-// âââââââââââââââââââââââââââââââââââââââââââââââââââ
-// ââ ADMIN DASHBOARD â Full-page admin view
-// âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ═══════════════════════════════════════════════════
+// ██ ADMIN DASHBOARD — Full-page admin view
+// ═══════════════════════════════════════════════════
 function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
   const sb = supabase;
   const [users, setUsers] = useState([]);
@@ -9347,7 +9379,7 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
     setLoading(false);
   };
 
-  /* ââ User helpers ââ */
+  /* ── User helpers ── */
   const updateUser = async (userId, fields) => {
     try {
       const { error } = await sb.from("profiles").update(fields).eq("id", userId);
@@ -9365,7 +9397,7 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
     if (await updateUser(id, { role: "pending" })) flash("User deactivated");
   };
 
-  /* ââ Invite ââ */
+  /* ── Invite ── */
   const inviteUser = async () => {
     if (!invEmail) return;
     setInviting(true);
@@ -9396,7 +9428,7 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
     finally { setInviting(false); }
   };
 
-  /* ââ Dealer helpers ââ */
+  /* ── Dealer helpers ── */
   const createDealer = async () => {
     if (!newDealerName || !newDealerCode) return;
     setDlrLoading(true);
@@ -9418,14 +9450,14 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
     } catch (err) { console.error(err); }
   };
 
-  /* ââ Derived data ââ */
+  /* ── Derived data ── */
   const pendingUsers = users.filter(u => u.role === "pending");
   const activeUsers = users.filter(u => u.role !== "pending");
   const userMap = {}; users.forEach(u => { userMap[u.id] = u; });
   const dealerMap = {}; dealers.forEach(d => { dealerMap[d.id] = d; });
   const pendingCount = pendingUsers.length;
 
-  /* ââ Styles ââ */
+  /* ── Styles ── */
   const sectionHead = { fontSize:13, fontWeight:700, color:C.ink, textTransform:"uppercase", letterSpacing:"0.05em", marginBottom:10 };
   const cardStyle = { background:C.paper, border:`1px solid ${C.bdr}`, borderRadius:10, padding:mob?10:14 };
   const tabBtn = (id, label, badge) => (
@@ -9440,7 +9472,7 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
     }}>{badge}</span>}</button>
   );
 
-  /* ââ User card ââ */
+  /* ── User card ── */
   const UserCard = ({u, showApprove}) => (
     <div style={{...cardStyle, ...(showApprove?{borderLeft:`4px solid ${C.acc}`}:{})}}>
       <div style={{marginBottom:8}}>
@@ -9465,7 +9497,7 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
           <div>
             <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Dealer</label>
             <select value={u.dealer_id||""} onChange={e=>assignDealer(u.id,e.target.value?parseInt(e.target.value):null)} className="sel" style={{width:"100%",minHeight:40,fontSize:14}}>
-              <option value="">â None â</option>
+              <option value="">— None —</option>
               {dealers.map(d=><option key={d.id} value={d.id}>{d.name} ({d.code})</option>)}
             </select>
           </div>
@@ -9478,7 +9510,7 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
               placeholder="e.g. 53.9"
               onChange={e=>{const v=parseFloat(e.target.value);if(!isNaN(v))updateUserMultiplier(u.id,Math.max(0,Math.min(1,v/100)));}}
               style={{width:100,minHeight:40,padding:"6px 10px",fontSize:14}}/>
-            <span style={{fontSize:12,color:C.stone}}>{u.discount_pct ? "Ã"+u.discount_pct : ""}</span>
+            <span style={{fontSize:12,color:C.stone}}>{u.discount_pct ? "×"+u.discount_pct : ""}</span>
           </div>
         )}
         <div style={{display:"flex",justifyContent:"flex-end",marginTop:6}}>
@@ -9497,7 +9529,7 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
           <span style={{fontSize:10,padding:"3px 8px",borderRadius:4,background:C.gold+"22",color:C.gold,fontWeight:600,border:`1px solid ${C.gold}44`}}>ADMIN</span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-          <button onClick={()=>onNavigate("dashboard")} style={{background:"rgba(255,255,255,.12)",color:"#fff",border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 12px",fontSize:12,fontWeight:600,cursor:"pointer",minHeight:36}}>â Hub</button>
+          <button onClick={()=>onNavigate("dashboard")} style={{background:"rgba(255,255,255,.12)",color:"#fff",border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 12px",fontSize:12,fontWeight:600,cursor:"pointer",minHeight:36}}>← Hub</button>
           <button onClick={()=>onNavigate("estimator")} style={{background:"rgba(255,255,255,.12)",color:"#fff",border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 12px",fontSize:12,fontWeight:600,cursor:"pointer",minHeight:36}}>Estimator</button>
           <span style={{fontSize:11,color:C.stL,fontFamily:F.b}}>{profile?.email || ""}</span>
           <button onClick={onLogout} style={{background:"none",border:`1px solid ${C.stL}44`,borderRadius:6,padding:"5px 12px",color:C.stL,cursor:"pointer",fontSize:11}}>Logout</button>
@@ -9531,11 +9563,11 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
           {tabBtn("dealers","Dealers",0)}
         </div>
 
-        {/* ââ QUOTES TAB ââ */}
+        {/* ── QUOTES TAB ── */}
         {tab==="quotes" && (
           <div style={{background:C.paper,borderRadius:12,border:`1px solid ${C.bdr}`,overflow:"hidden"}}>
             <div style={{padding:"14px 20px",borderBottom:`1px solid ${C.bdr}`}}>
-              <h2 style={{fontFamily:F.d,fontSize:16,fontWeight:700,color:C.ink,margin:0}}>All Quotes â All Users</h2>
+              <h2 style={{fontFamily:F.d,fontSize:16,fontWeight:700,color:C.ink,margin:0}}>All Quotes — All Users</h2>
             </div>
             {loading ? (
               <div style={{padding:24,textAlign:"center",color:C.stone}}>Loading...</div>
@@ -9567,9 +9599,9 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
                           onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                           <td style={{padding:"10px 14px"}}>
                             <div style={{fontWeight:600,color:C.ink}}>{q.name || "Untitled"}</div>
-                            {mob && <div style={{fontSize:11,color:C.stone,marginTop:2}}>{u?.full_name || u?.email || "â"}</div>}
+                            {mob && <div style={{fontSize:11,color:C.stone,marginTop:2}}>{u?.full_name || u?.email || "—"}</div>}
                           </td>
-                          {!mob&&<td style={{padding:"10px 14px",color:C.stone}}>{u?.full_name || u?.email || "â"}</td>}
+                          {!mob&&<td style={{padding:"10px 14px",color:C.stone}}>{u?.full_name || u?.email || "—"}</td>}
                           <td style={{padding:"10px 14px",color:C.stone}}>{itemCount}</td>
                           {!mob&&<td style={{padding:"10px 14px",color:C.stone}}>{sp}</td>}
                           {!mob&&<td style={{padding:"10px 14px",color:C.stone}}>{door}</td>}
@@ -9584,7 +9616,7 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
           </div>
         )}
 
-        {/* ââ PENDING TAB ââ */}
+        {/* ── PENDING TAB ── */}
         {tab==="pending" && (
           <div>
             {pendingUsers.length===0 ? (
@@ -9597,7 +9629,7 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
           </div>
         )}
 
-        {/* ââ USERS TAB ââ */}
+        {/* ── USERS TAB ── */}
         {tab==="users" && (
           <div>
             {/* Invite form */}
@@ -9623,7 +9655,7 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
                 <div>
                   <label style={{fontSize:11,fontWeight:600,color:C.stone,display:"block",marginBottom:3}}>Assign to Dealer</label>
                   <select value={invDealer} onChange={e=>setInvDealer(e.target.value)} className="sel" style={{width:"100%",minHeight:44,fontSize:14}}>
-                    <option value="">â None â</option>
+                    <option value="">— None —</option>
                     {dealers.map(d=><option key={d.id} value={d.id}>{d.name} ({d.code})</option>)}
                   </select>
                 </div>
@@ -9631,7 +9663,7 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
               <button onClick={inviteUser} disabled={inviting||!invEmail} className="bt bp" style={{width:"100%",minHeight:48,fontSize:15,fontWeight:700,background:"#16a34a",border:"none",opacity:!invEmail?0.5:1}}>
                 {inviting ? "Sending invite..." : "Send Invite"}
               </button>
-              <div style={{fontSize:11,color:C.stone,marginTop:8,lineHeight:1.4}}>User will receive an email to set their password. Pre-approved â no pending step.</div>
+              <div style={{fontSize:11,color:C.stone,marginTop:8,lineHeight:1.4}}>User will receive an email to set their password. Pre-approved — no pending step.</div>
             </div>
 
             <div style={sectionHead}>{activeUsers.length} Active User{activeUsers.length!==1?"s":""}</div>
@@ -9641,7 +9673,7 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
           </div>
         )}
 
-        {/* ââ DEALERS TAB ââ */}
+        {/* ── DEALERS TAB ── */}
         {tab==="dealers" && (
           <div>
             <div style={sectionHead}>Add New Dealer</div>
@@ -9687,9 +9719,9 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
   );
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââââââââ
-// ââ DASHBOARD â Hub Landing Page
-// âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ═══════════════════════════════════════════════════
+// ██ DASHBOARD — Hub Landing Page
+// ═══════════════════════════════════════════════════
 function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9714,23 +9746,23 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
 
   const WfIcon = ({type, color, size=22}) => {
     const s = {width:size,height:size,fill:"none",stroke:color,strokeWidth:1.5,strokeLinecap:"round",strokeLinejoin:"round"};
-    /* Standard Order â clipboard with list lines, SF Symbols doc.text style */
+    /* Standard Order — clipboard with list lines, SF Symbols doc.text style */
     if(type==="estimator") return (<svg viewBox="0 0 24 24" style={s}>
       <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
       <rect x="9" y="2" width="6" height="4" rx="1.5"/>
       <line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="15.5" x2="13" y2="15.5"/>
     </svg>);
-    /* Express Parts â paper plane, fast + lightweight, SF Symbols paperplane style */
+    /* Express Parts — paper plane, fast + lightweight, SF Symbols paperplane style */
     if(type==="express") return (<svg viewBox="0 0 24 24" style={s}>
       <path d="M21.5 2.5l-9.1 18.8a.3.3 0 0 1-.5 0L8.8 14.1a.3.3 0 0 0-.2-.2L1.2 11a.3.3 0 0 1 0-.5L21.5 2.5z"/>
       <line x1="21.5" y1="2.5" x2="8.7" y2="14"/>
     </svg>);
-    /* Warranty â shield with small checkmark, SF Symbols checkmark.shield style */
+    /* Warranty — shield with small checkmark, SF Symbols checkmark.shield style */
     if(type==="warranty") return (<svg viewBox="0 0 24 24" style={s}>
       <path d="M12 2l7.5 3.5v5c0 5.25-3.19 10.15-7.5 11.5C7.69 20.65 4.5 15.75 4.5 10.5v-5L12 2z"/>
       <polyline points="9 12.5 11 14.5 15 10.5" strokeWidth="1.6"/>
     </svg>);
-    /* Samples â overlapping swatches / color chips, SF Symbols paintpalette style */
+    /* Samples — overlapping swatches / color chips, SF Symbols paintpalette style */
     if(type==="samples") return (<svg viewBox="0 0 24 24" style={s}>
       <rect x="3" y="3" width="11" height="14" rx="2.5"/>
       <rect x="10" y="7" width="11" height="14" rx="2.5"/>
@@ -9741,7 +9773,7 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
   };
 
   const workflows = [
-    { id: "estimator", title: "Standard Order", desc: "Full cabinetry estimator â build complete kitchen, bath & closet orders", color: C.acc, bg: C.accS },
+    { id: "estimator", title: "Standard Order", desc: "Full cabinetry estimator — build complete kitchen, bath & closet orders", color: C.acc, bg: C.accS },
     { id: "express", title: "Express Parts", desc: "Quick order for replacement doors, drawer fronts, or individual parts", color: "#7c3aed", bg: "#ede9fe" },
     { id: "warranty", title: "Warranty Request", desc: "Submit no-charge warranty replacements with original order reference", color: "#0369a1", bg: "#e0f2fe" },
     { id: "samples", title: "Order Samples", desc: "Sample doors, drawer fronts, color blocks & color chips", color: "#b45309", bg: "#fef3c7" },
@@ -9801,7 +9833,7 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
           ) : quotes.length === 0 ? (
             <div style={{padding:32,textAlign:"center"}}>
               <div style={{marginBottom:8}}><Ic n="clip" sz={32} c={C.stL}/></div>
-              <div style={{fontSize:13,color:C.stone,fontFamily:F.b}}>No projects yet â start your first order above!</div>
+              <div style={{fontSize:13,color:C.stone,fontFamily:F.b}}>No projects yet — start your first order above!</div>
             </div>
           ) : (
             <div>
@@ -9820,7 +9852,7 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
                   >
                     <div>
                       <div style={{fontFamily:F.b,fontSize:13,fontWeight:600,color:C.ink}}>{q.name || "Untitled"}</div>
-                      <div style={{fontSize:11,color:C.stone,marginTop:2}}>{itemCount} item{itemCount !== 1 ? "s" : ""}{species ? ` Â· ${species}` : ""}{door ? ` Â· ${door}` : ""}</div>
+                      <div style={{fontSize:11,color:C.stone,marginTop:2}}>{itemCount} item{itemCount !== 1 ? "s" : ""}{species ? ` · ${species}` : ""}{door ? ` · ${door}` : ""}</div>
                     </div>
                     <div style={{textAlign:"right"}}>
                       <div style={{fontSize:10.5,color:C.stone}}>{new Date(q.updated_at).toLocaleDateString()}</div>
@@ -9843,9 +9875,9 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
   );
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââââââââ
-// ââ SHARED: SKU Search Dropdown (used by Express & Warranty)
-// âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ═══════════════════════════════════════════════════
+// ██ SHARED: SKU Search Dropdown (used by Express & Warranty)
+// ═══════════════════════════════════════════════════
 function SkuSearchInput({value, onSelect, placeholder, sp, cx, door, drwF, drwBox, catalogFilter}) {
   const [sr, setSr] = useState("");
   const [open, setOpen] = useState(false);
@@ -9884,7 +9916,7 @@ function SkuSearchInput({value, onSelect, placeholder, sp, cx, door, drwF, drwBo
                 onMouseEnter={e => e.currentTarget.style.background = C.accS}
                 onMouseLeave={e => e.currentTarget.style.background = "transparent"}
               >
-                <span><strong>{SKU_LABELS[c.s] || c.s}</strong> <span style={{color:C.stone,fontSize:10}}>{c.r} Â· {TN[c.t]||c.t}</span></span>
+                <span><strong>{SKU_LABELS[c.s] || c.s}</strong> <span style={{color:C.stone,fontSize:10}}>{c.r} · {TN[c.t]||c.t}</span></span>
                 <span style={{fontFamily:F.m,fontWeight:600,color:C.acc}}>{fm(unitP)}</span>
               </div>
             );
@@ -9895,7 +9927,7 @@ function SkuSearchInput({value, onSelect, placeholder, sp, cx, door, drwF, drwBo
   );
 }
 
-// ââ Shared Spec Selector Bar ââ
+// ── Shared Spec Selector Bar ──
 function SpecBar({sp, setSp, cx, setCx, door, setDoor, drwF, setDrwF, drwBox, setDrwBox, mob, labelStyle, fieldStyle}) {
   return (
     <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr 1fr",gap:10}}>
@@ -9933,9 +9965,9 @@ function SpecBar({sp, setSp, cx, setCx, door, setDoor, drwF, setDrwF, drwBox, se
   );
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââââââââ
-// ââ WARRANTY REQUEST â Lightweight Form (with pricing)
-// âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ═══════════════════════════════════════════════════
+// ██ WARRANTY REQUEST — Lightweight Form (with pricing)
+// ═══════════════════════════════════════════════════
 function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
   const [mob, setMob] = useState(false);
   const [ntf, setNtf] = useState(null);
@@ -10036,7 +10068,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
       } catch(e) {}
     };
 
-    // Page 1 â Cover Sheet: Order Information
+    // Page 1 — Cover Sheet: Order Information
     setText("Business Name", dealerName);
     setText("Customer #", dealerCode);
     setText("P.O. Number", wPO);
@@ -10051,9 +10083,9 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
     setText("Contact Phone", contactPhone);
     setText("Contact Email", contactEmail);
     setText("Original Order Number", origOrderNum);
-    setText("Previous Warranty Order Number", prevWarranty === "Yes" ? "Yes â see notes" : "");
+    setText("Previous Warranty Order Number", prevWarranty === "Yes" ? "Yes — see notes" : "");
 
-    // Page 2 â Item List: header + special instructions (smaller font)
+    // Page 2 — Item List: header + special instructions (smaller font)
     try { const siField = form.getTextField("Special Instructions"); siField.setFontSize(7); siField.setText(String(warrantyNotes || "")); } catch(e) {}
 
     // Glaze
@@ -10144,7 +10176,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
     <div style={{minHeight:"100vh",background:C.warm}}>
       <div style={{background:C.ink,padding:"12px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <button onClick={onBack} style={{background:"none",border:"none",cursor:"pointer",color:C.stL,fontSize:18,padding:"0 4px"}}>â¹</button>
+          <button onClick={onBack} style={{background:"none",border:"none",cursor:"pointer",color:C.stL,fontSize:18,padding:"0 4px"}}>‹</button>
           <span style={{fontFamily:F.d,fontSize:mob?15:18,fontWeight:700,color:C.cream}}>Warranty Request</span>
           <span style={{fontSize:9,padding:"2px 7px",borderRadius:4,background:"#0369a122",color:"#0ea5e9",fontWeight:600,border:"1px solid #0369a144"}}>ECL-WRTY</span>
         </div>
@@ -10225,13 +10257,13 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
                 <div><label style={labelStyle}>Hinge(s)</label><input value={item.hinge} onChange={e=>updateItem(item.id,"hinge",e.target.value)} placeholder="" style={fieldStyle} /></div>
               </div>
               {item.sku && <div style={{marginTop:6,display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:11,fontFamily:F.m}}>
-                <span style={{color:C.stone}}>{SKU_LABELS[item.sku] || item.sku} Ã {item.qty}</span>
+                <span style={{color:C.stone}}>{SKU_LABELS[item.sku] || item.sku} × {item.qty}</span>
                 <span><span style={{textDecoration:"line-through",color:C.stone,marginRight:8}}>{fm(item.unitPrice * item.qty)}</span><strong style={{color:"#0369a1"}}>$0 warranty</strong></span>
               </div>}
             </div>
           ))}
           {origTotal > 0 && <div style={{textAlign:"right",marginTop:8,padding:"8px 12px",background:"#e0f2fe",borderRadius:6,border:"1px solid #0369a122"}}>
-            <span style={{fontSize:11,fontFamily:F.b,color:"#0c4a6e"}}>Original value: <span style={{textDecoration:"line-through"}}>{fm(origTotal)}</span> â <strong>$0.00 (Warranty)</strong></span>
+            <span style={{fontSize:11,fontFamily:F.b,color:"#0c4a6e"}}>Original value: <span style={{textDecoration:"line-through"}}>{fm(origTotal)}</span> → <strong>$0.00 (Warranty)</strong></span>
           </div>}
         </div>
 
@@ -10242,7 +10274,7 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
         </div>
 
         <div style={{display:"flex",gap:10,justifyContent:"center"}}>
-          <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>â Back to Hub</button>
+          <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
           <button onClick={()=>{const missing=[];if(!origOrderNum)missing.push("Original Order #");if(!dealerName)missing.push("Dealer Name");if(missing.length){fl(`Please fill: ${missing.join(", ")}`);return;}generateWarrantyPdf()}} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)",...(!origOrderNum?{opacity:0.7}:{})}}><Ic n="shield" sz={13} c="#0369a1"/> Generate Warranty PDF{!origOrderNum?" !":""}</button>
         </div>
       </div>
@@ -10250,9 +10282,9 @@ function WarrantyRequest({user, profile, supabase, onLogout, onBack}) {
   );
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââââââââ
-// ââ SAMPLE ORDERING â 4 Sample Type Cards
-// âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ═══════════════════════════════════════════════════
+// ██ SAMPLE ORDERING — 4 Sample Type Cards
+// ═══════════════════════════════════════════════════
 function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
   const [mob, setMob] = useState(false);
   const [ntf, setNtf] = useState(null);
@@ -10301,7 +10333,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       .map(([species, colors]) => ({ species, colors: [...colors].sort() }))
       .sort((a, b) => a.species.localeCompare(b.species));
   }, []);
-  // Same list but with OW (Olde World) colors removed â used for color chips
+  // Same list but with OW (Olde World) colors removed — used for color chips
   const COLORS_BY_SPECIES_NO_OW = useMemo(() => {
     return COLORS_BY_SPECIES.map(g => ({ species: g.species, colors: g.colors.filter(c => !c.startsWith("OW-")) })).filter(g => g.colors.length > 0);
   }, [COLORS_BY_SPECIES]);
@@ -10311,10 +10343,10 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
   const COLORS_LAMINATE = useMemo(() => COLORS_BY_SPECIES.filter(g => LAMINATE_SPECIES.has(g.species)), [COLORS_BY_SPECIES]);
 
   const sampleTypes = [
-    { id: "sd85", icon: "clip", title: "Sample Door 8Â½Ã11 (Standard)", price: "$65+", code: "ECL-SD-STD", desc: "8.5 x 11 inch standard sample door â $65 list + species & construction upcharges. Not available in Walnut, Rustic Walnut, Rift White Oak, QS White Oak, or TFL." },
-    { id: "sd12std", icon: "door", title: "Sample Door 12Â½Ã15Â½ (Standard)", price: "$155+", code: "ECL-SD-STD12", desc: "12.5 x 15.5 inch sample door â standard lead time. $155 list + species & construction upcharges." },
-    { id: "sd", icon: "bolt", title: "Sample Door 12Â½Ã15Â½ (Express)", price: "$350", code: "ECL-SD", desc: "12.5 x 15.5 inch sample door â express 5-day lead time" },
-    { id: "ffd", icon: "drawer", title: "Sample Door & Drawer Front 14Â½Ã24", price: "Standard Lead Time", code: "ECL-SDD-F", desc: "14.5 x 24 inch pinned sample door and drawer front â standard lead time. Outputs on Eclipse Sample Door & Drawer Front order form." },
+    { id: "sd85", icon: "clip", title: "Sample Door 8½×11 (Standard)", price: "$65+", code: "ECL-SD-STD", desc: "8.5 x 11 inch standard sample door — $65 list + species & construction upcharges. Not available in Walnut, Rustic Walnut, Rift White Oak, QS White Oak, or TFL." },
+    { id: "sd12std", icon: "door", title: "Sample Door 12½×15½ (Standard)", price: "$155+", code: "ECL-SD-STD12", desc: "12.5 x 15.5 inch sample door — standard lead time. $155 list + species & construction upcharges." },
+    { id: "sd", icon: "bolt", title: "Sample Door 12½×15½ (Express)", price: "$350", code: "ECL-SD", desc: "12.5 x 15.5 inch sample door — express 5-day lead time" },
+    { id: "ffd", icon: "drawer", title: "Sample Door & Drawer Front 14½×24", price: "Standard Lead Time", code: "ECL-SDD-F", desc: "14.5 x 24 inch pinned sample door and drawer front — standard lead time. Outputs on Eclipse Sample Door & Drawer Front order form." },
     { id: "rcbs", icon: "swatch", title: "Color Block Samples", price: "$250/set", code: "ECL-RCBS", desc: "Set of up to 10 replacement color block samples" },
     { id: "rccs", icon: "swatch", title: "Color Chip Samples", price: "Per 10", code: "ECL-RCCS", desc: "Set of up to 10 replacement color chip samples" },
   ];
@@ -10324,7 +10356,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
     svPrefs({...ldPrefs(),dealerCode,contactPhone});
     const st = sampleTypes.find(s => s.id === activeType);
 
-    // SD 8Â½Ã11 outputs on the actual Express Parcel form
+    // SD 8½×11 outputs on the actual Express Parcel form
     if (activeType === "sd85") {
       const { PDFDocument, PDFName: PN, rgb: RGB } = await import("pdf-lib");
       let templateBytes;
@@ -10366,12 +10398,12 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       setText("Contact Email", contactEmail);
       setText("Special Instructions", shipAddr ? "Ship To: " + shipAddr : "");
 
-      // Item line 1: the SD 8Â½Ã11
+      // Item line 1: the SD 8½×11
       setText("Quantity 1", "1");
       setText("Item Number 1", "1");
       const fakeItem = { s: "SD81/2X11", t: "A", r: "U2", p: 65, q: 1, len: 0, sqin: 0, sqW: 0, sqH: 0, dc: 0, drc: 0, brot: 0, rbs: false, mods: {}, rot: "", rotQ: 0, rot2: "", rot2Q: 0, so: null };
       const { u: sdPrice } = cp(fakeItem, sampleSp, "Standard", "HNVR", "DF-HNVR", "5/8-STD");
-      setText("Description 1", "Sample Door 8Â½Ã11 (" + samplePanel + ") â " + sampleSp);
+      setText("Description 1", "Sample Door 8½×11 (" + samplePanel + ") — " + sampleSp);
       setText("Price 1", fm(sdPrice));
 
       // X-marks: Glaze
@@ -10405,7 +10437,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       return;
     }
 
-    // SD 12Â½Ã15Â½ Standard outputs on the actual Eclipse Sample Door Form
+    // SD 12½×15½ Standard outputs on the actual Eclipse Sample Door Form
     if (activeType === "sd12std") {
       const { PDFDocument, PDFName: PN, rgb: RGB } = await import("pdf-lib");
       let templateBytes;
@@ -10482,7 +10514,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       return;
     }
 
-    // SD 12Â½Ã15Â½ Express outputs on the actual Eclipse Sample 12Â½Ã15Â½ Door Form
+    // SD 12½×15½ Express outputs on the actual Eclipse Sample 12½×15½ Door Form
     if (activeType === "sd") {
       const { PDFDocument } = await import("pdf-lib");
       let templateBytes;
@@ -10567,7 +10599,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       return;
     }
 
-    // Sample Door & Drawer Front 14Â½Ã24 outputs on the actual Eclipse Sample Door & Drawer Front Form
+    // Sample Door & Drawer Front 14½×24 outputs on the actual Eclipse Sample Door & Drawer Front Form
     if (activeType === "ffd") {
       const { PDFDocument, PDFName: PN, rgb: RGB } = await import("pdf-lib");
       let templateBytes;
@@ -10645,7 +10677,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       return;
     }
 
-    // Color Block Samples â fill actual Eclipse Replacement Color Block Samples Form
+    // Color Block Samples — fill actual Eclipse Replacement Color Block Samples Form
     if (activeType === "rcbs") {
       const { PDFDocument } = await import("pdf-lib");
       let templateBytes;
@@ -10692,7 +10724,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       return;
     }
 
-    // Color Chip Samples â fill actual Eclipse Replacement Color Chip Samples Form
+    // Color Chip Samples — fill actual Eclipse Replacement Color Chip Samples Form
     if (activeType === "rccs") {
       const { PDFDocument } = await import("pdf-lib");
       let templateBytes;
@@ -10749,7 +10781,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
     <div style={{minHeight:"100vh",background:C.warm}}>
       <div style={{background:C.ink,padding:"12px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <button onClick={onBack} style={{background:"none",border:"none",cursor:"pointer",color:C.stL,fontSize:18,padding:"0 4px"}}>â¹</button>
+          <button onClick={onBack} style={{background:"none",border:"none",cursor:"pointer",color:C.stL,fontSize:18,padding:"0 4px"}}>‹</button>
           <span style={{fontFamily:F.d,fontSize:mob?15:18,fontWeight:700,color:C.cream}}>Order Samples</span>
           <span style={{fontSize:9,padding:"2px 7px",borderRadius:4,background:"#b4530922",color:"#f59e0b",fontWeight:600,border:"1px solid #b4530944"}}>SAMPLES</span>
         </div>
@@ -10782,16 +10814,16 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
               ))}
             </div>
             <div style={{textAlign:"center",marginTop:20}}>
-              <button onClick={onBack} style={{padding:"8px 20px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>â Back to Hub</button>
+              <button onClick={onBack} style={{padding:"8px 20px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
             </div>
           </>
         ) : (
           <>
-            <button onClick={() => setActiveType(null)} style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.acc,fontFamily:F.b,fontWeight:600,marginBottom:14,display:"block"}}>â Back to sample types</button>
+            <button onClick={() => setActiveType(null)} style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.acc,fontFamily:F.b,fontWeight:600,marginBottom:14,display:"block"}}>← Back to sample types</button>
 
             <div style={{background:"#fef3c7",border:"1px solid #b4530933",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:11.5,color:"#92400e",fontFamily:F.b,display:"flex",alignItems:"center",gap:8}}>
               <Ic n={sampleTypes.find(s=>s.id===activeType)?.icon} sz={18} c="#92400e"/>
-              <span><strong>{sampleTypes.find(s=>s.id===activeType)?.title}</strong> â {sampleTypes.find(s=>s.id===activeType)?.price}</span>
+              <span><strong>{sampleTypes.find(s=>s.id===activeType)?.title}</strong> — {sampleTypes.find(s=>s.id===activeType)?.price}</span>
             </div>
 
             {/* Dealer & Shipping */}
@@ -10814,7 +10846,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
               </div>
             </div>
 
-            {/* Specs â varies by type */}
+            {/* Specs — varies by type */}
             {(activeType === "sd" || activeType === "ffd" || activeType === "sd85" || activeType === "sd12std") && (
               <div style={{background:C.paper,borderRadius:10,border:`1px solid ${C.bdr}`,padding:"16px 18px",marginBottom:14}}>
                 <div style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.ink,marginBottom:12}}>Sample Specifications</div>
@@ -10824,7 +10856,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
                   {activeType==="sd85"&&<div><label style={labelStyle}>Panel Type</label><select value={samplePanel} onChange={e=>setSamplePanel(e.target.value)} style={fieldStyle}><option value="Raised">Raised</option><option value="Recessed">Recessed</option></select></div>}
                   <div><label style={labelStyle}>Color / Finish</label><select value={sampleColor} onChange={e=>setSampleColor(e.target.value)} style={fieldStyle}><option value="">-- Select --</option>{(FINISH_COLORS[sampleSp]||[]).map(c=><option key={c} value={c}>{c}</option>)}</select></div>
                   <div><label style={labelStyle}>Edge Profile</label><select value={sampleEdge} onChange={e=>setSampleEdge(e.target.value)} style={fieldStyle}>{["None","100","150","350","400","750"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
-                  <div><label style={labelStyle}>Glaze</label><select value={sampleGlaze} onChange={e=>setSampleGlaze(e.target.value)} style={fieldStyle}>{["None","Black","Mocha","Van Dyke","Nickel","CafÃ©","Slate","Graphite"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+                  <div><label style={labelStyle}>Glaze</label><select value={sampleGlaze} onChange={e=>setSampleGlaze(e.target.value)} style={fieldStyle}>{["None","Black","Mocha","Van Dyke","Nickel","Café","Slate","Graphite"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
                   <div><label style={labelStyle}>Finish Technique</label><select value={sampleCharT} onChange={e=>setSampleCharT(e.target.value)} style={fieldStyle}>{["NONE","Aged","Wearing","Sand-through"].map(v=><option key={v} value={v}>{v === "NONE" ? "None" : v}</option>)}</select></div>
                 </div>
               </div>
@@ -10863,7 +10895,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
                 <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:8}}>
                   {colorSelections.map((c, i) => {
                     const colorList = activeType === "rccs" ? COLORS_BY_SPECIES_NO_OW : blockColorMode === "laminate" ? COLORS_LAMINATE : COLORS_PAINT_STAIN;
-                    return <div key={i}><label style={labelStyle}>Color {i+1}</label><select value={c} onChange={e=>{const n=[...colorSelections];n[i]=e.target.value;setColorSelections(n)}} style={fieldStyle}><option value="">â Select Color â</option>{colorList.map(g=><optgroup key={g.species} label={g.species}>{g.colors.map(clr=><option key={g.species+"-"+clr} value={clr}>{clr}</option>)}</optgroup>)}</select></div>;
+                    return <div key={i}><label style={labelStyle}>Color {i+1}</label><select value={c} onChange={e=>{const n=[...colorSelections];n[i]=e.target.value;setColorSelections(n)}} style={fieldStyle}><option value="">— Select Color —</option>{colorList.map(g=><optgroup key={g.species} label={g.species}>{g.colors.map(clr=><option key={g.species+"-"+clr} value={clr}>{clr}</option>)}</optgroup>)}</select></div>;
                   })}
                 </div>
               </div>
@@ -10871,7 +10903,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
 
             {/* Actions */}
             <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:18}}>
-              <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>â Back to Hub</button>
+              <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
               <button onClick={generateSamplePdf} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)"}}><Ic n="clip" sz={13} c="#fff"/> Generate Sample Order PDF</button>
             </div>
           </>
@@ -10881,9 +10913,9 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
   );
 }
 
-// âââââââââââââââââââââââââââââââââââââââââââââââââââ
-// ââ EXPRESS PARTS ORDER â Parcel/Truck/DDF (full pricing + mods)
-// âââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ═══════════════════════════════════════════════════
+// ██ EXPRESS PARTS ORDER — Parcel/Truck/DDF (full pricing + mods)
+// ═══════════════════════════════════════════════════
 // Express Parcel: only parts/accessories, no cabinets, no doors/drawer fronts
 const EXPRESS_PARCEL_FILTER = (c) => {
   // Allow mouldings (toe kick, crown, etc.)
@@ -11006,7 +11038,7 @@ const [poLocation, setPoLocation] = useState("");
   const grandTotal = itemTotals.reduce((s, t) => s + t.total, 0);
 
   const expressTypes = [
-    { id: "ddf", icon: "door", title: "Door & Drawer Fronts Only", code: "ECL-EXP-DDF", desc: "Express order for doors and drawer fronts only â ships in 5 working days", ship: "UPS/FedEx" },
+    { id: "ddf", icon: "door", title: "Door & Drawer Fronts Only", code: "ECL-EXP-DDF", desc: "Express order for doors and drawer fronts only — ships in 5 working days", ship: "UPS/FedEx" },
     { id: "parcel", icon: "send", title: "Express Parcel", code: "ECL-EXP-P", desc: "Smaller express orders that ship via UPS/FedEx in 5 working days", ship: "UPS/FedEx" },
     { id: "truck", icon: "send", title: "Express Truck", code: "ECL-EXP-T", desc: "Larger express orders shipped via common carrier (freight collect) in 5 working days", ship: "Common Carrier (Freight Collect)" },
   ];
@@ -11101,7 +11133,7 @@ setText("P.O. Location", poLocation);
         setText("Item Number " + n, item.s);
         setText("Quantity " + n, item.q);
         const ddfLabel = item.s === "LSD" ? "Loose Door" : item.s === "SLBDF" ? "Loose Slab Drawer Front" : item.s === "5PDF" ? "Loose 5 Piece Drawer Front" : (DDF_TYPES.find(d => d.v === item.s)?.l || item.s);
-        const desc = (item.cabinetRef ? item.cabinetRef + " " : "") + ddfLabel + (item.sqW && item.sqH ? " " + item.sqW + '"Ã' + item.sqH + '"' : "") + (item.ddfDesc ? " " + item.ddfDesc : "");
+        const desc = (item.cabinetRef ? item.cabinetRef + " " : "") + ddfLabel + (item.sqW && item.sqH ? " " + item.sqW + '"×' + item.sqH + '"' : "") + (item.ddfDesc ? " " + item.ddfDesc : "");
         setText("Description " + n, desc);
         setText("Hinge " + n, item.hng || "");
         setText("Price " + n, fm(t.total || 0));
@@ -11120,7 +11152,7 @@ setText("P.O. Location", poLocation);
       setText("Special Instructions", shipAddr || "");
     }
 
-    // ââ X-mark logic for all express types (draw-after-flatten) ââ
+    // ── X-mark logic for all express types (draw-after-flatten) ──
     setText("Color", expColor || "");
 
     const { PDFName: PN, rgb: RGB } = await import("pdf-lib");
@@ -11186,7 +11218,7 @@ setText("P.O. Location", poLocation);
     <div style={{minHeight:"100vh",background:C.warm}}>
       <div style={{background:C.ink,padding:"12px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <button onClick={onBack} style={{background:"none",border:"none",cursor:"pointer",color:C.stL,fontSize:18,padding:"0 4px"}}>â¹</button>
+          <button onClick={onBack} style={{background:"none",border:"none",cursor:"pointer",color:C.stL,fontSize:18,padding:"0 4px"}}>‹</button>
           <span style={{fontFamily:F.d,fontSize:mob?15:18,fontWeight:700,color:C.cream}}>Express Parts Order</span>
           <span style={{fontSize:9,padding:"2px 7px",borderRadius:4,background:"#7c3aed22",color:"#a78bfa",fontWeight:600,border:"1px solid #7c3aed44"}}>EXPRESS</span>
         </div>
@@ -11215,27 +11247,27 @@ setText("P.O. Location", poLocation);
                     <div style={{fontFamily:F.b,fontSize:11,color:C.stone,marginTop:2,lineHeight:1.4}}>{et.desc}</div>
                     <div style={{fontSize:10,color:"#7c3aed",fontWeight:600,marginTop:4}}>Ships via: {et.ship}</div>
                   </div>
-                  <div style={{marginLeft:"auto",fontSize:18,color:C.stL}}>âº</div>
+                  <div style={{marginLeft:"auto",fontSize:18,color:C.stL}}>›</div>
                 </button>
               ))}
             </div>
             <div style={{textAlign:"center",marginTop:20}}>
-              <button onClick={onBack} style={{padding:"8px 20px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>â Back to Hub</button>
+              <button onClick={onBack} style={{padding:"8px 20px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
             </div>
           </>
         ) : (
           <>
-            <button onClick={() => setExpressType(null)} style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.acc,fontFamily:F.b,fontWeight:600,marginBottom:14,display:"block"}}>â Back to order types</button>
+            <button onClick={() => setExpressType(null)} style={{background:"none",border:"none",cursor:"pointer",fontSize:11,color:C.acc,fontFamily:F.b,fontWeight:600,marginBottom:14,display:"block"}}>← Back to order types</button>
             <div style={{background:"#ede9fe",border:"1px solid #7c3aed33",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:11.5,color:"#5b21b6",fontFamily:F.b,display:"flex",alignItems:"center",gap:8}}>
               <Ic n="bolt" sz={16} c="#7c3aed"/>
-              <span><strong>{expressTypes.find(e=>e.id===expressType)?.title}</strong> â Ships in 5 working days via {expressTypes.find(e=>e.id===expressType)?.ship}</span>
+              <span><strong>{expressTypes.find(e=>e.id===expressType)?.title}</strong> — Ships in 5 working days via {expressTypes.find(e=>e.id===expressType)?.ship}</span>
             </div>
             {expressType==="parcel"&&<div style={{background:"#fef3c7",border:"1px solid #f59e0b44",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:10.5,color:"#92400e",fontFamily:F.b,lineHeight:1.5}}>
               <strong>Express Parcel Eligible Items:</strong> End panels (base, wall, vanity), standard fillers (no profile), mouldings, toe kick, plywood tops, finished shelves, valances, corbels, onlays, range hood accessories, drawer boxes, roll-outs, lazy susan kits, cutlery divider inserts, shelf supports, spice drawer inserts, spice racks, stain/touch-up kits, wire tray dividers, standard adjustable shelves, color door samples (max 3), and various hardware.<br/>
-              <strong>Max length:</strong> 94" â for longer items, specify how to cut down (e.g. 6' and 4'). <strong>No doors or drawer fronts</strong> â use ECL-EXP-DDF form for those. Orders with non-qualifying items will be placed for normal production without prior notification. No order changes or modifications allowed.
+              <strong>Max length:</strong> 94" — for longer items, specify how to cut down (e.g. 6' and 4'). <strong>No doors or drawer fronts</strong> — use ECL-EXP-DDF form for those. Orders with non-qualifying items will be placed for normal production without prior notification. No order changes or modifications allowed.
             </div>}
             {expressType==="ddf"&&<div style={{background:"#fef3c7",border:"1px solid #f59e0b44",borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:10.5,color:"#92400e",fontFamily:F.b,lineHeight:1.5}}>
-              <strong>Express Door & Drawer Front Order (ECL-EXP-DDF)</strong> â Chargeable door and drawer front items only. Select the type (Loose Door, Slab DF, or 5-Piece DF), enter the cabinet it's for, and specify width and height. Price is calculated per square inch. Not for warranty replacements â use ECL-WRTY for those. <strong>This order is final â no changes or modifications allowed.</strong>
+              <strong>Express Door & Drawer Front Order (ECL-EXP-DDF)</strong> — Chargeable door and drawer front items only. Select the type (Loose Door, Slab DF, or 5-Piece DF), enter the cabinet it's for, and specify width and height. Price is calculated per square inch. Not for warranty replacements — use ECL-WRTY for those. <strong>This order is final — no changes or modifications allowed.</strong>
             </div>}
             {expressType==="truck"&&<div style={{background:"#fef2f2",border:"2px solid #dc2626",borderRadius:8,padding:"14px 18px",marginBottom:16,fontSize:13,color:"#991b1b",fontFamily:F.b,lineHeight:1.5,textAlign:"center"}}>
               <div style={{fontSize:22,marginBottom:4}}>&#9888;</div>
@@ -11297,7 +11329,7 @@ setText("P.O. Location", poLocation);
               )}
 
               {expressType==="ddf" ? (
-                /* âââ DDF-SPECIFIC ITEM LIST âââ */
+                /* ═══ DDF-SPECIFIC ITEM LIST ═══ */
                 items.map((item, idx) => {
                   const ddfType = DDF_TYPES.find(d => d.v === item.s);
                   const sqinRate = ddfType?.price || item.p || 0;
@@ -11340,19 +11372,19 @@ setText("P.O. Location", poLocation);
                         <div>
                           <label style={labelStyle}>Hinge</label>
                           <select value={item.hng||""} onChange={e=>updItem(item.id,{hng:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto"}}>
-                            <option value="">â</option><option value="L">Left</option><option value="R">Right</option><option value="NB">No Boring</option>
+                            <option value="">—</option><option value="L">Left</option><option value="R">Right</option><option value="NB">No Boring</option>
                           </select>
                         </div>
                         <div>
                           <label style={labelStyle}>{item.s==="LSD"?"Door Style Override":"Drawer Front Style Override"}</label>
                           {item.s==="LSD" ? (
                             <select value={item.ds||""} onChange={e=>updItem(item.id,{ds:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto",fontSize:11}}>
-                              <option value="">â global ({door}) â</option>
+                              <option value="">— global ({door}) —</option>
                               {DOORS.map(d=><option key={d.v} value={d.v}>{d.l} ({d.g})</option>)}
                             </select>
                           ) : (
                             <select value={item.dfs||""} onChange={e=>updItem(item.id,{dfs:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto",fontSize:11}}>
-                              <option value="">â global ({drwF}) â</option>
+                              <option value="">— global ({drwF}) —</option>
                               {DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.l} ({d.g})</option>)}
                             </select>
                           )}
@@ -11370,18 +11402,18 @@ setText("P.O. Location", poLocation);
                         <div style={{fontSize:10,color:C.stone,fontFamily:F.b}}>
                           <span style={{fontWeight:600,color:C.ink}}>{ddfType?.l||item.s}</span>
                           {item.cabinetRef ? ` for ${item.cabinetRef}` : ""}
-                          {sqin > 0 ? ` Â· ${item.sqW}" Ã ${item.sqH}" = ${sqin.toLocaleString()} sq.in Â· $${sqinRate}/sq.in` + (doorChg > 0 ? ` + $${doorChg} door grp` : "") + (dfChg > 0 ? ` + $${dfChg} DF grp` : "") : " Â· Enter width and height"}
-                          {item.hng ? ` Â· ${item.hng} hinge` : ""}
+                          {sqin > 0 ? ` · ${item.sqW}" × ${item.sqH}" = ${sqin.toLocaleString()} sq.in · $${sqinRate}/sq.in` + (doorChg > 0 ? ` + $${doorChg} door grp` : "") + (dfChg > 0 ? ` + $${dfChg} DF grp` : "") : " · Enter width and height"}
+                          {item.hng ? ` · ${item.hng} hinge` : ""}
                         </div>
                         <div style={{fontFamily:F.m,fontWeight:700,fontSize:14,color:sqin>0?C.ink:C.stone}}>
-                          {sqin > 0 ? fm(lineTotal) : "â"}
+                          {sqin > 0 ? fm(lineTotal) : "—"}
                         </div>
                       </div>
                     </div>
                   );
                 })
               ) : (
-              /* âââ STANDARD / PARCEL / TRUCK ITEM LIST âââ */
+              /* ═══ STANDARD / PARCEL / TRUCK ITEM LIST ═══ */
               items.map((item, idx) => {
                 const t = itemTotals[idx] || {};
                 const isMould = item.t === "M";
@@ -11409,20 +11441,20 @@ setText("P.O. Location", poLocation);
                     {item.s && itemSQ && <div style={{display:"grid",gridTemplateColumns:"80px 80px 1fr",gap:8,marginBottom:6,alignItems:"end"}}>
                       <div><label style={labelStyle}>Width (in)</label><input type="number" min="0" value={item.sqW||0} onChange={e=>updItem(item.id,{sqW:+e.target.value,sqin:(+e.target.value)*(item.sqH||0)})} style={{...fieldStyle,textAlign:"center",fontSize:11}} /></div>
                       <div><label style={labelStyle}>Height (in)</label><input type="number" min="0" value={item.sqH||0} onChange={e=>updItem(item.id,{sqH:+e.target.value,sqin:(item.sqW||0)*(+e.target.value)})} style={{...fieldStyle,textAlign:"center",fontSize:11}} /></div>
-                      <div style={{fontSize:10,color:C.stone,fontFamily:F.b,paddingBottom:8}}>{(item.sqin||0).toLocaleString()} sq.in â priced per square inch</div>
+                      <div style={{fontSize:10,color:C.stone,fontFamily:F.b,paddingBottom:8}}>{(item.sqin||0).toLocaleString()} sq.in — priced per square inch</div>
                     </div>}
 
-                    {/* Row 2: Cabinet details (hinge, FE, mods â only for cabinet types) */}
+                    {/* Row 2: Cabinet details (hinge, FE, mods — only for cabinet types) */}
                     {item.s && !isMould && !itemSQ && ["B","W","T","V","C","D"].includes(item.t) && (<>
                       <div style={{display:"grid",gridTemplateColumns:mob?"1fr 1fr":"80px 80px 80px 80px 1fr",gap:6,marginBottom:6}}>
                         <div><label style={labelStyle}>Hinge</label>
                           <select value={item.hng||""} onChange={e=>updItem(item.id,{hng:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto",fontSize:11}}>
-                            <option value="">â</option><option value="L">Left</option><option value="R">Right</option><option value="Pair">Pair</option>
+                            <option value="">—</option><option value="L">Left</option><option value="R">Right</option><option value="Pair">Pair</option>
                           </select>
                         </div>
                         <div><label style={labelStyle}>Fin. End</label>
                           <select value={item.fe||""} onChange={e=>updItem(item.id,{fe:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto",fontSize:11}}>
-                            <option value="">â</option><option value="L">Left</option><option value="R">Right</option><option value="B">Both</option>
+                            <option value="">—</option><option value="L">Left</option><option value="R">Right</option><option value="B">Both</option>
                           </select>
                         </div>
                         <div><label style={labelStyle}>Doors</label>
@@ -11433,7 +11465,7 @@ setText("P.O. Location", poLocation);
                         </div>
                         <div><label style={labelStyle}>Door Style Override</label>
                           <select value={item.ds||""} onChange={e=>updItem(item.id,{ds:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto",fontSize:11}}>
-                            <option value="">â global ({door}) â</option>
+                            <option value="">— global ({door}) —</option>
                             {DOORS.map(d=><option key={d.v} value={d.v}>{d.l} ({d.g})</option>)}
                           </select>
                         </div>
@@ -11442,7 +11474,7 @@ setText("P.O. Location", poLocation);
                       {/* Modifications Panel */}
                       {applicableMods.length > 0 && <div style={{marginBottom:5}}>
                         <button onClick={()=>sModOpen(prev=>{const n=new Set(prev);if(modsExpanded)n.delete(item.id);else n.add(item.id);return n})} style={{background:activeMods.length>0?"#7c3aed18":"#f0edff",border:`2px solid ${activeMods.length>0?"#7c3aed":"#c4b5fd"}`,borderRadius:8,padding:"7px 10px",cursor:"pointer",fontSize:11,fontWeight:700,color:activeMods.length>0?"#7c3aed":"#6d28d9",display:"flex",alignItems:"center",gap:6,width:"100%",justifyContent:"space-between",transition:"all .15s"}}>
-                          <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:14}}>{modsExpanded?"â¾":"â¸"}</span><span><Ic n="gear" sz={13} c="#6d28d9"/> Modifications</span><span style={{background:activeMods.length>0?"#7c3aed":"#a78bfa",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:9,fontWeight:700}}>{activeMods.length>0?`${activeMods.length} active`:`${applicableMods.length} available`}</span></span>
+                          <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:14}}>{modsExpanded?"▾":"▸"}</span><span><Ic n="gear" sz={13} c="#6d28d9"/> Modifications</span><span style={{background:activeMods.length>0?"#7c3aed":"#a78bfa",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:9,fontWeight:700}}>{activeMods.length>0?`${activeMods.length} active`:`${applicableMods.length} available`}</span></span>
                           {(t.modCost||0)>0&&<span style={{fontFamily:F.m,fontWeight:700,color:"#7c3aed",fontSize:12}}>+{fm(t.modCost*item.q)}</span>}
                         </button>
                         {modsExpanded&&<div style={{borderLeft:"4px solid #7c3aed",borderRight:`1px solid #7c3aed33`,borderBottom:`1px solid #7c3aed33`,borderTop:"none",borderRadius:"0 0 8px 8px",padding:"10px 12px",marginTop:-1,background:"linear-gradient(135deg,#f8f5ff,#f0edff)"}}>
@@ -11456,11 +11488,11 @@ setText("P.O. Location", poLocation);
                                     m.input==="width"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked)setMod(item.id,m.code,true);else setMod(item.id,m.code,false)}} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/><span style={{fontSize:".8rem",color:isOn?"#7c3aed":"#888"}}>Enabled</span>{isOn!==false&&isOn!==0&&isOn!==undefined?<input type="text" value={typeof isOn==="string"?isOn:""} onChange={e=>setMod(item.id,m.code,e.target.value||true)} style={{width:"52px",padding:"2px 4px",border:"1px solid #ccc",borderRadius:"3px",fontSize:".8rem",marginLeft:"4px"}} placeholder="W"/>:null}</div>{m.note?<div style={{fontSize:".7rem",color:"#b08000",marginTop:"2px",fontStyle:"italic"}}>{m.note}</div>:null}</div>:
                                     m.input==="side"?
                                       <div style={{display:"flex",gap:3}}>
-                                        {[["","â"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} onClick={()=>setMod(item.id,m.code,v||0)} style={{fontSize:10,padding:"2px 6px",borderRadius:4,border:`1.5px solid ${val===v&&v?"#7c3aed":C.bdr}`,background:val===v&&v?"#7c3aed14":"#fff",color:val===v&&v?"#7c3aed":C.stone,cursor:"pointer",fontFamily:F.b}}>{l}</button>)}
+                                        {[["","—"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} onClick={()=>setMod(item.id,m.code,v||0)} style={{fontSize:10,padding:"2px 6px",borderRadius:4,border:`1.5px solid ${val===v&&v?"#7c3aed":C.bdr}`,background:val===v&&v?"#7c3aed14":"#fff",color:val===v&&v?"#7c3aed":C.stone,cursor:"pointer",fontFamily:F.b}}>{l}</button>)}
                                       </div>:
                                     m.input==="select"?
                                       <select value={val||""} onChange={e=>setMod(item.id,m.code,e.target.value||0)} style={{fontSize:10,padding:"2px 4px",borderRadius:4,border:`1px solid ${isOn?"#7c3aed":C.bdr}`,background:isOn?"#7c3aed0a":"#fff",fontFamily:F.m,cursor:"pointer"}}>
-                                        <option value="">â None â</option>{(m.options||[]).map(o=><option key={o} value={o}>{o}</option>)}
+                                        <option value="">— None —</option>{(m.options||[]).map(o=><option key={o} value={o}>{o}</option>)}
                                       </select>:
                                     m.input==="check"?
                                       <input type="checkbox" checked={!!isOn} onChange={e=>setMod(item.id,m.code,e.target.checked?1:0)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
@@ -11468,18 +11500,18 @@ setText("P.O. Location", poLocation);
                                     }
                                     <div style={{flex:1,minWidth:0}}>
                                       <div style={{fontSize:10.5,fontWeight:isOn?700:500,color:isOn?"#6d28d9":C.ink,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.label}</div>
-                                      <div style={{fontSize:9,color:isOn?"#7c3aed":C.stone,fontWeight:isOn?600:400}}>{m.code} Â· {m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.input==="side"?m.price*(val==="B"?2:1):m.price*(m.input==="check"?1:val))}`:""}</div>
+                                      <div style={{fontSize:9,color:isOn?"#7c3aed":C.stone,fontWeight:isOn?600:400}}>{m.code} · {m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.input==="side"?m.price*(val==="B"?2:1):m.price*(m.input==="check"?1:val))}`:""}</div>
                                     </div>
                                   </div>);
                                 })}
-                                {/* Mixed Drawer Front (MXDF) â 3 fixed position slots */}
+                                {/* Mixed Drawer Front (MXDF) — 3 fixed position slots */}
                                 {gMods.filter(m=>m.input==="mxdf").map(m=>{const val=item.mods?.[m.code];const positions=Array.isArray(val)?val:[];const activeCount=positions.filter(p=>p.on).length;const isOn=activeCount>0;
                                   const slots=[0,1,2].map(i=>positions[i]||{on:false,door:"",note:""});
                                   const updateSlot=(si,changes)=>{const ns=[...slots];ns[si]={...ns[si],...changes};const anyOn=ns.some(s=>s.on);setMod(item.id,m.code,anyOn?ns:0)};
                                   return(<div key={m.code} style={{marginTop:6,borderRadius:6,border:`1.5px solid ${isOn?"#7c3aed":"#e2ddf5"}`,background:isOn?"#7c3aed0a":"#fff",overflow:"hidden",gridColumn:"1/-1"}}>
                                     <div style={{padding:"6px 10px"}}>
                                       <div style={{fontSize:11,fontWeight:isOn?700:500,color:isOn?"#6d28d9":C.ink}}>{m.label}</div>
-                                      <div style={{fontSize:9.5,color:isOn?"#7c3aed":C.stone}}>{m.code} Â· ${m.price}/position{isOn?` Â· ${activeCount} active = ${fm(m.price*activeCount)}`:""}</div>
+                                      <div style={{fontSize:9.5,color:isOn?"#7c3aed":C.stone}}>{m.code} · ${m.price}/position{isOn?` · ${activeCount} active = ${fm(m.price*activeCount)}`:""}</div>
                                     </div>
                                     <div style={{borderTop:"1px solid #7c3aed22",padding:"6px 10px",display:"flex",flexDirection:"column",gap:6}}>
                                       {slots.map((sl,si)=>{const posNum=si+2;return(
@@ -11491,10 +11523,10 @@ setText("P.O. Location", poLocation);
                                           </div>
                                           {sl.on&&<div style={{marginLeft:22,display:"flex",flexDirection:"column",gap:5}}>
                                             <select value={sl.door||""} onChange={e=>updateSlot(si,{door:e.target.value})} style={{fontSize:11,padding:"4px 6px",borderRadius:5,border:`1px solid ${C.bdr}`,fontFamily:F.m,width:"100%",boxSizing:"border-box"}}>
-                                              <option value="">â Select Door Style â</option>
+                                              <option value="">— Select Door Style —</option>
                                               {DOORS.map(d=><option key={d.v} value={d.v}>{d.l}</option>)}
                                             </select>
-                                            <input type="text" placeholder="Notes â e.g. drawer front description, special instructions..." value={sl.note||""} onChange={e=>updateSlot(si,{note:e.target.value})} style={{width:"100%",padding:"5px 8px",fontSize:11,border:`1px solid ${C.bdr}`,borderRadius:5,fontFamily:F.b,boxSizing:"border-box"}}/>
+                                            <input type="text" placeholder="Notes — e.g. drawer front description, special instructions..." value={sl.note||""} onChange={e=>updateSlot(si,{note:e.target.value})} style={{width:"100%",padding:"5px 8px",fontSize:11,border:`1px solid ${C.bdr}`,borderRadius:5,fontFamily:F.b,boxSizing:"border-box"}}/>
                                           </div>}
                                         </div>);})}
                                     </div>
@@ -11504,7 +11536,7 @@ setText("P.O. Location", poLocation);
                             </div>);
                           })()}
                           {activeMods.length>0&&<div style={{borderTop:"2px solid #7c3aed33",paddingTop:8,marginTop:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                            <span style={{fontSize:10,color:"#6d28d9",fontWeight:700}}><Ic n="gear" sz={10} c="#6d28d9"/> {activeMods.length} mod{activeMods.length>1?"s":""} Â· +{fm(t.modCost||0)}/unit</span>
+                            <span style={{fontSize:10,color:"#6d28d9",fontWeight:700}}><Ic n="gear" sz={10} c="#6d28d9"/> {activeMods.length} mod{activeMods.length>1?"s":""} · +{fm(t.modCost||0)}/unit</span>
                             <button onClick={()=>updItem(item.id,{mods:{}})} style={{background:"#fff",border:"1px solid #dc262644",borderRadius:5,padding:"3px 10px",fontSize:9,color:C.red,cursor:"pointer",fontWeight:600}}>Clear All</button>
                           </div>}
                         </div>}
@@ -11524,12 +11556,12 @@ setText("P.O. Location", poLocation);
 
                     {/* Species restriction warning for SD 8.5x11 */}
                     {item.s==="SD81/2X11"&&SD_BLOCKED_SP.has(sp)&&<div style={{background:"#fef2f2",border:"1px solid #dc262644",borderRadius:6,padding:"6px 10px",marginTop:4,fontSize:10,color:"#991b1b",fontFamily:F.b}}>
-                      <strong>Not available in {sp}.</strong> SD 8Â½Ã11 standard samples are not available in Walnut, Rustic Walnut, Rift White Oak, QS White Oak, or TFL. Please change species or use a Color Match sample (CM 8 1/2 x 11) instead.
+                      <strong>Not available in {sp}.</strong> SD 8½×11 standard samples are not available in Walnut, Rustic Walnut, Rift White Oak, QS White Oak, or TFL. Please change species or use a Color Match sample (CM 8 1/2 x 11) instead.
                     </div>}
 
                     {/* Price summary */}
                     {item.s && <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:4,paddingTop:6,borderTop:`1px solid ${C.bdr}`}}>
-                      <span style={{fontSize:11,color:C.stone,fontFamily:F.b}}>{SKU_LABELS[item.s]||item.s} <span style={{color:C.stL}}>Â· {TN[item.t]||item.t} Â· {item.r}</span>{item.hng?` Â· ${item.hng} hinge`:""}{item.fe?` Â· FE ${item.fe}`:""}</span>
+                      <span style={{fontSize:11,color:C.stone,fontFamily:F.b}}>{SKU_LABELS[item.s]||item.s} <span style={{color:C.stL}}>· {TN[item.t]||item.t} · {item.r}</span>{item.hng?` · ${item.hng} hinge`:""}{item.fe?` · FE ${item.fe}`:""}</span>
                       <span style={{fontFamily:F.m,fontWeight:700,fontSize:13,color:item.s==="SD81/2X11"&&SD_BLOCKED_SP.has(sp)?C.red:C.ink}}>{item.s==="SD81/2X11"&&SD_BLOCKED_SP.has(sp)?"N/A":fm(t.total||0)}</span>
                     </div>}
                   </div>
@@ -11537,7 +11569,7 @@ setText("P.O. Location", poLocation);
               })
               )}
 
-              {items.length === 0 && <div style={{padding:24,textAlign:"center",color:C.stone,fontSize:12}}>No items yet â click "+ Add Item" above</div>}
+              {items.length === 0 && <div style={{padding:24,textAlign:"center",color:C.stone,fontSize:12}}>No items yet — click "+ Add Item" above</div>}
 
               {grandTotal > 0 && <div style={{textAlign:"right",marginTop:10,padding:"10px 14px",background:C.ink,borderRadius:8}}>
                 <span style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.cream}}>Order Total: </span>
@@ -11546,7 +11578,7 @@ setText("P.O. Location", poLocation);
             </div>
 
             <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:18}}>
-              <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>â Back to Hub</button>
+              <button onClick={onBack} style={{padding:"10px 24px",borderRadius:8,border:`1px solid ${C.bdr}`,background:C.paper,cursor:"pointer",fontSize:12,fontFamily:F.b,color:C.stone}}>← Back to Hub</button>
               <button onClick={()=>{const missing=[];if(!dealerName)missing.push("Dealer Name");if(!dealerCode)missing.push("Dealer Number");if(!contactName)missing.push("Contact");if(expressType!=="truck"&&!shipAddr)missing.push("Ship-To Address");if(missing.length){fl(`Please fill: ${missing.join(", ")}`);return;}generateExpressPdf()}} style={{padding:"10px 28px",borderRadius:8,border:"none",background:C.ink,cursor:"pointer",fontSize:12,fontFamily:F.b,fontWeight:700,color:C.gold,boxShadow:"0 2px 8px rgba(0,0,0,.2)",...((!dealerName||!dealerCode||!contactName)?{opacity:0.7}:{})}}><Ic n="bolt" sz={13} c="#fff"/> Generate Express Order PDF{(!dealerName||!dealerCode||!contactName)?" !":""}</button>
             </div>
           </>
@@ -11557,6 +11589,7 @@ setText("P.O. Location", poLocation);
 }
 
 function App({user, profile, supabase, onLogout, onBack, onAdmin}){
+  const initRef=useRef(null); // tracks user.id to prevent resetting on token refresh
   const[nm,sNm]=useState("Untitled Project"),[pid,sPid]=useState(uid());
   const[sp,sSp]=useState("White Oak"),[cx,sCx]=useState("Standard");
   const[door,sDoor]=useState("HNVR"),[drwF,sDrwF]=useState("DF-HNVR"),[glaze,sGlaze]=useState("NONE");
@@ -11582,7 +11615,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
   useEffect(()=>{const c=()=>sMob(window.innerWidth<=768);c();window.addEventListener("resize",c);return()=>window.removeEventListener("resize",c)},[]);
   const fl=useCallback(m=>{sNtf(m);setTimeout(()=>sNtf(null),2000)},[]);
 
-  // ââ Auto-save to Supabase (2s debounce) ââ
+  // ── Auto-save to Supabase (2s debounce) ──
   useEffect(()=>{
     if(!supabase||!user)return;
     const t=setTimeout(async()=>{
@@ -11605,16 +11638,19 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
     return()=>clearTimeout(t);
   },[nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,edgePro,items,currentQuoteId,supabase,user,versions]);
 
-  // ââ Start fresh new order on login â user loads saved orders manually ââ
+  // ── Start fresh new order on login — user loads saved orders manually ──
+  // Only reset on actual user change (new login), not on Supabase token refresh
   useEffect(()=>{
     if(!supabase||!user)return;
+    if(initRef.current===user.id)return; // same user — skip reset (token refresh)
+    initRef.current=user.id;
     setCurrentQuoteId(null);setVersions([]);sPid(uid());sNm("Untitled Project");
     sSp("White Oak");sCx("Standard");sDoor("HNVR");sDrwF("DF-HNVR");
     sGlaze("NONE");sHL("NONE");sCT1("NONE");sCT2("NONE");
     sMat("PB");sIntF("STD-MAPL");sDrwBox("5/8-STD");sEdgePro("None");sItems([]);sColor("");
   },[supabase,user]);
 
-  // ââ Load a specific quote from the quotes list ââ
+  // ── Load a specific quote from the quotes list ──
   const loadQuoteFromList=useCallback(async(quoteId)=>{
     if(!supabase)return;
     try{
@@ -11638,7 +11674,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
     const newId=uid();
     sItems(p=>[...p,{id:newId,s:cat.s,t:cat.t,r:cat.r,p:cat.p,q,z,so:null,len:len||0,hng:"",fe:"",ds:"",dc:guessDoors(cat.s,cat.t),drc:guessDrawers(cat.s,cat.t),brot:guessBuiltInROT(cat.s),sqin:sqin||0,sqW:dimW||0,sqH:dimH||0,rbs:false,mods:{},rot:"",rotQ:0,rotFeg:false,rot2:"",rot2Q:0,rot2Feg:false,ovenSpec:{}}]);
     const isMod=cat.t!=="M"&&!isSqIn(cat.s,cat.r);if(isMod)sModOpen(prev=>{const n=new Set(prev);n.add(newId);return n});
-    fl(`Added ${q}Ã ${cat.s}${len?` (${len}ft)`:""}${sqin?` (${sqin} sq.in)`:""}`);if(mob)ssAd(false);
+    fl(`Added ${q}× ${cat.s}${len?` (${len}ft)`:""}${sqin?` (${sqin} sq.in)`:""}`);if(mob)ssAd(false);
   },[fl,mob]);
 
   const addCustom=useCallback(({desc,price,quoteNum,pdf,pdfName,q,z})=>{
@@ -11649,7 +11685,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
 
   const upd=useCallback((id,p)=>sItems(prev=>prev.map(it=>it.id===id?{...it,...p}:it)),[]);
   const rem=useCallback(id=>sItems(prev=>prev.filter(it=>it.id!==id)),[]);
-  const dup=useCallback(id=>{const newId=uid();sItems(p=>{const s=p.find(it=>it.id===id);return s?[...p,{...s,id:newId}]:p});sModOpen(prev=>{const n=new Set(prev);n.add(newId);return n});fl("Duplicated â edit below ï¸");setTimeout(()=>{const el=document.getElementById("item-"+newId);if(el)el.scrollIntoView({behavior:"smooth",block:"center"})},120)},[fl]);
+  const dup=useCallback(id=>{const newId=uid();sItems(p=>{const s=p.find(it=>it.id===id);return s?[...p,{...s,id:newId}]:p});sModOpen(prev=>{const n=new Set(prev);n.add(newId);return n});fl("Duplicated — edit below ️");setTimeout(()=>{const el=document.getElementById("item-"+newId);if(el)el.scrollIntoView({behavior:"smooth",block:"center"})},120)},[fl]);
 
   const comp=useMemo(()=>{
     let tot=0,un=0,ov=0;const zm={},tm={};
@@ -11710,7 +11746,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
   const newP=useCallback(()=>{setCurrentQuoteId(null);setVersions([]);sPid(uid());sNm("Untitled Project");
     const pr=ldPrefs();
     sSp(pr.sp||"White Oak");sCx(pr.cx||"Standard");
-    sDoor(pr.door||"HNVR");sDrwF(pr.drwF||"DF-HNVR");sGlaze(pr.glaze||"NONE");sHL(pr.highlight||"NONE");sCT1(pr.charT1||"NONE");sCT2(pr.charT2||"NONE");sMat(pr.mat||"PB");sIntF(pr.intF||"STD-MAPL");sDrwBox(pr.drwBox||"5/8-STD");sItems([]);sColor(pr.color||"");fl("New project started â using your last selections")},[fl]);
+    sDoor(pr.door||"HNVR");sDrwF(pr.drwF||"DF-HNVR");sGlaze(pr.glaze||"NONE");sHL(pr.highlight||"NONE");sCT1(pr.charT1||"NONE");sCT2(pr.charT2||"NONE");sMat(pr.mat||"PB");sIntF(pr.intF||"STD-MAPL");sDrwBox(pr.drwBox||"5/8-STD");sItems([]);sColor(pr.color||"");fl("New project started — using your last selections")},[fl]);
   const fi=useMemo(()=>{
     let r=tf==="all"?items:items.filter(it=>it.t===tf);
     if(roomFilter!=="all")r=r.filter(it=>it.z===roomFilter);
@@ -11720,7 +11756,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
 
   const csv=useCallback(()=>{
     const dl=DOORS.find(d=>d.v===door)?.l||door;const dfl=DRW_FRONTS.find(d=>d.v===drwF)?.l||drwF;
-    const r=[["Eclipse Estimator v8.8.0 â "+nm],...(dealerMult>0&&dealerMult<1?[["Dealer Multiplier: Ã"+dealerMult]]:[]),["Door: "+dl,"Drawer Front: "+dfl,"Species: "+sp,"Color: "+color,"Construction: "+(cx==="Standard"?"Std":"Plywood")],
+    const r=[["Eclipse Estimator v8.8.0 — "+nm],...(dealerMult>0&&dealerMult<1?[["Dealer Multiplier: ×"+dealerMult]]:[]),["Door: "+dl,"Drawer Front: "+dfl,"Species: "+sp,"Color: "+color,"Construction: "+(cx==="Standard"?"Std":"Plywood")],
       ["Glaze: "+(GLAZES.find(g=>g.v===glaze)?.l||"None"),"Highlight: "+(HIGHLIGHTS.find(h=>h.v===highlight)?.l||"None"),"Drawer Box: "+(DRW_BOX.find(d=>d.v===drwBox)?.l||drwBox)],
       [],["SKU","Room","Qty","Door","Hinge","Fin.End","Length","Stock","Species Ovr","Unit","List Total",...(dealerMult>0&&dealerMult<1?["Dealer Cost"]:[])]];
     items.forEach(it=>{const{u,t}=cp(it,sp,cx,door,drwF,drwBox);const iM=it.t==="M";const row=[it.s,ZN.find(z=>z.id===it.z)?.l||it.z,it.q,it.ds||"",it.hng||"",it.fe||"",iM?`${it.len}ft`:"",(iM?`$${it.p}/LF`:it.p),it.so||"",Math.round(u),Math.round(t)];if(dealerMult>0&&dealerMult<1)row.push(Math.round(t*dealerMult));r.push(row)});
@@ -11744,10 +11780,10 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
           const mcRaw=calcModCost(it,it.mods,cp(it,sp,cx,door,drwF,drwBox).stockBase);
           const total=t+mcRaw*(1+((it.mods&&cx==="Plywood")?10:0)/100)*it.q;
           if(isCustom(it.s)){return{description:`CUSTOM: ${(it.cqDesc||"Custom Item").slice(0,80)}${it.cqNum?` [${it.cqNum}]`:""}`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
-          if(isREF(it.s)){return{description:`REF PANEL ${it.sqW||0}"W Ã ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)${it.refIce?" +ICE CUTOUT":""}`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
-          if(isDP(it.s)){return{description:`DW PANEL ${it.sqW||0}"W Ã ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
-          if(isBCFT(it.s)){return{description:`${it.s} (${BCFT_LABELS[it.s]||""}) ${it.sqW||0}"W Ã ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
-          if(isBCF(it.s)){return{description:`BCF ${it.sqW||0}"W Ã ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
+          if(isREF(it.s)){return{description:`REF PANEL ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)${it.refIce?" +ICE CUTOUT":""}`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
+          if(isDP(it.s)){return{description:`DW PANEL ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
+          if(isBCFT(it.s)){return{description:`${it.s} (${BCFT_LABELS[it.s]||""}) ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
+          if(isBCF(it.s)){return{description:`BCF ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
           if(isCO(it.s)){return{description:`${it.s} (${CO_LABELS[it.s]||""}) ${it.sqH||0}" tall`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
           const modParts=[];if(it.mods){Object.entries(it.mods).forEach(([code,v])=>{if(!v&&v!==0)return;const m=CABINET_MODS.find(x=>x.code===code);if(!m)return;
             if(m.input==="mxdf"){const ct=Array.isArray(v)?v.filter(p=>p.on).length:0;if(ct>0)modParts.push(`${m.label} x${ct} +$${m.price*ct}`);}
@@ -11787,7 +11823,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         setTF("Contact Phone",profile?.phone||"");
         // Glaze / Highlight
         const glazeMap={"BLK-GL":"Black","MCH-GL":"Mocha","VDK-GL":"Van Dyke","NKL-GL":"Nickel"};
-        const hlMap={"GRPH-HL":"Graphite","CAFE-HL":"CafÃ©","SLATE-HL":"Slate"};
+        const hlMap={"GRPH-HL":"Graphite","CAFE-HL":"Café","SLATE-HL":"Slate"};
         if(glazeMap[glaze])collectX(glazeMap[glaze]);
         if(hlMap[highlight])collectX(hlMap[highlight]);
         if(!glazeMap[glaze]&&!hlMap[highlight])collectX("None");
@@ -11816,7 +11852,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         const totalItemPages=Math.ceil(orderItems.length/20)||1;
         setTF("Number of Pages In Order",String(totalItemPages));
         let specialInstr=zoneLbl;
-        if(orderItems.length>59){const overflow=orderItems.length-59;specialInstr+=` â ${overflow} additional items, see attached CSV`;}
+        if(orderItems.length>59){const overflow=orderItems.length-59;specialInstr+=` — ${overflow} additional items, see attached CSV`;}
         setTF("Special Instructions",specialInstr);
         for(let i=0;i<itemsToShow;i++){
           const it=orderItems[i];const n=i+1;
@@ -11879,7 +11915,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         return pdfDoc;
       };
       if(!multiZone){
-        // Single zone â download directly
+        // Single zone — download directly
         const zk=zoneKeys[0];const zInfo=ZN.find(z=>z.id===zk);const zoneLbl=zInfo?zInfo.l:zk;
         const pdfDoc=await buildPdf(byZone[zk],zoneLbl);
         const filledBytes=await pdfDoc.save();
@@ -11888,7 +11924,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         a.download=`${(nm||"Eclipse_Order").replace(/\s+/g,"_")}_order_form.pdf`;
         a.click();fl("Order form PDF downloaded!");
       }else{
-        // Multiple zones â merge all into one PDF, each room gets its own order form section
+        // Multiple zones — merge all into one PDF, each room gets its own order form section
         const combined=await PDFDocument.create();
         for(let idx=0;idx<zoneKeys.length;idx++){
           const zk=zoneKeys[idx];
@@ -11909,7 +11945,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         const roomList=zoneKeys.map(zk=>{const zi=ZN.find(z=>z.id===zk);return zi?zi.l:zk}).join(", ");
         fl(`Order forms downloaded! Rooms: ${roomList}`);
       }
-    }catch(err){console.error(err);fl("Error generating PDF â check console");}
+    }catch(err){console.error(err);fl("Error generating PDF — check console");}
   },[items,sp,cx,door,drwF,drwBox,mat,intF,glaze,highlight,charT1,charT2,color,comp.tot,nm,fl]);
 
   const spp=SP[sp]||0,cxp=CX[cx]||0;
@@ -11950,21 +11986,21 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         <svg width={mob?18:20} height={mob?18:20} viewBox="0 0 20 20" style={{flexShrink:0}}>
           <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,.25)" strokeWidth="2.5"/>
           <circle cx="10" cy="10" r="8" fill="none" stroke={comp.pct===100?"#4ade80":comp.pct>=70?"#fcd34d":"#fca5a5"} strokeWidth="2.5" strokeDasharray={`${comp.pct/100*50.3} 50.3`} strokeLinecap="round" transform="rotate(-90 10 10)" style={{transition:"stroke-dasharray .4s"}}/>
-          {comp.pct===100&&<text x="10" y="10" textAnchor="middle" dominantBaseline="central" fill="#4ade80" fontSize="8" fontWeight="800">â</text>}
+          {comp.pct===100&&<text x="10" y="10" textAnchor="middle" dominantBaseline="central" fill="#4ade80" fontSize="8" fontWeight="800">✓</text>}
           {comp.pct<100&&<text x="10" y="10" textAnchor="middle" dominantBaseline="central" fill="#fff" fontSize="6.5" fontWeight="700">{comp.pct}</text>}
         </svg>
         <span style={{color:comp.pct===100?"#4ade80":comp.pct>=70?"#fcd34d":"#fca5a5",fontSize:mob?9:10}}>{comp.pct}%</span>
       </span>
-      <span style={{opacity:.5}}>Â·</span>
+      <span style={{opacity:.5}}>·</span>
       <span>{comp.n} item{comp.n!==1?"s":""}</span>
-      <span style={{opacity:.5}}>Â·</span>
+      <span style={{opacity:.5}}>·</span>
       <span>{comp.un} unit{comp.un!==1?"s":""}</span>
-      <span style={{opacity:.5}}>Â·</span>
+      <span style={{opacity:.5}}>·</span>
       <span>{comp.zc} room{comp.zc!==1?"s":""}</span>
-      <span style={{opacity:.5}}>Â·</span>
+      <span style={{opacity:.5}}>·</span>
       <span style={{color:C.goldS,fontWeight:700}}>{fm(comp.tot)}</span>
-      {dealerMult>0&&dealerMult<1&&<><span style={{opacity:.5}}>Â·</span><span style={{opacity:.85}}>Dealer {fm(comp.tot*dealerMult)}</span></>}
-      {!color&&<><span style={{opacity:.5}}>Â·</span><span style={{color:"#fcd34d"}}><Ic n="warn" sz={10} c="#fcd34d"/> No color</span></>}
+      {dealerMult>0&&dealerMult<1&&<><span style={{opacity:.5}}>·</span><span style={{opacity:.85}}>Dealer {fm(comp.tot*dealerMult)}</span></>}
+      {!color&&<><span style={{opacity:.5}}>·</span><span style={{color:"#fcd34d"}}><Ic n="warn" sz={10} c="#fcd34d"/> No color</span></>}
     </div>}
 
     <div style={{maxWidth:1320,margin:"0 auto",padding:mob?"10px 9px":"18px 18px 36px"}}>
@@ -11989,12 +12025,12 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
               <div><label className="lb">Species / Material</label><select className="sel" value={sp} onChange={e=>{sSp(e.target.value);sColor("")}}>
                 {Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
               </select></div>
-              <div><label className="lb">Finish Color {!color&&items.length>0&&<span style={{color:"#f59e0b",fontSize:9,fontWeight:600}}>â Required</span>}</label><select className="sel" value={color} onChange={e=>sColor(e.target.value)} style={!color&&items.length>0?{borderColor:"#f59e0b",background:"#fffbeb"}:{}}><option value="">-- Select --</option>{(FINISH_COLORS[sp]||[]).map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+              <div><label className="lb">Finish Color {!color&&items.length>0&&<span style={{color:"#f59e0b",fontSize:9,fontWeight:600}}>● Required</span>}</label><select className="sel" value={color} onChange={e=>sColor(e.target.value)} style={!color&&items.length>0?{borderColor:"#f59e0b",background:"#fffbeb"}:{}}><option value="">-- Select --</option>{(FINISH_COLORS[sp]||[]).map(c=><option key={c} value={c}>{c}</option>)}</select></div>
               <div><label className="lb">Door Style</label><select className="sel" value={door} onChange={e=>sDoor(e.target.value)}>
-                {DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} â Grp {d.g} ${DG[d.g]||0}/dr{d.x?` +$${d.x}/dr`:""}</option>)}
+                {DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} — Grp {d.g} ${DG[d.g]||0}/dr{d.x?` +$${d.x}/dr`:""}</option>)}
               </select></div>
               <div><label className="lb">Drawer Front</label><select className="sel" value={drwF} onChange={e=>sDrwF(e.target.value)}>
-                {DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}{d.g!=="A"?` â $${DG[d.g]||0}/drw`:""}</option>)}
+                {DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}{d.g!=="A"?` — $${DG[d.g]||0}/drw`:""}</option>)}
               </select></div>
               <div><label className="lb">Finish / Glaze</label><select className="sel" value={glaze} onChange={e=>sGlaze(e.target.value)}>
                 {GLAZES.map(g=><option key={g.v} value={g.v}>{g.l}</option>)}
@@ -12021,11 +12057,11 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
                 {["None","100","150","350","400","750","Matching","B-Alum","S-Alum","3D"].map(v=><option key={v} value={v}>{v}</option>)}
               </select></div>
             </div>
-            <div style={{marginTop:6,fontSize:10.5,color:C.stone}}>Effective multiplier: Ã{((1+spp/100)*(1+cxp/100)).toFixed(3)}{mat==="PLY"?" (plywood)":""}<Tip text={`Species ${sp} (${spp>=0?"+":""}${spp}%) Ã Construction ${cx} (${cxp>=0?"+":""}${cxp}%) applied to all base cabinet prices`}/></div>
+            <div style={{marginTop:6,fontSize:10.5,color:C.stone}}>Effective multiplier: ×{((1+spp/100)*(1+cxp/100)).toFixed(3)}{mat==="PLY"?" (plywood)":""}<Tip text={`Species ${sp} (${spp>=0?"+":""}${spp}%) × Construction ${cx} (${cxp>=0?"+":""}${cxp}%) applied to all base cabinet prices`}/></div>
           </div></div>}
       </div>
 
-      {!mob&&<div className="c" style={{marginBottom:10}}><div className="ch">Add Cabinets<span style={{fontSize:10.5,color:C.stone,fontFamily:F.b,fontWeight:400}}>Eclipse Catalog v8.8.0 Â· {CATALOG.length} SKUs</span></div><div className="cb"><AddUI onAdd={addIt} onAddCustom={addCustom}/></div></div>}
+      {!mob&&<div className="c" style={{marginBottom:10}}><div className="ch">Add Cabinets<span style={{fontSize:10.5,color:C.stone,fontFamily:F.b,fontWeight:400}}>Eclipse Catalog v8.9.0 · {CATALOG.length} SKUs</span></div><div className="cb"><AddUI onAdd={addIt} onAddCustom={addCustom}/></div></div>}
 
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,flexWrap:"wrap",gap:mob?6:4}}>
         <div style={{display:"flex",gap:mob?4:3,alignItems:"center",overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:mob?2:0}}>
@@ -12035,17 +12071,17 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         <div style={{display:"flex",gap:mob?4:3}}>
           <button className="bt bgl" onClick={()=>ssMg(true)} style={{fontSize:11,minHeight:mob?38:undefined}}><Ic n="dollar" sz={12} c={C.acc}/>{mob?"":" Margin"}</button>
           <button className="bt bg" onClick={csv} style={{fontSize:11,minHeight:mob?38:undefined}}><Ic n="clip" sz={11}/>{mob?"":" CSV"}</button>
-          <button className="bt bp" onClick={()=>{if(items.length===0){fl("No items to generate order form");return;}if(!color){fl("Please select a Finish Color before generating");return;}setShowOrderReview(true)}} style={{fontSize:11,minHeight:mob?38:undefined,...(comp.pct===100?{background:"#16a34a",borderColor:"#16a34a"}:!color&&items.length>0?{opacity:0.7}:{})}}><Ic n="clip" sz={12}/>{mob?"":" Order Form"}{comp.pct===100&&!mob?" â":!color&&items.length>0&&!mob?" !":""}</button>
+          <button className="bt bp" onClick={()=>{if(items.length===0){fl("No items to generate order form");return;}if(!color){fl("Please select a Finish Color before generating");return;}setShowOrderReview(true)}} style={{fontSize:11,minHeight:mob?38:undefined,...(comp.pct===100?{background:"#16a34a",borderColor:"#16a34a"}:!color&&items.length>0?{opacity:0.7}:{})}}><Ic n="clip" sz={12}/>{mob?"":" Order Form"}{comp.pct===100&&!mob?" ✓":!color&&items.length>0&&!mob?" !":""}</button>
           {mob&&<button className="bt bg" onClick={newP} style={{fontSize:11,minHeight:38}}>+New</button>}
         </div>
       </div>
 
-      {/* ââ Search & Room Filter Bar ââ */}
+      {/* ── Search & Room Filter Bar ── */}
       {items.length>3&&<div style={{display:"flex",gap:6,marginBottom:8,alignItems:"center",flexWrap:"wrap"}}>
         <div style={{position:"relative",flex:"1 1 180px",minWidth:mob?140:180}}>
           <input className="inp" value={itemSearch} onChange={e=>setItemSearch(e.target.value)} placeholder="Search items (SKU, name, room)..." style={{paddingLeft:30,fontSize:mob?14:12,minHeight:mob?40:32}}/>
           <span style={{position:"absolute",left:9,top:"50%",transform:"translateY(-50%)",fontSize:13,color:C.stone,pointerEvents:"none"}}><svg viewBox="0 0 24 24" style={{width:13,height:13,fill:"none",stroke:C.stone,strokeWidth:1.5,strokeLinecap:"round",strokeLinejoin:"round",verticalAlign:"middle"}}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-          {itemSearch&&<button onClick={()=>setItemSearch("")} style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",fontSize:16,color:C.stone,cursor:"pointer",padding:4}}>Ã</button>}
+          {itemSearch&&<button onClick={()=>setItemSearch("")} style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",fontSize:16,color:C.stone,cursor:"pointer",padding:4}}>×</button>}
         </div>
         {(()=>{const usedRooms=ZN.filter(z=>items.some(it=>it.z===z.id));return usedRooms.length>1?(<div style={{display:"flex",gap:3,overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:mob?2:0}}>
           <button className={`ch2 ${roomFilter==="all"?"on":""}`} onClick={()=>setRoomFilter("all")} style={{flexShrink:0,minHeight:mob?36:28,fontSize:mob?12:11}}>All Rooms</button>
@@ -12054,10 +12090,10 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         {(itemSearch||roomFilter!=="all")&&<div style={{fontSize:11,color:C.stone,fontFamily:F.b}}>Showing {fi.length} of {items.length}</div>}
       </div>}
 
-      {items.length>0&&(()=>{const rm={};items.forEach(it=>{if(!rm[it.z])rm[it.z]={n:0,c:0};rm[it.z].n+=it.q;const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);rm[it.z].c+=total+mcR*(1+plyPct/100)*it.q});const usedZones=ZN.filter(z=>rm[z.id]);const maxN=Math.max(...usedZones.map(z=>rm[z.id].n),1);return(<div style={{display:"flex",gap:6,marginBottom:8,overflowX:"auto",paddingBottom:2}}>{usedZones.map(z=>{const d=rm[z.id];const pct=Math.max(8,Math.round(d.n/maxN*100));return(<div key={z.id} onClick={()=>{setRoomFilter(roomFilter===z.id?"all":z.id);setItemSearch("")}} style={{flex:"1 0 0",minWidth:mob?80:100,background:roomFilter===z.id?C.acc+"14":C.warm,borderRadius:8,padding:"8px 10px",border:`1px solid ${roomFilter===z.id?C.acc:C.bdr}`,cursor:"pointer",transition:"all .15s"}}><div style={{display:"flex",alignItems:"center",gap:4,marginBottom:4}}><span style={{fontSize:14}}>{z.i}</span><span style={{fontSize:10.5,fontWeight:600,fontFamily:F.b,color:roomFilter===z.id?C.acc:C.ink}}>{z.l}</span></div><div style={{background:C.bdr,borderRadius:3,height:5,overflow:"hidden"}}><div style={{width:pct+"%",height:"100%",background:C.acc,borderRadius:3,transition:"width .3s"}}/></div><div style={{marginTop:3,fontSize:9.5,color:C.stone,fontFamily:F.m}}>{d.n} unit{d.n!==1?"s":""} Â· {fm(d.c)}</div></div>)})}</div>)})()}
+      {items.length>0&&(()=>{const rm={};items.forEach(it=>{if(!rm[it.z])rm[it.z]={n:0,c:0};rm[it.z].n+=it.q;const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);rm[it.z].c+=total+mcR*(1+plyPct/100)*it.q});const usedZones=ZN.filter(z=>rm[z.id]);const maxN=Math.max(...usedZones.map(z=>rm[z.id].n),1);return(<div style={{display:"flex",gap:6,marginBottom:8,overflowX:"auto",paddingBottom:2}}>{usedZones.map(z=>{const d=rm[z.id];const pct=Math.max(8,Math.round(d.n/maxN*100));return(<div key={z.id} onClick={()=>{setRoomFilter(roomFilter===z.id?"all":z.id);setItemSearch("")}} style={{flex:"1 0 0",minWidth:mob?80:100,background:roomFilter===z.id?C.acc+"14":C.warm,borderRadius:8,padding:"8px 10px",border:`1px solid ${roomFilter===z.id?C.acc:C.bdr}`,cursor:"pointer",transition:"all .15s"}}><div style={{display:"flex",alignItems:"center",gap:4,marginBottom:4}}><span style={{fontSize:14}}>{z.i}</span><span style={{fontSize:10.5,fontWeight:600,fontFamily:F.b,color:roomFilter===z.id?C.acc:C.ink}}>{z.l}</span></div><div style={{background:C.bdr,borderRadius:3,height:5,overflow:"hidden"}}><div style={{width:pct+"%",height:"100%",background:C.acc,borderRadius:3,transition:"width .3s"}}/></div><div style={{marginTop:3,fontSize:9.5,color:C.stone,fontFamily:F.m}}>{d.n} unit{d.n!==1?"s":""} · {fm(d.c)}</div></div>)})}</div>)})()}
 
       {items.length===0?(<div className="c" style={{padding:mob?28:44,textAlign:"center"}}>
-        <div style={{fontSize:28,marginBottom:8}}>â»</div>
+        <div style={{fontSize:28,marginBottom:8}}>◻</div>
         <div style={{fontFamily:F.d,fontSize:16,fontWeight:600,marginBottom:5}}>No cabinets yet</div>
         <div style={{color:C.stone,fontSize:12.5,marginBottom:14}}>{mob?"Tap + below":"Use the catalog above"} to add Eclipse cabinets.</div>
         {mob&&<button className="bt bp" onClick={()=>ssAd(true)} style={{fontSize:13,padding:"9px 22px"}}>+ Add Cabinets</button>}
@@ -12073,7 +12109,7 @@ if(modDef?.excGroup&&val){CABINET_MODS.filter(m=>m.excGroup===modDef.excGroup&&m
 if(val)newMods[code]=val;else delete newMods[code];
 upd(item.id,{mods:newMods});
 };
-          /* âââ CUSTOM REFRIGERATOR PANEL â special inline editor âââ */
+          /* ─── CUSTOM REFRIGERATOR PANEL — special inline editor ─── */
           if(isREF(item.s)){
             const panelCount=((item.sqH||0)<=47.9375)?1:((item.sqH||0)<=81.9375)?2:3;
             const showRefDwg=modOpen.has("ref-dwg-"+item.id);
@@ -12086,35 +12122,35 @@ upd(item.id,{mods:newMods});
                   <span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{panelCount} panel{panelCount>1?"s":""}</span>
                 </div>
                 <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                  <button onClick={()=>{if(confirm("Remove this ref panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                  <button onClick={()=>{if(confirm("Remove this ref panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>
               </div>
-              {/* ââ Dimensions (1/16" precision) ââ */}
+              {/* ── Dimensions (1/16" precision) ── */}
               <div style={{display:"flex",gap:6,marginBottom:6,alignItems:"center",padding:"8px 10px",background:"#ecfdf5",borderRadius:6,flexWrap:"wrap"}}>
-                <span className="lb" style={{marginBottom:0,color:"#059669",fontWeight:700}}>Width:<Tip text="Enter exact width in inches (1/16â³ precision). Use decimals: 23.5 = 23Â½â³, 23.0625 = 23 1/16â³"/></span>
-                <input type="number" className="inp" min={0.0625} max={120} step={0.0625} value={item.sqW||0} onChange={e=>{const w=Math.max(0,+e.target.value);upd(item.id,{sqW:w,sqin:w*(item.sqH||0)})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}} placeholder="0â120"/>
-                <span style={{color:C.stone,fontSize:11}}>â³</span>
-                <span style={{color:C.stone,fontSize:14}}>Ã</span>
-                <span className="lb" style={{marginBottom:0,color:"#059669",fontWeight:700}}>Height:<Tip text="Panel height determines panel count: â¤47 15/16â³ = 1 panel, 48â81 15/16â³ = 2 panels, 82â³+ = 3 panels"/></span>
-                <input type="number" className="inp" min={0.0625} max={120} step={0.0625} value={item.sqH||0} onChange={e=>{const h=Math.max(0,+e.target.value);upd(item.id,{sqH:h,sqin:(item.sqW||0)*h})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}} placeholder="0â120"/>
-                <span style={{color:C.stone,fontSize:11}}>â³</span>
-                <span style={{fontSize:11,color:"#059669",fontWeight:600}}>= {(item.sqin||0).toLocaleString(undefined,{maximumFractionDigits:2})} sq.in Â· ${item.p}/sq.in = {fm(item.p*(item.sqin||0))}</span>
+                <span className="lb" style={{marginBottom:0,color:"#059669",fontWeight:700}}>Width:<Tip text="Enter exact width in inches (1/16″ precision). Use decimals: 23.5 = 23½″, 23.0625 = 23 1/16″"/></span>
+                <input type="number" className="inp" min={0.0625} max={120} step={0.0625} value={item.sqW||0} onChange={e=>{const w=Math.max(0,+e.target.value);upd(item.id,{sqW:w,sqin:w*(item.sqH||0)})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}} placeholder="0–120"/>
+                <span style={{color:C.stone,fontSize:11}}>″</span>
+                <span style={{color:C.stone,fontSize:14}}>×</span>
+                <span className="lb" style={{marginBottom:0,color:"#059669",fontWeight:700}}>Height:<Tip text="Panel height determines panel count: ≤47 15/16″ = 1 panel, 48–81 15/16″ = 2 panels, 82″+ = 3 panels"/></span>
+                <input type="number" className="inp" min={0.0625} max={120} step={0.0625} value={item.sqH||0} onChange={e=>{const h=Math.max(0,+e.target.value);upd(item.id,{sqH:h,sqin:(item.sqW||0)*h})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}} placeholder="0–120"/>
+                <span style={{color:C.stone,fontSize:11}}>″</span>
+                <span style={{fontSize:11,color:"#059669",fontWeight:600}}>= {(item.sqin||0).toLocaleString(undefined,{maximumFractionDigits:2})} sq.in · ${item.p}/sq.in = {fm(item.p*(item.sqin||0))}</span>
               </div>
-              {/* ââ Ice maker cutout ââ */}
+              {/* ── Ice maker cutout ── */}
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,padding:"6px 10px",background:item.refIce?"#fef3c7":"#fff",borderRadius:6,border:`1.5px solid ${item.refIce?"#f59e0b":"#e5e7eb"}`}}>
                 <input type="checkbox" id={`refIce-${item.id}`} checked={!!item.refIce} onChange={e=>upd(item.id,{refIce:e.target.checked})} style={{width:15,height:15,cursor:"pointer",accentColor:"#f59e0b"}}/>
-                <label htmlFor={`refIce-${item.id}`} style={{fontSize:12,cursor:"pointer",fontWeight:item.refIce?700:500,color:item.refIce?"#92400e":"#666"}}>Ice Maker Cutout â +$200 list<Tip text="Adds a cutout for ice maker access. Note: this voids the finish warranty on this panel"/></label>
+                <label htmlFor={`refIce-${item.id}`} style={{fontSize:12,cursor:"pointer",fontWeight:item.refIce?700:500,color:item.refIce?"#92400e":"#666"}}>Ice Maker Cutout — +$200 list<Tip text="Adds a cutout for ice maker access. Note: this voids the finish warranty on this panel"/></label>
                 {item.refIce&&<span style={{fontSize:10,color:"#b45309",fontStyle:"italic"}}>Finish warranty voided</span>}
               </div>
-              {/* ââ Room & Species ââ */}
+              {/* ── Room & Species ── */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
                 <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
                 <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
-                  <option value="">â global â</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
+                  <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
                 </select></div>
               </div>
-              {/* ââ PDF Uploads: Ref Specs + Sketch ââ */}
+              {/* ── PDF Uploads: Ref Specs + Sketch ── */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
                 <div style={{padding:"6px 8px",background:"#f8fafc",borderRadius:6,border:"1px solid #e2e8f0"}}>
                   <label className="lb" style={{color:"#0369a1"}}><Ic n="clip" sz={11} c="#0369a1"/> Ref Specs PDF</label>
@@ -12125,7 +12161,7 @@ upd(item.id,{mods:newMods});
                   </div>:<input type="file" accept=".pdf" onChange={e=>{const f=e.target.files?.[0];if(f){const r=new FileReader();r.onload=ev=>upd(item.id,{refSpecPdf:ev.target.result,refSpecPdfName:f.name});r.readAsDataURL(f)}}} style={{fontSize:10}}/>}
                 </div>
                 <div style={{padding:"6px 8px",background:"#f8fafc",borderRadius:6,border:"1px solid #e2e8f0"}}>
-                  <label className="lb" style={{color:"#7c3aed"}}>ï¸ Panel Sketch PDF</label>
+                  <label className="lb" style={{color:"#7c3aed"}}>️ Panel Sketch PDF</label>
                   {item.refSketchPdf?<div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                     <span style={{fontSize:10,color:"#7c3aed",fontWeight:600}}>{item.refSketchPdfName||"Sketch PDF"}</span>
                     <a href={item.refSketchPdf} download={item.refSketchPdfName||"ref-sketch.pdf"} style={{fontSize:9.5,color:"#7c3aed",textDecoration:"underline"}}>Download</a>
@@ -12133,38 +12169,38 @@ upd(item.id,{mods:newMods});
                   </div>:<input type="file" accept=".pdf" onChange={e=>{const f=e.target.files?.[0];if(f){const r=new FileReader();r.onload=ev=>upd(item.id,{refSketchPdf:ev.target.result,refSketchPdfName:f.name});r.readAsDataURL(f)}}} style={{fontSize:10}}/>}
                 </div>
               </div>
-              {/* ââ Panel Height Table ââ */}
+              {/* ── Panel Height Table ── */}
               <div style={{marginBottom:6,padding:"6px 10px",background:"#f0fdf4",borderRadius:6,border:"1px solid #86efac"}}>
                 <div style={{fontSize:10,fontWeight:700,color:"#059669",marginBottom:4}}>Panel Height Reference</div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:2,fontSize:10}}>
-                  <span style={{fontWeight:600,color:"#374151"}}>Up to 47 15/16â³</span><span style={{color:"#059669",fontWeight:700}}>1 panel</span>
-                  <span style={{fontWeight:600,color:"#374151"}}>48â³ â 81 15/16â³</span><span style={{color:"#059669",fontWeight:700}}>2 panels</span>
-                  <span style={{fontWeight:600,color:"#374151"}}>82â³ & Over</span><span style={{color:"#059669",fontWeight:700}}>3 panels</span>
+                  <span style={{fontWeight:600,color:"#374151"}}>Up to 47 15/16″</span><span style={{color:"#059669",fontWeight:700}}>1 panel</span>
+                  <span style={{fontWeight:600,color:"#374151"}}>48″ – 81 15/16″</span><span style={{color:"#059669",fontWeight:700}}>2 panels</span>
+                  <span style={{fontWeight:600,color:"#374151"}}>82″ & Over</span><span style={{color:"#059669",fontWeight:700}}>3 panels</span>
                 </div>
               </div>
-              {/* ââ Reference Drawing (collapsible) ââ */}
+              {/* ── Reference Drawing (collapsible) ── */}
               <div style={{marginBottom:6}}>
                 <button onClick={()=>sModOpen(prev=>{const n=new Set(prev);const k="ref-dwg-"+item.id;n.has(k)?n.delete(k):n.add(k);return n})} style={{background:"#f8fafc",border:"1px solid #cbd5e1",borderRadius:6,padding:"6px 10px",cursor:"pointer",fontSize:11,fontWeight:600,color:"#475569",width:"100%",textAlign:"left",display:"flex",alignItems:"center",gap:6}}>
-                  <span>{showRefDwg?"â¾":"â¸"}</span><span><Ic n="ruler" sz={13} c={C.ink}/> Reference Drawing â Door / Spacer / Panel Detail</span>
+                  <span>{showRefDwg?"▾":"▸"}</span><span><Ic n="ruler" sz={13} c={C.ink}/> Reference Drawing — Door / Spacer / Panel Detail</span>
                 </button>
                 {showRefDwg&&<LazyImg loader={load_REF_DRAWING_B64} alt="Refrigerator Panel Reference Drawing"/>}
               </div>
-              {/* ââ Notes ââ */}
+              {/* ── Notes ── */}
               <div style={{marginBottom:6,padding:"8px 10px",background:"#fffbeb",borderRadius:6,border:"1px solid #fcd34d"}}>
-                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes â Custom Refrigerator Panels</div>
+                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes — Custom Refrigerator Panels</div>
                 <div style={{fontSize:9.5,color:"#92400e",lineHeight:1.6,whiteSpace:"pre-line"}}>{REF_NOTE}</div>
               </div>
-              {/* ââ Qty & Total ââ */}
+              {/* ── Qty & Total ── */}
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div style={{display:"flex",alignItems:"center",gap:6}}>
                   <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                  <span style={{fontSize:10.5,color:C.stone}}>Ã {fm(u)}/ea{item.refIce?" (incl. $200 ice cutout)":""}</span>
+                  <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea{item.refIce?" (incl. $200 ice cutout)":""}</span>
                 </div>
                 <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
               </div>
             </div>);
           }
-          /* âââ DISHWASHER PANEL â special inline editor âââ */
+          /* ─── DISHWASHER PANEL — special inline editor ─── */
           if(isDP(item.s)){
             return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #7c3aed"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
@@ -12173,29 +12209,29 @@ upd(item.id,{mods:newMods});
                   <span className="pl" style={{marginLeft:5,background:"#f0edff",color:"#7c3aed"}}>DP</span>
                 </div>
                 <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                  <button onClick={()=>{if(confirm("Remove this dishwasher panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                  <button onClick={()=>{if(confirm("Remove this dishwasher panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>
               </div>
-              {/* ââ Dimensions (1/16" precision) ââ */}
+              {/* ── Dimensions (1/16" precision) ── */}
               <div style={{display:"flex",gap:6,marginBottom:6,alignItems:"center",padding:"8px 10px",background:"#f0edff",borderRadius:6,flexWrap:"wrap"}}>
                 <span className="lb" style={{marginBottom:0,color:"#7c3aed",fontWeight:700}}>Width:</span>
                 <input type="number" className="inp" min={0.0625} max={120} step={0.0625} value={item.sqW||0} onChange={e=>{const w=Math.max(0,+e.target.value);upd(item.id,{sqW:w,sqin:w*(item.sqH||0)})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}}/>
-                <span style={{color:C.stone,fontSize:11}}>â³</span>
-                <span style={{color:C.stone,fontSize:14}}>Ã</span>
+                <span style={{color:C.stone,fontSize:11}}>″</span>
+                <span style={{color:C.stone,fontSize:14}}>×</span>
                 <span className="lb" style={{marginBottom:0,color:"#7c3aed",fontWeight:700}}>Height:</span>
                 <input type="number" className="inp" min={0.0625} max={120} step={0.0625} value={item.sqH||0} onChange={e=>{const h=Math.max(0,+e.target.value);upd(item.id,{sqH:h,sqin:(item.sqW||0)*h})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}}/>
-                <span style={{color:C.stone,fontSize:11}}>â³</span>
-                <span style={{fontSize:11,color:"#7c3aed",fontWeight:600}}>= {(item.sqin||0).toLocaleString(undefined,{maximumFractionDigits:2})} sq.in Â· ${item.p}/sq.in = {fm(item.p*(item.sqin||0))}</span>
+                <span style={{color:C.stone,fontSize:11}}>″</span>
+                <span style={{fontSize:11,color:"#7c3aed",fontWeight:600}}>= {(item.sqin||0).toLocaleString(undefined,{maximumFractionDigits:2})} sq.in · ${item.p}/sq.in = {fm(item.p*(item.sqin||0))}</span>
               </div>
-              {/* ââ Room & Species ââ */}
+              {/* ── Room & Species ── */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
                 <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
                 <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
-                  <option value="">â global â</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
+                  <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
                 </select></div>
               </div>
-              {/* ââ PDF Upload: Dishwasher Specs ââ */}
+              {/* ── PDF Upload: Dishwasher Specs ── */}
               <div style={{marginBottom:6,padding:"6px 8px",background:"#f8fafc",borderRadius:6,border:"1px solid #e2e8f0"}}>
                 <label className="lb" style={{color:"#0369a1"}}><Ic n="clip" sz={11} c="#0369a1"/> Dishwasher Spec Sheet (PDF)</label>
                 {item.dpSpecPdf?<div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
@@ -12204,22 +12240,22 @@ upd(item.id,{mods:newMods});
                   <button onClick={()=>upd(item.id,{dpSpecPdf:null,dpSpecPdfName:""})} style={{fontSize:9.5,color:C.red,background:"none",border:"none",cursor:"pointer"}}>Remove</button>
                 </div>:<input type="file" accept=".pdf" onChange={e=>{const f=e.target.files?.[0];if(f){const r=new FileReader();r.onload=ev=>upd(item.id,{dpSpecPdf:ev.target.result,dpSpecPdfName:f.name});r.readAsDataURL(f)}}} style={{fontSize:10}}/>}
               </div>
-              {/* ââ Notes ââ */}
+              {/* ── Notes ── */}
               <div style={{marginBottom:6,padding:"8px 10px",background:"#fffbeb",borderRadius:6,border:"1px solid #fcd34d"}}>
-                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes â Dishwasher Panels</div>
+                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes — Dishwasher Panels</div>
                 <div style={{fontSize:9.5,color:"#92400e",lineHeight:1.6,whiteSpace:"pre-line"}}>{DP_NOTE}</div>
               </div>
-              {/* ââ Qty & Total ââ */}
+              {/* ── Qty & Total ── */}
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div style={{display:"flex",alignItems:"center",gap:6}}>
                   <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                  <span style={{fontSize:10.5,color:C.stone}}>Ã {fm(u)}/ea</span>
+                  <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
                 </div>
                 <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
               </div>
             </div>);
           }
-          /* âââ BEVERAGE CENTER FRONT w/ ALUMINUM TRIM â special inline editor âââ */
+          /* ─── BEVERAGE CENTER FRONT w/ ALUMINUM TRIM — special inline editor ─── */
           if(isBCFT(item.s)){
             return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #b45309"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
@@ -12229,29 +12265,29 @@ upd(item.id,{mods:newMods});
                   <span className="pl" style={{marginLeft:3,background:"#f5f0e6",color:"#78716c"}}>{BCFT_LABELS[item.s]||""}</span>
                 </div>
                 <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                  <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                  <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>
               </div>
-              {/* ââ Dimensions (1/16" precision, max 24"W Ã 80"H) ââ */}
+              {/* ── Dimensions (1/16" precision, max 24"W × 80"H) ── */}
               <div style={{display:"flex",gap:6,marginBottom:6,alignItems:"center",padding:"8px 10px",background:"#fef3c7",borderRadius:6,flexWrap:"wrap"}}>
-                <span className="lb" style={{marginBottom:0,color:"#b45309",fontWeight:700}}>Width:<Tip text="Max 24â³. Enter exact width in inches (1/16â³ precision)"/></span>
-                <input type="number" className="inp" min={0.0625} max={24} step={0.0625} value={item.sqW||0} onChange={e=>{const w=Math.max(0,Math.min(24,+e.target.value));upd(item.id,{sqW:w,sqin:w*(item.sqH||0)})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}} placeholder="0â24"/>
-                <span style={{color:C.stone,fontSize:11}}>â³ (max 24â³)</span>
-                <span style={{color:C.stone,fontSize:14}}>Ã</span>
-                <span className="lb" style={{marginBottom:0,color:"#b45309",fontWeight:700}}>Height:<Tip text="Max 80â³. Enter exact height in inches (1/16â³ precision)"/></span>
-                <input type="number" className="inp" min={0.0625} max={80} step={0.0625} value={item.sqH||0} onChange={e=>{const h=Math.max(0,Math.min(80,+e.target.value));upd(item.id,{sqH:h,sqin:(item.sqW||0)*h})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}} placeholder="0â80"/>
-                <span style={{color:C.stone,fontSize:11}}>â³ (max 80â³)</span>
-                <span style={{fontSize:11,color:"#b45309",fontWeight:600}}>= {(item.sqin||0).toLocaleString(undefined,{maximumFractionDigits:2})} sq.in Â· ${item.p}/sq.in = {fm(item.p*(item.sqin||0))}</span>
+                <span className="lb" style={{marginBottom:0,color:"#b45309",fontWeight:700}}>Width:<Tip text="Max 24″. Enter exact width in inches (1/16″ precision)"/></span>
+                <input type="number" className="inp" min={0.0625} max={24} step={0.0625} value={item.sqW||0} onChange={e=>{const w=Math.max(0,Math.min(24,+e.target.value));upd(item.id,{sqW:w,sqin:w*(item.sqH||0)})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}} placeholder="0–24"/>
+                <span style={{color:C.stone,fontSize:11}}>″ (max 24″)</span>
+                <span style={{color:C.stone,fontSize:14}}>×</span>
+                <span className="lb" style={{marginBottom:0,color:"#b45309",fontWeight:700}}>Height:<Tip text="Max 80″. Enter exact height in inches (1/16″ precision)"/></span>
+                <input type="number" className="inp" min={0.0625} max={80} step={0.0625} value={item.sqH||0} onChange={e=>{const h=Math.max(0,Math.min(80,+e.target.value));upd(item.id,{sqH:h,sqin:(item.sqW||0)*h})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}} placeholder="0–80"/>
+                <span style={{color:C.stone,fontSize:11}}>″ (max 80″)</span>
+                <span style={{fontSize:11,color:"#b45309",fontWeight:600}}>= {(item.sqin||0).toLocaleString(undefined,{maximumFractionDigits:2})} sq.in · ${item.p}/sq.in = {fm(item.p*(item.sqin||0))}</span>
               </div>
-              {/* ââ Room & Species ââ */}
+              {/* ── Room & Species ── */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
                 <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
                 <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
-                  <option value="">â global â</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
+                  <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
                 </select></div>
               </div>
-              {/* ââ PDF Upload: Beverage Cooler Specs ââ */}
+              {/* ── PDF Upload: Beverage Cooler Specs ── */}
               <div style={{marginBottom:6,padding:"6px 8px",background:"#f8fafc",borderRadius:6,border:"1px solid #e2e8f0"}}>
                 <label className="lb" style={{color:"#0369a1"}}><Ic n="clip" sz={11} c="#0369a1"/> Beverage Cooler Spec Sheet (PDF)</label>
                 {item.bcftSpecPdf?<div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
@@ -12260,22 +12296,22 @@ upd(item.id,{mods:newMods});
                   <button onClick={()=>upd(item.id,{bcftSpecPdf:null,bcftSpecPdfName:""})} style={{fontSize:9.5,color:C.red,background:"none",border:"none",cursor:"pointer"}}>Remove</button>
                 </div>:<input type="file" accept=".pdf" onChange={e=>{const f=e.target.files?.[0];if(f){const r=new FileReader();r.onload=ev=>upd(item.id,{bcftSpecPdf:ev.target.result,bcftSpecPdfName:f.name});r.readAsDataURL(f)}}} style={{fontSize:10}}/>}
               </div>
-              {/* ââ Notes ââ */}
+              {/* ── Notes ── */}
               <div style={{marginBottom:6,padding:"8px 10px",background:"#fffbeb",borderRadius:6,border:"1px solid #fcd34d"}}>
-                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes â Beverage Center Fronts w/ Aluminum Trim</div>
+                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes — Beverage Center Fronts w/ Aluminum Trim</div>
                 <div style={{fontSize:9.5,color:"#92400e",lineHeight:1.6,whiteSpace:"pre-line"}}>{BCFT_NOTE}</div>
               </div>
-              {/* ââ Qty & Total ââ */}
+              {/* ── Qty & Total ── */}
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div style={{display:"flex",alignItems:"center",gap:6}}>
                   <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                  <span style={{fontSize:10.5,color:C.stone}}>Ã {fm(u)}/ea</span>
+                  <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
                 </div>
                 <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
               </div>
             </div>);
           }
-          /* âââ COLUMN OVERLAY â special inline editor âââ */
+          /* ─── COLUMN OVERLAY — special inline editor ─── */
           if(isCO(item.s)){
             const showCoDwg=modOpen.has("co-dwg-"+item.id);
             return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #6d28d9"}}>
@@ -12286,47 +12322,47 @@ upd(item.id,{mods:newMods});
                   <span className="pl" style={{marginLeft:3,background:"#f5f0e6",color:"#78716c"}}>{CO_LABELS[item.s]||""}</span>
                 </div>
                 <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                  <button onClick={()=>{if(confirm("Remove this column overlay?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                  <button onClick={()=>{if(confirm("Remove this column overlay?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>
               </div>
-              {/* ââ Height (per linear inch, 1/16" precision) ââ */}
+              {/* ── Height (per linear inch, 1/16" precision) ── */}
               <div style={{display:"flex",gap:6,marginBottom:6,alignItems:"center",padding:"8px 10px",background:"#ede9fe",borderRadius:6,flexWrap:"wrap"}}>
                 <span className="lb" style={{marginBottom:0,color:"#6d28d9",fontWeight:700}}>Height:</span>
                 <input type="number" className="inp" min={0.0625} max={120} step={0.0625} value={item.sqH||0} onChange={e=>{const h=Math.max(0,+e.target.value);upd(item.id,{sqH:h})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}}/>
-                <span style={{color:C.stone,fontSize:11}}>â³</span>
-                <span style={{fontSize:11,color:"#6d28d9",fontWeight:600}}>= {(item.sqH||0).toLocaleString(undefined,{maximumFractionDigits:4})} linear in Â· ${item.p}/lin.in = {fm(item.p*(item.sqH||0))}</span>
+                <span style={{color:C.stone,fontSize:11}}>″</span>
+                <span style={{fontSize:11,color:"#6d28d9",fontWeight:600}}>= {(item.sqH||0).toLocaleString(undefined,{maximumFractionDigits:4})} linear in · ${item.p}/lin.in = {fm(item.p*(item.sqH||0))}</span>
               </div>
-              {/* ââ Room & Species ââ */}
+              {/* ── Room & Species ── */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
                 <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
                 <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
-                  <option value="">â global â</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
+                  <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
                 </select></div>
               </div>
-              {/* ââ Reference Drawing (collapsible) ââ */}
+              {/* ── Reference Drawing (collapsible) ── */}
               <div style={{marginBottom:6}}>
                 <button onClick={()=>sModOpen(prev=>{const n=new Set(prev);const k="co-dwg-"+item.id;n.has(k)?n.delete(k):n.add(k);return n})} style={{background:"#f8fafc",border:"1px solid #cbd5e1",borderRadius:6,padding:"6px 10px",cursor:"pointer",fontSize:11,fontWeight:600,color:"#475569",width:"100%",textAlign:"left",display:"flex",alignItems:"center",gap:6}}>
-                  <span>{showCoDwg?"â¾":"â¸"}</span><span><Ic n="ruler" sz={13} c={C.ink}/> Reference Drawing â Column Overlay Profiles & Dimensions</span>
+                  <span>{showCoDwg?"▾":"▸"}</span><span><Ic n="ruler" sz={13} c={C.ink}/> Reference Drawing — Column Overlay Profiles & Dimensions</span>
                 </button>
                 {showCoDwg&&<LazyImg loader={load_CO_DRAWING_B64} alt="Column Overlay Reference Drawing"/>}
               </div>
-              {/* ââ Notes ââ */}
+              {/* ── Notes ── */}
               <div style={{marginBottom:6,padding:"8px 10px",background:"#fffbeb",borderRadius:6,border:"1px solid #fcd34d"}}>
-                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes â Column Overlays</div>
+                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes — Column Overlays</div>
                 <div style={{fontSize:9.5,color:"#92400e",lineHeight:1.6,whiteSpace:"pre-line"}}>{CO_NOTE}</div>
               </div>
-              {/* ââ Qty & Total ââ */}
+              {/* ── Qty & Total ── */}
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div style={{display:"flex",alignItems:"center",gap:6}}>
                   <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                  <span style={{fontSize:10.5,color:C.stone}}>Ã {fm(u)}/ea</span>
+                  <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
                 </div>
                 <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
               </div>
             </div>);
           }
-          /* âââ BEVERAGE CENTER FRONT (BCF) â special inline editor âââ */
+          /* ─── BEVERAGE CENTER FRONT (BCF) — special inline editor ─── */
           if(isBCF(item.s)){
             return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #0d9488"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
@@ -12335,29 +12371,29 @@ upd(item.id,{mods:newMods});
                   <span className="pl" style={{marginLeft:5,background:"#ccfbf1",color:"#0d9488"}}>BCF</span>
                 </div>
                 <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                  <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                  <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>
               </div>
-              {/* ââ Dimensions (1/16" precision, max 24"W Ã 80"H) ââ */}
+              {/* ── Dimensions (1/16" precision, max 24"W × 80"H) ── */}
               <div style={{display:"flex",gap:6,marginBottom:6,alignItems:"center",padding:"8px 10px",background:"#ccfbf1",borderRadius:6,flexWrap:"wrap"}}>
                 <span className="lb" style={{marginBottom:0,color:"#0d9488",fontWeight:700}}>Width:</span>
                 <input type="number" className="inp" min={0.0625} max={24} step={0.0625} value={item.sqW||0} onChange={e=>{const w=Math.max(0,Math.min(24,+e.target.value));upd(item.id,{sqW:w,sqin:w*(item.sqH||0)})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}}/>
-                <span style={{color:C.stone,fontSize:11}}>â³ (max 24â³)</span>
-                <span style={{color:C.stone,fontSize:14}}>Ã</span>
+                <span style={{color:C.stone,fontSize:11}}>″ (max 24″)</span>
+                <span style={{color:C.stone,fontSize:14}}>×</span>
                 <span className="lb" style={{marginBottom:0,color:"#0d9488",fontWeight:700}}>Height:</span>
                 <input type="number" className="inp" min={0.0625} max={80} step={0.0625} value={item.sqH||0} onChange={e=>{const h=Math.max(0,Math.min(80,+e.target.value));upd(item.id,{sqH:h,sqin:(item.sqW||0)*h})}} style={{width:70,textAlign:"center",padding:5,fontSize:12}}/>
-                <span style={{color:C.stone,fontSize:11}}>â³ (max 80â³)</span>
-                <span style={{fontSize:11,color:"#0d9488",fontWeight:600}}>= {(item.sqin||0).toLocaleString(undefined,{maximumFractionDigits:2})} sq.in Â· ${item.p}/sq.in = {fm(item.p*(item.sqin||0))}</span>
+                <span style={{color:C.stone,fontSize:11}}>″ (max 80″)</span>
+                <span style={{fontSize:11,color:"#0d9488",fontWeight:600}}>= {(item.sqin||0).toLocaleString(undefined,{maximumFractionDigits:2})} sq.in · ${item.p}/sq.in = {fm(item.p*(item.sqin||0))}</span>
               </div>
-              {/* ââ Room & Species ââ */}
+              {/* ── Room & Species ── */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
                 <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
                 <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
-                  <option value="">â global â</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
+                  <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
                 </select></div>
               </div>
-              {/* ââ PDF Upload: Beverage Cooler Specs ââ */}
+              {/* ── PDF Upload: Beverage Cooler Specs ── */}
               <div style={{marginBottom:6,padding:"6px 8px",background:"#f8fafc",borderRadius:6,border:"1px solid #e2e8f0"}}>
                 <label className="lb" style={{color:"#0369a1"}}><Ic n="clip" sz={11} c="#0369a1"/> Beverage Cooler Spec Sheet (PDF)</label>
                 {item.bcfSpecPdf?<div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
@@ -12366,22 +12402,22 @@ upd(item.id,{mods:newMods});
                   <button onClick={()=>upd(item.id,{bcfSpecPdf:null,bcfSpecPdfName:""})} style={{fontSize:9.5,color:C.red,background:"none",border:"none",cursor:"pointer"}}>Remove</button>
                 </div>:<input type="file" accept=".pdf" onChange={e=>{const f=e.target.files?.[0];if(f){const r=new FileReader();r.onload=ev=>upd(item.id,{bcfSpecPdf:ev.target.result,bcfSpecPdfName:f.name});r.readAsDataURL(f)}}} style={{fontSize:10}}/>}
               </div>
-              {/* ââ Notes ââ */}
+              {/* ── Notes ── */}
               <div style={{marginBottom:6,padding:"8px 10px",background:"#fffbeb",borderRadius:6,border:"1px solid #fcd34d"}}>
-                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes â Beverage Center Fronts</div>
+                <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:3}}><Ic n="warn" sz={10} c="#92400e"/> Important Notes — Beverage Center Fronts</div>
                 <div style={{fontSize:9.5,color:"#92400e",lineHeight:1.6,whiteSpace:"pre-line"}}>{BCF_NOTE}</div>
               </div>
-              {/* ââ Qty & Total ââ */}
+              {/* ── Qty & Total ── */}
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div style={{display:"flex",alignItems:"center",gap:6}}>
                   <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                  <span style={{fontSize:10.5,color:C.stone}}>Ã {fm(u)}/ea</span>
+                  <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
                 </div>
                 <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
               </div>
             </div>);
           }
-          /* âââ CUSTOM QUOTE ITEM â special inline editor âââ */
+          /* ─── CUSTOM QUOTE ITEM — special inline editor ─── */
           if(isCustom(item.s)){
             return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #0ea5e9"}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
@@ -12391,8 +12427,8 @@ upd(item.id,{mods:newMods});
                   {item.cqNum&&<span className="pl" style={{marginLeft:3,background:"#fef3c7",color:"#92400e"}}>#{item.cqNum}</span>}
                 </div>
                 <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                  <button onClick={()=>{if(confirm("Remove this custom item?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                  <button onClick={()=>{if(confirm("Remove this custom item?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>
               </div>
               <div style={{marginBottom:6}}>
@@ -12430,7 +12466,7 @@ upd(item.id,{mods:newMods});
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div style={{display:"flex",alignItems:"center",gap:6}}>
                   <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                  <span style={{fontSize:10.5,color:C.stone}}>Ã {fm(u)}/ea</span>
+                  <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
                 </div>
                 <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
               </div>
@@ -12443,20 +12479,20 @@ upd(item.id,{mods:newMods});
                   <span className="mn" style={{fontWeight:700,fontSize:mob?13.5:12.5}}>{SKU_LABELS[item.s]||item.s}</span>
                   <span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>
                   {isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}
-                  {itemSQ&&<span className="pl" style={{marginLeft:3,background:"#e8f0ea",color:"#2c4a34"}}>{isFLS(item.s)?`${item.sqW||0}"D Ã ${item.sqH||0}"L`:""} {(item.sqin||0).toLocaleString()} sq.in</span>}
+                  {itemSQ&&<span className="pl" style={{marginLeft:3,background:"#e8f0ea",color:"#2c4a34"}}>{isFLS(item.s)?`${item.sqW||0}"D × ${item.sqH||0}"L`:""} {(item.sqin||0).toLocaleString()} sq.in</span>}
                   {item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}
                   {item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng}</span>}
                   {item.fe&&intF!=="LINEN"&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe==="L"?"Left":"Right"}</span>}
                   {item.rbs&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>RBS +$87</span>}
-                  {activeMods.length>0&&activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;const modAmt=m.input==="mxdf"?m.price*mxdfCount:m.input==="side"?m.price*(qty==="B"?2:1):m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?m.price:m.price*(+qty||1);return <span key={code} className="pl" style={{marginLeft:3,background:"#7c3aed18",color:"#6d28d9"}}>{m.label}{m.input==="mxdf"?` Ã${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"L":"R"})`:typeof qty==="number"&&qty>1?` Ã${qty}`:""} {m.pct?`+${m.pct}%`:modAmt>0?`+${fm(modAmt)}`:""}</span>})}
+                  {activeMods.length>0&&activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;const modAmt=m.input==="mxdf"?m.price*mxdfCount:m.input==="side"?m.price*(qty==="B"?2:1):m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?m.price:m.price*(+qty||1);return <span key={code} className="pl" style={{marginLeft:3,background:"#7c3aed18",color:"#6d28d9"}}>{m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"L":"R"})`:typeof qty==="number"&&qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:modAmt>0?`+${fm(modAmt)}`:""}</span>})}
                 </div>
                 {!mob&&<div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
-                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                  <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                  <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                  <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                 </div>}
               </div>
               {(()=>{const w=[];if(!isMould&&!itemSQ&&!isCustom(item.s)){if(item.dc>0&&!item.hng)w.push("No hinge");if((item.t==="B"||item.t==="T"||item.t==="V")&&!item.fe)w.push("No fin. end");}if(itemSQ&&(item.sqin||0)===0)w.push("0 sq.in");if(isOven(item)){const oSpec=item.ovenSpec||{};const ot=OVEN_TYPE(item);const fields=OVEN_FIELDS[ot]||[];const filled=fields.filter(f=>oSpec[f.k]).length;if(filled===0)w.push("No oven spec");else if(filled<fields.length)w.push(`Spec ${filled}/${fields.length}`);}return w.length>0?<div style={{display:"flex",gap:3,marginTop:2,flexWrap:"wrap"}}>{w.map(x=><span key={x} style={{fontSize:9,padding:"1px 6px",borderRadius:3,background:"#fef3c7",color:"#92400e",fontWeight:600,border:"1px solid #f59e0b44"}}>{x}</span>)}</div>:null})()}
-              <div style={{fontSize:10.5,color:C.stone,marginTop:1}}>{item.r} Â· {SEC[item.r.charAt(0)]||""}{isMould?` Â· $${item.p}/LF`:""}{!isMould&&!itemSQ&&modCost>0?` Â· Base ${fm(u-doorChg-rbsChg)} + Mods ${fm(modCost)} = ${fm(u+modCost)}/ea`:""}</div>
+              <div style={{fontSize:10.5,color:C.stone,marginTop:1}}>{item.r} · {SEC[item.r.charAt(0)]||""}{isMould?` · $${item.p}/LF`:""}{!isMould&&!itemSQ&&modCost>0?` · Base ${fm(u-doorChg-rbsChg)} + Mods ${fm(modCost)} = ${fm(u+modCost)}/ea`:""}</div>
             </div>
             {isMould&&<div style={{display:"flex",gap:4,marginBottom:5}}>
               <button className={`ch2 ${item.len===5?"on":""}`} onClick={()=>upd(item.id,{len:5})} style={item.len===5?{borderColor:C.gold,color:C.gold,background:C.gold+"14"}:{}}>5 ft</button>
@@ -12467,23 +12503,23 @@ upd(item.id,{mods:newMods});
               {isFLS(item.s)?<>
                 <span className="lb" style={{marginBottom:0,color:"#2c4a34"}}>Depth:</span>
                 <input type="number" className="inp" min={FLS_DEPTH_MIN} max={FLS_DEPTH_MAX} value={item.sqW||FLS_DEPTH_MIN} onChange={e=>{const d=Math.max(FLS_DEPTH_MIN,Math.min(FLS_DEPTH_MAX,+e.target.value));upd(item.id,{sqW:d,sqin:d*(item.sqH||FLS_LEN_MIN)})}} style={{width:55,textAlign:"center",padding:4,fontSize:11}}/>
-                <span style={{color:C.stone}}>Ã</span>
+                <span style={{color:C.stone}}>×</span>
                 <span className="lb" style={{marginBottom:0,color:"#2c4a34"}}>Length:</span>
                 <input type="number" className="inp" min={FLS_LEN_MIN} max={FLS_LEN_MAX} value={item.sqH||FLS_LEN_MIN} onChange={e=>{const l=Math.max(FLS_LEN_MIN,Math.min(FLS_LEN_MAX,+e.target.value));upd(item.id,{sqH:l,sqin:(item.sqW||FLS_DEPTH_MIN)*l})}} style={{width:55,textAlign:"center",padding:4,fontSize:11}}/>
-                <span style={{fontSize:10,color:C.stone}}>= {(item.sqin||0).toLocaleString()} sq.in Â· ${item.p}/sq.in = {fm(u)}/pc</span>
+                <span style={{fontSize:10,color:C.stone}}>= {(item.sqin||0).toLocaleString()} sq.in · ${item.p}/sq.in = {fm(u)}/pc</span>
               </>:<>
                 <span className="lb" style={{marginBottom:0,color:"#2c4a34"}}>W:</span>
                 <input type="number" className="inp" min={1} max={120} value={item.sqW||1} onChange={e=>{const w=Math.max(1,+e.target.value);upd(item.id,{sqW:w,sqin:w*(item.sqH||1)})}} style={{width:55,textAlign:"center",padding:4,fontSize:11}}/>
-                <span style={{color:C.stone}}>Ã</span>
+                <span style={{color:C.stone}}>×</span>
                 <span className="lb" style={{marginBottom:0,color:"#2c4a34"}}>H:</span>
                 <input type="number" className="inp" min={1} max={120} value={item.sqH||1} onChange={e=>{const h=Math.max(1,+e.target.value);upd(item.id,{sqH:h,sqin:(item.sqW||1)*h})}} style={{width:55,textAlign:"center",padding:4,fontSize:11}}/>
-                <span style={{fontSize:10,color:C.stone}}>= {(item.sqin||0).toLocaleString()} sq.in Â· ${item.p}/sq.in = {fm(u)}/pc</span>
+                <span style={{fontSize:10,color:C.stone}}>= {(item.sqin||0).toLocaleString()} sq.in · ${item.p}/sq.in = {fm(u)}/pc</span>
               </>}
             </div>}
             {isOven(item)&&(()=>{const ot=OVEN_TYPE(item);const fields=OVEN_FIELDS[ot]||[];const specExpanded=modOpen.has("oven-spec-"+item.id);const oSpec=item.ovenSpec||{};const filledCount=fields.filter(f=>oSpec[f.k]).length;
 return(<div style={{marginBottom:5}}>
   <button onClick={()=>{const n=new Set(modOpen);n.has("oven-spec-"+item.id)?n.delete("oven-spec-"+item.id):n.add("oven-spec-"+item.id);sModOpen(n)}} style={{width:"100%",textAlign:"left",background:"linear-gradient(135deg,#fef3c7,#fff7ed)",border:"1px solid #f59e0b",borderRadius:6,padding:"8px 10px",cursor:"pointer",fontSize:11,fontWeight:600,color:"#92400e",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-    <span>{specExpanded?"â¼":"â¶"} <Ic n="clip" sz={13} c={C.ink}/> {OVEN_LABELS[ot]} Spec Form ({OVEN_FORM_CODES[ot]})</span>
+    <span>{specExpanded?"▼":"▶"} <Ic n="clip" sz={13} c={C.ink}/> {OVEN_LABELS[ot]} Spec Form ({OVEN_FORM_CODES[ot]})</span>
     <span style={{fontSize:10,fontWeight:500,color:filledCount===fields.length?"#059669":"#b45309"}}>{filledCount}/{fields.length} fields</span>
   </button>
   {specExpanded&&<div style={{border:"1px solid #f59e0b",borderTop:"none",borderRadius:"0 0 6px 6px",padding:"10px",background:"#fffbeb"}}>
@@ -12494,12 +12530,12 @@ return(<div style={{marginBottom:5}}>
       </div>)}
     </div>
     {(ot==="O"||ot==="OM")&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginTop:6}}>
-      <div><label className="lb" style={{color:"#92400e",fontSize:9.5}}>Top Rail Width</label><select className="sel" value={oSpec.ovenTopRail||""} onChange={e=>{const ns={...oSpec,ovenTopRail:e.target.value};upd(item.id,{ovenSpec:ns})}} style={{fontSize:11}}><option value="">Select...</option><option value='3"'>3"</option><option value='1 1/2"'>1 Â½"</option></select></div>
-      <div><label className="lb" style={{color:"#92400e",fontSize:9.5}}>Bottom Rail Width</label><select className="sel" value={oSpec.ovenBotRail||""} onChange={e=>{const ns={...oSpec,ovenBotRail:e.target.value};upd(item.id,{ovenSpec:ns})}} style={{fontSize:11}}><option value="">Select...</option><option value='3"'>3"</option><option value='1 1/2"'>1 Â½"</option></select></div>
-      {ot==="OM"&&<div><label className="lb" style={{color:"#92400e",fontSize:9.5}}>Middle Rail Width</label><select className="sel" value={oSpec.ovenMidRail||""} onChange={e=>{const ns={...oSpec,ovenMidRail:e.target.value};upd(item.id,{ovenSpec:ns})}} style={{fontSize:11}}><option value="">Select...</option><option value='3"'>3"</option><option value='1 1/2"'>1 Â½"</option></select></div>}
+      <div><label className="lb" style={{color:"#92400e",fontSize:9.5}}>Top Rail Width</label><select className="sel" value={oSpec.ovenTopRail||""} onChange={e=>{const ns={...oSpec,ovenTopRail:e.target.value};upd(item.id,{ovenSpec:ns})}} style={{fontSize:11}}><option value="">Select...</option><option value='3"'>3"</option><option value='1 1/2"'>1 ½"</option></select></div>
+      <div><label className="lb" style={{color:"#92400e",fontSize:9.5}}>Bottom Rail Width</label><select className="sel" value={oSpec.ovenBotRail||""} onChange={e=>{const ns={...oSpec,ovenBotRail:e.target.value};upd(item.id,{ovenSpec:ns})}} style={{fontSize:11}}><option value="">Select...</option><option value='3"'>3"</option><option value='1 1/2"'>1 ½"</option></select></div>
+      {ot==="OM"&&<div><label className="lb" style={{color:"#92400e",fontSize:9.5}}>Middle Rail Width</label><select className="sel" value={oSpec.ovenMidRail||""} onChange={e=>{const ns={...oSpec,ovenMidRail:e.target.value};upd(item.id,{ovenSpec:ns})}} style={{fontSize:11}}><option value="">Select...</option><option value='3"'>3"</option><option value='1 1/2"'>1 ½"</option></select></div>}
     </div>}
     {(ot==="MWC"||ot==="BO"||ot==="BWD")&&<div style={{display:"grid",gridTemplateColumns:"1fr",gap:6,marginTop:6}}>
-      <div><label className="lb" style={{color:"#92400e",fontSize:9.5}}>Intermediate Rail Width</label><select className="sel" value={oSpec.ovenIntRail||""} onChange={e=>{const ns={...oSpec,ovenIntRail:e.target.value};upd(item.id,{ovenSpec:ns})}} style={{fontSize:11}}><option value="">Select...</option><option value='3"'>3"</option><option value='1 1/2"'>1 Â½"</option></select></div>
+      <div><label className="lb" style={{color:"#92400e",fontSize:9.5}}>Intermediate Rail Width</label><select className="sel" value={oSpec.ovenIntRail||""} onChange={e=>{const ns={...oSpec,ovenIntRail:e.target.value};upd(item.id,{ovenSpec:ns})}} style={{fontSize:11}}><option value="">Select...</option><option value='3"'>3"</option><option value='1 1/2"'>1 ½"</option></select></div>
     </div>}
     <div style={{marginTop:8,padding:"8px",background:"#fef3c7",borderRadius:6,border:"1px solid #f59e0b44"}}>
       <div style={{fontSize:9.5,fontWeight:700,color:"#92400e",marginBottom:2}}><Ic n="warn" sz={10} c="#92400e"/> Cutout Information</div>
@@ -12515,10 +12551,10 @@ return(<div style={{marginBottom:5}}>
             <div style={{display:"grid",gridTemplateColumns:mob?"1fr 1fr":(isMould||itemSQ)?"1fr 1fr":"1fr 1fr 1fr",gap:6,marginBottom:5}}>
               <div><label className="lb">Room</label><select className="sel" value={item.z} onChange={e=>upd(item.id,{z:e.target.value})} style={{fontSize:mob?12:11.5}}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
               <div><label className="lb">Species Override<Tip text="Override the global species for this item only. Leave as 'global' to use the project species"/></label><select className="sel" value={item.so||""} onChange={e=>upd(item.id,{so:e.target.value||null})} style={{fontSize:mob?12:11.5,...(ov?{border:`2px solid ${C.gold}`,fontWeight:600}:{})}}>
-                <option value="">â global â</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
+                <option value="">— global —</option>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}
               </select></div>
               {!isMould&&!itemSQ&&<div style={mob?{gridColumn:"1 / -1"}:{}}><label className="lb">Door Style</label><select className="sel" value={item.ds||""} onChange={e=>upd(item.id,{ds:e.target.value||""})} style={{fontSize:mob?12:11.5,...(item.ds?{border:"2px solid #5a6b4a",fontWeight:600}:{})}}>
-                <option value="">â global ({door}) â</option>{DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} â ${DG[d.g]||0}{d.x?`+${d.x}`:""}/dr</option>)}
+                <option value="">— global ({door}) —</option>{DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} — ${DG[d.g]||0}{d.x?`+${d.x}`:""}/dr</option>)}
               </select></div>}
             </div>
             {!isMould&&!itemSQ&&(mob?<div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:5}}>
@@ -12543,7 +12579,7 @@ return(<div style={{marginBottom:5}}>
                   {[["","None"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} className={`ch2 ${item.fe===v?"on":""}`} onClick={()=>upd(item.id,{fe:v})} style={{justifyContent:"center",fontSize:12,minHeight:40,padding:"8px 4px",...(item.fe===v&&v?{borderColor:"#6b5340",color:"#6b5340",background:"#6b534014"}:{})}}>{l}</button>)}
                 </div>
               </div>:<div><label className="lb" style={{color:C.red}}>Finished End</label>
-                <div style={{fontSize:11,color:C.stone,padding:"8px 0"}}>N/A â Linen Interior</div>
+                <div style={{fontSize:11,color:C.stone,padding:"8px 0"}}>N/A — Linen Interior</div>
               </div>}
             </div>:<div style={{display:"flex",gap:6,marginBottom:5,flexWrap:"wrap"}}>
               <div style={{flex:"0 0 55px"}}><label className="lb">Doors</label>
@@ -12557,7 +12593,7 @@ return(<div style={{marginBottom:5}}>
               </div>}
               <div style={{flex:"1 1 90px"}}><label className="lb">Hinge</label>
                 <div style={{display:"flex",gap:3}}>
-                  {[["","â"],["L","Left"],["R","Right"]].map(([v,l])=><button key={v} className={`ch2 ${item.hng===v?"on":""}`} onClick={()=>upd(item.id,{hng:v})} style={{flex:1,justifyContent:"center",fontSize:10,...(item.hng===v&&v?{borderColor:"#4a6178",color:"#4a6178",background:"#4a617814"}:{})}}>{l}</button>)}
+                  {[["","—"],["L","Left"],["R","Right"]].map(([v,l])=><button key={v} className={`ch2 ${item.hng===v?"on":""}`} onClick={()=>upd(item.id,{hng:v})} style={{flex:1,justifyContent:"center",fontSize:10,...(item.hng===v&&v?{borderColor:"#4a6178",color:"#4a6178",background:"#4a617814"}:{})}}>{l}</button>)}
                 </div>
               </div>
               {intF!=="LINEN"?<div style={{flex:"1 1 130px"}}><label className="lb">Finished End</label>
@@ -12565,53 +12601,53 @@ return(<div style={{marginBottom:5}}>
                   {[["","None"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} className={`ch2 ${item.fe===v?"on":""}`} onClick={()=>upd(item.id,{fe:v})} style={{flex:1,justifyContent:"center",fontSize:10,...(item.fe===v&&v?{borderColor:"#6b5340",color:"#6b5340",background:"#6b534014"}:{})}}>{l}</button>)}
                 </div>
               </div>:<div style={{flex:"1 1 130px"}}><label className="lb" style={{color:C.red}}>Finished End</label>
-                <div style={{fontSize:10,color:C.stone,padding:"6px 0"}}>N/A â Linen Interior</div>
+                <div style={{fontSize:10,color:C.stone,padding:"6px 0"}}>N/A — Linen Interior</div>
               </div>}
             </div>)}
-            {!isMould&&doorChg>0&&<div style={{fontSize:10,color:C.gold,marginBottom:4}}>Door upcharge: {fm(doorChg)} ({item.dc} door{item.dc>1?"s":""} Ã ${(doorChg/item.dc).toFixed(0)}/door â {(item.ds||door)})</div>}
-            {!isMould&&dfChg>0&&<div style={{fontSize:10,color:"#7c3aed",marginBottom:2}}>DF upcharge: {fm(dfChg)} ({item.drc} drw Ã {(dfChg/(item.drc||1)).toFixed(0)}/drw â {drwF})</div>}
-            {!isMould&&dbChg>0&&(()=>{const rQ=(item.rot&&item.rotQ>0)?item.rotQ:0;const r2Q=(item.rot2&&item.rot2Q>0)?item.rot2Q:0;const br=item.brot||0;const dbP=DRW_BOX.find(d=>d.v===drwBox)?.price||0;const tot=(item.drc||0)+rQ+r2Q+br;return<div style={{fontSize:10,color:"#0369a1",marginBottom:2}}>Drw box/guide: {fm(dbChg)} ({item.drc||0} drw{br>0?` + ${br} built-in ROT`:""}{rQ>0?` + ${rQ} ROT`:""}{r2Q>0?` + ${r2Q} FM-ROT`:""} = {tot} Ã ${'{'}dbP}/ea â {drwBox})</div>})()}
-            {plyPct>0&&<div style={{fontSize:10,color:"#b45309",marginBottom:2}}>Plywood +{plyPct}% applied last â {fm(u)}/unit</div>}
+            {!isMould&&doorChg>0&&<div style={{fontSize:10,color:C.gold,marginBottom:4}}>Door upcharge: {fm(doorChg)} ({item.dc} door{item.dc>1?"s":""} × ${(doorChg/item.dc).toFixed(0)}/door — {(item.ds||door)})</div>}
+            {!isMould&&dfChg>0&&<div style={{fontSize:10,color:"#7c3aed",marginBottom:2}}>DF upcharge: {fm(dfChg)} ({item.drc} drw × {(dfChg/(item.drc||1)).toFixed(0)}/drw — {drwF})</div>}
+            {!isMould&&dbChg>0&&(()=>{const rQ=(item.rot&&item.rotQ>0)?item.rotQ:0;const r2Q=(item.rot2&&item.rot2Q>0)?item.rot2Q:0;const br=item.brot||0;const dbP=DRW_BOX.find(d=>d.v===drwBox)?.price||0;const tot=(item.drc||0)+rQ+r2Q+br;return<div style={{fontSize:10,color:"#0369a1",marginBottom:2}}>Drw box/guide: {fm(dbChg)} ({item.drc||0} drw{br>0?` + ${br} built-in ROT`:""}{rQ>0?` + ${rQ} ROT`:""}{r2Q>0?` + ${r2Q} FM-ROT`:""} = {tot} × ${'{'}dbP}/ea — {drwBox})</div>})()}
+            {plyPct>0&&<div style={{fontSize:10,color:"#b45309",marginBottom:2}}>Plywood +{plyPct}% applied last → {fm(u)}/unit</div>}
             {!isMould&&!itemSQ&&["B","V","C","D","T"].includes(item.t)&&<div style={{marginBottom:5}}>
-              {/* ââ Standard ROT ââ */}
+              {/* ── Standard ROT ── */}
               <div style={{display:"flex",gap:6,marginBottom:4,flexWrap:"wrap",alignItems:"flex-end"}}>
                 <div style={{flex:"1 1 180px"}}><label className="lb" style={{color:"#b45309"}}>Roll Out Tray (Standard)</label>
                   <select className="sel" value={item.rot||""} onChange={e=>{const v=e.target.value;upd(item.id,{rot:v,rotQ:v?Math.max(1,item.rotQ||1):0,rotFeg:v?item.rotFeg:false})}} style={{fontSize:11,...(item.rot?{border:"2px solid #b45309",fontWeight:600}:{})}}>
-                    <option value="">â None â</option>
-                    {ROT_OPTIONS.filter(r=>!r.v.endsWith("-FM")).map(r=><option key={r.v} value={r.v}>{r.v}: {r.l} â ${r.price}/ea</option>)}
+                    <option value="">— None —</option>
+                    {ROT_OPTIONS.filter(r=>!r.v.endsWith("-FM")).map(r=><option key={r.v} value={r.v}>{r.v}: {r.l} — ${r.price}/ea</option>)}
                   </select>
                 </div>
                 {item.rot&&<div style={{flex:"0 0 55px"}}><label className="lb" style={{color:"#b45309"}}>Qty</label>
                   <input type="number" className="inp" min={1} max={20} value={item.rotQ||1} onChange={e=>upd(item.id,{rotQ:Math.max(1,Math.min(20,+e.target.value))})} style={{textAlign:"center",padding:5,fontSize:12,border:"2px solid #b45309",fontWeight:600}}/>
                 </div>}
-                {item.rot&&item.rotQ>0&&(()=>{const ro=ROT_OPTIONS.find(r=>r.v===item.rot);const feg=item.rotFeg?item.rotQ*72:0;return ro?<div style={{fontSize:10,color:"#b45309",fontWeight:600,alignSelf:"center",padding:"4px 0"}}>{item.rotQ}Ã ${ro.price}{feg>0?` + $${feg} FEG`:""} = {fm(ro.price*item.rotQ+feg)}</div>:null})()}
+                {item.rot&&item.rotQ>0&&(()=>{const ro=ROT_OPTIONS.find(r=>r.v===item.rot);const feg=item.rotFeg?item.rotQ*72:0;return ro?<div style={{fontSize:10,color:"#b45309",fontWeight:600,alignSelf:"center",padding:"4px 0"}}>{item.rotQ}× ${ro.price}{feg>0?` + $${feg} FEG`:""} = {fm(ro.price*item.rotQ+feg)}</div>:null})()}
               </div>
               {item.rot&&<div style={{display:"flex",alignItems:"center",gap:5,marginBottom:6,paddingLeft:2}}>
                 <input type="checkbox" id={`rotFeg-${item.id}`} checked={!!item.rotFeg} onChange={e=>upd(item.id,{rotFeg:e.target.checked})} style={{width:13,height:13,cursor:"pointer",accentColor:"#b45309"}}/>
-                <label htmlFor={`rotFeg-${item.id}`} style={{fontSize:10.5,color:"#b45309",cursor:"pointer",fontWeight:item.rotFeg?700:400}}>FEG Upcharge â ${72}/tray{item.rotFeg&&item.rotQ>1?` Ã ${item.rotQ} = $${72*item.rotQ}`:""}</label>
+                <label htmlFor={`rotFeg-${item.id}`} style={{fontSize:10.5,color:"#b45309",cursor:"pointer",fontWeight:item.rotFeg?700:400}}>FEG Upcharge — ${72}/tray{item.rotFeg&&item.rotQ>1?` × ${item.rotQ} = $${72*item.rotQ}`:""}</label>
               </div>}
-              {/* ââ Floor Mounted ROT ââ */}
+              {/* ── Floor Mounted ROT ── */}
               <div style={{display:"flex",gap:6,marginBottom:4,flexWrap:"wrap",alignItems:"flex-end"}}>
                 <div style={{flex:"1 1 180px"}}><label className="lb" style={{color:"#7c5c2e"}}>Roll Out Tray (Floor Mounted)</label>
                   <select className="sel" value={item.rot2||""} onChange={e=>{const v=e.target.value;upd(item.id,{rot2:v,rot2Q:v?Math.max(1,item.rot2Q||1):0,rot2Feg:v?item.rot2Feg:false})}} style={{fontSize:11,...(item.rot2?{border:"2px solid #7c5c2e",fontWeight:600}:{})}}>
-                    <option value="">â None â</option>
-                    {ROT_OPTIONS.filter(r=>r.v.endsWith("-FM")).map(r=><option key={r.v} value={r.v}>{r.v}: {r.l} â ${r.price}/ea</option>)}
+                    <option value="">— None —</option>
+                    {ROT_OPTIONS.filter(r=>r.v.endsWith("-FM")).map(r=><option key={r.v} value={r.v}>{r.v}: {r.l} — ${r.price}/ea</option>)}
                   </select>
                 </div>
                 {item.rot2&&<div style={{flex:"0 0 55px"}}><label className="lb" style={{color:"#7c5c2e"}}>Qty</label>
                   <input type="number" className="inp" min={1} max={20} value={item.rot2Q||1} onChange={e=>upd(item.id,{rot2Q:Math.max(1,Math.min(20,+e.target.value))})} style={{textAlign:"center",padding:5,fontSize:12,border:"2px solid #7c5c2e",fontWeight:600}}/>
                 </div>}
-                {item.rot2&&item.rot2Q>0&&(()=>{const ro2=ROT_OPTIONS.find(r=>r.v===item.rot2);const feg2=item.rot2Feg?item.rot2Q*72:0;return ro2?<div style={{fontSize:10,color:"#7c5c2e",fontWeight:600,alignSelf:"center",padding:"4px 0"}}>{item.rot2Q}Ã ${ro2.price}{feg2>0?` + $${feg2} FEG`:""} = {fm(ro2.price*item.rot2Q+feg2)}</div>:null})()}
+                {item.rot2&&item.rot2Q>0&&(()=>{const ro2=ROT_OPTIONS.find(r=>r.v===item.rot2);const feg2=item.rot2Feg?item.rot2Q*72:0;return ro2?<div style={{fontSize:10,color:"#7c5c2e",fontWeight:600,alignSelf:"center",padding:"4px 0"}}>{item.rot2Q}× ${ro2.price}{feg2>0?` + $${feg2} FEG`:""} = {fm(ro2.price*item.rot2Q+feg2)}</div>:null})()}
               </div>
               {item.rot2&&<div style={{display:"flex",alignItems:"center",gap:5,marginBottom:2,paddingLeft:2}}>
                 <input type="checkbox" id={`rot2Feg-${item.id}`} checked={!!item.rot2Feg} onChange={e=>upd(item.id,{rot2Feg:e.target.checked})} style={{width:13,height:13,cursor:"pointer",accentColor:"#7c5c2e"}}/>
-                <label htmlFor={`rot2Feg-${item.id}`} style={{fontSize:10.5,color:"#7c5c2e",cursor:"pointer",fontWeight:item.rot2Feg?700:400}}>FEG Upcharge â ${72}/tray{item.rot2Feg&&item.rot2Q>1?` Ã ${item.rot2Q} = $${72*item.rot2Q}`:""}</label>
+                <label htmlFor={`rot2Feg-${item.id}`} style={{fontSize:10.5,color:"#7c5c2e",cursor:"pointer",fontWeight:item.rot2Feg?700:400}}>FEG Upcharge — ${72}/tray{item.rot2Feg&&item.rot2Q>1?` × ${item.rot2Q} = $${72*item.rot2Q}`:""}</label>
               </div>}
             </div>}
-            {/* âââ MODIFICATIONS PANEL âââ */}
+            {/* ─── MODIFICATIONS PANEL ─── */}
             {!isMould&&!itemSQ&&applicableMods.length>0&&<div style={{marginBottom:5}}>
               <button onClick={()=>sModOpen(prev=>{const n=new Set(prev);if(modsExpanded)n.delete(item.id);else n.add(item.id);return n})} style={{background:activeMods.length>0?"#7c3aed18":"#f0edff",border:`2px solid ${activeMods.length>0?"#7c3aed":"#c4b5fd"}`,borderRadius:8,padding:"8px 12px",cursor:"pointer",fontSize:12,fontWeight:700,color:activeMods.length>0?"#7c3aed":"#6d28d9",display:"flex",alignItems:"center",gap:6,width:"100%",justifyContent:"space-between",transition:"all .15s"}}>
-                <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:16}}>{modsExpanded?"â¾":"â¸"}</span><span><Ic n="gear" sz={13} c="#6d28d9"/> Modifications</span><span style={{background:activeMods.length>0?"#7c3aed":"#a78bfa",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:10,fontWeight:700}}>{activeMods.length>0?`${activeMods.length} active`:`${applicableMods.length} available`}</span></span>
+                <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:16}}>{modsExpanded?"▾":"▸"}</span><span><Ic n="gear" sz={13} c="#6d28d9"/> Modifications</span><span style={{background:activeMods.length>0?"#7c3aed":"#a78bfa",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:10,fontWeight:700}}>{activeMods.length>0?`${activeMods.length} active`:`${applicableMods.length} available`}</span></span>
                 {modCost>0&&<span style={{fontFamily:F.m,fontWeight:700,color:"#7c3aed",fontSize:13}}>+{fm(modTotal)}</span>}
               </button>
               {modsExpanded&&<div style={{borderLeft:"4px solid #7c3aed",borderRight:`1px solid #7c3aed33`,borderBottom:`1px solid #7c3aed33`,borderTop:"none",borderRadius:"0 0 8px 8px",padding:"10px 12px",marginTop:-1,background:"linear-gradient(135deg,#f8f5ff,#f0edff)"}}>
@@ -12623,11 +12659,11 @@ return(<div style={{marginBottom:5}}>
                         return(<div key={m.code} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 8px",borderRadius:6,background:isOn?"#7c3aed18":"#fff",border:`1.5px solid ${isOn?"#7c3aed":"#e2ddf5"}`,cursor:"pointer",transition:"all .1s"}}>
                           {m.input==="dims"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked){setMod(m.code,{w:"",h:"",d:""})}else{setMod(m.code,false)}}} style={{accentColor:"#1c3aed",margin:0,cursor:"pointer"}}/><span style={{fontSize:"0.8rem",color:isOn?"#1c3aed":"#888"}}>Enabled</span></div>{isOn&&typeof isOn==="object"?<div style={{display:"flex",gap:"4px",marginTop:"4px"}}>{["W","H","D"].map(dim=><label key={dim} style={{display:"flex",flexDirection:"column",alignItems:"center",fontSize:"0.65rem",color:"#666"}}>{dim}<input type="text" value={isOn[dim.toLowerCase()]||""} onChange={e=>{const nv={...isOn};nv[dim.toLowerCase()]=e.target.value;setMod(m.code,nv)}} style={{width:"44px",textAlign:"center",padding:"2px",fontSize:"0.75rem",borderRadius:"3px",border:"1px solid #a6b4a6"}}/></label>)}</div>:null}</div>:m.input==="width"?<div><div style={{display:"flex",alignItems:"center",gap:"4px"}}><input type="checkbox" checked={!!isOn} onChange={e=>{if(e.target.checked)setMod(m.code,true);else setMod(m.code,false)}} style={{accentColor:"#c3aed1"}}/><span style={{fontSize:".85rem",color:isOn?"#c3aed1":"#888"}}>Enabled</span>{isOn!==false&&isOn!==0&&isOn!==undefined?<input type="text" value={typeof isOn==="string"?isOn:""} onChange={e=>setMod(m.code,e.target.value||true)} style={{width:"52px",padding:"2px 4px",border:"1px solid #ccc",borderRadius:"3px",fontSize:".85rem",marginLeft:"4px"}} placeholder="W"/>:null}</div>{m.note?<div style={{fontSize:".7rem",color:"#b08000",marginTop:"2px",fontStyle:"italic"}}>{m.note}</div>:null}</div>:m.input==="side"?
                             <div style={{display:"flex",gap:3}}>
-                              {[["","â"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} className={`ch2 ${val===v?"on":""}`} onClick={()=>setMod(m.code,v||0)} style={{fontSize:10,padding:"2px 6px",...(val===v&&v?{borderColor:"#7c3aed",color:"#7c3aed",background:"#7c3aed14"}:{})}}>{l}</button>)}
+                              {[["","—"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} className={`ch2 ${val===v?"on":""}`} onClick={()=>setMod(m.code,v||0)} style={{fontSize:10,padding:"2px 6px",...(val===v&&v?{borderColor:"#7c3aed",color:"#7c3aed",background:"#7c3aed14"}:{})}}>{l}</button>)}
                             </div>:
                           m.input==="select"?
                             <select value={val||""} onChange={e=>setMod(m.code,e.target.value||0)} style={{fontSize:10,padding:"2px 4px",borderRadius:4,border:`1px solid ${isOn?"#7c3aed":C.bdr}`,background:isOn?"#7c3aed0a":"#fff",fontFamily:F.m,cursor:"pointer"}}>
-                              <option value="">â None â</option>{(m.options||[]).map(o=><option key={o} value={o}>{o}</option>)}
+                              <option value="">— None —</option>{(m.options||[]).map(o=><option key={o} value={o}>{o}</option>)}
                             </select>:
                           m.input==="check"?
                             <input type="checkbox" checked={isOn} onChange={e=>setMod(m.code,e.target.checked?1:0)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
@@ -12635,12 +12671,12 @@ return(<div style={{marginBottom:5}}>
                           }
                           <div style={{flex:1,minWidth:0}}>
                             <div style={{fontSize:11,fontWeight:isOn?700:500,color:isOn?"#6d28d9":C.ink,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.label}</div>
-                            <div style={{fontSize:9.5,color:isOn?"#7c3aed":C.stone,fontWeight:isOn?600:400}}>{m.code} Â· {m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.input==="side"?m.price*(val==="B"?2:1):m.price*(m.input==="check"?1:val))}`:""}</div>
+                            <div style={{fontSize:9.5,color:isOn?"#7c3aed":C.stone,fontWeight:isOn?600:400}}>{m.code} · {m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.input==="side"?m.price*(val==="B"?2:1):m.price*(m.input==="check"?1:val))}`:""}</div>
                           </div>
                         </div>);
                       })}
                     </div>
-                    {/* Mixed Drawer Front (MXDF) â 3 fixed position slots */}
+                    {/* Mixed Drawer Front (MXDF) — 3 fixed position slots */}
                     {gMods.filter(m=>m.input==="mxdf").map(m=>{const val=item.mods?.[m.code];const positions=Array.isArray(val)?val:[];const activeCount=positions.filter(p=>p.on).length;const isOn=activeCount>0;
                       // Ensure we always have 3 slots
                       const slots=[0,1,2].map(i=>positions[i]||{on:false,door:"",note:""});
@@ -12648,7 +12684,7 @@ return(<div style={{marginBottom:5}}>
                       return(<div key={m.code} style={{marginTop:6,borderRadius:6,border:`1.5px solid ${isOn?"#7c3aed":"#e2ddf5"}`,background:isOn?"#7c3aed0a":"#fff",overflow:"hidden"}}>
                         <div style={{padding:"6px 10px"}}>
                           <div style={{fontSize:11,fontWeight:isOn?700:500,color:isOn?"#6d28d9":C.ink}}>{m.label}</div>
-                          <div style={{fontSize:9.5,color:isOn?"#7c3aed":C.stone}}>{m.code} Â· ${m.price}/position{isOn?` Â· ${activeCount} active = ${fm(m.price*activeCount)}`:""}</div>
+                          <div style={{fontSize:9.5,color:isOn?"#7c3aed":C.stone}}>{m.code} · ${m.price}/position{isOn?` · ${activeCount} active = ${fm(m.price*activeCount)}`:""}</div>
                         </div>
                         <div style={{borderTop:"1px solid #7c3aed22",padding:"6px 10px",display:"flex",flexDirection:"column",gap:6}}>
                           {slots.map((sl,si)=>{const posNum=si+2;return(
@@ -12660,10 +12696,10 @@ return(<div style={{marginBottom:5}}>
                               </div>
                               {sl.on&&<div style={{marginLeft:22,display:"flex",flexDirection:"column",gap:5}}>
                                 <select value={sl.door||""} onChange={e=>updateSlot(si,{door:e.target.value})} style={{fontSize:11,padding:"4px 6px",borderRadius:5,border:`1px solid ${C.bdr}`,fontFamily:F.m,width:"100%",boxSizing:"border-box"}}>
-                                  <option value="">â Select Door Style â</option>
+                                  <option value="">— Select Door Style —</option>
                                   {DOORS.map(d=><option key={d.v} value={d.v}>{d.l}</option>)}
                                 </select>
-                                <input type="text" placeholder="Notes â e.g. drawer front description, special instructions..." value={sl.note||""} onChange={e=>updateSlot(si,{note:e.target.value})} style={{width:"100%",padding:"5px 8px",fontSize:11,border:`1px solid ${C.bdr}`,borderRadius:5,fontFamily:F.b,boxSizing:"border-box"}}/>
+                                <input type="text" placeholder="Notes — e.g. drawer front description, special instructions..." value={sl.note||""} onChange={e=>updateSlot(si,{note:e.target.value})} style={{width:"100%",padding:"5px 8px",fontSize:11,border:`1px solid ${C.bdr}`,borderRadius:5,fontFamily:F.b,boxSizing:"border-box"}}/>
                               </div>}
                             </div>);})}
                         </div>
@@ -12672,7 +12708,7 @@ return(<div style={{marginBottom:5}}>
                   </div>);
                 })()}
                 {activeMods.length>0&&<div style={{borderTop:"2px solid #7c3aed33",paddingTop:8,marginTop:6,display:"flex",justifyContent:"space-between",alignItems:"center",background:"#7c3aed0a",margin:"6px -12px -10px",padding:"8px 12px",borderRadius:"0 0 4px 4px"}}>
-                  <span style={{fontSize:11,color:"#6d28d9",fontWeight:700}}><Ic n="gear" sz={10} c="#6d28d9"/> {activeMods.length} mod{activeMods.length>1?"s":""} Â· +{fm(modCost)}/unit</span>
+                  <span style={{fontSize:11,color:"#6d28d9",fontWeight:700}}><Ic n="gear" sz={10} c="#6d28d9"/> {activeMods.length} mod{activeMods.length>1?"s":""} · +{fm(modCost)}/unit</span>
                   <button onClick={()=>upd(item.id,{mods:{}})} style={{background:"#fff",border:"1px solid #dc262644",borderRadius:5,padding:"3px 10px",fontSize:10,color:C.red,cursor:"pointer",fontWeight:600}}>Clear All</button>
                 </div>}
               </div>}
@@ -12682,22 +12718,22 @@ return(<div style={{marginBottom:5}}>
               <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
               {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
                 const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;
-                return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` Ã${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` Ã${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
+                return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
               })}
               </div>
             </div>}
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:mob?4:0}}>
               <div style={{display:"flex",alignItems:"center",gap:mob?4:6}}>
-                {mob&&<button onClick={()=>upd(item.id,{q:Math.max(1,item.q-1)})} style={{width:36,height:36,borderRadius:8,border:`1px solid ${C.bdr}`,background:C.warm,fontSize:18,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:C.ink}}>â</button>}
+                {mob&&<button onClick={()=>upd(item.id,{q:Math.max(1,item.q-1)})} style={{width:36,height:36,borderRadius:8,border:`1px solid ${C.bdr}`,background:C.warm,fontSize:18,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:C.ink}}>−</button>}
                 <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:mob?44:50,textAlign:"center",padding:mob?7:5,fontSize:mob?14:13}}/>
                 {mob&&<button onClick={()=>upd(item.id,{q:Math.min(999,item.q+1)})} style={{width:36,height:36,borderRadius:8,border:`1px solid ${C.bdr}`,background:C.warm,fontSize:18,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:C.ink}}>+</button>}
-                <span style={{fontSize:mob?9.5:10.5,color:C.stone}}>{mob?`Ã ${fm(u+modCost)}`:`${isMould?`pcs Ã ${fm(u)}/pc`:itemSQ?`pcs Ã ${fm(u)}/pc`:`Ã ${fm(u+modCost)}${doorChg>0||rbsChg>0||modCost>0?` (base ${fm(u-doorChg-rbsChg)}${doorChg>0?` + doors ${fm(doorChg)}`:""}${rbsChg>0?" + RBS $87":""}${modCost>0?` + mods ${fm(modCost)}`:""})`:" (stock "+fm(item.p)+")"}`}`}</span>
+                <span style={{fontSize:mob?9.5:10.5,color:C.stone}}>{mob?`× ${fm(u+modCost)}`:`${isMould?`pcs × ${fm(u)}/pc`:itemSQ?`pcs × ${fm(u)}/pc`:`× ${fm(u+modCost)}${doorChg>0||rbsChg>0||modCost>0?` (base ${fm(u-doorChg-rbsChg)}${doorChg>0?` + doors ${fm(doorChg)}`:""}${rbsChg>0?" + RBS $87":""}${modCost>0?` + mods ${fm(modCost)}`:""})`:" (stock "+fm(item.p)+")"}`}`}</span>
               </div>
               <span className="mn" style={{fontWeight:700,fontSize:mob?15:14}}>{fm(grandTotal)}</span>
             </div>
             {mob&&<div style={{display:"flex",gap:4,marginTop:6,borderTop:`1px solid ${C.bdr}`,paddingTop:6}}>
-              <button onClick={()=>dup(item.id)} style={{flex:1,background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:6,cursor:"pointer",fontSize:12,color:C.stone,padding:"8px 10px",fontWeight:600,minHeight:38,display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>â§ Duplicate</button>
-              <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} style={{flex:1,background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:6,cursor:"pointer",fontSize:12,color:C.red,padding:"8px 10px",fontWeight:600,minHeight:38,display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>Ã Delete</button>
+              <button onClick={()=>dup(item.id)} style={{flex:1,background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:6,cursor:"pointer",fontSize:12,color:C.stone,padding:"8px 10px",fontWeight:600,minHeight:38,display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>⧉ Duplicate</button>
+              <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} style={{flex:1,background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:6,cursor:"pointer",fontSize:12,color:C.red,padding:"8px 10px",fontWeight:600,minHeight:38,display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>× Delete</button>
             </div>}
           </div>);
         }):(()=>{
@@ -12710,8 +12746,8 @@ return(<div style={{marginBottom:5}}>
           let zTotal=0;zItems.forEach(it=>{const{u,t,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);zTotal+=t+mcR*(1+plyPct/100)*it.q});
           return(<div key={zid} style={{marginBottom:8}}>
             <button onClick={()=>{const nc=new Set(collapsedZones);nc.has(zid)?nc.delete(zid):nc.add(zid);setCollapsedZones(nc)}} style={{width:"100%",textAlign:"left",background:C.ink,color:C.cream,border:"none",borderRadius:8,padding:"10px 14px",cursor:"pointer",fontWeight:600,fontSize:13,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-              <div style={{display:"flex",alignItems:"center",gap:8}}><span>{isCollapsed?"â¶":"â¼"}</span><span style={{fontSize:16,marginRight:4}}>{zInfo.i}</span><span style={{fontFamily:F.d}}>{zInfo.l}</span></div>
-              <div style={{fontSize:11,color:C.stL}}>{zItems.length} items Â· {fm(zTotal)}{dealerMult>0&&dealerMult<1?` Â· Dealer ${fm(zTotal*dealerMult)}`:""}</div>
+              <div style={{display:"flex",alignItems:"center",gap:8}}><span>{isCollapsed?"▶":"▼"}</span><span style={{fontSize:16,marginRight:4}}>{zInfo.i}</span><span style={{fontFamily:F.d}}>{zInfo.l}</span></div>
+              <div style={{fontSize:11,color:C.stL}}>{zItems.length} items · {fm(zTotal)}{dealerMult>0&&dealerMult<1?` · Dealer ${fm(zTotal*dealerMult)}`:""}</div>
             </button>
             {!isCollapsed&&<div style={{border:`1px solid ${C.bdr}`,borderTop:"none",padding:"0"}}>{zItems.map(item=>{
               const{u,t:total,stockBase,prePly,doorChg,dfChg,dbChg,itemSQ,rbsChg,plyPct}=cp(item,sp,cx,door,drwF,drwBox);const ov=!!item.so;const isMould=item.t==="M";const isWall=item.t==="W";
@@ -12720,16 +12756,16 @@ return(<div style={{marginBottom:5}}>
               if(isREF(item.s)){
                 return(<div key={item.id} className="ic" style={{margin:"8px",marginBottom:"0",borderLeft:"4px solid #059669"}}>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                    <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#059669"}}>Custom Ref Panel</span><span className="pl" style={{marginLeft:5,background:"#ecfdf5",color:"#059669"}}>REF</span>{item.refIce&&<span className="pl" style={{marginLeft:3,background:"#fef3c7",color:"#92400e"}}>Ice Cutout</span>}<span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}â³Ã{(item.sqH||0)}â³</span></div>
+                    <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#059669"}}>Custom Ref Panel</span><span className="pl" style={{marginLeft:5,background:"#ecfdf5",color:"#059669"}}>REF</span>{item.refIce&&<span className="pl" style={{marginLeft:3,background:"#fef3c7",color:"#92400e"}}>Ice Cutout</span>}<span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}″×{(item.sqH||0)}″</span></div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                      <button onClick={()=>{if(confirm("Remove this ref panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                      <button onClick={()=>{if(confirm("Remove this ref panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                     </div>
                   </div>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                     <div style={{display:"flex",alignItems:"center",gap:6}}>
                       <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                      <span style={{fontSize:10.5,color:C.stone}}>Ã {fm(u)}/ea</span>
+                      <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
                     </div>
                     <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
                   </div>
@@ -12738,16 +12774,16 @@ return(<div style={{marginBottom:5}}>
               if(isDP(item.s)){
                 return(<div key={item.id} className="ic" style={{margin:"8px",marginBottom:"0",borderLeft:"4px solid #7c3aed"}}>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                    <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#7c3aed"}}>Dishwasher Panel</span><span className="pl" style={{marginLeft:5,background:"#f0edff",color:"#7c3aed"}}>DP</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}â³Ã{(item.sqH||0)}â³</span></div>
+                    <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#7c3aed"}}>Dishwasher Panel</span><span className="pl" style={{marginLeft:5,background:"#f0edff",color:"#7c3aed"}}>DP</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}″×{(item.sqH||0)}″</span></div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                      <button onClick={()=>{if(confirm("Remove this dishwasher panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                      <button onClick={()=>{if(confirm("Remove this dishwasher panel?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                     </div>
                   </div>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                     <div style={{display:"flex",alignItems:"center",gap:6}}>
                       <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                      <span style={{fontSize:10.5,color:C.stone}}>Ã {fm(u)}/ea</span>
+                      <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
                     </div>
                     <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
                   </div>
@@ -12756,16 +12792,16 @@ return(<div style={{marginBottom:5}}>
               if(isBCFT(item.s)){
                 return(<div key={item.id} className="ic" style={{margin:"8px",marginBottom:"0",borderLeft:"4px solid #b45309"}}>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                    <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#b45309"}}>Bev Center Front</span><span className="pl" style={{marginLeft:5,background:"#fef3c7",color:"#92400e"}}>{item.s}</span><span className="pl" style={{marginLeft:3,background:"#f5f0e6",color:"#78716c"}}>{BCFT_LABELS[item.s]||""}</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}â³Ã{(item.sqH||0)}â³</span></div>
+                    <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#b45309"}}>Bev Center Front</span><span className="pl" style={{marginLeft:5,background:"#fef3c7",color:"#92400e"}}>{item.s}</span><span className="pl" style={{marginLeft:3,background:"#f5f0e6",color:"#78716c"}}>{BCFT_LABELS[item.s]||""}</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}″×{(item.sqH||0)}″</span></div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                      <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                      <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                     </div>
                   </div>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                     <div style={{display:"flex",alignItems:"center",gap:6}}>
                       <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                      <span style={{fontSize:10.5,color:C.stone}}>Ã {fm(u)}/ea</span>
+                      <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
                     </div>
                     <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
                   </div>
@@ -12774,16 +12810,16 @@ return(<div style={{marginBottom:5}}>
               if(isCO(item.s)){
                 return(<div key={item.id} className="ic" style={{margin:"8px",marginBottom:"0",borderLeft:"4px solid #6d28d9"}}>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                    <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#6d28d9"}}>Column Overlay</span><span className="pl" style={{marginLeft:5,background:"#ede9fe",color:"#6d28d9"}}>{item.s}</span><span className="pl" style={{marginLeft:3,background:"#f5f0e6",color:"#78716c"}}>{CO_LABELS[item.s]||""}</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqH||0)}â³</span></div>
+                    <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#6d28d9"}}>Column Overlay</span><span className="pl" style={{marginLeft:5,background:"#ede9fe",color:"#6d28d9"}}>{item.s}</span><span className="pl" style={{marginLeft:3,background:"#f5f0e6",color:"#78716c"}}>{CO_LABELS[item.s]||""}</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqH||0)}″</span></div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                      <button onClick={()=>{if(confirm("Remove this column overlay?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                      <button onClick={()=>{if(confirm("Remove this column overlay?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                     </div>
                   </div>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                     <div style={{display:"flex",alignItems:"center",gap:6}}>
                       <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                      <span style={{fontSize:10.5,color:C.stone}}>Ã {fm(u)}/ea</span>
+                      <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
                     </div>
                     <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
                   </div>
@@ -12792,16 +12828,16 @@ return(<div style={{marginBottom:5}}>
               if(isBCF(item.s)){
                 return(<div key={item.id} className="ic" style={{margin:"8px",marginBottom:"0",borderLeft:"4px solid #0d9488"}}>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                    <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#0d9488"}}>Bev Center Front</span><span className="pl" style={{marginLeft:5,background:"#ccfbf1",color:"#0d9488"}}>BCF</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}â³Ã{(item.sqH||0)}â³</span></div>
+                    <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#0d9488"}}>Bev Center Front</span><span className="pl" style={{marginLeft:5,background:"#ccfbf1",color:"#0d9488"}}>BCF</span><span className="pl" style={{marginLeft:3,background:"#e0f2fe",color:"#0369a1"}}>{(item.sqW||0)}″×{(item.sqH||0)}″</span></div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                      <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                      <button onClick={()=>{if(confirm("Remove this beverage center front?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                     </div>
                   </div>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                     <div style={{display:"flex",alignItems:"center",gap:6}}>
                       <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                      <span style={{fontSize:10.5,color:C.stone}}>Ã {fm(u)}/ea</span>
+                      <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
                     </div>
                     <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
                   </div>
@@ -12812,15 +12848,15 @@ return(<div style={{marginBottom:5}}>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
                     <div><span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#0369a1"}}>Custom Quote</span><span className="pl" style={{marginLeft:5,background:"#e0f2fe",color:"#0369a1"}}>CQ</span>{item.cqNum&&<span className="pl" style={{marginLeft:3,background:"#fef3c7",color:"#92400e"}}>#{item.cqNum}</span>}</div>
                     <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                      <button onClick={()=>{if(confirm("Remove this custom item?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                      <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                      <button onClick={()=>{if(confirm("Remove this custom item?"))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                     </div>
                   </div>
                   {item.cqDesc&&<div style={{fontSize:10.5,color:C.stone,marginBottom:3,whiteSpace:"pre-line"}}>{item.cqDesc}</div>}
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                     <div style={{display:"flex",alignItems:"center",gap:6}}>
                       <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                      <span style={{fontSize:10.5,color:C.stone}}>Ã {fm(u)}/ea</span>
+                      <span style={{fontSize:10.5,color:C.stone}}>× {fm(u)}/ea</span>
                     </div>
                     <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
                   </div>
@@ -12828,16 +12864,16 @@ return(<div style={{marginBottom:5}}>
               }
               return(<div key={item.id} className={`ic${ov?" ov":""}`} style={{margin:"8px",marginBottom:"0"}}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                  <div style={{display:"flex",flexWrap:"wrap",gap:2,alignItems:"center"}}><span className="mn" style={{fontWeight:700,fontSize:12.5}}>{item.s}</span><span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>{isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}{item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}{item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng}</span>}{item.fe&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe}</span>}{activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;const modAmt=m.input==="mxdf"?m.price*mxdfCount:m.input==="side"?m.price*(qty==="B"?2:1):m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?m.price:m.price*(+qty||1);return <span key={code} className="pl" style={{background:"#7c3aed18",color:"#6d28d9"}}>{m.label}{m.input==="mxdf"?` Ã${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"L":"R"})`:typeof qty==="number"&&qty>1?` Ã${qty}`:""} {m.pct?`+${m.pct}%`:modAmt>0?`+${fm(modAmt)}`:""}</span>})}{modCost>0&&<span style={{fontSize:9.5,color:C.stone}}>Base {fm(u)} + Mods {fm(modCost)}</span>}</div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:2,alignItems:"center"}}><span className="mn" style={{fontWeight:700,fontSize:12.5}}>{item.s}</span><span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>{isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}{item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}{item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng}</span>}{item.fe&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe}</span>}{activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;const modAmt=m.input==="mxdf"?m.price*mxdfCount:m.input==="side"?m.price*(qty==="B"?2:1):m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?m.price:m.price*(+qty||1);return <span key={code} className="pl" style={{background:"#7c3aed18",color:"#6d28d9"}}>{m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"L":"R"})`:typeof qty==="number"&&qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:modAmt>0?`+${fm(modAmt)}`:""}</span>})}{modCost>0&&<span style={{fontSize:9.5,color:C.stone}}>Base {fm(u)} + Mods {fm(modCost)}</span>}</div>
                   <div style={{display:"flex",gap:4,alignItems:"center"}}>
-                    <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>â§ Dup</button>
-                    <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>Ã Del</button>
+                    <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
+                    <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
                   </div>
                 </div>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <div style={{display:"flex",alignItems:"center",gap:6}}>
                     <input type="number" className="inp" min={1} max={999} value={item.q} onChange={e=>upd(item.id,{q:Math.max(1,+e.target.value)})} style={{width:50,textAlign:"center",padding:5}}/>
-                    <span style={{fontSize:10.5,color:C.stone}}>{item.q>1?`Ã ${fm(grandTotal/item.q)}`:""}</span>
+                    <span style={{fontSize:10.5,color:C.stone}}>{item.q>1?`× ${fm(grandTotal/item.q)}`:""}</span>
                   </div>
                   <span className="mn" style={{fontWeight:700,fontSize:14}}>{fm(grandTotal)}</span>
                 </div>
@@ -12850,7 +12886,7 @@ return(<div style={{marginBottom:5}}>
           <span style={{fontFamily:F.d,fontWeight:600,fontSize:13}}>Total List Price ({comp.un} units)</span>
           <div style={{display:"flex",gap:16}}>
             <div style={{textAlign:"center"}}><div style={{fontSize:9.5,color:C.stL}}>List Price</div><div className="mn" style={{fontSize:16,fontWeight:700,color:C.gold}}>{fm(comp.tot)}</div></div>
-            {dealerMult>0&&dealerMult<1&&<div style={{textAlign:"center"}}><div style={{fontSize:9.5,color:C.stL}}>Dealer Cost (Ã{dealerMult})</div><div className="mn" style={{fontSize:16,fontWeight:700,color:C.acc}}>{fm(comp.tot*dealerMult)}</div></div>}
+            {dealerMult>0&&dealerMult<1&&<div style={{textAlign:"center"}}><div style={{fontSize:9.5,color:C.stL}}>Dealer Cost (×{dealerMult})</div><div className="mn" style={{fontSize:16,fontWeight:700,color:C.acc}}>{fm(comp.tot*dealerMult)}</div></div>}
           </div>
         </div>
         </div>
@@ -12872,7 +12908,7 @@ return(<div style={{marginBottom:5}}>
                   <span style={{fontFamily:F.d,fontSize:14,fontWeight:700,color:C.cream}}>{zInfo.l}</span>
                   <span style={{fontSize:8,fontFamily:F.m,background:C.acc,color:"#fff",padding:"2px 5px",borderRadius:3}}>Form {zi+1} of {zoneEntries.length}</span>
                 </div>
-                <span style={{fontSize:10,color:C.stL}}>{zItems.length} items Â· {fm(zTotal)}</span>
+                <span style={{fontSize:10,color:C.stL}}>{zItems.length} items · {fm(zTotal)}</span>
               </div>
               {zi===0&&<div style={{padding:"8px 14px",background:C.warm,borderBottom:`1px solid ${C.bdr}`}}>
                 <div style={{display:"grid",gridTemplateColumns:mob?"1fr 1fr":"1fr 1fr 1fr 1fr",gap:4,fontSize:10,color:C.stone}}>
@@ -12894,7 +12930,7 @@ return(<div style={{marginBottom:5}}>
                   </tr></thead>
                   <tbody>
                     {zItems.map((item,idx)=>{const{u,t,itemSQ,stockBase,plyPct}=cp(item,sp,cx,door,drwF,drwBox);const mcR=calcModCost(item,item.mods,stockBase);const total=t+mcR*(1+plyPct/100)*item.q;const iM=item.t==="M";
-                      let desc=isCustom(item.s)?`CUSTOM: ${(item.cqDesc||"Custom Item").slice(0,60)}${item.cqNum?` [${item.cqNum}]`:""}`:isREF(item.s)?`REF PANEL ${item.sqW||0}"Ã${item.sqH||0}" ${(item.sqin||0)}sq.in${item.refIce?" +ICE CUTOUT":""}`:isDP(item.s)?`DW PANEL ${item.sqW||0}"Ã${item.sqH||0}"`:isBCFT(item.s)?`${item.s} (${BCFT_LABELS[item.s]||""}) ${item.sqW||0}"Ã${item.sqH||0}"`:isBCF(item.s)?`BCF ${item.sqW||0}"Ã${item.sqH||0}"`:isCO(item.s)?`${item.s} (${CO_LABELS[item.s]||""}) ${item.sqH||0}"`:(`${item.s}${item.ds&&item.ds!==door?` (${item.ds})`:""}`+(iM?` ${item.len}ft`:"")+(itemSQ?` ${item.sqin}sq.in`:"")+(item.rbs?" +RBS":"")+(isOven(item)?" ["+OVEN_LABELS[OVEN_TYPE(item)]+"]":""));
+                      let desc=isCustom(item.s)?`CUSTOM: ${(item.cqDesc||"Custom Item").slice(0,60)}${item.cqNum?` [${item.cqNum}]`:""}`:isREF(item.s)?`REF PANEL ${item.sqW||0}"×${item.sqH||0}" ${(item.sqin||0)}sq.in${item.refIce?" +ICE CUTOUT":""}`:isDP(item.s)?`DW PANEL ${item.sqW||0}"×${item.sqH||0}"`:isBCFT(item.s)?`${item.s} (${BCFT_LABELS[item.s]||""}) ${item.sqW||0}"×${item.sqH||0}"`:isBCF(item.s)?`BCF ${item.sqW||0}"×${item.sqH||0}"`:isCO(item.s)?`${item.s} (${CO_LABELS[item.s]||""}) ${item.sqH||0}"`:(`${item.s}${item.ds&&item.ds!==door?` (${item.ds})`:""}`+(iM?` ${item.len}ft`:"")+(itemSQ?` ${item.sqin}sq.in`:"")+(item.rbs?" +RBS":"")+(isOven(item)?" ["+OVEN_LABELS[OVEN_TYPE(item)]+"]":""));
                       const mp=[];if(item.mods){Object.entries(item.mods).forEach(([code,v])=>{if(!v&&v!==0)return;const m=CABINET_MODS.find(x=>x.code===code);if(!m)return;if(m.input==="mxdf"){const ct=Array.isArray(v)?v.filter(p=>p.on).length:0;if(ct>0)mp.push(`${m.label} x${ct}`);}else if(m.input==="side"&&typeof v==="string"&&v)mp.push(`${m.label} (${v==="B"?"Both":v})`);else if(m.input==="select"&&v)mp.push(`${m.label} (${v})`);else if((m.input==="check"||m.input==="width"||m.input==="dims")&&v)mp.push(m.label);else if(typeof v==="number"&&v>0)mp.push(`${m.label}${v>1?` x${v}`:""}`);});}
                       if(item.rot&&item.rotQ>0)mp.push(`ROT ${item.rot} x${item.rotQ}${item.rotFeg?" +FEG":""}`);
                       if(item.rot2&&item.rot2Q>0)mp.push(`FM-ROT ${item.rot2} x${item.rot2Q}${item.rot2Feg?" +FEG":""}`);
@@ -12904,8 +12940,8 @@ return(<div style={{marginBottom:5}}>
                         <td style={{padding:"5px 8px",fontFamily:F.m,fontSize:11,color:C.stone}}>{idx+1}</td>
                         <td style={{padding:"5px 8px",textAlign:"center",fontFamily:F.m,fontSize:11}}>{item.q}</td>
                         <td style={{padding:"5px 8px",fontWeight:500}}>{desc}</td>
-                        <td style={{padding:"5px 8px",textAlign:"center",fontWeight:feLabel?600:400,color:feLabel?"#6b5340":C.stone}}>{feLabel||"â"}</td>
-                        <td style={{padding:"5px 8px",textAlign:"center",fontWeight:item.hng?600:400,color:item.hng?"#4a6178":C.stone}}>{item.hng||"â"}</td>
+                        <td style={{padding:"5px 8px",textAlign:"center",fontWeight:feLabel?600:400,color:feLabel?"#6b5340":C.stone}}>{feLabel||"—"}</td>
+                        <td style={{padding:"5px 8px",textAlign:"center",fontWeight:item.hng?600:400,color:item.hng?"#4a6178":C.stone}}>{item.hng||"—"}</td>
                         <td style={{padding:"5px 8px",textAlign:"right",fontFamily:F.m,fontWeight:600}}>{Math.round(total).toLocaleString()}</td>
                       </tr>);})}
                     <tr style={{background:"#2c4a34",color:C.cream}}>
@@ -12919,27 +12955,27 @@ return(<div style={{marginBottom:5}}>
             </div>);
           })}
           {zoneEntries.length>1&&<div style={{background:C.ink,borderRadius:8,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",color:C.cream}}>
-            <span style={{fontFamily:F.d,fontWeight:700,fontSize:13}}>Grand Total List Price ({zoneEntries.length} rooms Â· {comp.un} units)</span>
+            <span style={{fontFamily:F.d,fontWeight:700,fontSize:13}}>Grand Total List Price ({zoneEntries.length} rooms · {comp.un} units)</span>
             <span className="mn" style={{fontSize:18,fontWeight:700,color:C.gold}}>{fm(comp.tot)}</span>
           </div>}
         </div>);
       })()}
 
       <div style={{textAlign:"center",marginTop:20,color:C.stone,fontSize:9.5,fontFamily:F.m}}>
-        Eclipse Cabinetry by WW Wood Products Â· Catalog v8.8.0 Â· {CATALOG.length} SKUs Â· Pinnacle Sales
+        Eclipse Cabinetry by WW Wood Products · Catalog v8.9.0 · {CATALOG.length} SKUs · Pinnacle Sales
       </div>
     </div>
 
     {mob&&<button onClick={()=>ssAd(true)} style={{position:"fixed",bottom:"calc(18px + env(safe-area-inset-bottom,0px))",right:16,zIndex:800,width:56,height:56,borderRadius:"50%",background:C.acc,color:"#fff",border:"none",fontSize:28,cursor:"pointer",boxShadow:"0 6px 20px rgba(0,0,0,.28)",display:"flex",alignItems:"center",justifyContent:"center",WebkitTapHighlightColor:"transparent",touchAction:"manipulation"}}>+</button>}
 
-    {mob&&sAd&&<><div className="sbg" onClick={()=>ssAd(false)}/><div className="sht"><div className="shtH"/><div className="shtT"><span>Add Cabinets</span><button onClick={()=>ssAd(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>Ã</button></div><div className="shtB"><AddUI onAdd={addIt} onAddCustom={addCustom}/></div></div></>}
+    {mob&&sAd&&<><div className="sbg" onClick={()=>ssAd(false)}/><div className="sht"><div className="shtH"/><div className="shtT"><span>Add Cabinets</span><button onClick={()=>ssAd(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>×</button></div><div className="shtB"><AddUI onAdd={addIt} onAddCustom={addCustom}/></div></div></>}
 
-    {mob&&sCf&&<><div className="sbg" onClick={()=>ssCf(false)}/><div className="sht"><div className="shtH"/><div className="shtT"><span>Order Selections</span><button onClick={()=>ssCf(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>Ã</button></div><div className="shtB">
+    {mob&&sCf&&<><div className="sbg" onClick={()=>ssCf(false)}/><div className="sht"><div className="shtH"/><div className="shtT"><span>Order Selections</span><button onClick={()=>ssCf(false)} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>×</button></div><div className="shtB">
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
         <div><label className="lb">Species / Material</label><select className="sel" value={sp} onChange={e=>{sSp(e.target.value);sColor("")}}>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}</select></div>
         <div><label className="lb">Finish Color</label><select className="sel" value={color} onChange={e=>sColor(e.target.value)}><option value="">-- Select --</option>{(FINISH_COLORS[sp]||[]).map(c=><option key={c} value={c}>{c}</option>)}</select></div>
-        <div><label className="lb">Door Style</label><select className="sel" value={door} onChange={e=>sDoor(e.target.value)}>{DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} â Grp {d.g} ${DG[d.g]||0}/dr{d.x?` +$${d.x}/dr`:""}</option>)}</select></div>
-        <div><label className="lb">Drawer Front</label><select className="sel" value={drwF} onChange={e=>sDrwF(e.target.value)}>{DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}{d.g!=="A"?` â $${DG[d.g]||0}/drw`:""}</option>)}</select></div>
+        <div><label className="lb">Door Style</label><select className="sel" value={door} onChange={e=>sDoor(e.target.value)}>{DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} — Grp {d.g} ${DG[d.g]||0}/dr{d.x?` +$${d.x}/dr`:""}</option>)}</select></div>
+        <div><label className="lb">Drawer Front</label><select className="sel" value={drwF} onChange={e=>sDrwF(e.target.value)}>{DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}{d.g!=="A"?` — $${DG[d.g]||0}/drw`:""}</option>)}</select></div>
         <div><label className="lb">Finish / Glaze</label><select className="sel" value={glaze} onChange={e=>sGlaze(e.target.value)}>{GLAZES.map(g=><option key={g.v} value={g.v}>{g.l}</option>)}</select></div>
         <div><label className="lb">Highlight</label><select className="sel" value={highlight} onChange={e=>sHL(e.target.value)}>{HIGHLIGHTS.map(h=><option key={h.v} value={h.v}>{h.l}</option>)}</select></div>
         <div><label className="lb">Character Technique 1</label><select className="sel" value={charT1} onChange={e=>sCT1(e.target.value)}>{CHAR_TECH.map(c=><option key={c.v} value={c.v}>{c.l}</option>)}</select></div>
@@ -12948,7 +12984,7 @@ return(<div style={{marginBottom:5}}>
         <div><label className="lb">Interior</label><select className="sel" value={intF} onChange={e=>{sIntF(e.target.value);if(e.target.value==="LINEN")sItems(p=>p.map(it=>({...it,fe:""})))}}>{INTERIOR.map(i=><option key={i.v} value={i.v}>{i.l}</option>)}</select></div>
         <div><label className="lb">Drawer Box / Guide</label><select className="sel" value={drwBox} onChange={e=>sDrwBox(e.target.value)}>{DRW_BOX.map(d=><option key={d.v} value={d.v}>{d.l}</option>)}</select></div>
         <div><label className="lb">Edge Profile</label><select className="sel" value={edgePro} onChange={e=>sEdgePro(e.target.value)}>{["None","100","150","350","400","750","Matching","B-Alum","S-Alum","3D"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
-        <div style={{fontSize:10.5,color:C.stone}}>Effective: Ã{((1+spp/100)*(1+cxp/100)).toFixed(3)}</div>
+        <div style={{fontSize:10.5,color:C.stone}}>Effective: ×{((1+spp/100)*(1+cxp/100)).toFixed(3)}</div>
       </div>
     </div></div></>}
 
@@ -12962,7 +12998,7 @@ return(<div style={{marginBottom:5}}>
       <div style={{background:C.paper,borderRadius:"12px",padding:"20px",width:"100%",maxWidth:"500px",maxHeight:"80vh",overflowY:"auto",boxShadow:"0 20px 60px rgba(0,0,0,0.3)"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px",paddingBottom:"12px",borderBottom:`1px solid ${C.bdr}`}}>
           <h3 style={{fontFamily:F.d,fontSize:"18px",fontWeight:"700",color:C.ink}}>Quote History</h3>
-          <button onClick={()=>setShowHistory(false)} style={{background:"none",border:"none",fontSize:"24px",cursor:"pointer",color:C.stone}}>Ã</button>
+          <button onClick={()=>setShowHistory(false)} style={{background:"none",border:"none",fontSize:"24px",cursor:"pointer",color:C.stone}}>×</button>
         </div>
         {versions.length===0?<div style={{textAlign:"center",color:C.stone,padding:"28px",fontSize:12.5}}>No version history</div>:
           <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
@@ -12970,7 +13006,7 @@ return(<div style={{marginBottom:5}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"start"}}>
                 <div>
                   <div style={{fontSize:"13px",fontWeight:"600",color:C.ink}}>{new Date(v.at).toLocaleString()}</div>
-                  <div style={{fontSize:"11px",color:C.stone,marginTop:"2px"}}>{v.items} items Â· {fm(v.total)}</div>
+                  <div style={{fontSize:"11px",color:C.stone,marginTop:"2px"}}>{v.items} items · {fm(v.total)}</div>
                 </div>
                 <button className="bt bp" onClick={()=>{if(v.snapshot){const s=v.snapshot;sNm(s.nm);sPid(s.pid);sSp(s.sp);sCx(s.cx);sDoor(s.door);sDrwF(s.drwF);sGlaze(s.glaze);sHL(s.highlight);sCT1(s.charT1);sCT2(s.charT2);sColor(s.color);sMat(s.mat);sIntF(s.intF);sDrwBox(s.drwBox);if(s.edgePro)sEdgePro(s.edgePro);sItems(s.items);setShowHistory(false);fl("Restored version");}}} style={{fontSize:10.5,padding:"5px 10px"}}>Restore</button>
               </div>
@@ -12984,23 +13020,23 @@ return(<div style={{marginBottom:5}}>
     {showOrderReview&&<><div className="sbg" onClick={()=>setShowOrderReview(false)} style={{zIndex:1100}}/><div style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:1101,width:mob?"95vw":"600px",maxHeight:"80vh",background:"#fff",borderRadius:12,boxShadow:"0 20px 60px rgba(0,0,0,.35)",overflow:"hidden",display:"flex",flexDirection:"column"}}>
       <div style={{background:C.ink,padding:"14px 18px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <span style={{fontFamily:F.d,fontSize:16,fontWeight:700,color:C.cream}}>Review Order Before Generating</span>
-        <button onClick={()=>setShowOrderReview(false)} style={{background:"none",border:"none",color:C.stL,cursor:"pointer",fontSize:18}}>Ã</button>
+        <button onClick={()=>setShowOrderReview(false)} style={{background:"none",border:"none",color:C.stL,cursor:"pointer",fontSize:18}}>×</button>
       </div>
       <div style={{overflowY:"auto",padding:"14px 18px",flex:1}}>
         {(()=>{const rz={};items.forEach(it=>{const z=it.z||"other";if(!rz[z])rz[z]=[];rz[z].push(it)});const ze=Object.entries(rz);let warnings=0;
         return(<div>
-          <div style={{fontSize:11,color:C.stone,marginBottom:10,fontFamily:F.b}}>Project: <strong style={{color:C.ink}}>{nm||"Untitled"}</strong> Â· {sp} Â· {door} Â· {items.length} item{items.length!==1?"s":""} Â· {comp.zc} room{comp.zc!==1?"s":""}</div>
+          <div style={{fontSize:11,color:C.stone,marginBottom:10,fontFamily:F.b}}>Project: <strong style={{color:C.ink}}>{nm||"Untitled"}</strong> · {sp} · {door} · {items.length} item{items.length!==1?"s":""} · {comp.zc} room{comp.zc!==1?"s":""}</div>
           {ze.map(([zid,zItems])=>{const zInfo=ZN.find(z=>z.id===zid)||{l:zid,i:"+"};let zt=0;zItems.forEach(it=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);zt+=total+mcR*(1+plyPct/100)*it.q});
           return(<div key={zid} style={{marginBottom:10}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 10px",background:C.warm,borderRadius:6,marginBottom:4}}>
               <span style={{fontWeight:600,fontSize:12}}>{zInfo.i} {zInfo.l}</span>
-              <span style={{fontSize:11,fontFamily:F.m,color:C.stone}}>{zItems.reduce((s,i)=>s+i.q,0)} units Â· {fm(zt)}</span>
+              <span style={{fontSize:11,fontFamily:F.m,color:C.stone}}>{zItems.reduce((s,i)=>s+i.q,0)} units · {fm(zt)}</span>
             </div>
             {zItems.map((it,idx)=>{const{u,t:total,stockBase,plyPct,itemSQ}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);const gt=total+mcR*(1+plyPct/100)*it.q;const iM=it.t==="M";
               const iw=[];if(!iM&&!itemSQ&&!isCustom(it.s)){if(it.dc>0&&!it.hng){iw.push("No hinge");warnings++;}if((it.t==="B"||it.t==="T"||it.t==="V")&&!it.fe){iw.push("No fin. end");warnings++;}}if(itemSQ&&(it.sqin||0)===0){iw.push("0 sq.in");warnings++;}
               return(<div key={it.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 10px",fontSize:11,borderBottom:`1px solid ${C.bdr}`,background:idx%2===0?"transparent":"#fafaf8"}}>
                 <div style={{display:"flex",alignItems:"center",gap:6,flex:1}}>
-                  <span style={{fontWeight:600,fontFamily:F.m,minWidth:32}}>{it.q}Ã</span>
+                  <span style={{fontWeight:600,fontFamily:F.m,minWidth:32}}>{it.q}×</span>
                   <span style={{fontWeight:500}}>{SKU_LABELS[it.s]||it.s}{it.ds&&it.ds!==door?` (${it.ds})`:""}{iM?` ${it.len}ft`:""}{itemSQ?` ${it.sqin}sq.in`:""}</span>
                   {iw.map(w=><span key={w} style={{fontSize:8.5,padding:"1px 5px",borderRadius:3,background:"#fef3c7",color:"#92400e",fontWeight:600,border:"1px solid #f59e0b44",marginLeft:3}}><Ic n="warn" sz={8} c="#92400e"/> {w}</span>)}
                 </div>
@@ -13011,7 +13047,7 @@ return(<div style={{marginBottom:5}}>
             <span style={{fontFamily:F.d,fontWeight:700,fontSize:14,color:C.cream}}>List Price Total</span>
             <span style={{fontFamily:F.m,fontWeight:700,fontSize:18,color:C.gold}}>{fm(comp.tot)}</span>
           </div>
-          {warnings>0&&<div style={{marginTop:8,padding:"8px 12px",background:"#fef3c7",borderRadius:6,border:"1px solid #f59e0b44",fontSize:11,color:"#92400e"}}><Ic n="warn" sz={11} c="#92400e"/> {warnings} warning{warnings!==1?"s":""} found â items may be missing hinge, finished end, or dimensions. You can still generate the order form.</div>}
+          {warnings>0&&<div style={{marginTop:8,padding:"8px 12px",background:"#fef3c7",borderRadius:6,border:"1px solid #f59e0b44",fontSize:11,color:"#92400e"}}><Ic n="warn" sz={11} c="#92400e"/> {warnings} warning{warnings!==1?"s":""} found — items may be missing hinge, finished end, or dimensions. You can still generate the order form.</div>}
         </div>)})()}
       </div>
       <div style={{padding:"12px 18px",borderTop:`1px solid ${C.bdr}`,display:"flex",justifyContent:"space-between",gap:8}}>
