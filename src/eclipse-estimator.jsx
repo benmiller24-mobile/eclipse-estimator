@@ -7941,7 +7941,7 @@ const CABINET_MODS=[
   {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/cab",types:["W"],group:"Lighting Prep",input:"check"},
   {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/shelf",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^FLS$/},
   {code:"FLED_FEP",label:"LED Lighting Prep — Flush End Panel",price:60,unit:"/panel",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^F(WEP|BEP|VEP|VTEP|REP)/},
-  {code:"PFG",label:"Prep for Glass (door prep)",price:0,unit:"/door",types:["B","V","C","D","T","W"],group:"Door Mods",input:"qty_pos",max:10},
+  {code:"GFD",label:"Prep for Glass / Mullion Door",price:0,unit:"/door",types:["B","V","C","D","T","W"],group:"Door Mods",input:"gfd",max:10},
 {code:"FF_TOP",label:"False Front Top (removes top drawer)",price:100,unit:"/cab",types:["B","V","C","D","T"],group:"Other",input:"check"},
   // Aventos Top Hinge Modifications (E3) — Wall cabinets only
   {code:"AVENTOS_HK",label:"Aventos HK Stay Lift Door",price:435,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
@@ -7950,6 +7950,36 @@ const CABINET_MODS=[
   {code:"AVENTOS_HLSD",label:"Aventos HL w/ Servo-Drive",price:1940,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
   {code:"AVENTOS_HF",label:"Aventos HF Bi-Fold Door",price:782,unit:"/cab",types:["W"],group:"Aventos Top Hinge",input:"check",excGroup:"aventos"},
   {code:"AVENTOS_HFSD",label:"Aventos HF w/ Servo-Drive",price:2042,unit:"/cab",types:["W"],group:"Aventos Top Hinge",input:"check",excGroup:"aventos"},
+];
+
+// Glass/Mullion door styles for GFD mod — code, label, per-door price
+const GFD_STYLES=[
+  {v:"GFD",l:"Glass Frame Door (no mullion)",price:0},
+  {v:"CMD",l:"Country Mullion (9 lite)",price:210},
+  {v:"FMD",l:"Fairfield Mullion (11 lite)",price:210},
+  {v:"MD",l:"Mullion Door",price:210},
+  {v:"OEMD",l:"Old English Mullion (8 lite)",price:210},
+  {v:"TMD",l:"Triple Mullion",price:210},
+  {v:"XMD",l:"X Mullion (4 lite)",price:825},
+  {v:"DXMD",l:"Double X Mullion (7 lite)",price:1171},
+  {v:"DXHMD",l:"Double X Horiz. Mullion (8 lite)",price:1179},
+  {v:"TXMD",l:"Triple X Mullion (10 lite)",price:1517},
+  {v:"TXHMD",l:"Triple X Horiz. Mullion (12 lite)",price:1540},
+  {v:"DBMD",l:"Double Bow Mullion (4 lite)",price:1254},
+  {v:"SEMD",l:"Single Elliptical Mullion (7 lite)",price:1558},
+  {v:"DEMD",l:"Double Elliptical Mullion (12 lite)",price:1844},
+  {v:"DLMD",l:"Diamond Left Mullion",price:1844},
+  {v:"DRMD",l:"Diamond Right Mullion",price:1844},
+  {v:"Pane7-P",l:'Pane 7" Solid Panel',price:29},
+  {v:"Pane7-1",l:'Pane 7" GFD',price:29},
+  {v:"Pane12-P",l:'Pane 12" Solid Panel',price:29},
+  {v:"Pane12-1",l:'Pane 12" GFD',price:29},
+  {v:"Pane7-2",l:'Pane 7" 2-Lite Mullion',price:76},
+  {v:"Pane7-4",l:'Pane 7" 4-Lite Mullion',price:76},
+  {v:"Pane12-2",l:'Pane 12" 2-Lite Mullion',price:107},
+  {v:"Pane12-4",l:'Pane 12" 4-Lite Mullion',price:107},
+  {v:"LAGFD",l:"Left Arch Glass Frame",price:121},
+  {v:"RAGFD",l:"Right Arch Glass Frame",price:121},
 ];
 
 const ROT_OPTIONS=[
@@ -7975,6 +8005,7 @@ const calcModCost=(item,mods,baseUnitPrice)=>{
     if(m.pct){cost+=baseUnitPrice*(m.pct/100);}
     else if(m.input==="side"){const sides=v==="B"?2:1;cost+=m.price*sides;}
     else if(m.input==="mxdf"){if(Array.isArray(v))cost+=m.price*v.filter(p=>p.on).length;}
+    else if(m.input==="gfd"){if(typeof v==="object"&&v.qty>0){const gs=GFD_STYLES.find(g=>g.v===v.style);cost+=(gs?.price||0)*v.qty;}}
     else if(m.input==="qty_pos"){const qv=typeof v==="object"?v.qty||0:+v||0;cost+=m.price*qv;}
     else{cost+=m.price*(m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?1:+v||0);}
   });}
@@ -11601,13 +11632,19 @@ setText("P.O. Location", poLocation);
                                       <select value={val||""} onChange={e=>setMod(item.id,m.code,e.target.value||0)} style={{fontSize:10,padding:"2px 4px",borderRadius:4,border:`1px solid ${isOn?"#7c3aed":C.bdr}`,background:isOn?"#7c3aed0a":"#fff",fontFamily:F.m,cursor:"pointer"}}>
                                         <option value="">— None —</option>{(m.options||[]).map(o=><option key={o} value={o}>{o}</option>)}
                                       </select>:
-                                    m.input==="qty_pos"?
-                                      <div style={{display:"flex",flexDirection:"column",gap:3}}>
-                                        <div style={{display:"flex",alignItems:"center",gap:4}}>
+                                    m.input==="gfd"?
+                                      <div style={{display:"flex",flexDirection:"column",gap:3,minWidth:0,flex:1}}>
+                                        <div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                                           <span style={{fontSize:9,color:C.stone}}>Qty</span>
-                                          <input type="number" min={0} max={m.max||10} value={typeof val==="object"?val.qty||0:+val||0} onChange={e=>{const nq=Math.max(0,Math.min(m.max||10,+e.target.value));const cur=typeof val==="object"?val:{qty:0,pos:""};setMod(item.id,m.code,nq>0?{...cur,qty:nq}:0)}} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
+                                          <input type="number" min={0} max={m.max||10} value={typeof val==="object"?val.qty||0:0} onChange={e=>{const nq=Math.max(0,Math.min(m.max||10,+e.target.value));const cur=typeof val==="object"?val:{qty:0,pos:"",style:"GFD"};setMod(item.id,m.code,nq>0?{...cur,qty:nq}:0)}} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
                                         </div>
-                                        {(typeof val==="object"&&val.qty>0)&&<input type="text" placeholder="Position — e.g. top left, bottom right" value={val.pos||""} onChange={e=>{setMod(item.id,m.code,{...val,pos:e.target.value})}} style={{width:"100%",padding:"3px 5px",fontSize:10,border:`1px solid ${C.bdr}`,borderRadius:4,fontFamily:F.b,boxSizing:"border-box"}}/>}
+                                        {(typeof val==="object"&&val.qty>0)&&<>
+                                          <select value={val.style||"GFD"} onChange={e=>setMod(item.id,m.code,{...val,style:e.target.value})} style={{width:"100%",padding:"3px 5px",fontSize:10,border:`1px solid ${C.bdr}`,borderRadius:4,fontFamily:F.m,boxSizing:"border-box"}}>
+                                            {GFD_STYLES.map(g=><option key={g.v} value={g.v}>{g.l}{g.price>0?` +$${g.price}/door`:""}</option>)}
+                                          </select>
+                                          <input type="text" placeholder="Position — e.g. top left, bottom right" value={val.pos||""} onChange={e=>setMod(item.id,m.code,{...val,pos:e.target.value})} style={{width:"100%",padding:"3px 5px",fontSize:10,border:`1px solid ${C.bdr}`,borderRadius:4,fontFamily:F.b,boxSizing:"border-box"}}/>
+                                          {(()=>{const gs=GFD_STYLES.find(g=>g.v===val.style);return gs&&gs.price>0?<div style={{fontSize:9,color:"#7c3aed",fontWeight:600}}>{val.qty}× {gs.l} = {fm(gs.price*val.qty)}</div>:null})()}
+                                        </>}
                                       </div>:
                                     m.input==="check"?
                                       <input type="checkbox" checked={!!isOn} onChange={e=>setMod(item.id,m.code,e.target.checked?1:0)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
@@ -11663,7 +11700,7 @@ setText("P.O. Location", poLocation);
                         <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
                           {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
                             const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;
-                            return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` x${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:m.input==="dims"&&typeof qty==="object"?` (${qty.w||"?"}x${qty.h||"?"}x${qty.d||"?"})`:m.input==="qty_pos"&&typeof qty==="object"?` x${qty.qty||0}${qty.pos?` (${qty.pos})`:""}`:(typeof qty==="number"&&qty>1)?` x${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
+                            return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` x${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:m.input==="dims"&&typeof qty==="object"?` (${qty.w||"?"}x${qty.h||"?"}x${qty.d||"?"})`:m.input==="gfd"&&typeof qty==="object"?` x${qty.qty||0} ${(GFD_STYLES.find(g=>g.v===qty.style)||{}).l||"GFD"}${qty.pos?` [${qty.pos}]`:""}`:(typeof qty==="number"&&qty>1)?` x${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.input==="gfd"&&typeof qty==="object"?(()=>{const gs=GFD_STYLES.find(g=>g.v===qty.style);return gs&&gs.price>0?`+${fm(gs.price*(qty.qty||0))}`:"Free"})():m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
                           })}
                         </div>
                       </div>}
@@ -11928,7 +11965,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
             else if(m.input==="side"&&typeof v==="string"&&v){modParts.push(`${m.label} (${v==="B"?"Both":v}) +$${m.price*(v==="B"?2:1)}`);}
             else if(m.input==="select"&&v){modParts.push(`${m.label} (${v})${m.price>0?` +$${m.price}`:""}`);}
             else if(m.input==="dims"&&v){const d=typeof v==="object"?`${v.w||""}x${v.h||""}x${v.d||""}`:"";modParts.push(`${m.label}${d?` (${d})`:""} +$${m.price}`);}
-            else if(m.input==="qty_pos"&&v){const qp=typeof v==="object"?v:{qty:+v||0,pos:""};if(qp.qty>0)modParts.push(`${m.label} x${qp.qty}${qp.pos?` (${qp.pos})`:""}`); }
+            else if(m.input==="gfd"&&v&&typeof v==="object"&&v.qty>0){const gs=GFD_STYLES.find(g=>g.v===v.style);modParts.push(`${gs?.l||"GFD"} x${v.qty}${v.pos?` [${v.pos}]`:""}${gs&&gs.price>0?` +$${gs.price*v.qty}`:""}`);}
             else if((m.input==="check"||m.input==="width")&&v){modParts.push(`${m.label}${m.pct?` +${m.pct}%`:m.price>0?` +$${m.price}`:""}`);}
             else if(typeof v==="number"&&v>0){modParts.push(`${m.label}${v>1?` x${v}`:""} ${m.pct?`+${m.pct}%`:m.price>0?`+$${m.price*v}`:""}`);}
           });}
@@ -12814,13 +12851,19 @@ return(<div style={{marginBottom:5}}>
                             <select value={val||""} onChange={e=>setMod(m.code,e.target.value||0)} style={{fontSize:10,padding:"2px 4px",borderRadius:4,border:`1px solid ${isOn?"#7c3aed":C.bdr}`,background:isOn?"#7c3aed0a":"#fff",fontFamily:F.m,cursor:"pointer"}}>
                               <option value="">— None —</option>{(m.options||[]).map(o=><option key={o} value={o}>{o}</option>)}
                             </select>:
-                          m.input==="qty_pos"?
-                            <div style={{display:"flex",flexDirection:"column",gap:3}}>
-                              <div style={{display:"flex",alignItems:"center",gap:4}}>
+                          m.input==="gfd"?
+                            <div style={{display:"flex",flexDirection:"column",gap:3,minWidth:0,flex:1}}>
+                              <div style={{display:"flex",alignItems:"center",gap:4,flexWrap:"wrap"}}>
                                 <span style={{fontSize:9,color:C.stone}}>Qty</span>
-                                <input type="number" min={0} max={m.max||10} value={typeof val==="object"?val.qty||0:+val||0} onChange={e=>{const nq=Math.max(0,Math.min(m.max||10,+e.target.value));const cur=typeof val==="object"?val:{qty:0,pos:""};setMod(m.code,nq>0?{...cur,qty:nq}:0)}} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
+                                <input type="number" min={0} max={m.max||10} value={typeof val==="object"?val.qty||0:0} onChange={e=>{const nq=Math.max(0,Math.min(m.max||10,+e.target.value));const cur=typeof val==="object"?val:{qty:0,pos:"",style:"GFD"};setMod(m.code,nq>0?{...cur,qty:nq}:0)}} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
                               </div>
-                              {(typeof val==="object"&&val.qty>0)&&<input type="text" placeholder="Position — e.g. top left, bottom right" value={val.pos||""} onChange={e=>{setMod(m.code,{...val,pos:e.target.value})}} style={{width:"100%",padding:"3px 5px",fontSize:10,border:`1px solid ${C.bdr}`,borderRadius:4,fontFamily:F.b,boxSizing:"border-box"}}/>}
+                              {(typeof val==="object"&&val.qty>0)&&<>
+                                <select value={val.style||"GFD"} onChange={e=>setMod(m.code,{...val,style:e.target.value})} style={{width:"100%",padding:"3px 5px",fontSize:10,border:`1px solid ${C.bdr}`,borderRadius:4,fontFamily:F.m,boxSizing:"border-box"}}>
+                                  {GFD_STYLES.map(g=><option key={g.v} value={g.v}>{g.l}{g.price>0?` +$${g.price}/door`:""}</option>)}
+                                </select>
+                                <input type="text" placeholder="Position — e.g. top left, bottom right" value={val.pos||""} onChange={e=>setMod(m.code,{...val,pos:e.target.value})} style={{width:"100%",padding:"3px 5px",fontSize:10,border:`1px solid ${C.bdr}`,borderRadius:4,fontFamily:F.b,boxSizing:"border-box"}}/>
+                                {(()=>{const gs=GFD_STYLES.find(g=>g.v===val.style);return gs&&gs.price>0?<div style={{fontSize:9,color:"#7c3aed",fontWeight:600}}>{val.qty}× {gs.l} = {fm(gs.price*val.qty)}</div>:null})()}
+                              </>}
                             </div>:
                           m.input==="check"?
                             <input type="checkbox" checked={isOn} onChange={e=>setMod(m.code,e.target.checked?1:0)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
@@ -12875,7 +12918,7 @@ return(<div style={{marginBottom:5}}>
               <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
               {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
                 const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;
-                return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
+                return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.input==="gfd"&&typeof qty==="object"?(()=>{const gs=GFD_STYLES.find(g=>g.v===qty.style);return gs&&gs.price>0?`+${fm(gs.price*(qty.qty||0))}`:"Free"})():m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
               })}
               </div>
             </div>}
