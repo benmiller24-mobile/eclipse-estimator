@@ -7942,7 +7942,7 @@ const CABINET_MODS=[
   {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/shelf",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^FLS$/},
   {code:"FLED_FEP",label:"LED Lighting Prep — Flush End Panel",price:60,unit:"/panel",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^F(WEP|BEP|VEP|VTEP|REP)/},
   {code:"GFD",label:"Prep for Glass / Mullion Door",price:0,unit:"/door",types:["B","V","C","D","T","W"],group:"Door Mods",input:"gfd",max:10},
-  {code:"FI",label:"Finished Interior",price:0,unit:"/cab",types:["B","V","C","D","T","W"],group:"Structure",pct:25,input:"check"},
+  {code:"FI",label:"Finished Interior (25% of base+mods)",price:0,unit:"/cab",types:["B","V","C","D","T","W"],group:"Structure",input:"check",isFI:true},
 {code:"FF_TOP",label:"False Front Top (removes top drawer)",price:100,unit:"/cab",types:["B","V","C","D","T"],group:"Other",input:"check"},
   // Aventos Top Hinge Modifications (E3) — Wall cabinets only
   {code:"AVENTOS_HK",label:"Aventos HK Stay Lift Door",price:435,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
@@ -8001,8 +8001,9 @@ const getApplicableMods=(item)=>CABINET_MODS.filter(m=>{
   return true;
 });
 const calcModCost=(item,mods,baseUnitPrice)=>{
-  let cost=0;
+  let cost=0;let hasFI=false;
   if(mods){CABINET_MODS.forEach(m=>{const v=mods[m.code];if(!v)return;
+    if(m.isFI){hasFI=true;return;}// defer FI — computed after all other mods
     if(m.pct){cost+=baseUnitPrice*(m.pct/100);}
     else if(m.input==="side"){const sides=v==="B"?2:1;cost+=m.price*sides;}
     else if(m.input==="mxdf"){if(Array.isArray(v))cost+=m.price*v.filter(p=>p.on).length;}
@@ -8012,6 +8013,8 @@ const calcModCost=(item,mods,baseUnitPrice)=>{
   });}
   if(item.rot&&item.rotQ>0){const ro=ROT_OPTIONS.find(r=>r.v===item.rot);if(ro){cost+=ro.price*item.rotQ;if(item.rotFeg)cost+=72*item.rotQ;}}
   if(item.rot2&&item.rot2Q>0){const ro2=ROT_OPTIONS.find(r=>r.v===item.rot2);if(ro2){cost+=ro2.price*item.rot2Q;if(item.rot2Feg)cost+=72*item.rot2Q;}}
+  // FI = 25% of (base + all other mods), excludes door/drawer/drawer system upcharges
+  if(hasFI){cost+=(baseUnitPrice+cost)*0.25;}
   return cost;
 };
 
@@ -11653,7 +11656,7 @@ setText("P.O. Location", poLocation);
                                     }
                                     <div style={{flex:1,minWidth:0}}>
                                       <div style={{fontSize:10.5,fontWeight:isOn?700:500,color:isOn?"#6d28d9":C.ink,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.label}</div>
-                                      <div style={{fontSize:9,color:isOn?"#7c3aed":C.stone,fontWeight:isOn?600:400}}>{m.code} · {m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.input==="side"?m.price*(val==="B"?2:1):m.price*(m.input==="check"?1:val))}`:""}</div>
+                                      <div style={{fontSize:9,color:isOn?"#7c3aed":C.stone,fontWeight:isOn?600:400}}>{m.code} · {m.isFI?"25% of base+mods":m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.input==="side"?m.price*(val==="B"?2:1):m.price*(m.input==="check"?1:val))}`:""}</div>
                                     </div>
                                   </div>);
                                 })}
@@ -11701,7 +11704,7 @@ setText("P.O. Location", poLocation);
                         <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
                           {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
                             const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;
-                            return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` x${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:m.input==="dims"&&typeof qty==="object"?` (${qty.w||"?"}x${qty.h||"?"}x${qty.d||"?"})`:m.input==="gfd"&&typeof qty==="object"?` x${qty.qty||0} ${(GFD_STYLES.find(g=>g.v===qty.style)||{}).l||"GFD"}${qty.pos?` [${qty.pos}]`:""}`:(typeof qty==="number"&&qty>1)?` x${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.input==="gfd"&&typeof qty==="object"?(()=>{const gs=GFD_STYLES.find(g=>g.v===qty.style);return gs&&gs.price>0?`+${fm(gs.price*(qty.qty||0))}`:"Free"})():m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
+                            return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` x${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:m.input==="dims"&&typeof qty==="object"?` (${qty.w||"?"}x${qty.h||"?"}x${qty.d||"?"})`:m.input==="gfd"&&typeof qty==="object"?` x${qty.qty||0} ${(GFD_STYLES.find(g=>g.v===qty.style)||{}).l||"GFD"}${qty.pos?` [${qty.pos}]`:""}`:(typeof qty==="number"&&qty>1)?` x${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.input==="gfd"&&typeof qty==="object"?(()=>{const gs=GFD_STYLES.find(g=>g.v===qty.style);return gs&&gs.price>0?`+${fm(gs.price*(qty.qty||0))}`:"Free"})():m.isFI?"+25%":m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
                           })}
                         </div>
                       </div>}
@@ -11967,6 +11970,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
             else if(m.input==="select"&&v){modParts.push(`${m.label} (${v})${m.price>0?` +$${m.price}`:""}`);}
             else if(m.input==="dims"&&v){const d=typeof v==="object"?`${v.w||""}x${v.h||""}x${v.d||""}`:"";modParts.push(`${m.label}${d?` (${d})`:""} +$${m.price}`);}
             else if(m.input==="gfd"&&v&&typeof v==="object"&&v.qty>0){const gs=GFD_STYLES.find(g=>g.v===v.style);modParts.push(`${gs?.l||"GFD"} x${v.qty}${v.pos?` [${v.pos}]`:""}${gs&&gs.price>0?` +$${gs.price*v.qty}`:""}`);}
+            else if(m.isFI&&v){modParts.push(`FI +25% of base+mods`);}
             else if((m.input==="check"||m.input==="width")&&v){modParts.push(`${m.label}${m.pct?` +${m.pct}%`:m.price>0?` +$${m.price}`:""}`);}
             else if(typeof v==="number"&&v>0){modParts.push(`${m.label}${v>1?` x${v}`:""} ${m.pct?`+${m.pct}%`:m.price>0?`+$${m.price*v}`:""}`);}
           });}
@@ -12872,7 +12876,7 @@ return(<div style={{marginBottom:5}}>
                           }
                           <div style={{flex:1,minWidth:0}}>
                             <div style={{fontSize:11,fontWeight:isOn?700:500,color:isOn?"#6d28d9":C.ink,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.label}</div>
-                            <div style={{fontSize:9.5,color:isOn?"#7c3aed":C.stone,fontWeight:isOn?600:400}}>{m.code} · {m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.input==="side"?m.price*(val==="B"?2:1):m.price*(m.input==="check"?1:val))}`:""}</div>
+                            <div style={{fontSize:9.5,color:isOn?"#7c3aed":C.stone,fontWeight:isOn?600:400}}>{m.code} · {m.isFI?"25% of base+mods":m.pct?`${m.pct}% of base`:m.price>0?`$${m.price}${m.unit}`:m.price===0?"No charge":""}{isOn&&!m.pct&&m.price>0?` = ${fm(m.input==="side"?m.price*(val==="B"?2:1):m.price*(m.input==="check"?1:val))}`:""}</div>
                           </div>
                         </div>);
                       })}
@@ -12919,7 +12923,7 @@ return(<div style={{marginBottom:5}}>
               <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
               {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
                 const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;
-                return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.input==="gfd"&&typeof qty==="object"?(()=>{const gs=GFD_STYLES.find(g=>g.v===qty.style);return gs&&gs.price>0?`+${fm(gs.price*(qty.qty||0))}`:"Free"})():m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
+                return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:qty>1?` ×${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.input==="gfd"&&typeof qty==="object"?(()=>{const gs=GFD_STYLES.find(g=>g.v===qty.style);return gs&&gs.price>0?`+${fm(gs.price*(qty.qty||0))}`:"Free"})():m.isFI?"+25%":m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
               })}
               </div>
             </div>}
