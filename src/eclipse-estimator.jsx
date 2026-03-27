@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { PDFDocument } from "pdf-lib";
 import { createClient } from "@supabase/supabase-js";
+import { TALL_P } from "./tall-prices.js";
 // PDF form templates served from /forms/*.pdf (loaded at runtime)
 
 // ── Eclipse Order Form (base64 encoded blank PDF) ──
@@ -7816,7 +7817,9 @@ const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{
   const sqin=item.sqin||0;const itemSQ=isSqIn(item.s,item.r);
   const refIceCost=isREF(item.s)&&item.refIce?REF_ICE_CUTOUT:0;
   const isCOItem=isCO(item.s);
-  const stockBase=isCOItem?(item.p*(item.sqH||0)*(1+sm/100)):itemSQ?(item.p*sqin*(1+sm/100)+refIceCost):(item.p*len*(1+sm/100));
+  // Use height-specific price for tall cabinets
+  const baseP=(item.t==="T"&&item.tallH)?tallPrice(item.s,item.r,item.tallH)||item.p:item.p;
+  const stockBase=isCOItem?(baseP*(item.sqH||0)*(1+sm/100)):itemSQ?(baseP*sqin*(1+sm/100)+refIceCost):(baseP*len*(1+sm/100));
   const ds=item.ds||gDoor||"HNVR";const dInfo=DOORS.find(d=>d.v===ds);
   const dgCharge=dInfo?DG[dInfo.g]||0:0;const dxCharge=dInfo?.x||0;
   const isC3=item.r==="C3";
@@ -7997,18 +8000,53 @@ function _cabW(sku){
   return 0;
 }
 
+/* ── Available heights per catalog reference (from Eclipse catalog v8.8.0) ── */
+const TALL_HEIGHTS={
+  // Utility cabinets (standard) — 84-102
+  L2:[84,87,90,93,96,102],
+  // Utility Tall, Clothes Closet, Broom Closet — 84-114
+  L3:[84,87,90,93,96,102,108,114],L4:[84,87,90,93,96,102,108,114],L5:[84,87,90,93,96,102,108,114],
+  // Utility w/3 Drawers, w/Base FHD — 84-102
+  L6:[84,87,90,93,96,102],L7:[84,87,90,93,96,102],
+  // Utility Tall w/Roll Out Tray, Chef's Pantry — 84-114
+  L8:[84,87,90,93,96,102,108,114],L9:[84,87,90,93,96,102,108,114],
+  // Chrome Wire Pull-Out Pantry — 84-102; Chrome Wire Pull-Out Tall — 84-114
+  L10:[84,87,90,93,96,102],L11:[84,87,90,93,96,102,108,114],
+  // Pull-Out Pantry Rack — 84-102; Tall Pull-Out Pantry Rack — 84-114
+  L12:[84,87,90,93,96,102],L13:[84,87,90,93,96,102,108,114],
+  // Pantry Entry — 84-114
+  L14:[84,87,90,93,96,102,108,114],
+  // Oven Cabinet, Oven Microwave — 84-114
+  L15:[84,87,90,93,96,102,108,114],L16:[84,87,90,93,96,102,108,114],
+  // Oven w/Subframe, Oven MW w/Subframe, Oven w/MW & WD — 84-114
+  L17:[84,87,90,93,96,102,108,114],L18:[84,87,90,93,96,102,108,114],
+  L19:[84,87,90,93,96,102,108,114],L20:[84,87,90,93,96,102,108,114],
+  L21:[84,87,90,93,96,102,108,114],
+};
+/* Default tall heights for refs not explicitly listed */
+const TALL_H_DEFAULT=[84,87,90,93,96,102,108,114];
+function tallHeights(ref){return TALL_HEIGHTS[ref]||TALL_H_DEFAULT;}
+// Look up exact price for a tall/oven SKU at a given height; falls back to base (84″) price
+function tallPrice(sku,ref,height){
+  const prices=TALL_P[sku];if(!prices)return null;
+  const hts=tallHeights(ref);
+  const idx=hts.indexOf(height);
+  if(idx<0||idx>=prices.length)return prices[0];// fallback to 84″
+  return prices[idx];
+}
+
 /* ── Cabinet height extractor (for tall cabinets) ────────── */
 function _cabH(sku,typeCode){
   if(typeCode!=="T")return 0;
   let s=sku.toUpperCase().replace(/\s+/g,'');
   for(let i=0;i<3;i++)s=s.replace(/-(RT|FHD|2D|2DR|1DR|WS|MC|SS|PH|S)$/,'');
   const m=s.match(/(\d+)$/);if(!m)return 0;
-  const n=parseInt(m[1]);
   const ds=m[1];
   // Concatenated width+height (e.g. "2484" = 24 wide × 84 tall, "3093" = 30 wide × 93 tall)
-  if(ds.length>=4){const h=parseInt(ds.slice(-2));if(h>=80&&h<=96)return h;}
-  // Tall cabs with suffix like U12-27 = 12 wide, 27 deep → default 84" height
-  // Standalone width number (U12, U24) → default 84" height
+  if(ds.length>=4){const h=parseInt(ds.slice(-2));if(h>=80&&h<=99)return h;
+    // 3-digit heights like 102, 108, 114
+    const h3=parseInt(ds.slice(-3));if(h3>=100&&h3<=120)return h3;}
+  // Default: 84" base height (other heights selectable via height picker)
   return 84;
 }
 
@@ -8311,10 +8349,14 @@ const trackRecent=(sku)=>{try{let r=getRecent().filter(s=>s!==sku);r.unshift(sku
 function AddUI({onAdd,onAddCustom}){
   const[sk,sSk]=useState(CATALOG[0]?.s||""),[q,sQ]=useState(1),[z,sZ]=useState("kitchen"),[sr,sSr]=useState(""),[tf,sTf]=useState("all"),[len,sLen]=useState(10);
   const[sqW,sSqW]=useState(36),[sqH,sSqH]=useState(34);
+  const[tallH,sTallH]=useState(84);
   const[showCQ,setShowCQ]=useState(false);
   const[recentSkus,setRecentSkus]=useState(getRecent);
   const[cqDesc,setCqDesc]=useState(""),[cqPrice,setCqPrice]=useState(""),[cqNum,setCqNum]=useState(""),[cqZ,setCqZ]=useState("kitchen"),[cqQ,setCqQ]=useState(1),[cqPdf,setCqPdf]=useState(null),[cqPdfName,setCqPdfName]=useState("");
   const selCat=CATALOG.find(c=>c.s===sk);const isM=selCat?.t==="M";const isSQ=selCat?isSqIn(selCat.s,selCat.r):false;
+  const isTall=selCat?.t==="T";const avH=isTall?tallHeights(selCat.r):[];
+  // Reset height when switching to a new tall SKU
+  useEffect(()=>{if(isTall&&avH.length>0&&!avH.includes(tallH))sTallH(avH[0]);},[sk,isTall,avH]);
   const fl=useMemo(()=>{let l=CATALOG;if(tf!=="all")l=l.filter(c=>c.t===tf);if(sr){const s=sr.toLowerCase();l=l.filter(c=>c.s.toLowerCase().includes(s)||c.r.toLowerCase().includes(s));}return l.slice(0,200);},[tf,sr]);
   const grouped=useMemo(()=>{const g={};fl.forEach(c=>{const k=c.r||c.t;if(!g[k])g[k]=[];g[k].push(c)});return Object.entries(g)},[fl]);
   return(<div>
@@ -8327,8 +8369,8 @@ function AddUI({onAdd,onAddCustom}){
     <div style={{maxHeight:"36vh",overflowY:"auto",border:`1px solid ${C.bdr}`,borderRadius:7,marginBottom:7,background:C.cream}}>
       {recentSkus.length>0&&!sr&&tf==="all"&&<div>
         <div style={{padding:"4px 9px",background:"linear-gradient(90deg,#f59e0b22,#f59e0b08)",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:"#b45309",position:"sticky",top:0,zIndex:2,borderBottom:`1px solid #f59e0b33`,display:"flex",alignItems:"center",gap:5}}><Ic n="bolt" sz={10} c="#b45309"/> Recently Used ({recentSkus.length})</div>
-        {recentSkus.map(s=>{const c=CATALOG.find(x=>x.s===s);if(!c)return null;const w=_cabW(c.s);const h=_cabH(c.s,c.t);return(<div key={"recent-"+c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"#fffbeb08",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid #f59e0b44"}}>
-            <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s} <span style={{fontSize:9.5,color:C.stone,fontWeight:400}}>{c.r}{w>0?` · ${w}″W${h>0?`×${h}″H`:""}`:"" }</span></span>
+        {recentSkus.map(s=>{const c=CATALOG.find(x=>x.s===s);if(!c)return null;const w=_cabW(c.s);const h=_cabH(c.s,c.t);const th=c.t==="T"?tallHeights(c.r):[];const hDisp=th.length>1?`${th[0]}-${th[th.length-1]}″H`:h>0?`${h}″H`:"";return(<div key={"recent-"+c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"#fffbeb08",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid #f59e0b44"}}>
+            <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s} <span style={{fontSize:9.5,color:C.stone,fontWeight:400}}>{c.r}{w>0?` · ${w}″W${hDisp?`×${hDisp}`:""}`:"" }</span></span>
             <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
           </div>)})}
       </div>}
@@ -8336,8 +8378,8 @@ function AddUI({onAdd,onAddCustom}){
         <div style={{padding:"4px 9px",background:C.warm,fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:C.stone,position:"sticky",top:0,zIndex:1,borderBottom:`1px solid ${C.bdr}`}}>
           {ref} — {SEC[ref.charAt(0)]||TN[items[0]?.t]||""} ({items.length})
         </div>
-        {items.map(c=>{const w=_cabW(c.s);const h=_cabH(c.s,c.t);return(<div key={c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"transparent",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid transparent"}}>
-          <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s}{w>0&&<span style={{fontSize:9,color:C.stone,fontWeight:400,marginLeft:4}}>{w}″W{h>0?` × ${h}″H`:""}</span>}</span>
+        {items.map(c=>{const w=_cabW(c.s);const h=_cabH(c.s,c.t);const th=c.t==="T"?tallHeights(c.r):[];const hDisp=th.length>1?`${th[0]}-${th[th.length-1]}″H`:h>0?`${h}″H`:"";return(<div key={c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"transparent",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid transparent"}}>
+          <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s}{w>0&&<span style={{fontSize:9,color:C.stone,fontWeight:400,marginLeft:4}}>{w}″W{hDisp?` × ${hDisp}`:""}</span>}</span>
           <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
         </div>)})}
       </div>)}
@@ -8371,10 +8413,17 @@ function AddUI({onAdd,onAddCustom}){
       <div style={{fontSize:10,fontWeight:700,color:"#856404",marginBottom:3}}><Ic n="warn" sz={10} c="#856404"/> Important Notes</div>
       <div style={{fontSize:10,color:"#856404",lineHeight:1.5,whiteSpace:"pre-line"}}>{LSD_NOTE}</div>
     </div>}
+    {isTall&&avH.length>1&&<div style={{marginBottom:7,padding:"8px 10px",background:"#eff6ff",borderRadius:7,border:"1px solid #93c5fd"}}>
+      <label className="lb" style={{color:"#1d4ed8"}}>Cabinet Height</label>
+      <div style={{display:"flex",gap:4,flexWrap:"wrap",marginTop:3}}>
+        {avH.map(h=>{const hp=selCat?tallPrice(selCat.s,selCat.r,h):null;return<button key={h} className={`ch2 ${tallH===h?"on":""}`} onClick={()=>sTallH(h)} style={tallH===h?{borderColor:"#2563eb",color:"#1d4ed8",background:"#dbeafe",fontWeight:700,minWidth:38}:{minWidth:38}}>{h}″</button>})}
+      </div>
+      {selCat&&<div style={{fontSize:10,color:"#1d4ed8",marginTop:4,fontWeight:600}}>{tallH}″H — {fm(tallPrice(selCat.s,selCat.r,tallH)||selCat.p)}</div>}
+    </div>}
     <div style={{display:"flex",gap:6,alignItems:"flex-end",flexWrap:"wrap"}}>
       <div style={{width:60}}><label className="lb">{isM?"Pcs":isSQ?"Pcs":"Qty"}</label><input type="number" className="inp" min={1} max={999} value={q} onChange={e=>sQ(Math.max(1,+e.target.value))} style={{textAlign:"center"}}/></div>
       <div style={{flex:"1 1 80px"}}><label className="lb">Room</label><select className="sel" value={z} onChange={e=>sZ(e.target.value)}>{ZN.map(z=><option key={z.id} value={z.id}>{z.i} {z.l}</option>)}</select></div>
-      <button className="bt bp" onClick={()=>{const cat=CATALOG.find(c=>c.s===sk);if(cat){onAdd(cat,q,z,cat.t==="M"?len:0,isSqIn(cat.s,cat.r)?sqW*sqH:0,isSqIn(cat.s,cat.r)?sqW:0,isSqIn(cat.s,cat.r)?sqH:0);trackRecent(cat.s);setRecentSkus(getRecent());sQ(1);}}} style={{minWidth:100}}>+ Add</button>
+      <button className="bt bp" onClick={()=>{const cat=CATALOG.find(c=>c.s===sk);if(cat){onAdd(cat,q,z,cat.t==="M"?len:0,isSqIn(cat.s,cat.r)?sqW*sqH:0,isSqIn(cat.s,cat.r)?sqW:0,isSqIn(cat.s,cat.r)?sqH:0,isTall?tallH:0);trackRecent(cat.s);setRecentSkus(getRecent());sQ(1);}}} style={{minWidth:100}}>+ Add</button>
     </div>
     {/* Custom Quote Section */}
     <div style={{marginTop:10,borderTop:`2px solid ${C.gold}`,paddingTop:10}}>
@@ -11730,11 +11779,11 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
     }catch(e){console.error("Error loading quote:",e)}
   },[supabase,fl]);
 
-  const addIt=useCallback((cat,q,z,len,sqin,dimW,dimH)=>{
+  const addIt=useCallback((cat,q,z,len,sqin,dimW,dimH,tH)=>{
     const newId=uid();
-    sItems(p=>[...p,{id:newId,s:cat.s,t:cat.t,r:cat.r,p:cat.p,q,z,so:null,len:len||0,hng:"",fe:"",ds:"",dc:guessDoors(cat.s,cat.t),drc:guessDrawers(cat.s,cat.t),brot:guessBuiltInROT(cat.s),sqin:sqin||0,sqW:dimW||0,sqH:dimH||0,rbs:false,mods:{},rot:"",rotQ:0,rotFeg:false,rot2:"",rot2Q:0,rot2Feg:false,ovenSpec:{}}]);
+    sItems(p=>[...p,{id:newId,s:cat.s,t:cat.t,r:cat.r,p:cat.p,q,z,so:null,len:len||0,hng:"",fe:"",ds:"",dc:guessDoors(cat.s,cat.t),drc:guessDrawers(cat.s,cat.t),brot:guessBuiltInROT(cat.s),sqin:sqin||0,sqW:dimW||0,sqH:dimH||0,rbs:false,mods:{},rot:"",rotQ:0,rotFeg:false,rot2:"",rot2Q:0,rot2Feg:false,ovenSpec:{},tallH:tH||0}]);
     const isMod=cat.t!=="M"&&!isSqIn(cat.s,cat.r);if(isMod)sModOpen(prev=>{const n=new Set(prev);n.add(newId);return n});
-    fl(`Added ${q}× ${cat.s}${len?` (${len}ft)`:""}${sqin?` (${sqin} sq.in)`:""}`);if(mob)ssAd(false);
+    fl(`Added ${q}× ${cat.s}${tH&&tH!==84?` (${tH}″H)`:""}${len?` (${len}ft)`:""}${sqin?` (${sqin} sq.in)`:""}`);if(mob)ssAd(false);
   },[fl,mob]);
 
   const addCustom=useCallback(({desc,price,quoteNum,pdf,pdfName,q,z})=>{
@@ -11859,7 +11908,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
           if(it.rot2&&it.rot2Q>0){const ro2=ROT_OPTIONS.find(r=>r.v===it.rot2);if(ro2)modParts.push(`FM-ROT ${it.rot2} x${it.rot2Q}${it.rot2Feg?" +FEG":""}`);}
           const modStr=modParts.length>0?" | "+modParts.join(", "):"";
           const ovenTag=isOven(it)?" ["+OVEN_LABELS[OVEN_TYPE(it)]+"]":"";
-          return{description:`${it.s}${it.ds?` (${it.ds})`:""}`+(iM?` ${it.len}ft`:"")+(isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":"")+ovenTag+modStr,qty:String(it.q),finishedEnd:it.fe==="B"?"Both":it.fe||"",hinge:it.hng||"",price:`$${Math.round(total).toLocaleString()}`};
+          return{description:`${it.s}${it.ds?` (${it.ds})`:""}${it.tallH&&it.tallH>0?` ${it.tallH}"H`:""}`+(iM?` ${it.len}ft`:"")+(isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":"")+ovenTag+modStr,qty:String(it.q),finishedEnd:it.fe==="B"?"Both":it.fe||"",hinge:it.hng||"",price:`$${Math.round(total).toLocaleString()}`};
         });
         const zoneTot=zoneItems.reduce((s,it)=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);return s+total+mcRaw*(1+plyPct/100)*it.q},0);
         const { PDFName: PN, rgb: RGB } = await import("pdf-lib");
@@ -13109,7 +13158,7 @@ return(<div style={{marginBottom:5}}>
               return(<div key={it.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4px 10px",fontSize:11,borderBottom:`1px solid ${C.bdr}`,background:idx%2===0?"transparent":"#fafaf8"}}>
                 <div style={{display:"flex",alignItems:"center",gap:6,flex:1}}>
                   <span style={{fontWeight:600,fontFamily:F.m,minWidth:32}}>{it.q}×</span>
-                  <span style={{fontWeight:500}}>{SKU_LABELS[it.s]||it.s}{it.ds&&it.ds!==door?` (${it.ds})`:""}{iM?` ${it.len}ft`:""}{itemSQ?` ${it.sqin}sq.in`:""}</span>
+                  <span style={{fontWeight:500}}>{SKU_LABELS[it.s]||it.s}{it.ds&&it.ds!==door?` (${it.ds})`:""}{it.tallH&&it.tallH>0?` ${it.tallH}″H`:""}{iM?` ${it.len}ft`:""}{itemSQ?` ${it.sqin}sq.in`:""}</span>
                   {iw.map(w=><span key={w} style={{fontSize:8.5,padding:"1px 5px",borderRadius:3,background:"#fef3c7",color:"#92400e",fontWeight:600,border:"1px solid #f59e0b44",marginLeft:3}}><Ic n="warn" sz={8} c="#92400e"/> {w}</span>)}
                 </div>
                 <span style={{fontFamily:F.m,fontWeight:600,fontSize:11,color:C.ink}}>{fm(gt)}</span>
