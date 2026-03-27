@@ -11629,7 +11629,7 @@ setText("P.O. Location", poLocation);
 
 function App({user, profile, supabase, onLogout, onBack, onAdmin}){
   const initRef=useRef(null); // tracks user.id to prevent resetting on token refresh
-  const[nm,sNm]=useState("Untitled Project"),[pid,sPid]=useState(uid()),[po,sPo]=useState("");
+  const[nm,sNm]=useState("Untitled Project"),[pid,sPid]=useState(uid()),[po,sPo]=useState(""),[dlrCode,sDlrCode]=useState(()=>ldPrefs().dealerCode||"");
   const[sp,sSp]=useState("White Oak"),[cx,sCx]=useState("Standard");
   const[door,sDoor]=useState("HNVR"),[drwF,sDrwF]=useState("DF-HNVR"),[glaze,sGlaze]=useState("NONE");
   const[highlight,sHL]=useState("NONE"),[charT1,sCT1]=useState("NONE"),[charT2,sCT2]=useState("NONE");
@@ -11785,7 +11785,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
     const s=ldS();const i=s.findIndex(x=>x.id===pid);if(i>=0)s[i]=e;else s.unshift(e);
     svS(s);
     // Remember last-used order selections for smart defaults on new projects
-    svPrefs({...ldPrefs(),sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox});
+    svPrefs({...ldPrefs(),sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,dealerCode:dlrCode});
     // Also save to Supabase explicitly
     if(supabase&&user){
       try{
@@ -11879,6 +11879,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         setTF("Drawer Front Style",drwF||"");
         setTF("Order Date",new Date().toLocaleDateString());
         setTF("Business Name",profile?.business_name||"");
+        setTF("Customer #",dlrCode||"");
         setTF("Salesperson/Contact",profile?.full_name||"");
         setTF("Job Name",nm||"");
         setTF("P.O. Number",po||"");
@@ -11949,7 +11950,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
           const setOF=(name,val)=>{try{ovenForm.getTextField(name).setText(val||"");}catch(e){}};
           // Fill order info from parent order
           setOF("Business Name",profile?.business_name||"");
-          setOF("Customer #","");
+          setOF("Customer #",dlrCode||"");
           setOF("Order P.O. Number",po||"");
           setOF("Job Name",nm||"");
           setOF("Cabinet Number",oit.s);
@@ -12074,7 +12075,11 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
               <label className="lb">Project Name</label>
               <input className="inp" value={nm} onChange={e=>sNm(e.target.value)} style={{fontFamily:F.d,fontSize:mob?14:16,fontWeight:600}}/>
             </div>
-            <div style={{flex:"0 0 160px",marginBottom:mob?8:0}}>
+            <div style={{flex:"0 0 140px",marginBottom:mob?8:0}}>
+              <label className="lb">Dealer #</label>
+              <input className="inp" value={dlrCode} onChange={e=>{sDlrCode(e.target.value);svPrefs({...ldPrefs(),dealerCode:e.target.value})}} placeholder="Dealer #" style={{fontFamily:F.d,fontSize:mob?14:16,fontWeight:600}}/>
+            </div>
+            <div style={{flex:"0 0 140px",marginBottom:mob?8:0}}>
               <label className="lb">PO #</label>
               <input className="inp" value={po} onChange={e=>sPo(e.target.value)} placeholder="Purchase Order #" style={{fontFamily:F.d,fontSize:mob?14:16,fontWeight:600}}/>
             </div>
