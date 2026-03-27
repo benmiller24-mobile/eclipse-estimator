@@ -8169,6 +8169,45 @@ const CHAR_TECH=[
   {v:"NONE",l:"No Character Technique"},{v:"AGED",l:"Aged"},{v:"SNDTHRU",l:"Sand-Through"},
   {v:"WEAR",l:"Wearing"},{v:"WTHR",l:"Weathered Collection"},{v:"OLDE",l:"Olde World"},
 ];
+// ── Stain → Glaze / Highlight compatibility (Eclipse Catalog v8.8.0, pages D4–D35) ──
+// Maps species → stain color → array of allowed glaze/highlight value codes.
+// Stains NOT listed for a species = no glaze or highlight available.
+// OW-* (Olde World), Weathered Collection, and Natural Elements colors never allow glaze/highlight.
+const STAIN_COMPAT=(()=>{
+  const A=["BLK-GL","MCH-GL","VDK-GL","NKL-GL","GRPH-HL"]; // all 4 glazes + graphite
+  const G=["BLK-GL","MCH-GL","VDK-GL","NKL-GL"];             // 4 glazes, no graphite
+  const P=["CAFE-HL","SLATE-HL"];                             // paint highlights only
+  const BMV=["BLK-GL","MCH-GL","VDK-GL"];                    // black+mocha+vandyke only
+  const BVNG=["BLK-GL","VDK-GL","NKL-GL","GRPH-HL"];         // no mocha
+  const r={};
+  // Alder / Rustic Alder
+  r["Alder"]=r["Rustic Alder"]={Natural:A,Caramel:A,Cola:A,Sierra:A,Silas:A,Umber:A,Walnut:A,Bistre:BMV,Espresso:BMV};
+  // Hickory / Rustic Hickory
+  r["Hickory"]=r["Rustic Hickory"]={Natural:A,"Burnt Sugar":A,Chestnut:A,Medium:A,Silas:A,Cotton:BVNG};
+  // Cherry / Rustic Cherry
+  r["Cherry"]=r["Rustic Cherry"]={Natural:A,Bourbon:A,Carob:A,Coffee:A,Medium:A,Red:A,Silas:A,Espresso:G};
+  // Maple / Rustic Maple
+  r["Maple"]=r["Rustic Maple"]={Natural:A,Acorn:A,Cashmere:A,Cayenne:A,Golden:A,Sable:A,Silas:A,Spice:A,Cocoa:BMV,Espresso:G};
+  // Red Oak / Rustic Red Oak
+  r["Red Oak"]=r["Rustic Red Oak"]={Natural:A,Autumn:A,Braun:A,Harvest:A,Medium:A,Silas:A,Espresso:G};
+  // White Oak / Rustic White Oak
+  r["White Oak"]=r["Rustic White Oak"]={Natural:A,Autumn:A,Braun:A,Medium:A,Silas:A,Espresso:G};
+  // Quarter Sawn White Oak
+  r["QS White Oak"]={Natural:A,Autumn:A,Braun:A,Medium:A,Silas:A,Espresso:G};
+  // Rift Cut White Oak
+  r["Rift White Oak"]={Natural:A,Autumn:A,Braun:A,Medium:A,Silas:A,Espresso:G};
+  // Walnut / Rustic Walnut
+  r["Walnut"]=r["Rustic Walnut"]={Natural:A,Rye:A,Bison:G};
+  // Paint (Std SW) — highlights only (Café / Slate), no glazes
+  r["Paint (Std SW)"]={"Amazing Gray":P,Arctic:P,Beige:P,"Clary Sage":P,"Dovetail Gray":P,Eggshell:P,"Light French Gray":P,"Mindful Gray":P,"Niebla Azul":P,Polar:P,"Pure White":P,"Repose Gray":P,"Soft White":P,"Shoji White":P,"Unusual Gray":P};
+  // Paint (Trend)
+  r["Paint (Trend)"]={"Studio Clay":P,Taiga:P};
+  // Species with NO glaze/highlight at all (omitted = empty object or absent)
+  // Select Poplar, American Poplar, Recon White Oak, Recon Walnut, Custom Paint, TFL, HPL, Acrylic, PV
+  return r;
+})();
+// Stains that REQUIRE a glaze or highlight (catalog: "Available With Glaze/Highlight Only")
+const STAIN_REQUIRES_OVERLAY=new Set(["Silas","Acorn"]);
 const FINISH_COLORS=(()=>{const o={},OW=["OW-Beige","OW-Black","OW-Clary Sage","OW-Dovetail Gray","OW-Iron Ore","OW-Mindful Gray","OW-Naval","OW-Polar","OW-Pure White","OW-Repose Gray","OW-Unusual Gray"],NE=["Clay","Creekside","Dusk","Flagstone","Mineral","Morel"],oakS=["Natural","Almond","Aqua","Autumn","Braun","Cadet","Cotton","Espresso","Harbor","Hudson","Ink","Medium","Moss","Sandrift","Silas","Sky","Sterling","Stratus","Straw","Thyme","Whitewash","Yosemite Brown"];o["Alder"]=o["Rustic Alder"]=["Natural","Aqua","Bistre","Caramel","Caviar","Cola","Cotton","Dusty Road","Espresso","Sierra","Silas","Stonehenge","Thyme","Umber","Walnut","White Sands","Barnwood",...OW];o["Hickory"]=o["Rustic Hickory"]=["Natural","Aqua","Burnt Sugar","Cadet","Chestnut","Cotton","Harbor","Hudson","Medium","Moss","Silas","Sky","Sterling","Stratus","Thyme",...OW];o["Cherry"]=o["Rustic Cherry"]=["Natural","Bourbon","Carob","Coffee","Espresso","Medium","Red","Silas","Thyme","Rosewood","Tobacco",...OW];o["Maple"]=o["Rustic Maple"]=["Natural","Acorn","Cashmere","Cayenne","Cocoa","Espresso","Golden","Pebble","Perfect Brown","Rockbridge","Sable","Silas","Spice","Thyme","Gunstock","Oatmeal","Roasted Pepper",...OW];o["Paint (Std SW)"]=["Amazing Gray","Arctic","Beige","Black","Clary Sage","Dovetail Gray","Eggshell","Evergreen Fog","Hale Navy","Iron Ore","Light French Gray","Mindful Gray","Naval","Niebla Azul","Outerspace","Pewter Green","Polar","Pure White","Repose Gray","Soft White","Shoji White","Slate Tile","Unusual Gray"];o["Paint (Trend)"]=["Plum Brown","Studio Clay","Taiga"];o["Custom Paint (SW)"]=["Custom"];o["Red Oak"]=o["Rustic Red Oak"]=["Natural","Aqua","Autumn","Braun","Cadet","Espresso","Harbor","Harvest","Hudson","Medium","Moss","Silas","Sterling","Thyme","Wiley",...NE,...OW];o["QS White Oak"]=[...oakS,...NE];o["Rift White Oak"]=[...oakS,...NE];o["White Oak"]=o["Rustic White Oak"]=[...oakS,...NE,...OW];o["Select Poplar"]=["Carbon","Heatherstone","River Rock","Seagull"];o["American Poplar"]=["Cadet","Harbor","Hudson","Moss","Sky","Sterling","Stratus","Thyme"];o["Recon White Oak"]=["Natural","Ashfall","Meadow"];o["Recon Walnut"]=["Natural","Dakota","Mountain Haze"];o["Walnut"]=o["Rustic Walnut"]=["Natural","Bison","Cadet","Rye","Seagull","Stratus","Thyme"];o["TFL"]=["Arizona Cypress","Battle Creek Oak","Canella Rustik","Dark Walnut","Door County Oak","Evening Notte","Gregio Pine","Grey Echo","Kirsche","Morning Fog","Natural Elm","Natural Rustik","Outer Bank Oak","Pearl White","Serotina","Takase Teak","White Nebbia"];o["Rauvisio noir Matte HPL"]=["After Dark","Boxcar Blonde","Capital Starlit","Casa Blanca","Gaslit Alley","High Low","Maltese Mist","Midnight Dash","Olive Detour","Silver Lake","Smoke Stack","Trench Coat"];o["Acrylic HG"]=["Bianco","Bigio","Cubanite","Gabbiano"];o["Acrylic Matte"]=["White Velvet","Ash Velvet","Carbon Velvet","Charcoal Velvet"];o["PV"]=["American Oak","Classic Walnut","Hazelnut Oak","Natural Oak","Tropic Walnut"];return o;})();
 const MATERIAL=[
   {v:"PB",l:"Particle Board (Standard)"},{v:"PLY",l:"Plywood (+10%)"},
@@ -11615,6 +11654,27 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
   useEffect(()=>{const c=()=>sMob(window.innerWidth<=768);c();window.addEventListener("resize",c);return()=>window.removeEventListener("resize",c)},[]);
   const fl=useCallback(m=>{sNtf(m);setTimeout(()=>sNtf(null),2000)},[]);
 
+  // ── Stain/Glaze/Highlight compatibility filtering ──
+  const _allowed=useMemo(()=>{
+    const compat=STAIN_COMPAT[sp];
+    if(!compat||!color||color.startsWith("OW-"))return [];
+    return compat[color]||[];
+  },[sp,color]);
+  const filteredGlazes=useMemo(()=>{
+    const allowed=_allowed.filter(c=>c.endsWith("-GL"));
+    return GLAZES.filter(g=>g.v==="NONE"||allowed.includes(g.v));
+  },[_allowed]);
+  const filteredHighlights=useMemo(()=>{
+    const allowed=_allowed.filter(c=>c.endsWith("-HL"));
+    return HIGHLIGHTS.filter(h=>h.v==="NONE"||allowed.includes(h.v));
+  },[_allowed]);
+  const overlayRequired=useMemo(()=>STAIN_REQUIRES_OVERLAY.has(color),[color]);
+  // Auto-reset glaze/highlight when current selection is no longer valid
+  useEffect(()=>{
+    if(glaze!=="NONE"&&!filteredGlazes.some(g=>g.v===glaze))sGlaze("NONE");
+    if(highlight!=="NONE"&&!filteredHighlights.some(h=>h.v===highlight))sHL("NONE");
+  },[sp,color,filteredGlazes,filteredHighlights]);
+
   // ── Auto-save to Supabase (2s debounce) ──
   useEffect(()=>{
     if(!supabase||!user)return;
@@ -11695,6 +11755,8 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
     checks+=2; // color + items
     if(color){passed++;}else if(items.length>0){issues.push("No finish color selected");}
     if(items.length>0){passed++;}else{issues.push("No items added");}
+    // Glaze/highlight required for certain stains (e.g. Silas, Acorn)
+    if(STAIN_REQUIRES_OVERLAY.has(color)){checks++;if(glaze!=="NONE"||highlight!=="NONE"){passed++;}else{issues.push(color+" requires a glaze or highlight");}}
 
     items.forEach(it=>{const{u,t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);const mc=mcRaw*(1+plyPct/100)*it.q;const itemTotal=total+mc;tot+=itemTotal;un+=it.q;tm[it.t]=(tm[it.t]||0)+it.q;
     if(!zm[it.z])zm[it.z]={c:0,n:0};zm[it.z].c+=itemTotal;zm[it.z].n+=it.q;if(it.so)ov++;
@@ -11715,7 +11777,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
     });
     const pct=checks>0?Math.round(passed/checks*100):0;
     return{tot,un,n:items.length,zm,tm,zc:Object.keys(zm).length,ov,pct,issues};
-  },[items,sp,cx,door,color]);
+  },[items,sp,cx,door,color,glaze,highlight]);
 
   const save=useCallback(async()=>{
     // Save to localStorage
@@ -12032,11 +12094,11 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
               <div><label className="lb">Drawer Front</label><select className="sel" value={drwF} onChange={e=>sDrwF(e.target.value)}>
                 {DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}{d.g!=="A"?` — $${DG[d.g]||0}/drw`:""}</option>)}
               </select></div>
-              <div><label className="lb">Finish / Glaze</label><select className="sel" value={glaze} onChange={e=>sGlaze(e.target.value)}>
-                {GLAZES.map(g=><option key={g.v} value={g.v}>{g.l}</option>)}
+              <div><label className="lb">Finish / Glaze {overlayRequired&&glaze==="NONE"&&highlight==="NONE"&&<span style={{color:"#f59e0b",fontSize:9,fontWeight:600}}>● Required</span>}</label><select className="sel" value={glaze} onChange={e=>sGlaze(e.target.value)} style={overlayRequired&&glaze==="NONE"&&highlight==="NONE"?{borderColor:"#f59e0b",background:"#fffbeb"}:{}} disabled={filteredGlazes.length<=1}>
+                {filteredGlazes.map(g=><option key={g.v} value={g.v}>{g.l}</option>)}
               </select></div>
-              <div><label className="lb">Highlight</label><select className="sel" value={highlight} onChange={e=>sHL(e.target.value)}>
-                {HIGHLIGHTS.map(h=><option key={h.v} value={h.v}>{h.l}</option>)}
+              <div><label className="lb">Highlight {overlayRequired&&glaze==="NONE"&&highlight==="NONE"&&<span style={{color:"#f59e0b",fontSize:9,fontWeight:600}}>● Required</span>}</label><select className="sel" value={highlight} onChange={e=>sHL(e.target.value)} style={overlayRequired&&glaze==="NONE"&&highlight==="NONE"?{borderColor:"#f59e0b",background:"#fffbeb"}:{}} disabled={filteredHighlights.length<=1}>
+                {filteredHighlights.map(h=><option key={h.v} value={h.v}>{h.l}</option>)}
               </select></div>
               <div><label className="lb">Character Tech 1<Tip text="Aged, Wearing, or Sand-through finish techniques that add character to the wood surface"/></label><select className="sel" value={charT1} onChange={e=>sCT1(e.target.value)}>
                 {CHAR_TECH.map(c=><option key={c.v} value={c.v}>{c.l}</option>)}
@@ -12061,7 +12123,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
           </div></div>}
       </div>
 
-      {!mob&&<div className="c" style={{marginBottom:10}}><div className="ch">Add Cabinets<span style={{fontSize:10.5,color:C.stone,fontFamily:F.b,fontWeight:400}}>Eclipse Catalog v8.9.0 · {CATALOG.length} SKUs</span></div><div className="cb"><AddUI onAdd={addIt} onAddCustom={addCustom}/></div></div>}
+      {!mob&&<div className="c" style={{marginBottom:10}}><div className="ch">Add Cabinets<span style={{fontSize:10.5,color:C.stone,fontFamily:F.b,fontWeight:400}}>Eclipse Catalog v8.10.0 · {CATALOG.length} SKUs</span></div><div className="cb"><AddUI onAdd={addIt} onAddCustom={addCustom}/></div></div>}
 
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8,flexWrap:"wrap",gap:mob?6:4}}>
         <div style={{display:"flex",gap:mob?4:3,alignItems:"center",overflowX:"auto",WebkitOverflowScrolling:"touch",paddingBottom:mob?2:0}}>
@@ -12962,7 +13024,7 @@ return(<div style={{marginBottom:5}}>
       })()}
 
       <div style={{textAlign:"center",marginTop:20,color:C.stone,fontSize:9.5,fontFamily:F.m}}>
-        Eclipse Cabinetry by WW Wood Products · Catalog v8.9.0 · {CATALOG.length} SKUs · Pinnacle Sales
+        Eclipse Cabinetry by WW Wood Products · Catalog v8.10.0 · {CATALOG.length} SKUs · Pinnacle Sales
       </div>
     </div>
 
@@ -12976,8 +13038,8 @@ return(<div style={{marginBottom:5}}>
         <div><label className="lb">Finish Color</label><select className="sel" value={color} onChange={e=>sColor(e.target.value)}><option value="">-- Select --</option>{(FINISH_COLORS[sp]||[]).map(c=><option key={c} value={c}>{c}</option>)}</select></div>
         <div><label className="lb">Door Style</label><select className="sel" value={door} onChange={e=>sDoor(e.target.value)}>{DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} — Grp {d.g} ${DG[d.g]||0}/dr{d.x?` +$${d.x}/dr`:""}</option>)}</select></div>
         <div><label className="lb">Drawer Front</label><select className="sel" value={drwF} onChange={e=>sDrwF(e.target.value)}>{DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}{d.g!=="A"?` — $${DG[d.g]||0}/drw`:""}</option>)}</select></div>
-        <div><label className="lb">Finish / Glaze</label><select className="sel" value={glaze} onChange={e=>sGlaze(e.target.value)}>{GLAZES.map(g=><option key={g.v} value={g.v}>{g.l}</option>)}</select></div>
-        <div><label className="lb">Highlight</label><select className="sel" value={highlight} onChange={e=>sHL(e.target.value)}>{HIGHLIGHTS.map(h=><option key={h.v} value={h.v}>{h.l}</option>)}</select></div>
+        <div><label className="lb">Finish / Glaze {overlayRequired&&glaze==="NONE"&&highlight==="NONE"&&<span style={{color:"#f59e0b",fontSize:9,fontWeight:600}}>● Required</span>}</label><select className="sel" value={glaze} onChange={e=>sGlaze(e.target.value)} disabled={filteredGlazes.length<=1}>{filteredGlazes.map(g=><option key={g.v} value={g.v}>{g.l}</option>)}</select></div>
+        <div><label className="lb">Highlight {overlayRequired&&glaze==="NONE"&&highlight==="NONE"&&<span style={{color:"#f59e0b",fontSize:9,fontWeight:600}}>● Required</span>}</label><select className="sel" value={highlight} onChange={e=>sHL(e.target.value)} disabled={filteredHighlights.length<=1}>{filteredHighlights.map(h=><option key={h.v} value={h.v}>{h.l}</option>)}</select></div>
         <div><label className="lb">Character Technique 1</label><select className="sel" value={charT1} onChange={e=>sCT1(e.target.value)}>{CHAR_TECH.map(c=><option key={c.v} value={c.v}>{c.l}</option>)}</select></div>
         <div><label className="lb">Character Technique 2</label><select className="sel" value={charT2} onChange={e=>sCT2(e.target.value)}>{CHAR_TECH.map(c=><option key={c.v} value={c.v}>{c.l}</option>)}</select></div>
         <div><label className="lb">Material / Construction</label><select className="sel" value={mat} onChange={e=>{sMat(e.target.value);sCx(e.target.value==="PLY"?"Plywood":"Standard")}}>{MATERIAL.map(m=><option key={m.v} value={m.v}>{m.l}</option>)}</select></div>
