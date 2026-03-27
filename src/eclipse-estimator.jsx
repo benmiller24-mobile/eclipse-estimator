@@ -11629,7 +11629,7 @@ setText("P.O. Location", poLocation);
 
 function App({user, profile, supabase, onLogout, onBack, onAdmin}){
   const initRef=useRef(null); // tracks user.id to prevent resetting on token refresh
-  const[nm,sNm]=useState("Untitled Project"),[pid,sPid]=useState(uid());
+  const[nm,sNm]=useState("Untitled Project"),[pid,sPid]=useState(uid()),[po,sPo]=useState("");
   const[sp,sSp]=useState("White Oak"),[cx,sCx]=useState("Standard");
   const[door,sDoor]=useState("HNVR"),[drwF,sDrwF]=useState("DF-HNVR"),[glaze,sGlaze]=useState("NONE");
   const[highlight,sHL]=useState("NONE"),[charT1,sCT1]=useState("NONE"),[charT2,sCT2]=useState("NONE");
@@ -11684,8 +11684,8 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         let tot=0;items.forEach(it=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);tot+=total+mcRaw*(1+plyPct/100)*it.q});
         const lastVersion=versions[versions.length-1];const meaningfulChange=!lastVersion||items.length!==lastVersion.items||Math.abs(tot-lastVersion.total)/Math.max(1,lastVersion.total)>0.05;
         let newVersions=versions;
-        if(meaningfulChange){newVersions=[...versions,{at:new Date().toISOString(),items:items.length,total:tot,snapshot:{nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,edgePro,items}}].slice(-10);}
-        const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,edgePro,items,versions:newVersions};
+        if(meaningfulChange){newVersions=[...versions,{at:new Date().toISOString(),items:items.length,total:tot,snapshot:{nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,edgePro,po,items}}].slice(-10);}
+        const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,edgePro,po,items,versions:newVersions};
         if(currentQuoteId){
           await supabase.from("quotes").update({name:nm,data:stateData,updated_at:new Date().toISOString()}).eq("id",currentQuoteId);
           if(meaningfulChange)setVersions(newVersions);
@@ -11696,7 +11696,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
       }catch(e){console.error("Auto-save error:",e)}
     },2000);
     return()=>clearTimeout(t);
-  },[nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,edgePro,items,currentQuoteId,supabase,user,versions]);
+  },[nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,edgePro,po,items,currentQuoteId,supabase,user,versions]);
 
   // ── Start fresh new order on login — user loads saved orders manually ──
   // Only reset on actual user change (new login), not on Supabase token refresh
@@ -11707,7 +11707,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
     setCurrentQuoteId(null);setVersions([]);sPid(uid());sNm("Untitled Project");
     sSp("White Oak");sCx("Standard");sDoor("HNVR");sDrwF("DF-HNVR");
     sGlaze("NONE");sHL("NONE");sCT1("NONE");sCT2("NONE");
-    sMat("PB");sIntF("STD-MAPL");sDrwBox("5/8-STD");sEdgePro("None");sItems([]);sColor("");
+    sMat("PB");sIntF("STD-MAPL");sDrwBox("5/8-STD");sEdgePro("None");sItems([]);sColor("");sPo("");
   },[supabase,user]);
 
   // ── Load a specific quote from the quotes list ──
@@ -11723,7 +11723,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         if(d.door)sDoor(d.door);if(d.drwF)sDrwF(d.drwF);if(d.glaze)sGlaze(d.glaze);
         if(d.highlight)sHL(d.highlight);if(d.charT1)sCT1(d.charT1);if(d.charT2)sCT2(d.charT2);
         if(d.color!==undefined)sColor(d.color);if(d.mat)sMat(d.mat);if(d.intF)sIntF(d.intF);
-        if(d.drwBox)sDrwBox(d.drwBox);if(d.edgePro)sEdgePro(d.edgePro);if(d.items)sItems(d.items);
+        if(d.drwBox)sDrwBox(d.drwBox);if(d.edgePro)sEdgePro(d.edgePro);if(d.po!==undefined)sPo(d.po);if(d.items)sItems(d.items);
         setShowQuotesList(false);
         fl("Quote loaded");
       }
@@ -11781,7 +11781,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
 
   const save=useCallback(async()=>{
     // Save to localStorage
-    const e={id:pid,nm,at:new Date().toISOString(),sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,n:items.length,tot:comp.tot};
+    const e={id:pid,nm,at:new Date().toISOString(),sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,po,items,n:items.length,tot:comp.tot};
     const s=ldS();const i=s.findIndex(x=>x.id===pid);if(i>=0)s[i]=e;else s.unshift(e);
     svS(s);
     // Remember last-used order selections for smart defaults on new projects
@@ -11789,7 +11789,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
     // Also save to Supabase explicitly
     if(supabase&&user){
       try{
-        const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,versions};
+        const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,po,items,versions};
         if(currentQuoteId){
           await supabase.from("quotes").update({name:nm,data:stateData,updated_at:new Date().toISOString()}).eq("id",currentQuoteId);
         }else{
@@ -11799,16 +11799,16 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
       }catch(err){console.error("Save error:",err)}
     }
     fl(`"${nm}" saved`);
-  },[pid,nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,items,comp.tot,fl,supabase,user,currentQuoteId,versions]);
+  },[pid,nm,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,po,items,comp.tot,fl,supabase,user,currentQuoteId,versions]);
 
   const load=useCallback(e=>{setCurrentQuoteId(null);setVersions([]);sPid(e.id);sNm(e.nm);sSp(e.sp||"White Oak");sCx(e.cx||"Standard");
     sDoor(e.door||"HNVR");sDrwF(e.drwF||"DF-HNVR");sGlaze(e.glaze||"NONE");sHL(e.highlight||"NONE");
     sCT1(e.charT1||"NONE");sCT2(e.charT2||"NONE");sMat(e.mat||"PB");sIntF(e.intF||"STD-MAPL");sDrwBox(e.drwBox||"5/8-STD");
-    sItems(e.items||[]);sColor(e.color||"");fl(`Loaded "${e.nm}"`)},[fl]);
+    sItems(e.items||[]);sColor(e.color||"");sPo(e.po||"");fl(`Loaded "${e.nm}"`)},[fl]);
   const newP=useCallback(()=>{setCurrentQuoteId(null);setVersions([]);sPid(uid());sNm("Untitled Project");
     const pr=ldPrefs();
     sSp(pr.sp||"White Oak");sCx(pr.cx||"Standard");
-    sDoor(pr.door||"HNVR");sDrwF(pr.drwF||"DF-HNVR");sGlaze(pr.glaze||"NONE");sHL(pr.highlight||"NONE");sCT1(pr.charT1||"NONE");sCT2(pr.charT2||"NONE");sMat(pr.mat||"PB");sIntF(pr.intF||"STD-MAPL");sDrwBox(pr.drwBox||"5/8-STD");sItems([]);sColor(pr.color||"");fl("New project started — using your last selections")},[fl]);
+    sDoor(pr.door||"HNVR");sDrwF(pr.drwF||"DF-HNVR");sGlaze(pr.glaze||"NONE");sHL(pr.highlight||"NONE");sCT1(pr.charT1||"NONE");sCT2(pr.charT2||"NONE");sMat(pr.mat||"PB");sIntF(pr.intF||"STD-MAPL");sDrwBox(pr.drwBox||"5/8-STD");sItems([]);sColor(pr.color||"");sPo("");fl("New project started — using your last selections")},[fl]);
   const fi=useMemo(()=>{
     let r=tf==="all"?items:items.filter(it=>it.t===tf);
     if(roomFilter!=="all")r=r.filter(it=>it.z===roomFilter);
@@ -11881,6 +11881,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         setTF("Business Name",profile?.business_name||"");
         setTF("Salesperson/Contact",profile?.full_name||"");
         setTF("Job Name",nm||"");
+        setTF("P.O. Number",po||"");
         setTF("Contact Email",user?.email||"");
         setTF("Contact Phone",profile?.phone||"");
         // Glaze / Highlight
@@ -11949,7 +11950,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
           // Fill order info from parent order
           setOF("Business Name",profile?.business_name||"");
           setOF("Customer #","");
-          setOF("Order P.O. Number","");
+          setOF("Order P.O. Number",po||"");
           setOF("Job Name",nm||"");
           setOF("Cabinet Number",oit.s);
           setOF("Cabinet Description",oit.s);
@@ -12072,6 +12073,10 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
             <div style={{flex:"1 1 200px",marginBottom:mob?8:0}}>
               <label className="lb">Project Name</label>
               <input className="inp" value={nm} onChange={e=>sNm(e.target.value)} style={{fontFamily:F.d,fontSize:mob?14:16,fontWeight:600}}/>
+            </div>
+            <div style={{flex:"0 0 160px",marginBottom:mob?8:0}}>
+              <label className="lb">PO #</label>
+              <input className="inp" value={po} onChange={e=>sPo(e.target.value)} placeholder="Purchase Order #" style={{fontFamily:F.d,fontSize:mob?14:16,fontWeight:600}}/>
             </div>
             <div style={{display:"flex",gap:12,justifyContent:mob?"center":"flex-end",flexWrap:"wrap"}}>
               {[["Items",comp.n],["Units",comp.un],["Rooms",comp.zc],["List Price",fm(comp.tot)],...(dealerMult>0&&dealerMult<1?[["Dealer Cost",fm(comp.tot*dealerMult)]]:[]),["Ready",comp.pct+"%"]]
@@ -13070,7 +13075,7 @@ return(<div style={{marginBottom:5}}>
                   <div style={{fontSize:"13px",fontWeight:"600",color:C.ink}}>{new Date(v.at).toLocaleString()}</div>
                   <div style={{fontSize:"11px",color:C.stone,marginTop:"2px"}}>{v.items} items · {fm(v.total)}</div>
                 </div>
-                <button className="bt bp" onClick={()=>{if(v.snapshot){const s=v.snapshot;sNm(s.nm);sPid(s.pid);sSp(s.sp);sCx(s.cx);sDoor(s.door);sDrwF(s.drwF);sGlaze(s.glaze);sHL(s.highlight);sCT1(s.charT1);sCT2(s.charT2);sColor(s.color);sMat(s.mat);sIntF(s.intF);sDrwBox(s.drwBox);if(s.edgePro)sEdgePro(s.edgePro);sItems(s.items);setShowHistory(false);fl("Restored version");}}} style={{fontSize:10.5,padding:"5px 10px"}}>Restore</button>
+                <button className="bt bp" onClick={()=>{if(v.snapshot){const s=v.snapshot;sNm(s.nm);sPid(s.pid);sSp(s.sp);sCx(s.cx);sDoor(s.door);sDrwF(s.drwF);sGlaze(s.glaze);sHL(s.highlight);sCT1(s.charT1);sCT2(s.charT2);sColor(s.color);sMat(s.mat);sIntF(s.intF);sDrwBox(s.drwBox);if(s.edgePro)sEdgePro(s.edgePro);if(s.po!==undefined)sPo(s.po);sItems(s.items);setShowHistory(false);fl("Restored version");}}} style={{fontSize:10.5,padding:"5px 10px"}}>Restore</button>
               </div>
             </div>))
           }
@@ -13087,7 +13092,7 @@ return(<div style={{marginBottom:5}}>
       <div style={{overflowY:"auto",padding:"14px 18px",flex:1}}>
         {(()=>{const rz={};items.forEach(it=>{const z=it.z||"other";if(!rz[z])rz[z]=[];rz[z].push(it)});const ze=Object.entries(rz);let warnings=0;
         return(<div>
-          <div style={{fontSize:11,color:C.stone,marginBottom:10,fontFamily:F.b}}>Project: <strong style={{color:C.ink}}>{nm||"Untitled"}</strong> · {sp} · {door} · {items.length} item{items.length!==1?"s":""} · {comp.zc} room{comp.zc!==1?"s":""}</div>
+          <div style={{fontSize:11,color:C.stone,marginBottom:10,fontFamily:F.b}}>Project: <strong style={{color:C.ink}}>{nm||"Untitled"}</strong>{po?` · PO# ${po}`:""} · {sp} · {door} · {items.length} item{items.length!==1?"s":""} · {comp.zc} room{comp.zc!==1?"s":""}</div>
           {ze.map(([zid,zItems])=>{const zInfo=ZN.find(z=>z.id===zid)||{l:zid,i:"+"};let zt=0;zItems.forEach(it=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcR=calcModCost(it,it.mods,stockBase);zt+=total+mcR*(1+plyPct/100)*it.q});
           return(<div key={zid} style={{marginBottom:10}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 10px",background:C.warm,borderRadius:6,marginBottom:4}}>
