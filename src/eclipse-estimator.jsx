@@ -7547,7 +7547,7 @@ const SP = {
   "Custom Paint (SW)": 28, "Rustic Walnut": 25,
 };
 const CX = { "Standard": 0, "Plywood": 10 };
-const TN = { B:"Base", W:"Wall", T:"Tall", V:"Vanity", C:"Vanity Tall", D:"Dressing Room", A:"Accessory", G:"GOLA", M:"Moulding", F:"Fillers", X:"Other" };
+const TN = { B:"Base", W:"Wall", T:"Tall", V:"Vanity", C:"Vanity Custom", D:"Dressing Room", A:"Accessory", G:"GOLA", M:"Moulding", F:"Fillers", X:"Other" };
 const TC = { B:"#3d5a47", W:"#4a6178", T:"#6b5340", V:"#6b4a6b", C:"#8b5a8b", D:"#5a7b6b", A:"#6b6b6b", G:"#5a6b4a", M:"#8b6b3d", F:"#7b5ea7", X:"#999" };
 // Price book section names by ref letter
 const SEC={C:"Loose Doors & Drawer Fronts",E:"Wall Cabinets",F:"Pediments",G:"Range Hoods",H:"RH Accessories",I:"Base Cabinets",J:"Island End Caps",K:"Island Cabinets",L:"Utility Cabinets",M:"Tall Shelf Cabinets",N:"Vanity Cabinets",O:"ADA Compliant",P:"Vanity Tall Custom",Q:"Dressing Room",R:"GOLA Channel",S:"Accessories & Panels",T:"Moulding",U:"Samples & Displays"};
@@ -7941,7 +7941,7 @@ const CABINET_MODS=[
   {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/cab",types:["W"],group:"Lighting Prep",input:"check"},
   {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/shelf",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^FLS$/},
   {code:"FLED_FEP",label:"LED Lighting Prep — Flush End Panel",price:60,unit:"/panel",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^F(WEP|BEP|VEP|VTEP|REP)/},
-  {code:"PFG",label:"Prep for Glass (door prep)",price:0,unit:"/door",types:["B","V","C","D","T","W"],group:"Door Mods",input:"check"},
+  {code:"PFG",label:"Prep for Glass (door prep)",price:0,unit:"/door",types:["B","V","C","D","T","W"],group:"Door Mods",input:"qty_pos",max:10},
 {code:"FF_TOP",label:"False Front Top (removes top drawer)",price:100,unit:"/cab",types:["B","V","C","D","T"],group:"Other",input:"check"},
   // Aventos Top Hinge Modifications (E3) — Wall cabinets only
   {code:"AVENTOS_HK",label:"Aventos HK Stay Lift Door",price:435,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
@@ -7975,6 +7975,7 @@ const calcModCost=(item,mods,baseUnitPrice)=>{
     if(m.pct){cost+=baseUnitPrice*(m.pct/100);}
     else if(m.input==="side"){const sides=v==="B"?2:1;cost+=m.price*sides;}
     else if(m.input==="mxdf"){if(Array.isArray(v))cost+=m.price*v.filter(p=>p.on).length;}
+    else if(m.input==="qty_pos"){const qv=typeof v==="object"?v.qty||0:+v||0;cost+=m.price*qv;}
     else{cost+=m.price*(m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?1:+v||0);}
   });}
   if(item.rot&&item.rotQ>0){const ro=ROT_OPTIONS.find(r=>r.v===item.rot);if(ro){cost+=ro.price*item.rotQ;if(item.rotFeg)cost+=72*item.rotQ;}}
@@ -8060,6 +8061,16 @@ function guessDoors(sku,typeCode){
   if(/^(FLVB\dD|VTB\dD|VB\dD)/.test(s))return 0;
   if(/^(F[36]|EFIL|ECROWN|ETOEKICK|RBS|BNFT|FRLG|SMF|SBAF|EDIK|SMP|LCEC|TKLC)/.test(s))return 0;
   if(/^(RH|PRH)/.test(s))return 0;
+  // Mud Room Top (MRT) — open shelves, no doors
+  if(/^MRT\d/.test(s)&&!/^MRTD/.test(s))return 0;
+  // Mud Room Top w/ Doors (MRTD) — 1 door up to 24"W, 2 doors for -2D and wider
+  if(/^MRTD/.test(s)){if(s.includes('-2D'))return 2;const w=_cabW(sku);return w>24?2:1;}
+  // Mud Room Drawer Base w/ Door (MRDBD) — drawer only, no doors
+  if(/^MRDBD/.test(s))return 0;
+  // BUBO (Utensil Bin Organizer) — 1 door
+  if(/^BUBO/.test(s))return 1;
+  // VTCSD (Vanity Tall Combination Sink Drawer) — 1 door (24-36"W), 2 doors for -2D (39-48"W)
+  if(/^VTCSD/.test(s)){if(s.includes('-2D'))return 2;return 1;}
   // Drawer-only ADA types
   if(/^(BA[2-5]D|BA2HD|VBA\dD)/.test(s))return 0;
   if(/^FLVB\d+HD/.test(s))return 0;
@@ -8107,6 +8118,14 @@ function guessDrawers(sku,typeCode){
   if(/^(UVTD|UVD)\d/.test(s))return 3;
   if(/^(UVTH|UVH|UVT|UV)\d/.test(s))return 0;
   if(/^SFDHD/.test(s))return 2;
+  // Mud Room Top (MRT/MRTD) — no drawers
+  if(/^MRT/.test(s))return 0;
+  // MRDBD — 1 drawer, no doors
+  if(/^MRDBD/.test(s))return 1;
+  // BUBO — no drawers (utensil bin organizer)
+  if(/^BUBO/.test(s))return 0;
+  // VTCSD — 2 drawers (24-36"W), 1 drawer for -2D (39-48"W)
+  if(/^VTCSD/.test(s)){return s.includes('-2D')?1:2;}
   // === Dressing Room (all TypeCode V) ===
   if(/^VTC/.test(s))return 0;
   if(/^(DRU5D|DRU5TO|DRU5JO)/.test(s))return 5;
@@ -8369,7 +8388,7 @@ function AddUI({onAdd,onAddCustom}){
     <div style={{maxHeight:"36vh",overflowY:"auto",border:`1px solid ${C.bdr}`,borderRadius:7,marginBottom:7,background:C.cream}}>
       {recentSkus.length>0&&!sr&&tf==="all"&&<div>
         <div style={{padding:"4px 9px",background:"linear-gradient(90deg,#f59e0b22,#f59e0b08)",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:"#b45309",position:"sticky",top:0,zIndex:2,borderBottom:`1px solid #f59e0b33`,display:"flex",alignItems:"center",gap:5}}><Ic n="bolt" sz={10} c="#b45309"/> Recently Used ({recentSkus.length})</div>
-        {recentSkus.map(s=>{const c=CATALOG.find(x=>x.s===s);if(!c)return null;const w=_cabW(c.s);const h=_cabH(c.s,c.t);const th=c.t==="T"?tallHeights(c.r):[];const hDisp=th.length>1?`${th[0]}-${th[th.length-1]}″H`:h>0?`${h}″H`:"";return(<div key={"recent-"+c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"#fffbeb08",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid #f59e0b44"}}>
+        {recentSkus.map(s=>{const c=CATALOG.find(x=>x.s===s);if(!c)return null;const w=_cabW(c.s);const h=_cabH(c.s,c.t);const th=c.t==="T"?tallHeights(c.r):[];const mrtH=(c.r==="I43"||c.r==="I44");const hDisp=th.length>1?`${th[0]}-${th[th.length-1]}″H`:mrtH?'64½-76½″H':h>0?`${h}″H`:"";return(<div key={"recent-"+c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"#fffbeb08",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid #f59e0b44"}}>
             <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s} <span style={{fontSize:9.5,color:C.stone,fontWeight:400}}>{c.r}{w>0?` · ${w}″W${hDisp?`×${hDisp}`:""}`:"" }</span></span>
             <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
           </div>)})}
@@ -8378,7 +8397,7 @@ function AddUI({onAdd,onAddCustom}){
         <div style={{padding:"4px 9px",background:C.warm,fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:C.stone,position:"sticky",top:0,zIndex:1,borderBottom:`1px solid ${C.bdr}`}}>
           {ref} — {SEC[ref.charAt(0)]||TN[items[0]?.t]||""} ({items.length})
         </div>
-        {items.map(c=>{const w=_cabW(c.s);const h=_cabH(c.s,c.t);const th=c.t==="T"?tallHeights(c.r):[];const hDisp=th.length>1?`${th[0]}-${th[th.length-1]}″H`:h>0?`${h}″H`:"";return(<div key={c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"transparent",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid transparent"}}>
+        {items.map(c=>{const w=_cabW(c.s);const h=_cabH(c.s,c.t);const th=c.t==="T"?tallHeights(c.r):[];const mrtH=(c.r==="I43"||c.r==="I44");const hDisp=th.length>1?`${th[0]}-${th[th.length-1]}″H`:mrtH?'64½-76½″H':h>0?`${h}″H`:"";return(<div key={c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"transparent",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid transparent"}}>
           <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s}{w>0&&<span style={{fontSize:9,color:C.stone,fontWeight:400,marginLeft:4}}>{w}″W{hDisp?` × ${hDisp}`:""}</span>}</span>
           <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
         </div>)})}
@@ -11582,6 +11601,14 @@ setText("P.O. Location", poLocation);
                                       <select value={val||""} onChange={e=>setMod(item.id,m.code,e.target.value||0)} style={{fontSize:10,padding:"2px 4px",borderRadius:4,border:`1px solid ${isOn?"#7c3aed":C.bdr}`,background:isOn?"#7c3aed0a":"#fff",fontFamily:F.m,cursor:"pointer"}}>
                                         <option value="">— None —</option>{(m.options||[]).map(o=><option key={o} value={o}>{o}</option>)}
                                       </select>:
+                                    m.input==="qty_pos"?
+                                      <div style={{display:"flex",flexDirection:"column",gap:3}}>
+                                        <div style={{display:"flex",alignItems:"center",gap:4}}>
+                                          <span style={{fontSize:9,color:C.stone}}>Qty</span>
+                                          <input type="number" min={0} max={m.max||10} value={typeof val==="object"?val.qty||0:+val||0} onChange={e=>{const nq=Math.max(0,Math.min(m.max||10,+e.target.value));const cur=typeof val==="object"?val:{qty:0,pos:""};setMod(item.id,m.code,nq>0?{...cur,qty:nq}:0)}} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
+                                        </div>
+                                        {(typeof val==="object"&&val.qty>0)&&<input type="text" placeholder="Position — e.g. top left, bottom right" value={val.pos||""} onChange={e=>{setMod(item.id,m.code,{...val,pos:e.target.value})}} style={{width:"100%",padding:"3px 5px",fontSize:10,border:`1px solid ${C.bdr}`,borderRadius:4,fontFamily:F.b,boxSizing:"border-box"}}/>}
+                                      </div>:
                                     m.input==="check"?
                                       <input type="checkbox" checked={!!isOn} onChange={e=>setMod(item.id,m.code,e.target.checked?1:0)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
                                       <input type="number" min={0} max={m.max||10} value={val} onChange={e=>setMod(item.id,m.code,Math.max(0,Math.min(m.max||10,+e.target.value)))} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
@@ -11636,7 +11663,7 @@ setText("P.O. Location", poLocation);
                         <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
                           {activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;
                             const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;
-                            return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` x${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:m.input==="dims"&&typeof qty==="object"?` (${qty.w||"?"}x${qty.h||"?"}x${qty.d||"?"})`:qty>1?` x${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
+                            return(<span key={code} style={{display:"inline-flex",alignItems:"center",gap:3,background:"#7c3aed18",color:"#6d28d9",borderRadius:5,padding:"2px 8px",fontSize:10,fontWeight:600,border:"1px solid #7c3aed33"}}><Ic n="gear" sz={10} c="#6d28d9"/> {m.label}{m.input==="mxdf"?` x${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"Left":"Right"})`:m.input==="dims"&&typeof qty==="object"?` (${qty.w||"?"}x${qty.h||"?"}x${qty.d||"?"})`:m.input==="qty_pos"&&typeof qty==="object"?` x${qty.qty||0}${qty.pos?` (${qty.pos})`:""}`:(typeof qty==="number"&&qty>1)?` x${qty}`:""} <span style={{color:"#7c3aed",fontFamily:F.m}}>{m.input==="mxdf"?`+${fm(m.price*mxdfCount)}`:m.pct?`+${m.pct}%`:m.price>0?`+$${m.input==="side"?m.price*(qty==="B"?2:1):m.price*(m.input==="check"?1:qty)}`:m.price===0?"Free":""}</span></span>);
                           })}
                         </div>
                       </div>}
@@ -11901,6 +11928,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
             else if(m.input==="side"&&typeof v==="string"&&v){modParts.push(`${m.label} (${v==="B"?"Both":v}) +$${m.price*(v==="B"?2:1)}`);}
             else if(m.input==="select"&&v){modParts.push(`${m.label} (${v})${m.price>0?` +$${m.price}`:""}`);}
             else if(m.input==="dims"&&v){const d=typeof v==="object"?`${v.w||""}x${v.h||""}x${v.d||""}`:"";modParts.push(`${m.label}${d?` (${d})`:""} +$${m.price}`);}
+            else if(m.input==="qty_pos"&&v){const qp=typeof v==="object"?v:{qty:+v||0,pos:""};if(qp.qty>0)modParts.push(`${m.label} x${qp.qty}${qp.pos?` (${qp.pos})`:""}`); }
             else if((m.input==="check"||m.input==="width")&&v){modParts.push(`${m.label}${m.pct?` +${m.pct}%`:m.price>0?` +$${m.price}`:""}`);}
             else if(typeof v==="number"&&v>0){modParts.push(`${m.label}${v>1?` x${v}`:""} ${m.pct?`+${m.pct}%`:m.price>0?`+$${m.price*v}`:""}`);}
           });}
@@ -12786,6 +12814,14 @@ return(<div style={{marginBottom:5}}>
                             <select value={val||""} onChange={e=>setMod(m.code,e.target.value||0)} style={{fontSize:10,padding:"2px 4px",borderRadius:4,border:`1px solid ${isOn?"#7c3aed":C.bdr}`,background:isOn?"#7c3aed0a":"#fff",fontFamily:F.m,cursor:"pointer"}}>
                               <option value="">— None —</option>{(m.options||[]).map(o=><option key={o} value={o}>{o}</option>)}
                             </select>:
+                          m.input==="qty_pos"?
+                            <div style={{display:"flex",flexDirection:"column",gap:3}}>
+                              <div style={{display:"flex",alignItems:"center",gap:4}}>
+                                <span style={{fontSize:9,color:C.stone}}>Qty</span>
+                                <input type="number" min={0} max={m.max||10} value={typeof val==="object"?val.qty||0:+val||0} onChange={e=>{const nq=Math.max(0,Math.min(m.max||10,+e.target.value));const cur=typeof val==="object"?val:{qty:0,pos:""};setMod(m.code,nq>0?{...cur,qty:nq}:0)}} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
+                              </div>
+                              {(typeof val==="object"&&val.qty>0)&&<input type="text" placeholder="Position — e.g. top left, bottom right" value={val.pos||""} onChange={e=>{setMod(m.code,{...val,pos:e.target.value})}} style={{width:"100%",padding:"3px 5px",fontSize:10,border:`1px solid ${C.bdr}`,borderRadius:4,fontFamily:F.b,boxSizing:"border-box"}}/>}
+                            </div>:
                           m.input==="check"?
                             <input type="checkbox" checked={isOn} onChange={e=>setMod(m.code,e.target.checked?1:0)} style={{accentColor:"#7c3aed",margin:0,cursor:"pointer"}}/>:
                             <input type="number" min={0} max={m.max||10} value={val} onChange={e=>setMod(m.code,Math.max(0,Math.min(m.max||10,+e.target.value)))} style={{width:36,textAlign:"center",padding:"2px 3px",fontSize:10,borderRadius:4,border:`1px solid ${C.bdr}`,fontFamily:F.m}}/>
