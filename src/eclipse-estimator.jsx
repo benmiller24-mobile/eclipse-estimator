@@ -7942,6 +7942,7 @@ const CABINET_MODS=[
   {code:"FWC",label:"Prep Wall LED Continuous Pull",price:60,unit:"/shelf",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^FLS$/},
   {code:"FLED_FEP",label:"LED Lighting Prep — Flush End Panel",price:60,unit:"/panel",types:["A"],group:"Lighting Prep",input:"check",skuMatch:/^F(WEP|BEP|VEP|VTEP|REP)/},
   {code:"GFD",label:"Prep for Glass / Mullion Door",price:0,unit:"/door",types:["B","V","C","D","T","W"],group:"Door Mods",input:"gfd",max:10},
+  {code:"FI",label:"Finished Interior",price:0,unit:"/cab",types:["B","V","C","D","T","W"],group:"Structure",pct:25,input:"check"},
 {code:"FF_TOP",label:"False Front Top (removes top drawer)",price:100,unit:"/cab",types:["B","V","C","D","T"],group:"Other",input:"check"},
   // Aventos Top Hinge Modifications (E3) — Wall cabinets only
   {code:"AVENTOS_HK",label:"Aventos HK Stay Lift Door",price:435,unit:"/door",types:["W"],group:"Aventos Top Hinge",input:"qty",max:10,excGroup:"aventos"},
