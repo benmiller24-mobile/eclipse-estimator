@@ -1005,37 +1005,303 @@ SWBC45--(18)|1282|E10|W
 SWBC45--(21)|1381|E10|W
 SWBC48--(18)|1371|E10|W
 SWBC48--(21)|1458|E10|W
-RW30|406|E11|W
-RW30-27|602|E11|W
-RW30-30|662|E11|W
-RW33|429|E11|W
-RW33-27|625|E11|W
-RW33-30|685|E11|W
-RW36|459|E11|W
-RW3621|621|E11|W
-RW3624|661|E11|W
-RW3627|717|E11|W
-RW3630|773|E11|W
-RW3633|781|E11|W
-RW3636|885|E11|W
-RW36-27|655|E11|W
-RW36-30|715|E11|W
-RW37|482|E11|W
-RW37-27|678|E11|W
-RW37-30|738|E11|W
-RW39|482|E11|W
-RW39-27|678|E11|W
-RW39-30|738|E11|W
-RW42|506|E11|W
-RW42-27|702|E11|W
-RW42-30|762|E11|W
-RW45|528|E11|W
-RW45-27|724|E11|W
-RW45-30|784|E11|W
-RW48|552|E11|W
-RW48-27|748|E11|W
-RW48-30|808|E11|W
-RW51|752|E11|W
+RW3012-24|406|E11|W
+RW3015-24|459|E11|W
+RW3018-24|511|E11|W
+RW3021-24|550|E11|W
+RW3024-24|588|E11|W
+RW3027-24|626|E11|W
+RW3030-24|664|E11|W
+RW3033-24|702|E11|W
+RW3036-24|740|E11|W
+RW3039-24|778|E11|W
+RW3042-24|816|E11|W
+RW3012-27|602|E11|W
+RW3015-27|655|E11|W
+RW3018-27|707|E11|W
+RW3021-27|746|E11|W
+RW3024-27|784|E11|W
+RW3027-27|822|E11|W
+RW3030-27|860|E11|W
+RW3033-27|898|E11|W
+RW3036-27|936|E11|W
+RW3039-27|974|E11|W
+RW3042-27|1012|E11|W
+RW3012-30|662|E11|W
+RW3015-30|715|E11|W
+RW3018-30|767|E11|W
+RW3021-30|806|E11|W
+RW3024-30|844|E11|W
+RW3027-30|882|E11|W
+RW3030-30|920|E11|W
+RW3033-30|958|E11|W
+RW3036-30|996|E11|W
+RW3039-30|1034|E11|W
+RW3042-30|1072|E11|W
+RW3312-24|429|E11|W
+RW3315-24|482|E11|W
+RW3318-24|546|E11|W
+RW3321-24|585|E11|W
+RW3324-24|623|E11|W
+RW3327-24|661|E11|W
+RW3330-24|699|E11|W
+RW3333-24|737|E11|W
+RW3336-24|775|E11|W
+RW3339-24|813|E11|W
+RW3342-24|851|E11|W
+RW3312-27|625|E11|W
+RW3315-27|678|E11|W
+RW3318-27|742|E11|W
+RW3321-27|781|E11|W
+RW3324-27|819|E11|W
+RW3327-27|857|E11|W
+RW3330-27|895|E11|W
+RW3333-27|933|E11|W
+RW3336-27|971|E11|W
+RW3339-27|1009|E11|W
+RW3342-27|1047|E11|W
+RW3312-30|685|E11|W
+RW3315-30|738|E11|W
+RW3318-30|802|E11|W
+RW3321-30|841|E11|W
+RW3324-30|879|E11|W
+RW3327-30|917|E11|W
+RW3330-30|955|E11|W
+RW3333-30|993|E11|W
+RW3336-30|1031|E11|W
+RW3339-30|1069|E11|W
+RW3342-30|1107|E11|W
+RW3612-24|459|E11|W
+RW3615-24|493|E11|W
+RW3618-24|580|E11|W
+RW3621-24|621|E11|W
+RW3624-24|661|E11|W
+RW3627-24|701|E11|W
+RW3630-24|741|E11|W
+RW3633-24|781|E11|W
+RW3636-24|821|E11|W
+RW3639-24|861|E11|W
+RW3642-24|901|E11|W
+RW3612-27|655|E11|W
+RW3615-27|689|E11|W
+RW3618-27|776|E11|W
+RW3621-27|817|E11|W
+RW3624-27|857|E11|W
+RW3627-27|897|E11|W
+RW3630-27|937|E11|W
+RW3633-27|977|E11|W
+RW3636-27|1017|E11|W
+RW3639-27|1057|E11|W
+RW3642-27|1097|E11|W
+RW3612-30|715|E11|W
+RW3615-30|749|E11|W
+RW3618-30|836|E11|W
+RW3621-30|877|E11|W
+RW3624-30|917|E11|W
+RW3627-30|957|E11|W
+RW3630-30|997|E11|W
+RW3633-30|1037|E11|W
+RW3636-30|1077|E11|W
+RW3639-30|1117|E11|W
+RW3642-30|1157|E11|W
+RW3712-24|482|E11|W
+RW3715-24|533|E11|W
+RW3718-24|604|E11|W
+RW3721-24|648|E11|W
+RW3724-24|691|E11|W
+RW3727-24|734|E11|W
+RW3730-24|777|E11|W
+RW3733-24|820|E11|W
+RW3736-24|863|E11|W
+RW3739-24|906|E11|W
+RW3742-24|949|E11|W
+RW3712-27|678|E11|W
+RW3715-27|729|E11|W
+RW3718-27|800|E11|W
+RW3721-27|844|E11|W
+RW3724-27|887|E11|W
+RW3727-27|930|E11|W
+RW3730-27|973|E11|W
+RW3733-27|1016|E11|W
+RW3736-27|1059|E11|W
+RW3739-27|1102|E11|W
+RW3742-27|1145|E11|W
+RW3712-30|738|E11|W
+RW3715-30|789|E11|W
+RW3718-30|860|E11|W
+RW3721-30|904|E11|W
+RW3724-30|947|E11|W
+RW3727-30|990|E11|W
+RW3730-30|1033|E11|W
+RW3733-30|1076|E11|W
+RW3736-30|1119|E11|W
+RW3739-30|1162|E11|W
+RW3742-30|1205|E11|W
+RW3912-24|482|E11|W
+RW3915-24|533|E11|W
+RW3918-24|604|E11|W
+RW3921-24|648|E11|W
+RW3924-24|691|E11|W
+RW3927-24|734|E11|W
+RW3930-24|777|E11|W
+RW3933-24|820|E11|W
+RW3936-24|863|E11|W
+RW3939-24|906|E11|W
+RW3942-24|949|E11|W
+RW3912-27|678|E11|W
+RW3915-27|729|E11|W
+RW3918-27|800|E11|W
+RW3921-27|844|E11|W
+RW3924-27|887|E11|W
+RW3927-27|930|E11|W
+RW3930-27|973|E11|W
+RW3933-27|1016|E11|W
+RW3936-27|1059|E11|W
+RW3939-27|1102|E11|W
+RW3942-27|1145|E11|W
+RW3912-30|738|E11|W
+RW3915-30|789|E11|W
+RW3918-30|860|E11|W
+RW3921-30|904|E11|W
+RW3924-30|947|E11|W
+RW3927-30|990|E11|W
+RW3930-30|1033|E11|W
+RW3933-30|1076|E11|W
+RW3936-30|1119|E11|W
+RW3939-30|1162|E11|W
+RW3942-30|1205|E11|W
+RW4212-24|506|E11|W
+RW4215-24|568|E11|W
+RW4218-24|633|E11|W
+RW4221-24|680|E11|W
+RW4224-24|726|E11|W
+RW4227-24|772|E11|W
+RW4230-24|818|E11|W
+RW4233-24|864|E11|W
+RW4236-24|910|E11|W
+RW4239-24|956|E11|W
+RW4242-24|1002|E11|W
+RW4212-27|702|E11|W
+RW4215-27|764|E11|W
+RW4218-27|829|E11|W
+RW4221-27|876|E11|W
+RW4224-27|922|E11|W
+RW4227-27|968|E11|W
+RW4230-27|1014|E11|W
+RW4233-27|1060|E11|W
+RW4236-27|1106|E11|W
+RW4239-27|1152|E11|W
+RW4242-27|1198|E11|W
+RW4212-30|762|E11|W
+RW4215-30|824|E11|W
+RW4218-30|889|E11|W
+RW4221-30|936|E11|W
+RW4224-30|982|E11|W
+RW4227-30|1028|E11|W
+RW4230-30|1074|E11|W
+RW4233-30|1120|E11|W
+RW4236-30|1166|E11|W
+RW4239-30|1212|E11|W
+RW4242-30|1258|E11|W
+RW4512-24|528|E11|W
+RW4515-24|604|E11|W
+RW4518-24|663|E11|W
+RW4521-24|713|E11|W
+RW4524-24|761|E11|W
+RW4527-24|809|E11|W
+RW4530-24|857|E11|W
+RW4533-24|905|E11|W
+RW4536-24|953|E11|W
+RW4539-24|1001|E11|W
+RW4542-24|1049|E11|W
+RW4512-27|724|E11|W
+RW4515-27|800|E11|W
+RW4518-27|859|E11|W
+RW4521-27|909|E11|W
+RW4524-27|957|E11|W
+RW4527-27|1005|E11|W
+RW4530-27|1053|E11|W
+RW4533-27|1101|E11|W
+RW4536-27|1149|E11|W
+RW4539-27|1197|E11|W
+RW4542-27|1245|E11|W
+RW4512-30|784|E11|W
+RW4515-30|860|E11|W
+RW4518-30|919|E11|W
+RW4521-30|969|E11|W
+RW4524-30|1017|E11|W
+RW4527-30|1065|E11|W
+RW4530-30|1113|E11|W
+RW4533-30|1161|E11|W
+RW4536-30|1209|E11|W
+RW4539-30|1257|E11|W
+RW4542-30|1305|E11|W
+RW4812-24|552|E11|W
+RW4815-24|639|E11|W
+RW4818-24|693|E11|W
+RW4821-24|745|E11|W
+RW4824-24|795|E11|W
+RW4827-24|845|E11|W
+RW4830-24|895|E11|W
+RW4833-24|945|E11|W
+RW4836-24|995|E11|W
+RW4839-24|1045|E11|W
+RW4842-24|1095|E11|W
+RW4812-27|748|E11|W
+RW4815-27|835|E11|W
+RW4818-27|889|E11|W
+RW4821-27|941|E11|W
+RW4824-27|991|E11|W
+RW4827-27|1041|E11|W
+RW4830-27|1091|E11|W
+RW4833-27|1141|E11|W
+RW4836-27|1191|E11|W
+RW4839-27|1241|E11|W
+RW4842-27|1291|E11|W
+RW4812-30|808|E11|W
+RW4815-30|895|E11|W
+RW4818-30|949|E11|W
+RW4821-30|1001|E11|W
+RW4824-30|1051|E11|W
+RW4827-30|1101|E11|W
+RW4830-30|1151|E11|W
+RW4833-30|1201|E11|W
+RW4836-30|1251|E11|W
+RW4839-30|1301|E11|W
+RW4842-30|1351|E11|W
+RW5112-24|752|E11|W
+RW5115-24|839|E11|W
+RW5118-24|893|E11|W
+RW5121-24|945|E11|W
+RW5124-24|995|E11|W
+RW5127-24|1045|E11|W
+RW5130-24|1095|E11|W
+RW5133-24|1145|E11|W
+RW5136-24|1195|E11|W
+RW5139-24|1245|E11|W
+RW5142-24|1295|E11|W
+RW5112-27|948|E11|W
+RW5115-27|1035|E11|W
+RW5118-27|1089|E11|W
+RW5121-27|1141|E11|W
+RW5124-27|1191|E11|W
+RW5127-27|1241|E11|W
+RW5130-27|1291|E11|W
+RW5133-27|1341|E11|W
+RW5136-27|1391|E11|W
+RW5139-27|1441|E11|W
+RW5142-27|1491|E11|W
+RW5112-30|1008|E11|W
+RW5115-30|1095|E11|W
+RW5118-30|1149|E11|W
+RW5121-30|1201|E11|W
+RW5124-30|1251|E11|W
+RW5127-30|1301|E11|W
+RW5130-30|1351|E11|W
+RW5133-30|1401|E11|W
+RW5136-30|1451|E11|W
+RW5139-30|1501|E11|W
+RW5142-30|1551|E11|W
 WPOSR12|842|E12|W
 WPOSR9|719|E12|W
 WSP 22 1/2 720|758|E12|W
@@ -7630,7 +7896,7 @@ const isBCF=(s)=>s==="BCF";
 const BCF_NOTE="• Door frame for use on front of glass front beverage coolers\n• Cut for glass will be filled with trim of same wood species\n• BCF available in Cherry, Maple, Red Oak, Select American Poplar, Hickory & Alder & are solid wood construction. No vertical or horizontal grain orientation available. Solid wood color tones may vary from veneer doors.\n• BCF will match those of the lower cabinet door style of adjoining components\n• Lower door style required if not ordered with adjoining components.\n• BCF with painted finishes as Metro will be MDF\n• Available up to 24\" wide and 80\" tall. Specify width and height when ordering\n• Custom rail widths available on all except mitered door styles\n• No custom grooving, notching, or drilling available";
 const CO_NOTE="• Column overlays are sent loose and must be field installed to cabinets\n• Column overlays are matching finish hardwood and attached to a 3\" wide hardwood filler\n• Pricing is per linear inch for each individual column\n• Plinth blocks are 3\" wide by 2 1/2\" tall at top and bottom (Except for use with flush toe kick)\n• Flush toe kick columns have a 6 1/2\" tall plinth block on bottom\n• Column overlays may also be applied to 3\" × 3\" angle fillers, 3\" columns and 3\" end panels\n• Column overlays will cause frameless overlay doors to bump plinth block when opened past 90°\n• Column overlays may also necessitate special counter tops when used with base cabinets\n• Width and depth modifications not available\n• Spindle modifications not available\n• Plinth blocks width modifications not available\n• Custom height of plinth blocks is available for $400 list Upcharge per column\n• Plinth blocks only available on top and bottom of column overlays\n• Column overlay may be ordered unassembled, must specify wall, base, or utility height, sold in complete sets only, field miter and assembly required\n• Column overlays may be ordered in a different color than the cabinet. Contact customer service for price and availability\n• Not available in: TFL, Reconstituted White Oak, Reconstituted Walnut, HPL & PV, Acrylic";
 let CO_DRAWING_B64=null;async function load_CO_DRAWING_B64(){if(!CO_DRAWING_B64){const m=await import("./pdf-co-drawing.js");CO_DRAWING_B64=m.default;}return CO_DRAWING_B64;};
-const SKU_LABELS={"F3":"Filler","OVF3":"Overlay Filler","PROFILE FILLER":"Profile Filler","W2436-2D":"Wall 24x36 Two-Door (see W24-2D36)","RW3624":"Refrigerator Wall 36x24","RW36":"Refrigerator Wall 36","RH57":"Range Hood 57\" Width","O3093":"Oven Cabinet 30x93","3/4TK":"3/4 Toe Kick Moulding","WBC33":"Wall Blind Corner 33","LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts","CUSTOM":"Custom Quote","REF":"Custom Refrigerator Panel","DP":"Dishwasher Panel","BCFTA":"Bev Center Front (Natural Aluminum)","BCFTBL":"Bev Center Front (Matte Black Aluminum)","BCFTMB":"Bev Center Front (Matte Brass)","BCF":"Beverage Center Front","COS":"Column Overlay — Smooth","COF":"Column Overlay — Fluted","COR":"Column Overlay — Rope","SD81/2X11":"Sample Door 8½×11 (Standard)","SD121/2151/2":"Sample Door 12½×15½","CM 8 1/2 x 11":"Color Match Sample 8½×11","CM 12 1/2 x 15 1/2":"Color Match Sample 12½×15½"};
+const SKU_LABELS={"F3":"Filler","OVF3":"Overlay Filler","PROFILE FILLER":"Profile Filler","W2436-2D":"Wall 24x36 Two-Door (see W24-2D36)","RW3624-24":"Refrigerator Wall 36x24","RW3612-24":"Refrigerator Wall 36x12","RH57":"Range Hood 57\" Width","O3093":"Oven Cabinet 30x93","3/4TK":"3/4 Toe Kick Moulding","WBC33":"Wall Blind Corner 33","LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts","CUSTOM":"Custom Quote","REF":"Custom Refrigerator Panel","DP":"Dishwasher Panel","BCFTA":"Bev Center Front (Natural Aluminum)","BCFTBL":"Bev Center Front (Matte Black Aluminum)","BCFTMB":"Bev Center Front (Matte Brass)","BCF":"Beverage Center Front","COS":"Column Overlay — Smooth","COF":"Column Overlay — Fluted","COR":"Column Overlay — Rope","SD81/2X11":"Sample Door 8½×11 (Standard)","SD121/2151/2":"Sample Door 12½×15½","CM 8 1/2 x 11":"Color Match Sample 8½×11","CM 12 1/2 x 15 1/2":"Color Match Sample 12½×15½"};
 const isCustom=(s)=>s==="CUSTOM";
 
 // ── Oven Cutout Spec Forms ──
@@ -8024,6 +8290,8 @@ const calcModCost=(item,mods,baseUnitPrice)=>{
    then reads trailing digits as the width. */
 function _cabW(sku){
   let s=sku.toUpperCase().replace(/\s+/g,'');
+  // Strip depth suffixes for RW cabinets (e.g. RW4230-24 → RW4230)
+  s=s.replace(/-(24|27|30)$/,'');
   for(let i=0;i<3;i++)s=s.replace(/-(RT|FHD|2D|2DR|1DR|WS|MC|SS|PH|S)$/,'');
   const m=s.match(/(\d+)$/);if(!m)return 0;
   const n=parseInt(m[1]);
@@ -8069,6 +8337,24 @@ function tallPrice(sku,ref,height){
   const idx=hts.indexOf(height);
   if(idx<0||idx>=prices.length)return prices[0];// fallback to 84″
   return prices[idx];
+}
+
+/* ── RW cabinet depth extractor (24, 27, or 30) ────────── */
+function _rwDepth(sku){
+  const m=sku.match(/-(24|27|30)$/);
+  return m?parseInt(m[1]):0;
+}
+/* ── RW cabinet height extractor ────────── */
+function _rwH(sku){
+  let s=sku.toUpperCase().replace(/\s+/g,'');
+  // Strip depth suffix (e.g. RW4230-24 → RW4230)
+  s=s.replace(/-(24|27|30)$/,'');
+  // Match the trailing number after RW prefix (e.g. RW4230 → 4230)
+  const m=s.match(/^RW(\d+)$/);if(!m)return 0;
+  const ds=m[1];
+  // Concatenated width+height: last 2 digits are height (e.g. 4230 → 30)
+  if(ds.length>=4){return parseInt(ds.slice(-2));}
+  return 0;
 }
 
 /* ── Cabinet height extractor (for tall cabinets) ────────── */
@@ -8423,8 +8709,8 @@ function AddUI({onAdd,onAddCustom}){
     <div style={{maxHeight:"36vh",overflowY:"auto",border:`1px solid ${C.bdr}`,borderRadius:7,marginBottom:7,background:C.cream}}>
       {recentSkus.length>0&&!sr&&tf==="all"&&<div>
         <div style={{padding:"4px 9px",background:"linear-gradient(90deg,#f59e0b22,#f59e0b08)",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:"#b45309",position:"sticky",top:0,zIndex:2,borderBottom:`1px solid #f59e0b33`,display:"flex",alignItems:"center",gap:5}}><Ic n="bolt" sz={10} c="#b45309"/> Recently Used ({recentSkus.length})</div>
-        {recentSkus.map(s=>{const c=CATALOG.find(x=>x.s===s);if(!c)return null;const w=_cabW(c.s);const h=_cabH(c.s,c.t);const th=c.t==="T"?tallHeights(c.r):[];const mrtH=(c.r==="I43"||c.r==="I44");const hDisp=th.length>1?`${th[0]}-${th[th.length-1]}″H`:mrtH?'64½-76½″H':h>0?`${h}″H`:"";return(<div key={"recent-"+c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"#fffbeb08",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid #f59e0b44"}}>
-            <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s} <span style={{fontSize:9.5,color:C.stone,fontWeight:400}}>{c.r}{w>0?` · ${w}″W${hDisp?`×${hDisp}`:""}`:"" }</span></span>
+        {recentSkus.map(s=>{const c=CATALOG.find(x=>x.s===s);if(!c)return null;const w=_cabW(c.s);const h=_cabH(c.s,c.t);const th=c.t==="T"?tallHeights(c.r):[];const mrtH=(c.r==="I43"||c.r==="I44");const rwH=_rwH(c.s);const rwD=_rwDepth(c.s);const hDisp=th.length>1?`${th[0]}-${th[th.length-1]}″H`:mrtH?'64½-76½″H':h>0?`${h}″H`:rwH>0?`${rwH}″H`:"";const dDisp=rwD>0?` × ${rwD}″ Deep`:"";return(<div key={"recent-"+c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"#fffbeb08",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid #f59e0b44"}}>
+            <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s} <span style={{fontSize:9.5,color:C.stone,fontWeight:400}}>{c.r}{w>0?` · ${w}″W${hDisp?` × ${hDisp}`:""}${dDisp}`:"" }</span></span>
             <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
           </div>)})}
       </div>}
@@ -8432,8 +8718,8 @@ function AddUI({onAdd,onAddCustom}){
         <div style={{padding:"4px 9px",background:C.warm,fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:C.stone,position:"sticky",top:0,zIndex:1,borderBottom:`1px solid ${C.bdr}`}}>
           {ref} — {SEC[ref.charAt(0)]||TN[items[0]?.t]||""} ({items.length})
         </div>
-        {items.map(c=>{const w=_cabW(c.s);const h=_cabH(c.s,c.t);const th=c.t==="T"?tallHeights(c.r):[];const mrtH=(c.r==="I43"||c.r==="I44");const hDisp=th.length>1?`${th[0]}-${th[th.length-1]}″H`:mrtH?'64½-76½″H':h>0?`${h}″H`:"";return(<div key={c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"transparent",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid transparent"}}>
-          <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s}{w>0&&<span style={{fontSize:9,color:C.stone,fontWeight:400,marginLeft:4}}>{w}″W{hDisp?` × ${hDisp}`:""}</span>}</span>
+        {items.map(c=>{const w=_cabW(c.s);const h=_cabH(c.s,c.t);const rwH=_rwH(c.s);const rwD=_rwDepth(c.s);const th=c.t==="T"?tallHeights(c.r):[];const mrtH=(c.r==="I43"||c.r==="I44");const hDisp=th.length>1?`${th[0]}-${th[th.length-1]}″H`:mrtH?'64½-76½″H':h>0?`${h}″H`:rwH>0?`${rwH}″H`:"";const dDisp=rwD>0?` × ${rwD}″ Deep`:"";return(<div key={c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"transparent",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid transparent"}}>
+          <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s}{w>0&&<span style={{fontSize:9,color:C.stone,fontWeight:400,marginLeft:4}}>{w}″W{hDisp?` × ${hDisp}`:""}{dDisp}</span>}</span>
           <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
         </div>)})}
       </div>)}
