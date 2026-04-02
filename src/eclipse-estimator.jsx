@@ -13131,7 +13131,7 @@ return(<div style={{marginBottom:5}}>
               </div>}
             </div>}
             {/* ─── MODIFICATIONS PANEL ─── */}
-            {!isMould&&!itemSQ&&applicableMods.length>0&&<div style={{marginBottom:5}}>
+            {!isMould&&(!itemSQ||isEDGT(item.s))&&applicableMods.length>0&&<div style={{marginBottom:5}}>
               <button onClick={()=>sModOpen(prev=>{const n=new Set(prev);if(modsExpanded)n.delete(item.id);else n.add(item.id);return n})} style={{background:activeMods.length>0?"#7c3aed18":"#f0edff",border:`2px solid ${activeMods.length>0?"#7c3aed":"#c4b5fd"}`,borderRadius:8,padding:"8px 12px",cursor:"pointer",fontSize:12,fontWeight:700,color:activeMods.length>0?"#7c3aed":"#6d28d9",display:"flex",alignItems:"center",gap:6,width:"100%",justifyContent:"space-between",transition:"all .15s"}}>
                 <span style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:16}}>{modsExpanded?"▾":"▸"}</span><span><Ic n="gear" sz={13} c="#6d28d9"/> Modifications</span><span style={{background:activeMods.length>0?"#7c3aed":"#a78bfa",color:"#fff",borderRadius:10,padding:"1px 7px",fontSize:10,fontWeight:700}}>{activeMods.length>0?`${activeMods.length} active`:`${applicableMods.length} available`}</span></span>
                 {modCost>0&&<span style={{fontFamily:F.m,fontWeight:700,color:"#7c3aed",fontSize:13}}>+{fm(modTotal)}</span>}
