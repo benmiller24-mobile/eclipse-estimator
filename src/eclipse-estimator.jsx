@@ -11887,7 +11887,18 @@ setText("P.O. Location", poLocation);
                 const activeMods = item.mods ? Object.entries(item.mods).filter(([, v]) => Array.isArray(v) ? v.some(p => p.on) : v > 0) : [];
 
                 return (
-                  <div key={item.id} style={{padding:"12px 14px",background:idx%2===0?C.cream:"#fff",borderRadius:10,marginBottom:8,border:`1px solid ${item.s?C.acc+"33":C.bdr}`,transition:"all .15s"}}>
+                  <div key={item.id} id={"item-"+item.id} draggable onDragStart={e=>handleDragStart(e,item.id)} onDragOver={e=>handleDragOver(e,item.id)} onDragLeave={handleDragLeave} onDrop={e=>handleDrop(e,item.id)} onDragEnd={handleDragEnd} style={{padding:"12px 14px",background:dragOverId===item.id?"#dbeafe":idx%2===0?C.cream:"#fff",borderRadius:10,marginBottom:8,border:`1px solid ${dragOverId===item.id?"#3b82f6":item.s?C.acc+"33":C.bdr}`,transition:"all .15s",opacity:dragId===item.id?0.4:1,cursor:"grab"}}>
+                    {/* Row 0: Reorder arrows + item # */}
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
+                      <div style={{display:"flex",alignItems:"center",gap:4}}>
+                        <span style={{fontSize:10,color:C.stone,fontWeight:600,cursor:"grab",marginRight:4}} title="Drag to reorder">☰</span>
+                        <span style={{fontSize:10,color:C.stone,fontWeight:600}}>#{idx+1}</span>
+                      </div>
+                      <div style={{display:"flex",gap:2}}>
+                        <button onClick={()=>moveItem(item.id,-1)} disabled={idx===0} title="Move up" style={{background:idx===0?"#f5f5f4":"#e0f2fe",border:"1px solid "+(idx===0?"#e5e7eb":"#93c5fd"),borderRadius:4,cursor:idx===0?"default":"pointer",fontSize:11,padding:"1px 6px",color:idx===0?"#d4d4d4":"#2563eb",fontWeight:700,lineHeight:"16px"}}>▲</button>
+                        <button onClick={()=>moveItem(item.id,1)} disabled={idx===items.length-1} title="Move down" style={{background:idx===items.length-1?"#f5f5f4":"#e0f2fe",border:"1px solid "+(idx===items.length-1?"#e5e7eb":"#93c5fd"),borderRadius:4,cursor:idx===items.length-1?"default":"pointer",fontSize:11,padding:"1px 6px",color:idx===items.length-1?"#d4d4d4":"#2563eb",fontWeight:700,lineHeight:"16px"}}>▼</button>
+                      </div>
+                    </div>
                     {/* Row 1: SKU search + Qty + Delete */}
                     <div style={{display:"grid",gridTemplateColumns:mob?"1fr":"60px 1fr 32px",gap:8,alignItems:"end",marginBottom:item.s?8:0}}>
                       <div><label style={labelStyle}>Qty</label><input type="number" min="1" value={item.q} onChange={e=>updItem(item.id,{q:Math.max(1,parseInt(e.target.value)||1)})} style={{...fieldStyle,textAlign:"center"}} /></div>
@@ -12185,6 +12196,16 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
   const upd=useCallback((id,p)=>sItems(prev=>prev.map(it=>it.id===id?{...it,...p}:it)),[]);
   const rem=useCallback(id=>sItems(prev=>prev.filter(it=>it.id!==id)),[]);
   const dup=useCallback(id=>{const newId=uid();sItems(p=>{const s=p.find(it=>it.id===id);return s?[...p,{...s,id:newId}]:p});sModOpen(prev=>{const n=new Set(prev);n.add(newId);return n});fl("Duplicated — edit below ️");setTimeout(()=>{const el=document.getElementById("item-"+newId);if(el)el.scrollIntoView({behavior:"smooth",block:"center"})},120)},[fl]);
+  // ─── REORDER: move item up/down ───
+  const moveItem=useCallback((id,dir)=>{sItems(prev=>{const i=prev.findIndex(it=>it.id===id);if(i<0)return prev;const j=i+dir;if(j<0||j>=prev.length)return prev;const a=[...prev];[a[i],a[j]]=[a[j],a[i]];return a});},[]);
+  // ─── DRAG-AND-DROP state ───
+  const[dragId,setDragId]=useState(null);
+  const[dragOverId,setDragOverId]=useState(null);
+  const handleDragStart=useCallback((e,id)=>{setDragId(id);e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",id);},[]);
+  const handleDragOver=useCallback((e,id)=>{e.preventDefault();e.dataTransfer.dropEffect="move";setDragOverId(id);},[]);
+  const handleDragLeave=useCallback(()=>{setDragOverId(null);},[]);
+  const handleDrop=useCallback((e,targetId)=>{e.preventDefault();setDragOverId(null);const srcId=dragId;if(!srcId||srcId===targetId)return;sItems(prev=>{const si=prev.findIndex(it=>it.id===srcId);const ti=prev.findIndex(it=>it.id===targetId);if(si<0||ti<0)return prev;const a=[...prev];const[moved]=a.splice(si,1);a.splice(ti,0,moved);return a;});setDragId(null);},[dragId]);
+  const handleDragEnd=useCallback(()=>{setDragId(null);setDragOverId(null);},[]);
 
   const comp=useMemo(()=>{
     let tot=0,un=0,ov=0;const zm={},tm={};
@@ -12613,6 +12634,10 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         {mob&&<button className="bt bp" onClick={()=>ssAd(true)} style={{fontSize:13,padding:"9px 22px"}}>+ Add Cabinets</button>}
       </div>):(
         <div>{!groupByZone?fi.map(item=>{
+          const itemIdx=items.indexOf(item);const isFirst=itemIdx===0;const isLast=itemIdx===items.length-1;
+          const dragProps={draggable:true,onDragStart:e=>handleDragStart(e,item.id),onDragOver:e=>handleDragOver(e,item.id),onDragLeave:handleDragLeave,onDrop:e=>handleDrop(e,item.id),onDragEnd:handleDragEnd};
+          const dragStyle={opacity:dragId===item.id?0.4:1,border:dragOverId===item.id?"2px solid #3b82f6":undefined,background:dragOverId===item.id?"#dbeafe":undefined};
+          const reorderRow=<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:4}}><div style={{display:"flex",alignItems:"center",gap:4}}><span style={{fontSize:10,color:C.stone,fontWeight:600,cursor:"grab",marginRight:4}} title="Drag to reorder">☰</span><span style={{fontSize:10,color:C.stone,fontWeight:600}}>#{itemIdx+1}</span></div><div style={{display:"flex",gap:2}}><button onClick={()=>moveItem(item.id,-1)} disabled={isFirst} title="Move up" style={{background:isFirst?"#f5f5f4":"#e0f2fe",border:"1px solid "+(isFirst?"#e5e7eb":"#93c5fd"),borderRadius:4,cursor:isFirst?"default":"pointer",fontSize:11,padding:"1px 6px",color:isFirst?"#d4d4d4":"#2563eb",fontWeight:700,lineHeight:"16px"}}>▲</button><button onClick={()=>moveItem(item.id,1)} disabled={isLast} title="Move down" style={{background:isLast?"#f5f5f4":"#e0f2fe",border:"1px solid "+(isLast?"#e5e7eb":"#93c5fd"),borderRadius:4,cursor:isLast?"default":"pointer",fontSize:11,padding:"1px 6px",color:isLast?"#d4d4d4":"#2563eb",fontWeight:700,lineHeight:"16px"}}>▼</button></div></div>;
           const{u,t:total,stockBase,prePly,doorChg,dfChg,dbChg,itemSQ,rbsChg,plyPct}=cp(item,sp,cx,door,drwF,drwBox);const ov=!!item.so;const isMould=item.t==="M";const isWall=item.t==="W";
 const mcRaw=calcModCost(item,item.mods,stockBase);const modCost=mcRaw*(1+plyPct/100);const modTotal=modCost*item.q;const grandTotal=total+modTotal;
 const activeMods=item.mods?Object.entries(item.mods).filter(([,v])=>Array.isArray(v)?v.some(p=>p.on):v>0):[];
@@ -12627,7 +12652,8 @@ upd(item.id,{mods:newMods});
           if(isREF(item.s)){
             const panelCount=((item.sqH||0)<=47.9375)?1:((item.sqH||0)<=81.9375)?2:3;
             const showRefDwg=modOpen.has("ref-dwg-"+item.id);
-            return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #059669"}}>
+            return(<div key={item.id} id={"item-"+item.id} className="ic" {...dragProps} style={{borderLeft:"4px solid #059669",...dragStyle}}>
+              {reorderRow}
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                 <div>
                   <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#059669"}}>Custom Refrigerator Panel</span>
@@ -12716,7 +12742,8 @@ upd(item.id,{mods:newMods});
           }
           /* ─── DISHWASHER PANEL — special inline editor ─── */
           if(isDP(item.s)){
-            return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #7c3aed"}}>
+            return(<div key={item.id} id={"item-"+item.id} className="ic" {...dragProps} style={{borderLeft:"4px solid #7c3aed",...dragStyle}}>
+              {reorderRow}
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                 <div>
                   <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#7c3aed"}}>Dishwasher Panel</span>
@@ -12771,7 +12798,8 @@ upd(item.id,{mods:newMods});
           }
           /* ─── BEVERAGE CENTER FRONT w/ ALUMINUM TRIM — special inline editor ─── */
           if(isBCFT(item.s)){
-            return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #b45309"}}>
+            return(<div key={item.id} id={"item-"+item.id} className="ic" {...dragProps} style={{borderLeft:"4px solid #b45309",...dragStyle}}>
+              {reorderRow}
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                 <div>
                   <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#b45309"}}>Bev Center Front</span>
@@ -12828,7 +12856,8 @@ upd(item.id,{mods:newMods});
           /* ─── COLUMN OVERLAY — special inline editor ─── */
           if(isCO(item.s)){
             const showCoDwg=modOpen.has("co-dwg-"+item.id);
-            return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #6d28d9"}}>
+            return(<div key={item.id} id={"item-"+item.id} className="ic" {...dragProps} style={{borderLeft:"4px solid #6d28d9",...dragStyle}}>
+              {reorderRow}
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                 <div>
                   <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#6d28d9"}}>Column Overlay</span>
@@ -12878,7 +12907,8 @@ upd(item.id,{mods:newMods});
           }
           /* ─── BEVERAGE CENTER FRONT (BCF) — special inline editor ─── */
           if(isBCF(item.s)){
-            return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #0d9488"}}>
+            return(<div key={item.id} id={"item-"+item.id} className="ic" {...dragProps} style={{borderLeft:"4px solid #0d9488",...dragStyle}}>
+              {reorderRow}
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
                 <div>
                   <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#0d9488"}}>Beverage Center Front</span>
@@ -12933,7 +12963,8 @@ upd(item.id,{mods:newMods});
           }
           /* ─── CUSTOM QUOTE ITEM — special inline editor ─── */
           if(isCustom(item.s)){
-            return(<div key={item.id} id={"item-"+item.id} className="ic" style={{borderLeft:"4px solid #0ea5e9"}}>
+            return(<div key={item.id} id={"item-"+item.id} className="ic" {...dragProps} style={{borderLeft:"4px solid #0ea5e9",...dragStyle}}>
+              {reorderRow}
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
                 <div>
                   <span className="mn" style={{fontWeight:700,fontSize:12.5,color:"#0369a1"}}>Custom Quote</span>
@@ -12986,7 +13017,8 @@ upd(item.id,{mods:newMods});
               </div>
             </div>);
           }
-          return(<div key={item.id} id={"item-"+item.id} className={`ic${ov?" ov":""}`}>
+          return(<div key={item.id} id={"item-"+item.id} className={`ic${ov?" ov":""}`} {...dragProps} style={dragStyle}>
+            {reorderRow}
             <div style={{marginBottom:mob?6:4}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                 <div style={{flex:1,minWidth:0}}>
