@@ -12090,6 +12090,8 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
   const[color,sColor]=useState("");
   const[mat,sMat]=useState("PB"),[intF,sIntF]=useState("STD-MAPL"),[drwBox,sDrwBox]=useState("5/8-STD");
   const[edgePro,sEdgePro]=useState("None");
+  const[projType,sProjType]=useState("New");
+  const[contactPhone,sContactPhone]=useState("");
   const[items,sItems]=useState([]),[vw,sVw]=useState("list");
   const[sMg,ssMg]=useState(false),[sAd,ssAd]=useState(false),[sCf,ssCf]=useState(false);
   const[dealerMult,setDealerMult]=useState(profile?.discount_pct||0);
@@ -12177,7 +12179,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
         if(d.door)sDoor(d.door);if(d.drwF)sDrwF(d.drwF);if(d.glaze)sGlaze(d.glaze);
         if(d.highlight)sHL(d.highlight);if(d.charT1)sCT1(d.charT1);if(d.charT2)sCT2(d.charT2);
         if(d.color!==undefined)sColor(d.color);if(d.mat)sMat(d.mat);if(d.intF)sIntF(d.intF);
-        if(d.drwBox)sDrwBox(d.drwBox);if(d.edgePro)sEdgePro(d.edgePro);if(d.po!==undefined)sPo(d.po);if(d.items)sItems(d.items);
+        if(d.drwBox)sDrwBox(d.drwBox);if(d.edgePro)sEdgePro(d.edgePro);if(d.po!==undefined)sPo(d.po);if(d.projType)sProjType(d.projType);if(d.contactPhone)sContactPhone(d.contactPhone);if(d.items)sItems(d.items);
         setShowQuotesList(false);
         fl("Quote loaded");
       }
@@ -12248,7 +12250,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
 
   const save=useCallback(async()=>{
     // Save to localStorage
-    const e={id:pid,nm,at:new Date().toISOString(),sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,po,items,n:items.length,tot:comp.tot};
+    const e={id:pid,nm,at:new Date().toISOString(),sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,po,projType,contactPhone,items,n:items.length,tot:comp.tot};
     const s=ldS();const i=s.findIndex(x=>x.id===pid);if(i>=0)s[i]=e;else s.unshift(e);
     svS(s);
     // Remember last-used order selections for smart defaults on new projects
@@ -12256,7 +12258,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
     // Also save to Supabase explicitly
     if(supabase&&user){
       try{
-        const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,po,items,versions};
+        const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,po,projType,contactPhone,items,versions};
         if(currentQuoteId){
           await supabase.from("quotes").update({name:nm,data:stateData,updated_at:new Date().toISOString()}).eq("id",currentQuoteId);
         }else{
@@ -12271,11 +12273,11 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
   const load=useCallback(e=>{setCurrentQuoteId(null);setVersions([]);sPid(e.id);sNm(e.nm);sSp(e.sp||"White Oak");sCx(e.cx||"Standard");
     sDoor(e.door||"HNVR");sDrwF(e.drwF||"DF-HNVR");sGlaze(e.glaze||"NONE");sHL(e.highlight||"NONE");
     sCT1(e.charT1||"NONE");sCT2(e.charT2||"NONE");sMat(e.mat||"PB");sIntF(e.intF||"STD-MAPL");sDrwBox(e.drwBox||"5/8-STD");
-    sItems(e.items||[]);sColor(e.color||"");sPo(e.po||"");fl(`Loaded "${e.nm}"`)},[fl]);
+    sItems(e.items||[]);sColor(e.color||"");sPo(e.po||"");sProjType(e.projType||"New");sContactPhone(e.contactPhone||"");fl(`Loaded "${e.nm}"`)},[fl]);
   const newP=useCallback(()=>{setCurrentQuoteId(null);setVersions([]);sPid(uid());sNm("Untitled Project");
     const pr=ldPrefs();
     sSp(pr.sp||"White Oak");sCx(pr.cx||"Standard");
-    sDoor(pr.door||"HNVR");sDrwF(pr.drwF||"DF-HNVR");sGlaze(pr.glaze||"NONE");sHL(pr.highlight||"NONE");sCT1(pr.charT1||"NONE");sCT2(pr.charT2||"NONE");sMat(pr.mat||"PB");sIntF(pr.intF||"STD-MAPL");sDrwBox(pr.drwBox||"5/8-STD");sItems([]);sColor(pr.color||"");sPo("");fl("New project started — using your last selections")},[fl]);
+    sDoor(pr.door||"HNVR");sDrwF(pr.drwF||"DF-HNVR");sGlaze(pr.glaze||"NONE");sHL(pr.highlight||"NONE");sCT1(pr.charT1||"NONE");sCT2(pr.charT2||"NONE");sMat(pr.mat||"PB");sIntF(pr.intF||"STD-MAPL");sDrwBox(pr.drwBox||"5/8-STD");sItems([]);sColor(pr.color||"");sPo("");sProjType("New");sContactPhone("");fl("New project started — using your last selections")},[fl]);
   const fi=useMemo(()=>{
     let r=tf==="all"?items:items.filter(it=>it.t===tf);
     if(roomFilter!=="all")r=r.filter(it=>it.z===roomFilter);
@@ -12344,7 +12346,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
         // Collect X-mark rectangles (same approach as warranty/express/sample forms)
         const xRects=[];
         const collectX=(name)=>{try{const btn=form.getButton(name+" ON");const w=btn.acroField.getWidgets()[0];const rect=w.dict.get(PN.of("Rect")).asArray().map(v=>v.numberValue);const pageRef=w.dict.get(PN.of("P"));let pgIdx=0;if(pageRef){for(let i=0;i<pages.length;i++){if(pages[i].ref===pageRef){pgIdx=i;break;}}}xRects.push({rect,pgIdx});}catch(e){}};
-        setTF("Wood Species",sp);
+        setTF("Wood Species",sp==="Paint (Std SW)"?"Maple":sp);
         setTF("Color",color||"");
         setTF("Upper Door Style",door);
         setTF("Lower Door Style",door);
@@ -12356,7 +12358,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
         setTF("Job Name",nm||"");
         setTF("P.O. Number",po||"");
         setTF("Contact Email",user?.email||"");
-        setTF("Contact Phone",profile?.phone||"");
+        setTF("Contact Phone",contactPhone||profile?.phone||"");
         // Glaze / Highlight
         const glazeMap={"BLK-GL":"Black","MCH-GL":"Mocha","VDK-GL":"Van Dyke","NKL-GL":"Nickel"};
         const hlMap={"GRPH-HL":"Graphite","CAFE-HL":"Café","SLATE-HL":"Slate"};
@@ -12383,7 +12385,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
         // Character Technique
         if(charT1&&charT1!=="NONE"){const ctMap={"aged":"Aged\u2020","wearing":"Wearing\u2020","sand":"Sand-through\u2021"};Object.entries(ctMap).forEach(([k,v])=>{if(charT1.toLowerCase().includes(k)||charT2?.toLowerCase().includes(k))collectX(v);});}
         // New/Remodel
-        collectX("New");
+        collectX(projType==="Remodel"?"Remodel":"New");
         const itemsToShow=Math.min(orderItems.length,59);
         const totalItemPages=Math.ceil(orderItems.length/20)||1;
         setTF("Number of Pages In Order",String(totalItemPages));
@@ -12482,7 +12484,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
         fl(`Order forms downloaded! Rooms: ${roomList}`);
       }
     }catch(err){console.error(err);fl("Error generating PDF — check console");}
-  },[items,sp,cx,door,drwF,drwBox,mat,intF,glaze,highlight,charT1,charT2,color,comp.tot,nm,fl]);
+  },[items,sp,cx,door,drwF,drwBox,mat,intF,glaze,highlight,charT1,charT2,color,comp.tot,nm,fl,projType,contactPhone]);
 
   const spp=SP[sp]||0,cxp=CX[cx]||0;
 
@@ -12600,6 +12602,10 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
               <div><label className="lb">Edge Profile</label><select className="sel" value={edgePro} onChange={e=>sEdgePro(e.target.value)}>
                 {["None","100","150","350","400","750","Matching","B-Alum","S-Alum","3D"].map(v=><option key={v} value={v}>{v}</option>)}
               </select></div>
+              <div><label className="lb">Project Type</label><select className="sel" value={projType} onChange={e=>sProjType(e.target.value)}>
+                <option value="New">New</option><option value="Remodel">Remodel</option>
+              </select></div>
+              <div><label className="lb">Contact Phone</label><input className="inp" value={contactPhone} onChange={e=>sContactPhone(e.target.value)} placeholder="Phone #" style={{fontSize:12}}/></div>
             </div>
             <div style={{marginTop:6,fontSize:10.5,color:C.stone}}>Effective multiplier: ×{((1+spp/100)*(1+cxp/100)).toFixed(3)}{mat==="PLY"?" (plywood)":""}<Tip text={`Species ${sp} (${spp>=0?"+":""}${spp}%) × Construction ${cx} (${cxp>=0?"+":""}${cxp}%) applied to all base cabinet prices`}/></div>
           </div></div>}
@@ -13554,6 +13560,8 @@ return(<div style={{marginBottom:5}}>
         <div><label className="lb">Interior</label><select className="sel" value={intF} onChange={e=>{sIntF(e.target.value);if(e.target.value==="LINEN")sItems(p=>p.map(it=>({...it,fe:""})))}}>{INTERIOR.map(i=><option key={i.v} value={i.v}>{i.l}</option>)}</select></div>
         <div><label className="lb">Drawer Box / Guide</label><select className="sel" value={drwBox} onChange={e=>sDrwBox(e.target.value)}>{DRW_BOX.map(d=><option key={d.v} value={d.v}>{d.l}</option>)}</select></div>
         <div><label className="lb">Edge Profile</label><select className="sel" value={edgePro} onChange={e=>sEdgePro(e.target.value)}>{["None","100","150","350","400","750","Matching","B-Alum","S-Alum","3D"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
+        <div><label className="lb">Project Type</label><select className="sel" value={projType} onChange={e=>sProjType(e.target.value)}><option value="New">New</option><option value="Remodel">Remodel</option></select></div>
+        <div><label className="lb">Contact Phone</label><input className="inp" value={contactPhone} onChange={e=>sContactPhone(e.target.value)} placeholder="Phone #" style={{fontSize:12}}/></div>
         <div style={{fontSize:10.5,color:C.stone}}>Effective: ×{((1+spp/100)*(1+cxp/100)).toFixed(3)}</div>
       </div>
     </div></div></>}
@@ -13578,7 +13586,7 @@ return(<div style={{marginBottom:5}}>
                   <div style={{fontSize:"13px",fontWeight:"600",color:C.ink}}>{new Date(v.at).toLocaleString()}</div>
                   <div style={{fontSize:"11px",color:C.stone,marginTop:"2px"}}>{v.items} items · {fm(v.total)}</div>
                 </div>
-                <button className="bt bp" onClick={()=>{if(v.snapshot){const s=v.snapshot;sNm(s.nm);sPid(s.pid);sSp(s.sp);sCx(s.cx);sDoor(s.door);sDrwF(s.drwF);sGlaze(s.glaze);sHL(s.highlight);sCT1(s.charT1);sCT2(s.charT2);sColor(s.color);sMat(s.mat);sIntF(s.intF);sDrwBox(s.drwBox);if(s.edgePro)sEdgePro(s.edgePro);if(s.po!==undefined)sPo(s.po);sItems(s.items);setShowHistory(false);fl("Restored version");}}} style={{fontSize:10.5,padding:"5px 10px"}}>Restore</button>
+                <button className="bt bp" onClick={()=>{if(v.snapshot){const s=v.snapshot;sNm(s.nm);sPid(s.pid);sSp(s.sp);sCx(s.cx);sDoor(s.door);sDrwF(s.drwF);sGlaze(s.glaze);sHL(s.highlight);sCT1(s.charT1);sCT2(s.charT2);sColor(s.color);sMat(s.mat);sIntF(s.intF);sDrwBox(s.drwBox);if(s.edgePro)sEdgePro(s.edgePro);if(s.po!==undefined)sPo(s.po);if(s.projType)sProjType(s.projType);if(s.contactPhone)sContactPhone(s.contactPhone);sItems(s.items);setShowHistory(false);fl("Restored version");}}} style={{fontSize:10.5,padding:"5px 10px"}}>Restore</button>
               </div>
             </div>))
           }
