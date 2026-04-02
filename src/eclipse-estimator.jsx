@@ -9790,7 +9790,7 @@ function AuthWrapper() {
   if (activeView === "express") {
     return <ExpressPartsOrder user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onBack={() => setActiveView("dashboard")} />;
   }
-  return <App user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onBack={() => setActiveView("dashboard")} onAdmin={() => setActiveView("admin")} />;
+  return <App user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onBack={() => setActiveView("dashboard")} onAdmin={() => setActiveView("admin")} initialQuoteId={workflowData?.quoteId||null} />;
 }
 
 
@@ -12077,7 +12077,7 @@ setText("P.O. Location", poLocation);
   );
 }
 
-function App({user, profile, supabase, onLogout, onBack, onAdmin}){
+function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId}){
   const initRef=useRef(null); // tracks user.id to prevent resetting on token refresh
   const[nm,sNm]=useState("Untitled Project"),[pid,sPid]=useState(uid()),[po,sPo]=useState(""),[dlrCode,sDlrCode]=useState(()=>ldPrefs().dealerCode||"");
   const[sp,sSp]=useState("White Oak"),[cx,sCx]=useState("Standard");
@@ -12179,6 +12179,9 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
       }
     }catch(e){console.error("Error loading quote:",e)}
   },[supabase,fl]);
+
+  // ── Auto-load quote when navigating from dashboard ──
+  useEffect(()=>{if(initialQuoteId)loadQuoteFromList(initialQuoteId);},[initialQuoteId]);
 
   const addIt=useCallback((cat,q,z,len,sqin,dimW,dimH,tH)=>{
     const newId=uid();
