@@ -8277,8 +8277,11 @@ const getApplicableMods=(item)=>CABINET_MODS.filter(m=>{
 });
 const calcModCost=(item,mods,baseUnitPrice)=>{
   let cost=0;let hasFI=false;
+  // FDS is free on tall/base cabinets modified to 18" depth or shallower
+  const freeD=mods?.FREE_D;const fdsFree=freeD&&parseInt(freeD)<=18;
   if(mods){CABINET_MODS.forEach(m=>{const v=mods[m.code];if(!v)return;
     if(m.isFI){hasFI=true;return;}// defer FI — computed after all other mods
+    if(m.code==="FDS"&&fdsFree)return;// FDS included at no charge for shallow depth
     if(m.pct){cost+=baseUnitPrice*(m.pct/100);}
     else if(m.input==="side"){const sides=v==="B"?2:1;cost+=m.price*sides;}
     else if(m.input==="mxdf"){if(Array.isArray(v))cost+=m.price*v.filter(p=>p.on).length;}
