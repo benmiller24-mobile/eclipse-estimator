@@ -7833,7 +7833,7 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 });
 
 const C={ink:"#000000",warm:"#F7F6F5",cream:"#FAFAF9",paper:"#FFFFFF",stone:"#AFA497",stL:"#DFDFDB",bdr:"#DFDFDB",acc:"#4A4A4D",accS:"#F7F6F5",gold:"#AFA497",goldS:"#F7F6F5",red:"#b91c1c"};
-const fm=n=>"$"+Math.round(n||0).toLocaleString();
+const fm=n=>"$"+(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 /* ── Pinnacle Brand Icon System — inline SVGs, 1.5px stroke ── */
 const LazyImg=({loader,alt})=>{const[src,setSrc]=useState(null);useEffect(()=>{loader().then(setSrc)},[]);return <div style={{border:"1px solid #cbd5e1",borderTop:"none",borderRadius:"0 0 6px 6px",padding:8,background:"#fff",textAlign:"center"}}>{src?<img src={src} alt={alt} style={{maxWidth:"100%",height:"auto",borderRadius:4}}/>:<span style={{color:"#94a3b8",fontSize:12}}>Loading...</span>}</div>};
 const Ic=({n,sz=14,c=C.stone,style={}})=>{
@@ -12280,12 +12280,12 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         const orderItems=zoneItems.map(it=>{const{t}=cp(it,sp,cx,door,drwF,drwBox);const iM=it.t==="M";const isSQ=isSqIn(it.s,it.r);
           const mcRaw=calcModCost(it,it.mods,cp(it,sp,cx,door,drwF,drwBox).stockBase);
           const total=t+mcRaw*(1+((it.mods&&cx==="Plywood")?10:0)/100)*it.q;
-          if(isCustom(it.s)){return{description:`CUSTOM: ${(it.cqDesc||"Custom Item").slice(0,80)}${it.cqNum?` [${it.cqNum}]`:""}`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
-          if(isREF(it.s)){return{description:`REF PANEL ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)${it.refIce?" +ICE CUTOUT":""}`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
-          if(isDP(it.s)){return{description:`DW PANEL ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
-          if(isBCFT(it.s)){return{description:`${it.s} (${BCFT_LABELS[it.s]||""}) ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
-          if(isBCF(it.s)){return{description:`BCF ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
-          if(isCO(it.s)){return{description:`${it.s} (${CO_LABELS[it.s]||""}) ${it.sqH||0}" tall`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${Math.round(total).toLocaleString()}`};}
+          if(isCustom(it.s)){return{description:`CUSTOM: ${(it.cqDesc||"Custom Item").slice(0,80)}${it.cqNum?` [${it.cqNum}]`:""}`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`};}
+          if(isREF(it.s)){return{description:`REF PANEL ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)${it.refIce?" +ICE CUTOUT":""}`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`};}
+          if(isDP(it.s)){return{description:`DW PANEL ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`};}
+          if(isBCFT(it.s)){return{description:`${it.s} (${BCFT_LABELS[it.s]||""}) ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`};}
+          if(isBCF(it.s)){return{description:`BCF ${it.sqW||0}"W × ${it.sqH||0}"H (${(it.sqin||0).toLocaleString()} sq.in)`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`};}
+          if(isCO(it.s)){return{description:`${it.s} (${CO_LABELS[it.s]||""}) ${it.sqH||0}" tall`,qty:String(it.q),finishedEnd:"",hinge:"",price:`$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`};}
           const modParts=[];if(it.mods){Object.entries(it.mods).forEach(([code,v])=>{if(!v&&v!==0)return;const m=CABINET_MODS.find(x=>x.code===code);if(!m)return;
             if(m.input==="mxdf"){const ct=Array.isArray(v)?v.filter(p=>p.on).length:0;if(ct>0)modParts.push(`${m.label} x${ct} +$${m.price*ct}`);}
             else if(m.input==="side"&&typeof v==="string"&&v){modParts.push(`${m.label} (${v==="B"?"Both":v}) +$${m.price*(v==="B"?2:1)}`);}
@@ -12301,7 +12301,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
           const modStr=modParts.length>0?" | "+modParts.join(", "):"";
           const ovenTag=isOven(it)?" ["+OVEN_LABELS[OVEN_TYPE(it)]+"]":"";
           const edgtInfo=isEDGT(it.s)?` ${it.sqin}sq.in @$${edgtEffRate(it.s,it.sqin||0)}/sq.in [${edgtTier(it.s,it.sqin||0)}]`:"";
-          return{description:`${it.s}${it.ds?` (${it.ds})`:""}${it.tallH&&it.tallH>0?` ${it.tallH}"H`:""}`+(iM?` ${it.len}ft`:"")+(isEDGT(it.s)?edgtInfo:isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":"")+ovenTag+modStr,qty:String(it.q),finishedEnd:it.fe==="B"?"Both":it.fe||"",hinge:it.hng||"",price:`$${Math.round(total).toLocaleString()}`};
+          return{description:`${it.s}${it.ds?` (${it.ds})`:""}${it.tallH&&it.tallH>0?` ${it.tallH}"H`:""}`+(iM?` ${it.len}ft`:"")+(isEDGT(it.s)?edgtInfo:isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":"")+ovenTag+modStr,qty:String(it.q),finishedEnd:it.fe==="B"?"Both":it.fe||"",hinge:it.hng||"",price:`$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`};
         });
         const zoneTot=zoneItems.reduce((s,it)=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);return s+total+mcRaw*(1+plyPct/100)*it.q},0);
         const { PDFName: PN, rgb: RGB } = await import("pdf-lib");
@@ -12371,7 +12371,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
         }
         const totalLine=Math.min(itemsToShow+1,60);
         setTF(`Description ${totalLine}`,"LIST PRICE TOTAL");
-        setTF(`Price ${totalLine}`,`$${Math.round(zoneTot).toLocaleString()}`);
+        setTF(`Price ${totalLine}`,`$${zoneTot.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`);
         setTF("Page Number 1","1");setTF("Page Number 2","2");setTF("Page Number 3","3");
         // Remove button fields before flattening (they served as position markers for X-marks)
         const allFields=form.getFields();for(const f of allFields){if(f.constructor.name==="PDFButton")form.removeField(f);}
@@ -13471,7 +13471,7 @@ return(<div style={{marginBottom:5}}>
                         <td style={{padding:"5px 8px",fontWeight:500}}>{desc}</td>
                         <td style={{padding:"5px 8px",textAlign:"center",fontWeight:feLabel?600:400,color:feLabel?"#6b5340":C.stone}}>{feLabel||"—"}</td>
                         <td style={{padding:"5px 8px",textAlign:"center",fontWeight:item.hng?600:400,color:item.hng?"#4a6178":C.stone}}>{item.hng||"—"}</td>
-                        <td style={{padding:"5px 8px",textAlign:"right",fontFamily:F.m,fontWeight:600}}>{Math.round(total).toLocaleString()}</td>
+                        <td style={{padding:"5px 8px",textAlign:"right",fontFamily:F.m,fontWeight:600}}>{total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                       </tr>);})}
                     <tr style={{background:"#2c4a34",color:C.cream}}>
                       <td colSpan={3} style={{padding:"7px 8px",fontFamily:F.d,fontWeight:600,fontSize:11}}>{zInfo.l} List Price</td>
