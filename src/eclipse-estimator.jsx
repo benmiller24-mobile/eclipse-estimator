@@ -13149,7 +13149,7 @@ return(<div style={{marginBottom:5}}>
               </div>}
               <div style={{flex:"1 1 90px"}}><label className="lb">Hinge</label>
                 <div style={{display:"flex",gap:3}}>
-                  {[["","—"],["L","Left"],["R","Right"]].map(([v,l])=><button key={v} className={`ch2 ${item.hng===v?"on":""}`} onClick={()=>upd(item.id,{hng:v})} style={{flex:1,justifyContent:"center",fontSize:10,...(item.hng===v&&v?{borderColor:"#4a6178",color:"#4a6178",background:"#4a617814"}:{})}}>{l}</button>)}
+                  {[["","—"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} className={`ch2 ${item.hng===v?"on":""}`} onClick={()=>upd(item.id,{hng:v})} style={{flex:1,justifyContent:"center",fontSize:10,...(item.hng===v&&v?{borderColor:"#4a6178",color:"#4a6178",background:"#4a617814"}:{})}}>{l}</button>)}
                 </div>
               </div>
               {intF!=="LINEN"?<div style={{flex:"1 1 130px"}}><label className="lb">Finished End</label>
