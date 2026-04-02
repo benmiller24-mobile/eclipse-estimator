@@ -11840,7 +11840,7 @@ setText("P.O. Location", poLocation);
                         <div>
                           <label style={labelStyle}>Hinge</label>
                           <select value={item.hng||""} onChange={e=>updItem(item.id,{hng:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto"}}>
-                            <option value="">—</option><option value="L">Left</option><option value="R">Right</option><option value="NB">No Boring</option>
+                            <option value="">—</option><option value="L">Left</option><option value="R">Right</option><option value="B">Both</option><option value="NB">No Boring</option>
                           </select>
                         </div>
                         <div>
@@ -11871,7 +11871,7 @@ setText("P.O. Location", poLocation);
                           <span style={{fontWeight:600,color:C.ink}}>{ddfType?.l||item.s}</span>
                           {item.cabinetRef ? ` for ${item.cabinetRef}` : ""}
                           {sqin > 0 ? ` · ${item.sqW}" × ${item.sqH}" = ${sqin.toLocaleString()} sq.in · $${sqinRate}/sq.in` + (doorChg > 0 ? ` + $${doorChg} door grp` : "") + (dfChg > 0 ? ` + $${dfChg} DF grp` : "") : " · Enter width and height"}
-                          {item.hng ? ` · ${item.hng} hinge` : ""}
+                          {item.hng ? ` · ${item.hng==="B"?"Both":item.hng} hinge` : ""}
                         </div>
                         <div style={{fontFamily:F.m,fontWeight:700,fontSize:14,color:sqin>0?C.ink:C.stone}}>
                           {sqin > 0 ? fm(lineTotal) : "—"}
@@ -11928,7 +11928,7 @@ setText("P.O. Location", poLocation);
                       <div style={{display:"grid",gridTemplateColumns:mob?"1fr 1fr":"80px 80px 80px 80px 1fr",gap:6,marginBottom:6}}>
                         <div><label style={labelStyle}>Hinge</label>
                           <select value={item.hng||""} onChange={e=>updItem(item.id,{hng:e.target.value})} style={{...fieldStyle,cursor:"pointer",appearance:"auto",fontSize:11}}>
-                            <option value="">—</option><option value="L">Left</option><option value="R">Right</option><option value="Pair">Pair</option>
+                            <option value="">—</option><option value="L">Left</option><option value="R">Right</option><option value="B">Both</option><option value="Pair">Pair</option>
                           </select>
                         </div>
                         <div><label style={labelStyle}>Fin. End</label>
@@ -12054,7 +12054,7 @@ setText("P.O. Location", poLocation);
 
                     {/* Price summary */}
                     {item.s && <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:4,paddingTop:6,borderTop:`1px solid ${C.bdr}`}}>
-                      <span style={{fontSize:11,color:C.stone,fontFamily:F.b}}>{SKU_LABELS[item.s]||item.s} <span style={{color:C.stL}}>· {TN[item.t]||item.t} · {item.r}</span>{item.hng?` · ${item.hng} hinge`:""}{item.fe?` · FE ${item.fe}`:""}</span>
+                      <span style={{fontSize:11,color:C.stone,fontFamily:F.b}}>{SKU_LABELS[item.s]||item.s} <span style={{color:C.stL}}>· {TN[item.t]||item.t} · {item.r}</span>{item.hng?` · ${item.hng==="B"?"Both":item.hng} hinge`:""}{item.fe?` · FE ${item.fe}`:""}</span>
                       <span style={{fontFamily:F.m,fontWeight:700,fontSize:13,color:item.s==="SD81/2X11"&&SD_BLOCKED_SP.has(sp)?C.red:C.ink}}>{item.s==="SD81/2X11"&&SD_BLOCKED_SP.has(sp)?"N/A":fm(t.total||0)}</span>
                     </div>}
                   </div>
@@ -12329,7 +12329,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
           const modStr=modParts.length>0?" | "+modParts.join(", "):"";
           const ovenTag=isOven(it)?" ["+OVEN_LABELS[OVEN_TYPE(it)]+"]":"";
           const edgtInfo=isEDGT(it.s)?` ${it.sqin}sq.in @$${edgtEffRate(it.s,it.sqin||0)}/sq.in [${edgtTier(it.s,it.sqin||0)}]`:"";
-          return{description:`${it.s}${it.ds?` (${it.ds})`:""}${it.tallH&&it.tallH>0?` ${it.tallH}"H`:""}`+(iM?` ${it.len}ft`:"")+(isEDGT(it.s)?edgtInfo:isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":"")+ovenTag+modStr,qty:String(it.q),finishedEnd:it.fe==="B"?"Both":it.fe||"",hinge:it.hng||"",price:`$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`};
+          return{description:`${it.s}${it.ds?` (${it.ds})`:""}${it.tallH&&it.tallH>0?` ${it.tallH}"H`:""}`+(iM?` ${it.len}ft`:"")+(isEDGT(it.s)?edgtInfo:isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":"")+ovenTag+modStr,qty:String(it.q),finishedEnd:it.fe==="B"?"Both":it.fe||"",hinge:it.hng==="B"?"Both":it.hng||"",price:`$${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}`};
         });
         const zoneTot=zoneItems.reduce((s,it)=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);return s+total+mcRaw*(1+plyPct/100)*it.q},0);
         const { PDFName: PN, rgb: RGB } = await import("pdf-lib");
@@ -12338,7 +12338,9 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
         const pdfDoc=await PDFDocument.load(pdfBytes,{ignoreEncryption:true});
         const form=pdfDoc.getForm();
         const pages=pdfDoc.getPages();
-        const setTF=(name,val)=>{try{form.getTextField(name).setText(val||"");}catch(e){}};
+        // Sanitize text for WinAnsi encoding (replace chars outside the encodable range)
+        const winSafe=(s)=>s?s.replace(/≤/g,"<=").replace(/≥/g,">=").replace(/[^\x00-\xFF]/g,""):s;
+        const setTF=(name,val)=>{try{form.getTextField(name).setText(winSafe(val)||"");}catch(e){}};
         // Collect X-mark rectangles (same approach as warranty/express/sample forms)
         const xRects=[];
         const collectX=(name)=>{try{const btn=form.getButton(name+" ON");const w=btn.acroField.getWidgets()[0];const rect=w.dict.get(PN.of("Rect")).asArray().map(v=>v.numberValue);const pageRef=w.dict.get(PN.of("P"));let pgIdx=0;if(pageRef){for(let i=0;i<pages.length;i++){if(pages[i].ref===pageRef){pgIdx=i;break;}}}xRects.push({rect,pgIdx});}catch(e){}};
@@ -12417,7 +12419,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
           const ovenPdfBytes=Uint8Array.from(atob(formB64),c=>c.charCodeAt(0));
           const ovenDoc=await PDFDocument.load(ovenPdfBytes,{ignoreEncryption:true});
           const ovenForm=ovenDoc.getForm();
-          const setOF=(name,val)=>{try{ovenForm.getTextField(name).setText(val||"");}catch(e){}};
+          const setOF=(name,val)=>{try{ovenForm.getTextField(name).setText(winSafe(val)||"");}catch(e){}};
           // Fill order info from parent order
           setOF("Business Name",profile?.business_name||"");
           setOF("Customer #",dlrCode||"");
@@ -13034,7 +13036,7 @@ upd(item.id,{mods:newMods});
                   {isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}
                   {itemSQ&&<span className="pl" style={{marginLeft:3,background:isEDGT(item.s)&&(item.sqin||0)>2304&&item.s!=="EDGTN"?"#fef3c7":"#e8f0ea",color:isEDGT(item.s)&&(item.sqin||0)>2304&&item.s!=="EDGTN"?"#92400e":"#2c4a34"}}>{isFLS(item.s)?`${item.sqW||0}"D × ${item.sqH||0}"L`:""} {(item.sqin||0).toLocaleString()} sq.in{isEDGT(item.s)?` · $${edgtEffRate(item.s,item.sqin||0)}/sq.in`:""}</span>}
                   {item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}
-                  {item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng}</span>}
+                  {item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng==="B"?"Both":item.hng}</span>}
                   {item.fe&&intF!=="LINEN"&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe==="L"?"Left":"Right"}</span>}
                   {item.rbs&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>RBS +$87</span>}
                   {activeMods.length>0&&activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;const modAmt=m.input==="mxdf"?m.price*mxdfCount:m.input==="side"?m.price*(qty==="B"?2:1):m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?m.price:m.price*(+qty||1);return <span key={code} className="pl" style={{marginLeft:3,background:"#7c3aed18",color:"#6d28d9"}}>{m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"L":"R"})`:typeof qty==="number"&&qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:modAmt>0?`+${fm(modAmt)}`:""}</span>})}
@@ -13124,8 +13126,8 @@ return(<div style={{marginBottom:5}}>
                 </div>}
               </div>
               <div><label className="lb">Hinge</label>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:4}}>
-                  {[["","None"],["L","Left"],["R","Right"]].map(([v,l])=><button key={v} className={`ch2 ${item.hng===v?"on":""}`} onClick={()=>upd(item.id,{hng:v})} style={{justifyContent:"center",fontSize:12,minHeight:40,padding:"8px 4px",...(item.hng===v&&v?{borderColor:"#4a6178",color:"#4a6178",background:"#4a617814"}:{})}}>{l}</button>)}
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:4}}>
+                  {[["","None"],["L","Left"],["R","Right"],["B","Both"]].map(([v,l])=><button key={v} className={`ch2 ${item.hng===v?"on":""}`} onClick={()=>upd(item.id,{hng:v})} style={{justifyContent:"center",fontSize:12,minHeight:40,padding:"8px 4px",...(item.hng===v&&v?{borderColor:"#4a6178",color:"#4a6178",background:"#4a617814"}:{})}}>{l}</button>)}
                 </div>
               </div>
               {intF!=="LINEN"?<div><label className="lb">Finished End</label>
@@ -13432,7 +13434,7 @@ return(<div style={{marginBottom:5}}>
               }
               return(<div key={item.id} className={`ic${ov?" ov":""}`} style={{margin:"8px",marginBottom:"0"}}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                  <div style={{display:"flex",flexWrap:"wrap",gap:2,alignItems:"center"}}><span className="mn" style={{fontWeight:700,fontSize:12.5}}>{item.s}</span><span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>{isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}{item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}{item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng}</span>}{item.fe&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe}</span>}{activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;const modAmt=m.input==="mxdf"?m.price*mxdfCount:m.input==="side"?m.price*(qty==="B"?2:1):m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?m.price:m.price*(+qty||1);return <span key={code} className="pl" style={{background:"#7c3aed18",color:"#6d28d9"}}>{m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"L":"R"})`:typeof qty==="number"&&qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:modAmt>0?`+${fm(modAmt)}`:""}</span>})}{modCost>0&&<span style={{fontSize:9.5,color:C.stone}}>Base {fm(u)} + Mods {fm(modCost)}</span>}</div>
+                  <div style={{display:"flex",flexWrap:"wrap",gap:2,alignItems:"center"}}><span className="mn" style={{fontWeight:700,fontSize:12.5}}>{item.s}</span><span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>{isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}{item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}{item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng==="B"?"Both":item.hng}</span>}{item.fe&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe}</span>}{activeMods.map(([code,qty])=>{const m=CABINET_MODS.find(x=>x.code===code);if(!m)return null;const mxdfCount=m.input==="mxdf"&&Array.isArray(qty)?qty.filter(p=>p.on).length:0;const modAmt=m.input==="mxdf"?m.price*mxdfCount:m.input==="side"?m.price*(qty==="B"?2:1):m.input==="check"||m.input==="dims"||m.input==="width"||m.input==="select"?m.price:m.price*(+qty||1);return <span key={code} className="pl" style={{background:"#7c3aed18",color:"#6d28d9"}}>{m.label}{m.input==="mxdf"?` ×${mxdfCount}`:m.input==="select"&&typeof qty==="string"?` (${qty})`:m.input==="side"?` (${qty==="B"?"Both":qty==="L"?"L":"R"})`:typeof qty==="number"&&qty>1?` ×${qty}`:""} {m.pct?`+${m.pct}%`:modAmt>0?`+${fm(modAmt)}`:""}</span>})}{modCost>0&&<span style={{fontSize:9.5,color:C.stone}}>Base {fm(u)} + Mods {fm(modCost)}</span>}</div>
                   <div style={{display:"flex",gap:4,alignItems:"center"}}>
                     <button onClick={()=>dup(item.id)} title="Duplicate" style={{background:C.warm,border:`1px solid ${C.bdr}`,borderRadius:5,cursor:"pointer",fontSize:12,color:C.stone,padding:"3px 8px",fontWeight:600}}>⧉ Dup</button>
                     <button onClick={()=>{if(confirm(`Remove ${item.s} from this quote?`))rem(item.id)}} title="Remove item" style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:5,cursor:"pointer",fontSize:12,color:C.red,padding:"3px 8px",fontWeight:600}}>× Del</button>
