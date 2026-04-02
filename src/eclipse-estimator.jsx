@@ -7874,6 +7874,10 @@ const SQI_REFS=new Set(["S3","S4","S5","S33","S34","S35","S36","S37","S38","S42"
 const SQI_FIXED=new Set(["BB1/4","BB1/4-CMP","BB1/4-CMP-Beaded","BB1/2-CMP","TKMSBB","TKMSLBB","DROT5/8","DROT3/4","LROT","SROT5/8","DROT5/8-PAD","DROT3/4-PAD","DROT5/8-FM","DROT3/4-FM","LROT-FM","SROT5/8-FM","DIRF","CNRLG","VAL","BLLG","BRLG","SDI-W","CLC","LCEC","COS","COF","COR"]);
 const SQI_SKUS=new Set(["PROFILE FILLER"]);
 const isSqIn=(s,r)=>(SQI_REFS.has(r)&&!SQI_FIXED.has(s))||SQI_SKUS.has(s);
+// EDGT auto-tier pricing: Small ≤2304 sq.in = $0.27, Large >2304 = $0.41, Narrow = $0.82
+const isEDGT=(s)=>s==="EDGTS"||s==="EDGTL"||s==="EDGTN";
+const edgtEffRate=(s,sqin)=>s==="EDGTN"?0.82:(s==="EDGTS"||s==="EDGTL")?(sqin>2304?0.41:0.27):null;
+const edgtTier=(s,sqin)=>s==="EDGTN"?"Narrow":(s==="EDGTS"||s==="EDGTL")?(sqin>2304?"Large (>16 sq.ft)":"Small (≤16 sq.ft)"):null;
 const CO_SKUS=new Set(["COS","COF","COR"]);
 const isCO=(s)=>CO_SKUS.has(s);
 const CO_LABELS={"COS":"Smooth","COF":"Fluted","COR":"Rope"};
@@ -7896,7 +7900,7 @@ const isBCF=(s)=>s==="BCF";
 const BCF_NOTE="• Door frame for use on front of glass front beverage coolers\n• Cut for glass will be filled with trim of same wood species\n• BCF available in Cherry, Maple, Red Oak, Select American Poplar, Hickory & Alder & are solid wood construction. No vertical or horizontal grain orientation available. Solid wood color tones may vary from veneer doors.\n• BCF will match those of the lower cabinet door style of adjoining components\n• Lower door style required if not ordered with adjoining components.\n• BCF with painted finishes as Metro will be MDF\n• Available up to 24\" wide and 80\" tall. Specify width and height when ordering\n• Custom rail widths available on all except mitered door styles\n• No custom grooving, notching, or drilling available";
 const CO_NOTE="• Column overlays are sent loose and must be field installed to cabinets\n• Column overlays are matching finish hardwood and attached to a 3\" wide hardwood filler\n• Pricing is per linear inch for each individual column\n• Plinth blocks are 3\" wide by 2 1/2\" tall at top and bottom (Except for use with flush toe kick)\n• Flush toe kick columns have a 6 1/2\" tall plinth block on bottom\n• Column overlays may also be applied to 3\" × 3\" angle fillers, 3\" columns and 3\" end panels\n• Column overlays will cause frameless overlay doors to bump plinth block when opened past 90°\n• Column overlays may also necessitate special counter tops when used with base cabinets\n• Width and depth modifications not available\n• Spindle modifications not available\n• Plinth blocks width modifications not available\n• Custom height of plinth blocks is available for $400 list Upcharge per column\n• Plinth blocks only available on top and bottom of column overlays\n• Column overlay may be ordered unassembled, must specify wall, base, or utility height, sold in complete sets only, field miter and assembly required\n• Column overlays may be ordered in a different color than the cabinet. Contact customer service for price and availability\n• Not available in: TFL, Reconstituted White Oak, Reconstituted Walnut, HPL & PV, Acrylic";
 let CO_DRAWING_B64=null;async function load_CO_DRAWING_B64(){if(!CO_DRAWING_B64){const m=await import("./pdf-co-drawing.js");CO_DRAWING_B64=m.default;}return CO_DRAWING_B64;};
-const SKU_LABELS={"F3":"Filler","OVF3":"Overlay Filler","PROFILE FILLER":"Profile Filler","W2436-2D":"Wall 24x36 Two-Door (see W24-2D36)","RW3624-24":"Refrigerator Wall 36x24","RW3612-24":"Refrigerator Wall 36x12","RH57":"Range Hood 57\" Width","O3093":"Oven Cabinet 30x93","3/4TK":"3/4 Toe Kick Moulding","WBC33":"Wall Blind Corner 33","LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts","CUSTOM":"Custom Quote","REF":"Custom Refrigerator Panel","DP":"Dishwasher Panel","TUK":"Fill Stick & Marker (Touch-Up)","TUK(Fill Stick & Marker)":"Fill Stick & Marker (Touch-Up)","TUB":"Touch-Up Paint & Fill Stick","GST":"Gallon of Stain","QST":"Quart of Stain","ASC":"Aerosol Can (Touch-Up)","BCFTA":"Bev Center Front (Natural Aluminum)","BCFTBL":"Bev Center Front (Matte Black Aluminum)","BCFTMB":"Bev Center Front (Matte Brass)","BCF":"Beverage Center Front","COS":"Column Overlay — Smooth","COF":"Column Overlay — Fluted","COR":"Column Overlay — Rope","SD81/2X11":"Sample Door 8½×11 (Standard)","SD121/2151/2":"Sample Door 12½×15½","CM 8 1/2 x 11":"Color Match Sample 8½×11","CM 12 1/2 x 15 1/2":"Color Match Sample 12½×15½"};
+const SKU_LABELS={"F3":"Filler","OVF3":"Overlay Filler","PROFILE FILLER":"Profile Filler","W2436-2D":"Wall 24x36 Two-Door (see W24-2D36)","RW3624-24":"Refrigerator Wall 36x24","RW3612-24":"Refrigerator Wall 36x12","RH57":"Range Hood 57\" Width","O3093":"Oven Cabinet 30x93","3/4TK":"3/4 Toe Kick Moulding","WBC33":"Wall Blind Corner 33","LSD":"Loose Standard Doors","SLBDF":"Slab Drawer Fronts","5PDF":"5 Piece Drawer Fronts","CUSTOM":"Custom Quote","REF":"Custom Refrigerator Panel","DP":"Dishwasher Panel","TUK":"Fill Stick & Marker (Touch-Up)","TUK(Fill Stick & Marker)":"Fill Stick & Marker (Touch-Up)","TUB":"Touch-Up Paint & Fill Stick","GST":"Gallon of Stain","QST":"Quart of Stain","ASC":"Aerosol Can (Touch-Up)","EDGTS":"Edge-Banded Panel Small (≤16 sq.ft)","EDGTL":"Edge-Banded Panel Large (>16 sq.ft)","EDGTN":"Edge-Banded Panel Narrow","BCFTA":"Bev Center Front (Natural Aluminum)","BCFTBL":"Bev Center Front (Matte Black Aluminum)","BCFTMB":"Bev Center Front (Matte Brass)","BCF":"Beverage Center Front","COS":"Column Overlay — Smooth","COF":"Column Overlay — Fluted","COR":"Column Overlay — Rope","SD81/2X11":"Sample Door 8½×11 (Standard)","SD121/2151/2":"Sample Door 12½×15½","CM 8 1/2 x 11":"Color Match Sample 8½×11","CM 12 1/2 x 15 1/2":"Color Match Sample 12½×15½"};
 const isCustom=(s)=>s==="CUSTOM";
 
 // ── Oven Cutout Spec Forms ──
@@ -8085,7 +8089,9 @@ const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{
   const isCOItem=isCO(item.s);
   // Use height-specific price for tall cabinets
   const baseP=(item.t==="T"&&item.tallH)?tallPrice(item.s,item.r,item.tallH)||item.p:item.p;
-  const stockBase=isCOItem?(baseP*(item.sqH||0)*(1+sm/100)):itemSQ?(baseP*sqin*(1+sm/100)+refIceCost):(baseP*len*(1+sm/100));
+  // EDGT auto-tier: price per sq.in varies by size threshold
+  const sqPrice=edgtEffRate(item.s,sqin)??baseP;
+  const stockBase=isCOItem?(baseP*(item.sqH||0)*(1+sm/100)):itemSQ?(sqPrice*sqin*(1+sm/100)+refIceCost):(baseP*len*(1+sm/100));
   const ds=item.ds||gDoor||"HNVR";const dInfo=DOORS.find(d=>d.v===ds);
   const dgCharge=dInfo?DG[dInfo.g]||0:0;const dxCharge=dInfo?.x||0;
   const isC3=item.r==="C3";
@@ -8711,7 +8717,7 @@ function AddUI({onAdd,onAddCustom}){
         <div style={{padding:"4px 9px",background:"linear-gradient(90deg,#f59e0b22,#f59e0b08)",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em",color:"#b45309",position:"sticky",top:0,zIndex:2,borderBottom:`1px solid #f59e0b33`,display:"flex",alignItems:"center",gap:5}}><Ic n="bolt" sz={10} c="#b45309"/> Recently Used ({recentSkus.length})</div>
         {recentSkus.map(s=>{const c=CATALOG.find(x=>x.s===s);if(!c)return null;const w=_cabW(c.s);const h=_cabH(c.s,c.t);const th=c.t==="T"?tallHeights(c.r):[];const mrtH=(c.r==="I43"||c.r==="I44");const rwH=_rwH(c.s);const rwD=_rwDepth(c.s);const hDisp=th.length>1?`${th[0]}-${th[th.length-1]}″H`:mrtH?'64½-76½″H':h>0?`${h}″H`:rwH>0?`${rwH}″H`:"";const dDisp=rwD>0?` × ${rwD}″ Deep`:"";return(<div key={"recent-"+c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"#fffbeb08",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid #f59e0b44"}}>
             <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s} <span style={{fontSize:9.5,color:C.stone,fontWeight:400}}>{c.r}{w>0?` · ${w}″W${hDisp?` × ${hDisp}`:""}${dDisp}`:"" }</span></span>
-            <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
+            <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isEDGT(c.s)?`$${c.p}/sq.in ${c.s==="EDGTS"?"(≤16sf)":c.s==="EDGTL"?"(>16sf)":"(Narrow)"}`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
           </div>)})}
       </div>}
       {grouped.map(([ref,items])=><div key={ref}>
@@ -8720,7 +8726,7 @@ function AddUI({onAdd,onAddCustom}){
         </div>
         {items.map(c=>{const w=_cabW(c.s);const h=_cabH(c.s,c.t);const rwH=_rwH(c.s);const rwD=_rwDepth(c.s);const th=c.t==="T"?tallHeights(c.r):[];const mrtH=(c.r==="I43"||c.r==="I44");const hDisp=th.length>1?`${th[0]}-${th[th.length-1]}″H`:mrtH?'64½-76½″H':h>0?`${h}″H`:rwH>0?`${rwH}″H`:"";const dDisp=rwD>0?` × ${rwD}″ Deep`:"";return(<div key={c.s} onClick={()=>sSk(c.s)} style={{padding:"6px 9px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",borderBottom:`1px solid ${C.bdr}`,background:sk===c.s?C.accS:"transparent",borderLeft:sk===c.s?`3px solid ${C.acc}`:"3px solid transparent"}}>
           <span className="mn" style={{fontWeight:600,fontSize:11}}>{SKU_LABELS[c.s]||c.s}{w>0&&<span style={{fontSize:9,color:C.stone,fontWeight:400,marginLeft:4}}>{w}″W{hDisp?` × ${hDisp}`:""}{dDisp}</span>}</span>
-          <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
+          <span className="mn" style={{fontSize:10.5,color:C.stone}}>{c.t==="M"?`$${c.p}/LF`:isEDGT(c.s)?`$${c.p}/sq.in ${c.s==="EDGTS"?"(≤16sf)":c.s==="EDGTL"?"(>16sf)":"(Narrow)"}`:isSqIn(c.s,c.r)?`$${c.p}/sq.in`:fm(c.p)}</span>
         </div>)})}
       </div>)}
       {fl.length===0&&<div style={{padding:18,textAlign:"center",color:C.stone,fontSize:12}}>No match — try different search</div>}
@@ -12264,7 +12270,8 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
           if(it.rot2&&it.rot2Q>0){const ro2=ROT_OPTIONS.find(r=>r.v===it.rot2);if(ro2)modParts.push(`FM-ROT ${it.rot2} x${it.rot2Q}${it.rot2Feg?" +FEG":""}`);}
           const modStr=modParts.length>0?" | "+modParts.join(", "):"";
           const ovenTag=isOven(it)?" ["+OVEN_LABELS[OVEN_TYPE(it)]+"]":"";
-          return{description:`${it.s}${it.ds?` (${it.ds})`:""}${it.tallH&&it.tallH>0?` ${it.tallH}"H`:""}`+(iM?` ${it.len}ft`:"")+(isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":"")+ovenTag+modStr,qty:String(it.q),finishedEnd:it.fe==="B"?"Both":it.fe||"",hinge:it.hng||"",price:`$${Math.round(total).toLocaleString()}`};
+          const edgtInfo=isEDGT(it.s)?` ${it.sqin}sq.in @$${edgtEffRate(it.s,it.sqin||0)}/sq.in [${edgtTier(it.s,it.sqin||0)}]`:"";
+          return{description:`${it.s}${it.ds?` (${it.ds})`:""}${it.tallH&&it.tallH>0?` ${it.tallH}"H`:""}`+(iM?` ${it.len}ft`:"")+(isEDGT(it.s)?edgtInfo:isSQ?` ${it.sqin}sq.in`:"")+(it.rbs?" +RBS":"")+ovenTag+modStr,qty:String(it.q),finishedEnd:it.fe==="B"?"Both":it.fe||"",hinge:it.hng||"",price:`$${Math.round(total).toLocaleString()}`};
         });
         const zoneTot=zoneItems.reduce((s,it)=>{const{t:total,stockBase,plyPct}=cp(it,sp,cx,door,drwF,drwBox);const mcRaw=calcModCost(it,it.mods,stockBase);return s+total+mcRaw*(1+plyPct/100)*it.q},0);
         const { PDFName: PN, rgb: RGB } = await import("pdf-lib");
@@ -12956,7 +12963,7 @@ upd(item.id,{mods:newMods});
                   <span className="mn" style={{fontWeight:700,fontSize:mob?13.5:12.5}}>{SKU_LABELS[item.s]||item.s}</span>
                   <span className="pl" style={{marginLeft:5,background:(TC[item.t]||"#999")+"18",color:TC[item.t]||"#999"}}>{TN[item.t]||item.t}</span>
                   {isMould&&<span className="pl" style={{marginLeft:3,background:C.goldS,color:C.gold}}>{item.len}ft</span>}
-                  {itemSQ&&<span className="pl" style={{marginLeft:3,background:"#e8f0ea",color:"#2c4a34"}}>{isFLS(item.s)?`${item.sqW||0}"D × ${item.sqH||0}"L`:""} {(item.sqin||0).toLocaleString()} sq.in</span>}
+                  {itemSQ&&<span className="pl" style={{marginLeft:3,background:isEDGT(item.s)&&(item.sqin||0)>2304&&item.s!=="EDGTN"?"#fef3c7":"#e8f0ea",color:isEDGT(item.s)&&(item.sqin||0)>2304&&item.s!=="EDGTN"?"#92400e":"#2c4a34"}}>{isFLS(item.s)?`${item.sqW||0}"D × ${item.sqH||0}"L`:""} {(item.sqin||0).toLocaleString()} sq.in{isEDGT(item.s)?` · $${edgtEffRate(item.s,item.sqin||0)}/sq.in`:""}</span>}
                   {item.ds&&<span className="pl" style={{marginLeft:3,background:"#5a6b4a18",color:"#5a6b4a"}}>{item.ds}</span>}
                   {item.hng&&<span className="pl" style={{marginLeft:3,background:"#4a617818",color:"#4a6178"}}>Hinge {item.hng}</span>}
                   {item.fe&&intF!=="LINEN"&&<span className="pl" style={{marginLeft:3,background:"#6b534018",color:"#6b5340"}}>FE {item.fe==="B"?"Both":item.fe==="L"?"Left":"Right"}</span>}
@@ -12990,7 +12997,8 @@ upd(item.id,{mods:newMods});
                 <span style={{color:C.stone}}>×</span>
                 <span className="lb" style={{marginBottom:0,color:"#2c4a34"}}>H:</span>
                 <input type="number" className="inp" min={1} max={120} value={item.sqH||1} onChange={e=>{const h=Math.max(1,+e.target.value);upd(item.id,{sqH:h,sqin:(item.sqW||1)*h})}} style={{width:55,textAlign:"center",padding:4,fontSize:11}}/>
-                <span style={{fontSize:10,color:C.stone}}>= {(item.sqin||0).toLocaleString()} sq.in · ${item.p}/sq.in = {fm(u)}/pc</span>
+                {isEDGT(item.s)?<span style={{fontSize:10,color:(item.sqin||0)>2304&&item.s!=="EDGTN"?"#b45309":"#2c4a34",fontWeight:600}}>= {(item.sqin||0).toLocaleString()} sq.in ({((item.sqin||0)/144).toFixed(1)} sq.ft) · ${edgtEffRate(item.s,item.sqin||0)}/sq.in [{edgtTier(item.s,item.sqin||0)}] = {fm(u)}/pc</span>
+                :<span style={{fontSize:10,color:C.stone}}>= {(item.sqin||0).toLocaleString()} sq.in · ${item.p}/sq.in = {fm(u)}/pc</span>}
               </>}
             </div>}
             {isOven(item)&&(()=>{const ot=OVEN_TYPE(item);const fields=OVEN_FIELDS[ot]||[];const specExpanded=modOpen.has("oven-spec-"+item.id);const oSpec=item.ovenSpec||{};const filledCount=fields.filter(f=>oSpec[f.k]).length;
