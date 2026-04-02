@@ -11474,6 +11474,7 @@ const [poLocation, setPoLocation] = useState("");
   };
   const removeItem = (id) => setItems(p => p.filter(i => i.id !== id));
   const updItem = (id, changes) => setItems(p => p.map(i => i.id === id ? { ...i, ...changes } : i));
+  const moveItem = (id, dir) => setItems(prev => { const i = prev.findIndex(it => it.id === id); if (i < 0) return prev; const j = i + dir; if (j < 0 || j >= prev.length) return prev; const a = [...prev]; [a[i], a[j]] = [a[j], a[i]]; return a; });
 
   // Express parcel price overrides (items that cost more on express forms)
   const EXPRESS_PRICE_OVERRIDES = { "SD121/2151/2": 350 };
