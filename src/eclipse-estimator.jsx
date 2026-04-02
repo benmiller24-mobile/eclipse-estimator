@@ -8097,7 +8097,7 @@ const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{
   const isC3=item.r==="C3";
   const doorChg=(itemSQ&&!isC3||item.t==="M")?0:(dgCharge+dxCharge)*(item.dc||0);
   const drc=item.drc||0;const dfS=item.dfs||gDrwF||"DF-HNVR";
-  const dfI=DRW_FRONTS.find(d=>d.v===dfS);const dfgChg=dfI?.g?DG[dfI.g]||0:0;
+  const dfI=DRW_FRONTS.find(d=>d.v===dfS);const dfgChg=dfI?.g?DFG[dfI.g]||0:0;
   const dfChg=(itemSQ&&!isC3||item.t==="M")?0:dfgChg*drc;
   const rotQ=(item.rot&&item.rotQ>0)?item.rotQ:0;const rot2Q=(item.rot2&&item.rot2Q>0)?item.rot2Q:0;const brot=item.brot||0;
   const dbI=DRW_BOX.find(d=>d.v===(gDrwBox||"5/8-STD"));const dbChg=isC3?0:(drc+rotQ+rot2Q+brot)*(dbI?.price||0);
@@ -8109,6 +8109,8 @@ const cp=(item,sp,cx,gDoor,gDrwF,gDrwBox)=>{
 // ─── ORDER SELECTION OPTIONS (from Eclipse order form, pages B1–B15, C3) ──
 // Door Group Charges (C3): A=$0, B=$44, C=$88, D=$150 PER DOOR
 const DG={A:0,B:44,C:88,D:150};
+// Drawer Front Group Charges: B=$55 (updated from $44)
+const DFG={A:0,B:55,C:88,D:150};
 const DOORS=[
   // Standard door styles (alphabetical)
   {v:"AFP",l:"Arch Flat Panel",g:"A"},
@@ -8505,42 +8507,69 @@ function guessBuiltInROT(sku){
   return 0;
 }
 const DRW_FRONTS=[
-  // One Piece — Group A
-  {v:"DF-MET",l:"Metropolitan (Slab)",g:"A"},{v:"DF-S",l:"Slab",g:"A"},{v:"DF-SCLPT",l:"Sculpted",g:"A"},
-  // 2 1/2" Rail — Group B
-  {v:"DF-BCP",l:"Beaded Century",g:"B"},{v:"DF2.5-BCP",l:"Beaded Century (2.5 rail)",g:"B"},
+  // Slab first
+  {v:"DF-S",l:"Slab",g:"A"},
+  // Alphabetical A–Z
+  {v:"DF-AFP",l:"Arch Flat Panel",g:"B"},
+  {v:"DF-ARP",l:"Arch Raised Panel",g:"B"},
+  {v:"DF-ASPN",l:"Aspen",g:"B"},
+  {v:"DF-ASVL",l:"Asherville Miter",g:"B"},
+  {v:"DF-BCP",l:"Beaded Century",g:"B"},
+  {v:"DF2.5-BCP",l:"Beaded Century (2.5 rail)",g:"B"},
+  {v:"DF-BDFD",l:"Bradford Miter",g:"B"},
+  {v:"DF-BRST",l:"Bristol",g:"B"},
   {v:"DF-CHRS",l:"Charleston",g:"B"},
-  {v:"DF-FP",l:"Flat Panel",g:"B"},{v:"DF2.5-SFP",l:"Square Flat Panel (2.5 rail)",g:"B"},
-  {v:"DF-GRNS",l:"Greensboro",g:"B"},{v:"DF2.5-GRNS",l:"Greensboro (2.5 rail)",g:"B"},
-  {v:"DF-HNVR",l:"Hanover",g:"B"},{v:"DF2.5-HNVR",l:"Hanover (2.5 rail)",g:"B"},
-  {v:"DF-MNTG",l:"Montgomery",g:"B"},
-  {v:"DF-NHVN",l:"New Haven",g:"B"},{v:"DF2.5-NHVN",l:"New Haven (2.5 rail)",g:"B"},
-  {v:"DF-OXRP",l:"Oxford Raised Panel",g:"B"},{v:"DF-RCMD",l:"Richmond",g:"B"},
-  {v:"DF-RP",l:"Raised Panel",g:"B"},{v:"DF-SRP",l:"Shaker Raised Panel",g:"B"},
-  {v:"DF-SCDL",l:"Scottsdale",g:"B"},{v:"DF2.5-SCDL",l:"Scottsdale (2.5 rail)",g:"B"},
-  {v:"DF-SFP",l:"Square Flat Panel",g:"B"},
-  {v:"DF-SMST",l:"Somerset",g:"B"},{v:"DF2.5-SMST",l:"Somerset (2.5 rail)",g:"B"},
-  {v:"DF-WARD",l:"Ward",g:"B"},{v:"DF2.5-WARD",l:"Ward (2.5 rail)",g:"B"},
-  {v:"DF-WMTN",l:"Wilmington",g:"B"},{v:"DF2.5-WMTN",l:"Wilmington (2.5 rail)",g:"B"},
-  {v:"DF-AFP",l:"Arch Flat Panel",g:"B"},{v:"DF-ARP",l:"Arch Raised Panel",g:"B"},
-  {v:"DF-CFP",l:"Crown Flat Panel",g:"B"},{v:"DF-CRP",l:"Crown Raised Panel",g:"B"},
-  // 3 1/4" Rail — Group B
-  {v:"DF-ASPN",l:"Aspen",g:"B"},{v:"DF-BRST",l:"Bristol",g:"B"},{v:"DF-HMLN",l:"Hamlin",g:"B"},
-  {v:"DF-HRTG",l:"Heritage",g:"B"},{v:"DF-HTFD",l:"Hartford",g:"B"},{v:"DF-LNCR",l:"Lancaster",g:"B"},
-  {v:"DF-TAHOE",l:"Tahoe",g:"B"},{v:"DF-SUMT",l:"Summit",g:"B"},{v:"DF-STSVL",l:"Statesville",g:"B"},
-  // Narrow Rail — Group B
-  {v:"DF-CNCD",l:"Concord",g:"B"},{v:"DF-RMLB",l:"Reeded Malibu",g:"B"},
-  {v:"DF-NAPA-V",l:"Napa 5-Piece (Vertical)",g:"B"},{v:"DF-NAPA-H",l:"Napa 5-Piece (Horizontal)",g:"B"},
+  {v:"DF-CNCD",l:"Concord",g:"B"},
+  {v:"DF-CFP",l:"Crown Flat Panel",g:"B"},
+  {v:"DF-CRP",l:"Crown Raised Panel",g:"B"},
+  {v:"DF-DLTN",l:"Dalton Miter",g:"B"},
+  {v:"DF-ESSX",l:"Essex Miter",g:"B"},
+  {v:"DF-FP",l:"Flat Panel",g:"B"},
+  {v:"DF-GLBK",l:"Glenbrook Miter",g:"B"},
+  {v:"DF-GRNS",l:"Greensboro",g:"B"},
+  {v:"DF2.5-GRNS",l:"Greensboro (2.5 rail)",g:"B"},
+  {v:"DF-HMLN",l:"Hamlin",g:"B"},
+  {v:"DF-HNVR",l:"Hanover",g:"B"},
+  {v:"DF2.5-HNVR",l:"Hanover (2.5 rail)",g:"B"},
+  {v:"DF-HTFD",l:"Hartford",g:"B"},
+  {v:"DF-HRTG",l:"Heritage",g:"B"},
+  {v:"DF-KNDL",l:"Kendall Miter",g:"B"},
+  {v:"DF-LNCR",l:"Lancaster",g:"B"},
+  {v:"DF-LNDS",l:"Landes Miter",g:"B"},
   {v:"DF-MLBU",l:"Malibu 5-Piece",g:"B"},
-  // Mitered — Group B
-  {v:"DF-ASVL",l:"Asherville Miter",g:"B"},{v:"DF-BDFD",l:"Bradford Miter",g:"B"},
-  {v:"DF-DLTN",l:"Dalton Miter",g:"B"},{v:"DF-ESSX",l:"Essex Miter",g:"B"},
-  {v:"DF-GLBK",l:"Glenbrook Miter",g:"B"},{v:"DF-KNDL",l:"Kendall Miter",g:"B"},
-  {v:"DF-LNDS",l:"Landes Miter",g:"B"},{v:"DF-PTLN",l:"Portland Miter",g:"B"},
-  {v:"DF-MNCH",l:"Manchester Miter",g:"B"},{v:"DF-SVNH",l:"Savannah Miter",g:"B"},
-  {v:"DF-WNSR",l:"Windsor Miter",g:"B"},{v:"DF-SHBY",l:"Shelby Miter",g:"B"},
-  // Shaped — Group A
-  {v:"DFS-OXRP",l:"Shaped Oxford",g:"A"},{v:"DFS-RCMD",l:"Shaped Richmond",g:"A"},{v:"DFS-SRP",l:"Shaped Shaker",g:"A"},
+  {v:"DF-MNCH",l:"Manchester Miter",g:"B"},
+  {v:"DF-MET",l:"Metropolitan (Slab)",g:"A"},
+  {v:"DF-MNTG",l:"Montgomery",g:"B"},
+  {v:"DF-NAPA-H",l:"Napa 5-Piece (Horizontal)",g:"B"},
+  {v:"DF-NAPA-V",l:"Napa 5-Piece (Vertical)",g:"B"},
+  {v:"DF-NHVN",l:"New Haven",g:"B"},
+  {v:"DF2.5-NHVN",l:"New Haven (2.5 rail)",g:"B"},
+  {v:"DF-OXRP",l:"Oxford Raised Panel",g:"B"},
+  {v:"DF-PTLN",l:"Portland Miter",g:"B"},
+  {v:"DF-RP",l:"Raised Panel",g:"B"},
+  {v:"DF-RMLB",l:"Reeded Malibu",g:"B"},
+  {v:"DF-RCMD",l:"Richmond",g:"B"},
+  {v:"DF-SVNH",l:"Savannah Miter",g:"B"},
+  {v:"DF-SCDL",l:"Scottsdale",g:"B"},
+  {v:"DF2.5-SCDL",l:"Scottsdale (2.5 rail)",g:"B"},
+  {v:"DF-SCLPT",l:"Sculpted",g:"A"},
+  {v:"DF-SRP",l:"Shaker Raised Panel",g:"B"},
+  {v:"DFS-OXRP",l:"Shaped Oxford",g:"A"},
+  {v:"DFS-RCMD",l:"Shaped Richmond",g:"A"},
+  {v:"DFS-SRP",l:"Shaped Shaker",g:"A"},
+  {v:"DF-SHBY",l:"Shelby Miter",g:"B"},
+  {v:"DF-SMST",l:"Somerset",g:"B"},
+  {v:"DF2.5-SMST",l:"Somerset (2.5 rail)",g:"B"},
+  {v:"DF-SFP",l:"Square Flat Panel",g:"B"},
+  {v:"DF2.5-SFP",l:"Square Flat Panel (2.5 rail)",g:"B"},
+  {v:"DF-STSVL",l:"Statesville",g:"B"},
+  {v:"DF-SUMT",l:"Summit",g:"B"},
+  {v:"DF-TAHOE",l:"Tahoe",g:"B"},
+  {v:"DF-WARD",l:"Ward",g:"B"},
+  {v:"DF2.5-WARD",l:"Ward (2.5 rail)",g:"B"},
+  {v:"DF-WMTN",l:"Wilmington",g:"B"},
+  {v:"DF2.5-WMTN",l:"Wilmington (2.5 rail)",g:"B"},
+  {v:"DF-WNSR",l:"Windsor Miter",g:"B"},
 ];
 const GLAZES=[
   {v:"NONE",l:"No Glazes"},{v:"BLK-GL",l:"Black Glaze"},{v:"MCH-GL",l:"Mocha Glaze"},
@@ -12515,7 +12544,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin}){
                 {DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} — Grp {d.g} ${DG[d.g]||0}/dr{d.x?` +$${d.x}/dr`:""}</option>)}
               </select></div>
               <div><label className="lb">Drawer Front</label><select className="sel" value={drwF} onChange={e=>sDrwF(e.target.value)}>
-                {DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}{d.g!=="A"?` — $${DG[d.g]||0}/drw`:""}</option>)}
+                {DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}{d.g!=="A"?` — $${DFG[d.g]||0}/drw`:""}</option>)}
               </select></div>
               <div><label className="lb">Finish / Glaze {overlayRequired&&glaze==="NONE"&&highlight==="NONE"&&<span style={{color:"#f59e0b",fontSize:9,fontWeight:600}}>● Required</span>}</label><select className="sel" value={glaze} onChange={e=>sGlaze(e.target.value)} style={overlayRequired&&glaze==="NONE"&&highlight==="NONE"?{borderColor:"#f59e0b",background:"#fffbeb"}:{}} disabled={filteredGlazes.length<=1}>
                 {filteredGlazes.map(g=><option key={g.v} value={g.v}>{g.l}</option>)}
@@ -13475,7 +13504,7 @@ return(<div style={{marginBottom:5}}>
         <div><label className="lb">Species / Material</label><select className="sel" value={sp} onChange={e=>{sSp(e.target.value);sColor("")}}>{Object.entries(SP).map(([k,v])=><option key={k} value={k}>{k} ({v>=0?"+":""}{v}%)</option>)}</select></div>
         <div><label className="lb">Finish Color</label><select className="sel" value={color} onChange={e=>sColor(e.target.value)}><option value="">-- Select --</option>{(FINISH_COLORS[sp]||[]).map(c=><option key={c} value={c}>{c}</option>)}</select></div>
         <div><label className="lb">Door Style</label><select className="sel" value={door} onChange={e=>sDoor(e.target.value)}>{DOORS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l} — Grp {d.g} ${DG[d.g]||0}/dr{d.x?` +$${d.x}/dr`:""}</option>)}</select></div>
-        <div><label className="lb">Drawer Front</label><select className="sel" value={drwF} onChange={e=>sDrwF(e.target.value)}>{DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}{d.g!=="A"?` — $${DG[d.g]||0}/drw`:""}</option>)}</select></div>
+        <div><label className="lb">Drawer Front</label><select className="sel" value={drwF} onChange={e=>sDrwF(e.target.value)}>{DRW_FRONTS.map(d=><option key={d.v} value={d.v}>{d.v}: {d.l}{d.g!=="A"?` — $${DFG[d.g]||0}/drw`:""}</option>)}</select></div>
         <div><label className="lb">Finish / Glaze {overlayRequired&&glaze==="NONE"&&highlight==="NONE"&&<span style={{color:"#f59e0b",fontSize:9,fontWeight:600}}>● Required</span>}</label><select className="sel" value={glaze} onChange={e=>sGlaze(e.target.value)} disabled={filteredGlazes.length<=1}>{filteredGlazes.map(g=><option key={g.v} value={g.v}>{g.l}</option>)}</select></div>
         <div><label className="lb">Highlight {overlayRequired&&glaze==="NONE"&&highlight==="NONE"&&<span style={{color:"#f59e0b",fontSize:9,fontWeight:600}}>● Required</span>}</label><select className="sel" value={highlight} onChange={e=>sHL(e.target.value)} disabled={filteredHighlights.length<=1}>{filteredHighlights.map(h=><option key={h.v} value={h.v}>{h.l}</option>)}</select></div>
         <div><label className="lb">Character Technique 1</label><select className="sel" value={charT1} onChange={e=>sCT1(e.target.value)}>{CHAR_TECH.map(c=><option key={c.v} value={c.v}>{c.l}</option>)}</select></div>
