@@ -9679,8 +9679,10 @@ function AuthWrapper() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState("dashboard");
-  const [workflowData, setWorkflowData] = useState(null);
+  // Check URL for shared order link
+  const shareParam = new URLSearchParams(window.location.search).get("share");
+  const [activeView, setActiveView] = useState(shareParam ? "estimator" : "dashboard");
+  const [workflowData, setWorkflowData] = useState(shareParam ? { quoteId: shareParam } : null);
   const [showResetPw, setShowResetPw] = useState(false);
 
   const fetchProfile = async (userId) => {
@@ -12187,7 +12189,8 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
   },[supabase,fl]);
 
   // ── Auto-load quote when navigating from dashboard ──
-  useEffect(()=>{if(initialQuoteId)loadQuoteFromList(initialQuoteId);},[initialQuoteId]);
+  useEffect(()=>{if(initialQuoteId){loadQuoteFromList(initialQuoteId);// Clean up share param from URL so refresh doesn't re-trigger
+    if(window.location.search.includes("share="))window.history.replaceState({},"",window.location.pathname);}},[initialQuoteId]);
 
   const addIt=useCallback((cat,q,z,len,sqin,dimW,dimH,tH)=>{
     const newId=uid();
@@ -12295,6 +12298,25 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
     const b=new Blob([r.map(x=>x.join(",")).join("\n")],{type:"text/csv"});
     const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`${nm.replace(/\s+/g,"_")}_v880.csv`;a.click();fl("Exported");
   },[items,sp,cx,door,comp.tot,dealerMult,nm,fl]);
+
+  const shareOrder=useCallback(async()=>{
+    if(items.length===0){fl("No items to share");return;}
+    try{
+      // Save first to ensure we have a Supabase quote ID
+      const stateData={nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,po,projType,contactPhone,items,versions};
+      let qid=currentQuoteId;
+      if(qid){
+        await supabase.from("quotes").update({name:nm,data:stateData,updated_at:new Date().toISOString()}).eq("id",qid);
+      }else{
+        const{data:ins,error}=await supabase.from("quotes").insert({user_id:user.id,name:nm,data:stateData}).select("id").single();
+        if(ins&&!error){qid=ins.id;setCurrentQuoteId(qid);}
+      }
+      if(!qid){fl("Could not save order for sharing");return;}
+      const url=`${window.location.origin}?share=${qid}`;
+      await navigator.clipboard.writeText(url);
+      fl("Share link copied to clipboard!");
+    }catch(err){console.error(err);fl("Error creating share link");}
+  },[items,nm,pid,sp,cx,door,drwF,glaze,highlight,charT1,charT2,color,mat,intF,drwBox,po,projType,contactPhone,versions,currentQuoteId,supabase,user,fl]);
 
   const genOrder=useCallback(async()=>{
     try{
@@ -12502,6 +12524,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
         <button style={{background:C.acc,color:"#fff",border:"none",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={save}><Ic n="clip" sz={12} c="#fff"/></button>
         <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>setShowQuotesList(true)}><Ic n="clip" sz={11} c={C.cream}/> Quotes</button>
         <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={genOrder}><Ic n="clip" sz={12} c={C.cream}/> Order</button>
+        <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={shareOrder}><Ic n="clip" sz={12} c={C.cream}/> Share</button>
         <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>ssCf(true)}><Ic n="gear" sz={13} c={C.cream}/></button>
         {versions.length>0&&<button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>setShowHistory(true)}><Ic n="clip" sz={12} c={C.cream}/></button>}
         {onBack&&<button style={{background:"rgba(255,255,255,.12)",color:C.gold,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={onBack}><Ic n="door" sz={12} c={C.gold}/></button>}
@@ -12511,6 +12534,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={newP}>+ New</button>
         <button className="bt bp" onClick={save} style={{fontSize:11}}><Ic n="clip" sz={11} c="#fff"/> Save</button>
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowQuotesList(true)}><Ic n="clip" sz={11} c={C.cream}/> Quotes</button>
+        <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={shareOrder}><Ic n="clip" sz={11} c={C.cream}/> Share</button>
         {versions.length>0&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowHistory(true)}><Ic n="clip" sz={11} c={C.cream}/> History</button>}
         {profile?.role==="admin"&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold}} onClick={()=>onAdmin&&onAdmin()}><Ic n="gear" sz={12} c={C.gold}/> Admin</button>}
         {onBack&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold,fontWeight:600}} onClick={onBack}><Ic n="door" sz={11} c={C.gold}/> Hub</button>}
