@@ -8689,14 +8689,19 @@ input:focus,select:focus,textarea:focus{border-color:${C.acc}!important;outline:
 
 function Tip({text}){const[show,setShow]=useState(false);return(<span style={{position:"relative",display:"inline-block",marginLeft:3,cursor:"help"}} onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)} onClick={e=>{e.stopPropagation();setShow(!show)}}><span style={{fontSize:10,color:C.stone,fontWeight:700,width:14,height:14,borderRadius:"50%",border:`1px solid ${C.stL}`,display:"inline-flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>?</span>{show&&<span style={{position:"absolute",bottom:"120%",left:"50%",transform:"translateX(-50%)",background:C.ink,color:"#fff",padding:"6px 10px",borderRadius:6,fontSize:10.5,lineHeight:1.4,whiteSpace:"normal",width:"max-content",maxWidth:220,zIndex:999,boxShadow:"0 4px 12px rgba(0,0,0,.25)",fontWeight:400,pointerEvents:"none"}}>{text}</span>}</span>)}
 
-function MarginCalc({tot,onClose}){
+function MarginCalc({tot,dealerMult,onClose}){
+  const cost=dealerMult>0&&dealerMult<1?tot*dealerMult:tot;
   const[mt,sMt]=useState("markup"),[mp,sMp]=useState(35),[il,sIl]=useState(65),[lf,sLf]=useState(20),[cs,sCs]=useState(85),[sf,sSf]=useState(45),[df,sDf]=useState(750),[fr,sFr]=useState(450);
-  const sell=mt==="markup"?tot*(1+mp/100):tot/(1-mp/100),gp=sell-tot,inst=il*lf,ct=cs*sf,pt=sell+inst+ct+df+fr;
+  const sell=mt==="markup"?cost*(1+mp/100):cost/(1-mp/100),gp=sell-cost,inst=il*lf,ct=cs*sf,pt=sell+inst+ct+df+fr;
   return(<div className="mbg" onClick={onClose}><div className="c" style={{width:"min(540px,94vw)",maxHeight:"90vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}>
     <div className="ch" style={{background:C.goldS}}><Ic n="dollar" sz={14} c={C.gold}/> Margin Calculator<button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",fontSize:16,color:C.stone}}>×</button></div>
     <div className="cb">
+      {dealerMult>0&&dealerMult<1&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:10,textAlign:"center"}}>
+        <div><div className="lb">List Price</div><div className="mn" style={{fontSize:15,fontWeight:600,color:C.stone}}>{fm(tot)}</div></div>
+        <div><div className="lb">Multiplier</div><div className="mn" style={{fontSize:15,fontWeight:600,color:C.stone}}>×{dealerMult}</div></div>
+      </div>}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12,textAlign:"center"}}>
-        <div><div className="lb">Cost</div><div className="mn" style={{fontSize:17,fontWeight:700}}>{fm(tot)}</div></div>
+        <div><div className="lb">{dealerMult>0&&dealerMult<1?"Your Cost":"Cost"}</div><div className="mn" style={{fontSize:17,fontWeight:700}}>{fm(cost)}</div></div>
         <div><div className="lb">Sell</div><div className="mn" style={{fontSize:17,fontWeight:700,color:C.acc}}>{fm(sell)}</div></div>
         <div><div className="lb">GP</div><div className="mn" style={{fontSize:17,fontWeight:700,color:C.gold}}>{fm(gp)}</div><div style={{fontSize:9.5,color:C.stone}}>{sell>0?((gp/sell)*100).toFixed(1):0}%</div></div>
       </div>
@@ -12096,7 +12101,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
   const[contactPhone,sContactPhone]=useState("");
   const[items,sItems]=useState([]),[vw,sVw]=useState("list");
   const[sMg,ssMg]=useState(false),[sAd,ssAd]=useState(false),[sCf,ssCf]=useState(false);
-  const[dealerMult,setDealerMult]=useState(profile?.discount_pct||0);
+  const[dealerMult,setDealerMult]=useState(()=>{const saved=ldPrefs().costMult;if(saved>0&&saved<1)return saved;return profile?.discount_pct||0;});
   const[tf,sTf]=useState("all"),[ntf,sNtf]=useState(null),[mob,sMob]=useState(false);
   const[itemSearch,setItemSearch]=useState(""),[roomFilter,setRoomFilter]=useState("all");
   const[modOpen,sModOpen]=useState(()=>new Set());
@@ -12630,6 +12635,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
                 <option value="New">New</option><option value="Remodel">Remodel</option>
               </select></div>
               <div><label className="lb">Contact Phone</label><input className="inp" value={contactPhone} onChange={e=>sContactPhone(e.target.value)} placeholder="Phone #" style={{fontSize:12}}/></div>
+              <div><label className="lb">Cost Multiplier</label><div style={{display:"flex",alignItems:"center",gap:4}}><span style={{fontSize:11,color:C.stone}}>×</span><input className="inp" type="number" step="0.01" min="0" max="1" value={dealerMult||""} onChange={e=>{const v=Math.min(1,Math.max(0,+e.target.value||0));setDealerMult(v);svPrefs({...ldPrefs(),costMult:v});}} placeholder="e.g. 0.55" style={{fontSize:12,width:80}}/>{dealerMult>0&&dealerMult<1&&<span style={{fontSize:10,color:C.acc,fontWeight:600}}>{fm(comp.tot*dealerMult)}</span>}</div></div>
             </div>
             <div style={{marginTop:6,fontSize:10.5,color:C.stone}}>Effective multiplier: ×{((1+spp/100)*(1+cxp/100)).toFixed(3)}{mat==="PLY"?" (plywood)":""}<Tip text={`Species ${sp} (${spp>=0?"+":""}${spp}%) × Construction ${cx} (${cxp>=0?"+":""}${cxp}%) applied to all base cabinet prices`}/></div>
           </div></div>}
@@ -13586,12 +13592,13 @@ return(<div style={{marginBottom:5}}>
         <div><label className="lb">Edge Profile</label><select className="sel" value={edgePro} onChange={e=>sEdgePro(e.target.value)}>{["None","100","150","350","400","750","Matching","B-Alum","S-Alum","3D"].map(v=><option key={v} value={v}>{v}</option>)}</select></div>
         <div><label className="lb">Project Type</label><select className="sel" value={projType} onChange={e=>sProjType(e.target.value)}><option value="New">New</option><option value="Remodel">Remodel</option></select></div>
         <div><label className="lb">Contact Phone</label><input className="inp" value={contactPhone} onChange={e=>sContactPhone(e.target.value)} placeholder="Phone #" style={{fontSize:12}}/></div>
+        <div><label className="lb">Cost Multiplier</label><div style={{display:"flex",alignItems:"center",gap:4}}><span style={{fontSize:11,color:C.stone}}>×</span><input className="inp" type="number" step="0.01" min="0" max="1" value={dealerMult||""} onChange={e=>{const v=Math.min(1,Math.max(0,+e.target.value||0));setDealerMult(v);svPrefs({...ldPrefs(),costMult:v});}} placeholder="e.g. 0.55" style={{fontSize:12,width:80}}/>{dealerMult>0&&dealerMult<1&&<span style={{fontSize:10,color:C.acc,fontWeight:600}}>{fm(comp.tot*dealerMult)}</span>}</div></div>
         <div style={{fontSize:10.5,color:C.stone}}>Effective: ×{((1+spp/100)*(1+cxp/100)).toFixed(3)}</div>
       </div>
     </div></div></>}
 
 
-    {sMg&&<MarginCalc tot={comp.tot} onClose={()=>ssMg(false)}/>}
+    {sMg&&<MarginCalc tot={comp.tot} dealerMult={dealerMult} onClose={()=>ssMg(false)}/>}
 
     {showQuotesList&&<QuotesList user={user} profile={profile} onLoadQuote={loadQuoteFromList} onClose={()=>setShowQuotesList(false)}/>}
     {/* Admin panel now uses full-page AdminDashboard view via onAdmin() */}
