@@ -9100,6 +9100,7 @@ function PendingApproval({user, onLogout}) {
 function QuotesList({user, profile, onLoadQuote, onClose}) {
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [viewAll, setViewAll] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -9110,14 +9111,18 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
   const [userMap, setUserMap] = useState({});
   const loadQuotes = async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       let query = supabaseClient.from("quotes").select("id,name,updated_at,user_id").order("updated_at", { ascending: false });
       if (!viewAll) query = query.eq("user_id", user.id);
-      const { data, error } = await query;
-      if (error) throw error;
-      setQuotes(data || []);
-      if (viewAll && data?.length) {
-        const uids = [...new Set(data.map(q => q.user_id))];
+      const result = await Promise.race([
+        query,
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 8000))
+      ]);
+      if (result.error) throw result.error;
+      setQuotes(result.data || []);
+      if (viewAll && result.data?.length) {
+        const uids = [...new Set(result.data.map(q => q.user_id))];
         const { data: profiles } = await supabaseClient.from("profiles").select("id,email,full_name,business_name").in("id", uids);
         if (profiles) {
           const m = {};
@@ -9127,6 +9132,7 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
       }
     } catch (err) {
       console.error("Error loading quotes:", err);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -9255,6 +9261,11 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
         <div style={{ padding: isMob ? "12px 14px 16px" : "16px 20px", overflowY: "auto", flex: 1, WebkitOverflowScrolling: "touch" }}>
           {loading ? (
             <div style={{ textAlign: "center", color: C.stone, padding: "28px 20px" }}>Loading quotes...</div>
+          ) : loadError ? (
+            <div style={{ textAlign: "center", padding: "28px 20px" }}>
+              <div style={{ fontSize: 13, color: C.stone, fontFamily: F.b, marginBottom: 10 }}>Could not load quotes</div>
+              <button onClick={loadQuotes} style={{ background: C.acc, color: C.paper, border: "none", borderRadius: 6, padding: "6px 16px", fontSize: 12, fontFamily: F.b, fontWeight: 600, cursor: "pointer" }}>Retry</button>
+            </div>
           ) : quotes.length === 0 ? (
             <div style={{ textAlign: "center", color: C.stone, padding: "28px 20px" }}>No quotes yet</div>
           ) : viewAll && grouped ? (
@@ -10199,6 +10210,7 @@ function AdminDashboard({user, profile, supabase, onLogout, onNavigate}) {
 function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
   const [quotes, setQuotes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [mob, setMob] = useState(false);
 
   useEffect(() => {
@@ -10207,15 +10219,25 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
     return () => window.removeEventListener("resize", c);
   }, []);
 
+  const loadProjects = async () => {
+    setLoading(true);
+    setLoadError(false);
+    try {
+      const result = await Promise.race([
+        supabase.from("quotes").select("id,name,updated_at,data").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(6),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 8000))
+      ]);
+      if (result.error) throw result.error;
+      setQuotes(result.data || []);
+    } catch (e) {
+      console.error("Dashboard quotes load error:", e);
+      setLoadError(true);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const load = async () => {
-      try {
-        const { data } = await supabase.from("quotes").select("id,name,updated_at,data").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(6);
-        setQuotes(data || []);
-      } catch (e) { console.error(e); }
-      setLoading(false);
-    };
-    load();
+    loadProjects();
   }, [user.id, supabase]);
 
   const WfIcon = ({type, color, size=22}) => {
@@ -10304,6 +10326,11 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
           </div>
           {loading ? (
             <div style={{padding:24,textAlign:"center",color:C.stone,fontSize:12}}>Loading...</div>
+          ) : loadError ? (
+            <div style={{padding:24,textAlign:"center"}}>
+              <div style={{fontSize:13,color:C.stone,fontFamily:F.b,marginBottom:10}}>Could not load projects</div>
+              <button onClick={loadProjects} style={{background:C.acc,color:C.paper,border:"none",borderRadius:6,padding:"6px 16px",fontSize:12,fontFamily:F.b,fontWeight:600,cursor:"pointer"}}>Retry</button>
+            </div>
           ) : quotes.length === 0 ? (
             <div style={{padding:32,textAlign:"center"}}>
               <div style={{marginBottom:8}}><Ic n="clip" sz={32} c={C.stL}/></div>
