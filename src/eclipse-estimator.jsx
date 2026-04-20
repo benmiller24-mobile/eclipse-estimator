@@ -12190,6 +12190,14 @@ const PCT_OPTIONS = [
 ];
 const PCT_VAL_TO_NUM = { "0":5, "1":10, "2":15, "3":20, "4":25, "5":30, "6":40, "7":50, "8":75, "9":100 };
 
+// Brand radio options on the Rep Discount Cover Sheet template.
+// Choice1 / Choice2 / Choice3 are the PDF's internal radio export values.
+const BRAND_OPTIONS = [
+  { val: "Choice2", label: "ECLIPSE" },  // default (Eclipse Estimator)
+  { val: "Choice1", label: "SHILOH" },
+  { val: "Choice3", label: "ASPECT" },
+];
+
 function ExtraDiscountForm({
   quoteId, quoteName, user, profile, mob,
   initialPO, initialJobName, initialDealerCode,
@@ -12205,6 +12213,7 @@ function ExtraDiscountForm({
   const [dealerPO, setDealerPO]   = useState(initialPO || "");
   const [jobName,  setJobName]    = useState(initialJobName || quoteName || "");
   const [custType, setCustType]   = useState("1");        // "0"=New, "1"=Existing
+  const [brand, setBrand]         = useState("Choice2");  // Default: Eclipse
   const [altPO, setAltPO]         = useState("");
   const [altJobName, setAltJobName] = useState("");
   const [stockDesc, setStockDesc] = useState("");
@@ -12256,7 +12265,7 @@ function ExtraDiscountForm({
 
   // Fill the PDF template and trigger a browser download.
   const generatePdf = async () => {
-    const { PDFDocument } = await import("pdf-lib");
+    const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
     let templateBytes;
     const resp = await fetch("/forms/rep-discount-cover-sheet.pdf");
     if (!resp.ok) throw new Error("Could not load Rep Discount Cover Sheet template (HTTP " + resp.status + ")");
@@ -12287,9 +12296,29 @@ function ExtraDiscountForm({
     setText("SPECIAL_INST", stockDesc);
     setText("Today", todayStr);
 
-    selectRadio("CU", custType);     // "0"=New, "1"=Existing
-    selectRadio("Brand", "Choice2"); // ECLIPSE (this is the Eclipse Estimator)
+    selectRadio("CU", custType);    // "0"=New, "1"=Existing
+    selectRadio("Brand", brand);    // Choice1=Shiloh, Choice2=Eclipse, Choice3=Aspect
     if (pctVal !== "") selectRadio("%", pctVal);
+
+    // Signature1 is a /Sig field — setText can't populate it. Instead, overlay the
+    // rep's name (typed, as initials/name) on top of the signature widget's rect.
+    // Template widget rect: (242.333, 102.871, 402.062, 132.218). We draw the name
+    // starting near the left edge of the widget, sitting just above the baseline.
+    if (salesRep && salesRep.trim()) {
+      try {
+        const helv = await doc.embedFont(StandardFonts.HelveticaOblique);
+        const page = doc.getPages()[0];
+        page.drawText(salesRep.trim(), {
+          x: 246,
+          y: 112,     // baseline y (pdf-lib origin is bottom-left)
+          size: 12,
+          font: helv,
+          color: rgb(0, 0, 0),
+        });
+      } catch (e) {
+        console.warn("Draw signature text failed:", e.message);
+      }
+    }
 
     // Flatten optional — leaving interactive so admin can tweak before signing/printing.
     // form.flatten();
@@ -12312,8 +12341,10 @@ function ExtraDiscountForm({
     if (!isSamples && !quoteId) { setError("Save the quote first, then generate a discount cover sheet."); return; }
     if (!pctVal)  { setError("Select a discount percentage."); return; }
     if (!reason.trim()) { setError("Reason is required for the audit record."); return; }
-    if (!dealerName.trim()) { setError("Customer / Dealer name is required."); return; }
+    if (!dealerName.trim()) { setError("Customer Name is required."); return; }
+    if (!dealerNum.trim()) { setError("Cust # is required — this is the Eclipse customer/account number."); return; }
     if (!dealerPO.trim()) { setError("Dealer P.O. # is required."); return; }
+    if (!salesRep.trim()) { setError("Sales Representative name is required (used for the Rep Signature area)."); return; }
     setSaving(true);
     try {
       // 1. Audit row in Supabase — RLS rejects non-admins, giving server-side enforcement.
@@ -12398,12 +12429,12 @@ function ExtraDiscountForm({
           </div>
           <div style={row2}>
             <div>
-              <label style={labelStyle}>Customer / Dealer Name <span style={{color:C.red}}>*</span></label>
+              <label style={labelStyle}>Customer Name <span style={{color:C.red}}>*</span></label>
               <input type="text" value={dealerName} onChange={e=>setDealerName(e.target.value)} style={inputStyle} disabled={saving} maxLength={80}/>
             </div>
             <div>
-              <label style={labelStyle}>Cust # / Dealer #</label>
-              <input type="text" value={dealerNum} onChange={e=>setDealerNum(e.target.value)} style={inputStyle} disabled={saving} maxLength={20}/>
+              <label style={labelStyle}>Cust # <span style={{color:C.red}}>*</span></label>
+              <input type="text" value={dealerNum} onChange={e=>setDealerNum(e.target.value)} placeholder="Eclipse customer/account #" style={inputStyle} disabled={saving} maxLength={20}/>
             </div>
           </div>
           <div style={row2}>
@@ -12416,15 +12447,28 @@ function ExtraDiscountForm({
               <input type="text" value={jobName} onChange={e=>setJobName(e.target.value)} style={inputStyle} disabled={saving} maxLength={60}/>
             </div>
           </div>
-          <div style={{marginBottom:12}}>
-            <label style={labelStyle}>Customer Type</label>
-            <div style={{display:"flex",gap:14}}>
-              {[{v:"0",l:"NEW Customer"},{v:"1",l:"Existing Customer"}].map(opt => (
-                <label key={opt.v} style={{display:"flex",alignItems:"center",gap:6,fontSize:13,cursor:"pointer"}}>
-                  <input type="radio" name="custType" value={opt.v} checked={custType===opt.v} onChange={()=>setCustType(opt.v)} disabled={saving}/>
-                  {opt.l}
-                </label>
-              ))}
+          <div style={row2}>
+            <div>
+              <label style={labelStyle}>Customer Type</label>
+              <div style={{display:"flex",gap:14,paddingTop:4}}>
+                {[{v:"0",l:"NEW"},{v:"1",l:"Existing"}].map(opt => (
+                  <label key={opt.v} style={{display:"flex",alignItems:"center",gap:6,fontSize:13,cursor:"pointer"}}>
+                    <input type="radio" name="custType" value={opt.v} checked={custType===opt.v} onChange={()=>setCustType(opt.v)} disabled={saving}/>
+                    {opt.l}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label style={labelStyle}>Brand <span style={{color:C.red}}>*</span></label>
+              <div style={{display:"flex",gap:12,paddingTop:4,flexWrap:"wrap"}}>
+                {BRAND_OPTIONS.map(opt => (
+                  <label key={opt.val} style={{display:"flex",alignItems:"center",gap:6,fontSize:13,cursor:"pointer",fontWeight:brand===opt.val?700:500}}>
+                    <input type="radio" name="brand" value={opt.val} checked={brand===opt.val} onChange={()=>setBrand(opt.val)} disabled={saving}/>
+                    {opt.label}
+                  </label>
+                ))}
+              </div>
             </div>
           </div>
 
