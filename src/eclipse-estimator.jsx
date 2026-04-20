@@ -10863,6 +10863,8 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
     { id: "ffd", icon: "drawer", title: "Sample Door & Drawer Front 14½×24", price: "Standard Lead Time", code: "ECL-SDD-F", desc: "14.5 x 24 inch pinned sample door and drawer front — standard lead time. Outputs on Eclipse Sample Door & Drawer Front order form." },
     { id: "rcbs", icon: "swatch", title: "Color Block Samples", price: "$250/set", code: "ECL-RCBS", desc: "Set of up to 10 replacement color block samples" },
     { id: "rccs", icon: "swatch", title: "Color Chip Samples", price: "Per 10", code: "ECL-RCCS", desc: "Set of up to 10 replacement color chip samples" },
+    { id: "starterShiloh", icon: "clip", title: "Starter Package A (Shiloh)", price: "$3,600 List", code: "SHI-START-A", desc: "Shiloh Starter Package A express order form — curated door sample package (predetermined, no modifications)." },
+    { id: "starterEclipse", icon: "clip", title: "Starter Package A (Eclipse)", price: "$2,400 List", code: "ECL-START-A", desc: "Eclipse Starter Package A express order form — curated door sample package (predetermined, no modifications)." },
   ];
 
   const generateSamplePdf = async () => {
@@ -11281,6 +11283,51 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
       a.download = `Eclipse-Color-Chips-${new Date().toISOString().slice(0,10)}.pdf`;
       a.click(); URL.revokeObjectURL(url);
       fl("Color chip sample form downloaded!");
+      return;
+    }
+
+    // Starter Package A (Shiloh or Eclipse) — Express Order Form
+    if (activeType === "starterShiloh" || activeType === "starterEclipse") {
+      const isShiloh = activeType === "starterShiloh";
+      const templatePath = isShiloh ? "/forms/starter-package-shiloh.pdf" : "/forms/starter-package-eclipse.pdf";
+      const custFieldName = isShiloh ? "Customer #" : "Account Number";
+      const fileLabel = isShiloh ? "Shiloh-Starter-A" : "Eclipse-Starter-A";
+
+      const { PDFDocument } = await import("pdf-lib");
+      let templateBytes;
+      try {
+        const resp = await fetch(templatePath);
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        templateBytes = new Uint8Array(await resp.arrayBuffer());
+      } catch(e) { fl("Could not load starter package form template"); return; }
+
+      const doc = await PDFDocument.load(templateBytes);
+      const form = doc.getForm();
+      const setText = (name, value) => { try { form.getTextField(name).setText(String(value || "")); } catch(e) {} };
+
+      // Text fields (note: uses curly apostrophe in field name)
+      setText("Sales Representative\u2019s Name", contactName);
+      setText(custFieldName, dealerCode);
+      setText("P.O. Number", samplePO);
+      setText("Order Date", new Date().toLocaleDateString());
+      setText("Street Address", shipAddr);
+      setText("City", sampleCity);
+      setText("State", sampleState);
+      setText("Zip Code", sampleZip);
+
+      // The form itself is scoped to Express + Starter Package A, so we leave
+      // push-button widgets intact — they render their current captions when flattened.
+      form.flatten();
+
+      const bytes = await doc.save();
+      const blob = new Blob([bytes], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${fileLabel}-${new Date().toISOString().slice(0,10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      fl("Starter package order form downloaded!");
       return;
     }
 
