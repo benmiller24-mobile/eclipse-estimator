@@ -101,7 +101,9 @@ begin
     new.email,
     coalesce(new.raw_user_meta_data->>'full_name', ''),
     case
-      when new.email in ('gillian@pinnaclesales.biz', 'ben@pinnaclesales.biz') then 'admin'
+      -- Anyone with a @pinnaclesales.biz email is automatically an admin.
+      -- Dealer users can still be manually promoted by updating profiles.role.
+      when lower(new.email) like '%@pinnaclesales.biz' then 'admin'
       else 'pending'
     end
   );
@@ -138,3 +140,105 @@ grant usage on schema public to authenticated;
 grant all on public.profiles to authenticated;
 grant all on public.quotes to authenticated;
 grant all on public.dealers to authenticated;
+
+-- ============================================================
+-- 12. Centralized admin check (Domain OR DB flag)
+--     Used by every admin RLS policy below so the rule lives in one place.
+--     Returns true when:
+--       (a) the signed-in user's profile has role = 'admin', OR
+--       (b) the signed-in user's email ends with @pinnaclesales.biz
+-- ============================================================
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    exists (
+      select 1 from public.profiles
+      where id = auth.uid() and role = 'admin'
+    )
+    or
+    coalesce(
+      lower(auth.jwt() ->> 'email') like '%@pinnaclesales.biz',
+      false
+    );
+$$;
+
+grant execute on function public.is_admin() to authenticated;
+
+-- 13. Rewrite existing admin RLS policies to use is_admin()
+drop policy if exists "Admins can view all profiles" on public.profiles;
+create policy "Admins can view all profiles" on public.profiles
+  for select using (public.is_admin());
+
+drop policy if exists "Admins can update all profiles" on public.profiles;
+create policy "Admins can update all profiles" on public.profiles
+  for update using (public.is_admin());
+
+drop policy if exists "Admins can view all quotes" on public.quotes;
+create policy "Admins can view all quotes" on public.quotes
+  for select using (public.is_admin());
+
+drop policy if exists "Admins can manage dealers" on public.dealers;
+create policy "Admins can manage dealers" on public.dealers
+  for all using (public.is_admin());
+
+-- 14. Back-fill: promote any existing Pinnacle users currently stuck at 'pending'
+update public.profiles
+  set role = 'admin', updated_at = now()
+  where lower(email) like '%@pinnaclesales.biz'
+    and role <> 'admin';
+
+-- ============================================================
+-- 15. Admin-only Extra Discount overrides (per-quote)
+--     A Pinnacle admin can attach an extra discount to any quote.
+--     Dealer users can READ the override on their own quote
+--     (so the UI can show "extra discount applied") but cannot write.
+-- ============================================================
+create table if not exists public.admin_quote_overrides (
+  id uuid default gen_random_uuid() primary key,
+  quote_id uuid references public.quotes(id) on delete cascade not null,
+  discount_pct numeric(5,2) not null check (discount_pct >= 0 and discount_pct <= 100),
+  reason text not null,
+  notes text,
+  applied_by uuid references auth.users(id) not null,
+  applied_at timestamptz default now() not null,
+  updated_at timestamptz default now() not null
+);
+
+create index if not exists idx_admin_quote_overrides_quote on public.admin_quote_overrides(quote_id);
+
+alter table public.admin_quote_overrides enable row level security;
+
+-- Read: admins can see every override; quote owner can see overrides on their own quote.
+create policy "Admins or quote owner can view overrides"
+  on public.admin_quote_overrides
+  for select using (
+    public.is_admin()
+    or exists (
+      select 1 from public.quotes q
+      where q.id = admin_quote_overrides.quote_id and q.user_id = auth.uid()
+    )
+  );
+
+-- Writes: admins only.
+create policy "Admins can insert overrides"
+  on public.admin_quote_overrides
+  for insert with check (public.is_admin());
+
+create policy "Admins can update overrides"
+  on public.admin_quote_overrides
+  for update using (public.is_admin());
+
+create policy "Admins can delete overrides"
+  on public.admin_quote_overrides
+  for delete using (public.is_admin());
+
+drop trigger if exists admin_quote_overrides_updated_at on public.admin_quote_overrides;
+create trigger admin_quote_overrides_updated_at before update on public.admin_quote_overrides
+  for each row execute procedure public.update_updated_at();
+
+grant all on public.admin_quote_overrides to authenticated;

@@ -7832,6 +7832,18 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   },
 });
 
+// ── Admin check: Domain (@pinnaclesales.biz) OR DB role='admin' ──
+// Matches the server-side public.is_admin() SQL function so UI and RLS stay in sync.
+// A user counts as admin if:
+//   (a) their profiles.role = 'admin', OR
+//   (b) their signed-in email ends with @pinnaclesales.biz
+const PINNACLE_DOMAIN = "@pinnaclesales.biz";
+function isAdmin(profile, user) {
+  if (profile?.role === "admin") return true;
+  const email = (user?.email || profile?.email || "").toLowerCase();
+  return !!email && email.endsWith(PINNACLE_DOMAIN);
+}
+
 const C={ink:"#000000",warm:"#F7F6F5",cream:"#FAFAF9",paper:"#FFFFFF",stone:"#AFA497",stL:"#DFDFDB",bdr:"#DFDFDB",acc:"#4A4A4D",accS:"#F7F6F5",gold:"#AFA497",goldS:"#F7F6F5",red:"#b91c1c"};
 const fm=n=>"$"+(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 /* ── Pinnacle Brand Icon System — inline SVGs, 1.5px stroke ── */
@@ -9105,7 +9117,7 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [pressedId, setPressedId] = useState(null);
-  const isAdmin = profile?.role === "admin";
+  const admin = isAdmin(profile, user);
   const isMob = window.innerWidth <= 768;
 
   const [userMap, setUserMap] = useState({});
@@ -9277,7 +9289,7 @@ function QuotesList({user, profile, onLoadQuote, onClose}) {
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: isMob ? "8px" : "6px" }}>
                     {group.quotes.map((quote) => (
-                      <QuoteRow key={quote.id} quote={quote} canDelete={quote.user_id === user.id || isAdmin} />
+                      <QuoteRow key={quote.id} quote={quote} canDelete={quote.user_id === user.id || admin} />
                     ))}
                   </div>
                 </div>
@@ -9799,7 +9811,7 @@ function AuthWrapper() {
   if (activeView === "dashboard") {
     return <Dashboard user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onNavigate={(view, data) => { setActiveView(view); setWorkflowData(data || null); }} />;
   }
-  if (activeView === "admin" && profile?.role === "admin") {
+  if (activeView === "admin" && isAdmin(profile, user)) {
     return <AdminDashboard user={user} profile={profile} supabase={supabaseClient} onLogout={handleLogout} onNavigate={(view, data) => { setActiveView(view); setWorkflowData(data || null); }} />;
   }
   if (activeView === "warranty") {
@@ -10366,7 +10378,7 @@ function Dashboard({user, profile, supabase, onLogout, onNavigate}) {
         </div>
 
         {/* Admin access */}
-        {profile?.role === "admin" && (
+        {isAdmin(profile, user) && (
           <div style={{marginTop:16,textAlign:"center"}}>
             <button onClick={() => onNavigate("admin")} style={{background:C.ink,border:"none",cursor:"pointer",fontSize:14,color:C.gold,fontFamily:F.d,fontWeight:700,padding:"12px 28px",borderRadius:8,letterSpacing:"0.03em"}}><Ic n="gear" sz={14} c={C.gold}/> Admin Dashboard</button>
           </div>
@@ -12115,6 +12127,326 @@ setText("P.O. Location", poLocation);
   );
 }
 
+// ── Admin-only: Extra Discount / Rep Discount Cover Sheet ──
+// Renders as a modal. On submit: (1) writes audit row to public.admin_quote_overrides
+// (RLS enforces admin-only inserts), (2) generates a filled Rep Discount Cover Sheet
+// PDF from /forms/rep-discount-cover-sheet.pdf and triggers download.
+// UI is gated by isAdmin(profile, user) in the parent, so non-admins never see this.
+//
+// PDF field map (from AcroForm in /forms/rep-discount-cover-sheet.pdf):
+//   REP AGENCY (text)           — Pinnacle's rep agency # (default "26")
+//   SALES REPRESENTATIVE (text) — admin name (from profile.full_name)
+//   DEALER NAME (text)          — dealer / customer business name
+//   DEALER # (text)             — dealer's Eclipse customer #
+//   PO (text)                   — Dealer P.O. #
+//   JOB NAME (text)             — Job name
+//   CU (radio /0 /1)            — /0 = NEW Customer, /1 = Existing Customer
+//   Brand (radio /Choice1..3)   — /Choice1=SHILOH /Choice2=ECLIPSE /Choice3=ASPECT
+//   PO2 (text)                  — alternate PO for rep confirmation
+//   JOB NAME2 (text)            — alternate job name for rep confirmation
+//   SPECIAL_INST (text)         — Stock # / description line
+//   % (radio /0../9)            — 0:5% 1:10% 2:15% 3:20% 4:25% 5:30% 6:40% 7:50% 8:75% 9:100%
+//   Today (text)                — date applied
+//   Signature1                  — signature field, left blank (admin signs by hand)
+const PCT_OPTIONS = [
+  { label: "5%",  val: "0",  requiresApproval: false },
+  { label: "10%", val: "1",  requiresApproval: false },
+  { label: "15%", val: "2",  requiresApproval: false },
+  { label: "20%", val: "3",  requiresApproval: false },
+  { label: "25%", val: "4",  requiresApproval: false },
+  { label: "30%", val: "5",  requiresApproval: false },
+  { label: "40%", val: "6",  requiresApproval: false },
+  { label: "50%", val: "7",  requiresApproval: false },
+  { label: "75%", val: "8",  requiresApproval: true },
+  { label: "100%",val: "9",  requiresApproval: true },
+];
+const PCT_VAL_TO_NUM = { "0":5, "1":10, "2":15, "3":20, "4":25, "5":30, "6":40, "7":50, "8":75, "9":100 };
+
+function ExtraDiscountForm({
+  quoteId, quoteName, user, profile, mob,
+  initialPO, initialJobName, initialDealerCode,
+  onClose, onApplied,
+}) {
+  // Form state — the names mirror PDF fields where practical.
+  const [pctVal, setPctVal]       = useState("");         // radio value "0".."9"
+  const [salesRep, setSalesRep]   = useState(profile?.full_name || "");
+  const [dealerName, setDealerName] = useState(profile?.business_name || "");
+  const [dealerNum, setDealerNum] = useState(initialDealerCode || "");
+  const [dealerPO, setDealerPO]   = useState(initialPO || "");
+  const [jobName,  setJobName]    = useState(initialJobName || quoteName || "");
+  const [custType, setCustType]   = useState("1");        // "0"=New, "1"=Existing
+  const [altPO, setAltPO]         = useState("");
+  const [altJobName, setAltJobName] = useState("");
+  const [stockDesc, setStockDesc] = useState("");
+  const [reason, setReason]       = useState("");
+  const [notes, setNotes]         = useState("");
+  const [saving, setSaving]       = useState(false);
+  const [error, setError]         = useState(null);
+  const [existing, setExisting]   = useState(null);
+  const [loadingExisting, setLoadingExisting] = useState(true);
+
+  // Load any existing override for this quote so admins can see prior values.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      if (!quoteId) { setLoadingExisting(false); return; }
+      try {
+        const { data, error } = await supabaseClient
+          .from("admin_quote_overrides")
+          .select("*")
+          .eq("quote_id", quoteId)
+          .order("applied_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (!alive) return;
+        if (error) { console.warn("Load override failed:", error.message); }
+        if (data) {
+          setExisting(data);
+          // Snap loaded pct to the closest preset radio value.
+          const num = Number(data.discount_pct);
+          let best = "", diff = Infinity;
+          for (const opt of PCT_OPTIONS) {
+            const d = Math.abs(PCT_VAL_TO_NUM[opt.val] - num);
+            if (d < diff) { diff = d; best = opt.val; }
+          }
+          setPctVal(best);
+          setReason(data.reason || "");
+          setNotes(data.notes || "");
+        }
+      } catch (e) {
+        console.warn("Load override exception:", e);
+      } finally {
+        if (alive) setLoadingExisting(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, [quoteId]);
+
+  // Fill the PDF template and trigger a browser download.
+  const generatePdf = async () => {
+    const { PDFDocument } = await import("pdf-lib");
+    let templateBytes;
+    const resp = await fetch("/forms/rep-discount-cover-sheet.pdf");
+    if (!resp.ok) throw new Error("Could not load Rep Discount Cover Sheet template (HTTP " + resp.status + ")");
+    templateBytes = new Uint8Array(await resp.arrayBuffer());
+
+    const doc = await PDFDocument.load(templateBytes);
+    const form = doc.getForm();
+
+    const setText = (name, value) => {
+      try { form.getTextField(name).setText(String(value ?? "")); }
+      catch (e) { console.warn("setText failed for", name, e.message); }
+    };
+    const selectRadio = (name, optionValue) => {
+      try { form.getRadioGroup(name).select(optionValue); }
+      catch (e) { console.warn("selectRadio failed for", name, "=", optionValue, e.message); }
+    };
+
+    const todayStr = new Date().toLocaleDateString("en-US", { year:"numeric", month:"2-digit", day:"2-digit" });
+
+    setText("REP AGENCY", "26");
+    setText("SALES REPRESENTATIVE", salesRep);
+    setText("DEALER NAME", dealerName);
+    setText("DEALER #", dealerNum);
+    setText("PO", dealerPO);
+    setText("JOB NAME", jobName);
+    setText("PO2", altPO);
+    setText("JOB NAME2", altJobName);
+    setText("SPECIAL_INST", stockDesc);
+    setText("Today", todayStr);
+
+    selectRadio("CU", custType);     // "0"=New, "1"=Existing
+    selectRadio("Brand", "Choice2"); // ECLIPSE (this is the Eclipse Estimator)
+    if (pctVal !== "") selectRadio("%", pctVal);
+
+    // Flatten optional — leaving interactive so admin can tweak before signing/printing.
+    // form.flatten();
+
+    const pdfBytes = await doc.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const safeName = (jobName || quoteName || "quote").replace(/[^a-z0-9\-_ ]/gi, "").trim().slice(0, 60) || "quote";
+    a.href = url;
+    a.download = `Rep-Discount-Cover-${safeName}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  };
+
+  const handleSubmit = async () => {
+    setError(null);
+    if (!quoteId) { setError("Save the quote first, then generate a discount cover sheet."); return; }
+    if (!pctVal)  { setError("Select a discount percentage."); return; }
+    if (!reason.trim()) { setError("Reason is required for the audit record."); return; }
+    if (!dealerName.trim()) { setError("Customer / Dealer name is required."); return; }
+    if (!dealerPO.trim()) { setError("Dealer P.O. # is required."); return; }
+    setSaving(true);
+    try {
+      // 1. Audit row in Supabase — RLS rejects non-admins, giving server-side enforcement.
+      const pctNum = PCT_VAL_TO_NUM[pctVal];
+      const payload = {
+        quote_id: quoteId,
+        discount_pct: pctNum,
+        reason: reason.trim(),
+        notes: [
+          notes.trim(),
+          stockDesc ? `Stock #: ${stockDesc}` : "",
+          altPO || altJobName ? `Alt PO/Job: ${altPO} / ${altJobName}` : "",
+          `Customer: ${dealerName}${dealerNum ? ` (#${dealerNum})` : ""}`,
+          `Type: ${custType === "0" ? "New" : "Existing"}`,
+        ].filter(Boolean).join(" | ") || null,
+        applied_by: user.id,
+      };
+      const { error: dbErr } = await supabaseClient.from("admin_quote_overrides").insert(payload);
+      if (dbErr) throw dbErr;
+
+      // 2. Generate + download filled PDF.
+      await generatePdf();
+
+      onApplied && onApplied(pctNum);
+    } catch (e) {
+      console.error("Apply extra discount failed:", e);
+      setError(e.message || "Failed to apply discount. (If this says 'row-level security', your account is not admin.)");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inputStyle = {width:"100%",padding:"8px 10px",fontSize:13,border:`1px solid ${C.bdr}`,borderRadius:6,fontFamily:F.b,background:"#fff",color:C.ink,boxSizing:"border-box"};
+  const labelStyle = {display:"block",fontSize:11,fontWeight:600,color:C.stone,textTransform:"uppercase",letterSpacing:".04em",marginBottom:5};
+  const sectionLabel = {fontSize:10,fontWeight:700,color:C.gold,textTransform:"uppercase",letterSpacing:".08em",marginBottom:10,paddingBottom:6,borderBottom:`1px solid ${C.bdr}`};
+  const row2 = {display:"grid",gridTemplateColumns:mob?"1fr":"1fr 1fr",gap:10,marginBottom:10};
+
+  return (
+    <>
+      <div className="sbg" onClick={onClose} style={{zIndex:1200}}/>
+      <div style={{position:"fixed",top:"50%",left:"50%",transform:"translate(-50%,-50%)",zIndex:1201,width:mob?"94vw":"640px",maxHeight:"90vh",background:"#fff",borderRadius:12,boxShadow:"0 20px 60px rgba(0,0,0,.35)",overflow:"hidden",display:"flex",flexDirection:"column"}}>
+        <div style={{padding:"14px 18px",background:C.ink,color:C.cream,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <Ic n="dollar" sz={15} c={C.gold}/>
+            <span style={{fontFamily:F.d,fontWeight:700,fontSize:15}}>Rep Discount Cover Sheet</span>
+            <span style={{fontSize:10,fontFamily:F.m,background:"rgba(175,164,151,.22)",color:C.gold,padding:"2px 6px",borderRadius:3,border:"1px solid rgba(175,164,151,.4)"}}>ADMIN ONLY</span>
+          </div>
+          <button onClick={onClose} style={{background:"transparent",border:"none",color:C.cream,fontSize:22,lineHeight:1,cursor:"pointer",padding:"0 4px"}}>&times;</button>
+        </div>
+
+        <div style={{padding:"16px 18px",overflowY:"auto",flex:1}}>
+          <div style={{fontSize:12,color:C.stone,marginBottom:14,lineHeight:1.5}}>
+            Fills the Eclipse Rep Discount Cover Sheet for quote <strong style={{color:C.ink}}>{quoteName || "(untitled)"}</strong>. Saves an audit record and downloads the PDF ready for signature.
+          </div>
+
+          {loadingExisting ? (
+            <div style={{color:C.stone,fontSize:12,padding:"8px 0"}}>Loading prior overrides…</div>
+          ) : existing && (
+            <div style={{marginBottom:14,padding:"8px 12px",background:"#F7F6F5",border:`1px solid ${C.bdr}`,borderRadius:6,fontSize:11,color:C.acc}}>
+              Prior override on this quote: <strong>{existing.discount_pct}%</strong> applied {new Date(existing.applied_at).toLocaleDateString()}. Submitting creates a new audit entry.
+            </div>
+          )}
+
+          {/* Display Information */}
+          <div style={sectionLabel}>Display Information</div>
+          <div style={row2}>
+            <div>
+              <label style={labelStyle}>Sales Representative <span style={{color:C.red}}>*</span></label>
+              <input type="text" value={salesRep} onChange={e=>setSalesRep(e.target.value)} style={inputStyle} disabled={saving} maxLength={60}/>
+            </div>
+            <div>
+              <label style={labelStyle}>Rep Agency #</label>
+              <input type="text" value="26" disabled style={{...inputStyle,background:"#f5f5f4",color:C.stone}} title="Pinnacle Sales — hardcoded"/>
+            </div>
+          </div>
+          <div style={row2}>
+            <div>
+              <label style={labelStyle}>Customer / Dealer Name <span style={{color:C.red}}>*</span></label>
+              <input type="text" value={dealerName} onChange={e=>setDealerName(e.target.value)} style={inputStyle} disabled={saving} maxLength={80}/>
+            </div>
+            <div>
+              <label style={labelStyle}>Cust # / Dealer #</label>
+              <input type="text" value={dealerNum} onChange={e=>setDealerNum(e.target.value)} style={inputStyle} disabled={saving} maxLength={20}/>
+            </div>
+          </div>
+          <div style={row2}>
+            <div>
+              <label style={labelStyle}>Dealer P.O. # <span style={{color:C.red}}>*</span></label>
+              <input type="text" value={dealerPO} onChange={e=>setDealerPO(e.target.value)} style={inputStyle} disabled={saving} maxLength={40}/>
+            </div>
+            <div>
+              <label style={labelStyle}>Job Name</label>
+              <input type="text" value={jobName} onChange={e=>setJobName(e.target.value)} style={inputStyle} disabled={saving} maxLength={60}/>
+            </div>
+          </div>
+          <div style={{marginBottom:12}}>
+            <label style={labelStyle}>Customer Type</label>
+            <div style={{display:"flex",gap:14}}>
+              {[{v:"0",l:"NEW Customer"},{v:"1",l:"Existing Customer"}].map(opt => (
+                <label key={opt.v} style={{display:"flex",alignItems:"center",gap:6,fontSize:13,cursor:"pointer"}}>
+                  <input type="radio" name="custType" value={opt.v} checked={custType===opt.v} onChange={()=>setCustType(opt.v)} disabled={saving}/>
+                  {opt.l}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Alternate Info */}
+          <div style={{...sectionLabel,marginTop:4}}>Alternate Info for Rep Confirmation</div>
+          <div style={row2}>
+            <div>
+              <label style={labelStyle}>Alt P.O. #</label>
+              <input type="text" value={altPO} onChange={e=>setAltPO(e.target.value)} placeholder="Optional" style={inputStyle} disabled={saving} maxLength={40}/>
+            </div>
+            <div>
+              <label style={labelStyle}>Alt Job Name</label>
+              <input type="text" value={altJobName} onChange={e=>setAltJobName(e.target.value)} placeholder="Optional" style={inputStyle} disabled={saving} maxLength={60}/>
+            </div>
+          </div>
+          <div style={{marginBottom:12}}>
+            <label style={labelStyle}>Stock # / Cab #1 / Description</label>
+            <input type="text" value={stockDesc} onChange={e=>setStockDesc(e.target.value)} placeholder="Shows on monthly rep statement" style={inputStyle} disabled={saving} maxLength={100}/>
+          </div>
+
+          {/* Discount Amount */}
+          <div style={{...sectionLabel,marginTop:4}}>Discount Amount <span style={{color:C.red}}>*</span></div>
+          <div style={{display:"grid",gridTemplateColumns:mob?"repeat(2,1fr)":"repeat(5,1fr)",gap:6,marginBottom:12}}>
+            {PCT_OPTIONS.map(opt => (
+              <label key={opt.val} style={{display:"flex",alignItems:"center",gap:6,padding:"8px 10px",border:`1px solid ${pctVal===opt.val?C.gold:C.bdr}`,borderRadius:6,background:pctVal===opt.val?"rgba(175,164,151,.12)":"#fff",cursor:"pointer",fontSize:12,fontWeight:pctVal===opt.val?700:500}}>
+                <input type="radio" name="pct" value={opt.val} checked={pctVal===opt.val} onChange={()=>setPctVal(opt.val)} disabled={saving}/>
+                <span>{opt.label}</span>
+                {opt.requiresApproval && <span style={{fontSize:9,color:C.red,fontWeight:600,marginLeft:"auto"}}>pre-appr.</span>}
+              </label>
+            ))}
+          </div>
+
+          {/* Audit metadata (not on the PDF but saved to Supabase) */}
+          <div style={{...sectionLabel,marginTop:4}}>Audit Record (Internal)</div>
+          <div style={{marginBottom:10}}>
+            <label style={labelStyle}>Reason <span style={{color:C.red}}>*</span></label>
+            <input type="text" value={reason} onChange={e=>setReason(e.target.value)} placeholder="e.g., VIP builder loyalty / promotion" style={inputStyle} disabled={saving} maxLength={200}/>
+          </div>
+          <div style={{marginBottom:12}}>
+            <label style={labelStyle}>Internal Notes (optional)</label>
+            <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Expiry, authorizer, anything for the record" rows={2} style={{...inputStyle,resize:"vertical",fontFamily:F.b}} disabled={saving} maxLength={1000}/>
+          </div>
+
+          {error && (
+            <div style={{padding:"8px 12px",background:"#fef2f2",border:"1px solid #fecaca",borderRadius:6,color:C.red,fontSize:12,marginBottom:4}}>
+              {error}
+            </div>
+          )}
+        </div>
+
+        <div style={{padding:"12px 18px",borderTop:`1px solid ${C.bdr}`,display:"flex",justifyContent:"flex-end",gap:8}}>
+          <button onClick={onClose} className="bt bg" style={{fontSize:12}} disabled={saving}>Cancel</button>
+          <button onClick={handleSubmit} className="bt bp" style={{fontSize:12,fontWeight:700}} disabled={saving || loadingExisting}>
+            {saving ? "Generating…" : "Save & Download PDF"}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId}){
   const initRef=useRef(null); // tracks user.id to prevent resetting on token refresh
   const[nm,sNm]=useState("Untitled Project"),[pid,sPid]=useState(uid()),[po,sPo]=useState(""),[dlrCode,sDlrCode]=useState(()=>ldPrefs().dealerCode||"");
@@ -12133,6 +12465,7 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
   const[itemSearch,setItemSearch]=useState(""),[roomFilter,setRoomFilter]=useState("all");
   const[modOpen,sModOpen]=useState(()=>new Set());
   const[showQuotesList,setShowQuotesList]=useState(false);
+  const[showExtraDiscount,setShowExtraDiscount]=useState(false);
   // Admin panel is now a full-page view via onAdmin()
   const[currentQuoteId,setCurrentQuoteId]=useState(null);
   const[versions,setVersions]=useState([]);
@@ -12560,7 +12893,8 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
         <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>ssCf(true)}><Ic n="gear" sz={13} c={C.cream}/></button>
         {versions.length>0&&<button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>setShowHistory(true)}><Ic n="clip" sz={12} c={C.cream}/></button>}
         {onBack&&<button style={{background:"rgba(255,255,255,.12)",color:C.gold,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={onBack}><Ic n="door" sz={12} c={C.gold}/></button>}
-        {profile?.role==="admin"&&<button style={{background:"rgba(255,255,255,.12)",color:C.gold,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>onAdmin&&onAdmin()}><Ic n="gear" sz={12} c={C.gold}/></button>}
+        {isAdmin(profile,user)&&<button style={{background:"rgba(255,255,255,.12)",color:C.gold,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>onAdmin&&onAdmin()} title="Admin Dashboard"><Ic n="gear" sz={12} c={C.gold}/></button>}
+        {isAdmin(profile,user)&&<button style={{background:"rgba(175,164,151,.18)",color:C.gold,border:"1px solid rgba(175,164,151,.45)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={()=>setShowExtraDiscount(true)} title="Admin-only: apply an extra discount to this quote"><Ic n="dollar" sz={12} c={C.gold}/></button>}
         <button style={{background:"rgba(255,255,255,.12)",color:C.cream,border:"1px solid rgba(255,255,255,.2)",borderRadius:6,padding:"6px 10px",fontSize:11,fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",minHeight:36,minWidth:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:3,flexShrink:0}} onClick={onLogout}>Out</button>
       </div>:<div style={{display:"flex",gap:4}}>
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={newP}>+ New</button>
@@ -12568,7 +12902,8 @@ function App({user, profile, supabase, onLogout, onBack, onAdmin, initialQuoteId
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowQuotesList(true)}><Ic n="clip" sz={11} c={C.cream}/> Quotes</button>
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={shareOrder}><Ic n="clip" sz={11} c={C.cream}/> Share</button>
         {versions.length>0&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={()=>setShowHistory(true)}><Ic n="clip" sz={11} c={C.cream}/> History</button>}
-        {profile?.role==="admin"&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold}} onClick={()=>onAdmin&&onAdmin()}><Ic n="gear" sz={12} c={C.gold}/> Admin</button>}
+        {isAdmin(profile,user)&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold}} onClick={()=>onAdmin&&onAdmin()}><Ic n="gear" sz={12} c={C.gold}/> Admin</button>}
+        {isAdmin(profile,user)&&<button className="bt bg" style={{borderColor:"rgba(175,164,151,.45)",color:C.gold,background:"rgba(175,164,151,.18)"}} onClick={()=>setShowExtraDiscount(true)} title="Admin-only: apply an extra discount to this quote"><Ic n="dollar" sz={12} c={C.gold}/> Extra Disc.</button>}
         {onBack&&<button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.gold,fontWeight:600}} onClick={onBack}><Ic n="door" sz={11} c={C.gold}/> Hub</button>}
         <button className="bt bg" style={{borderColor:"rgba(255,255,255,.2)",color:C.cream}} onClick={onLogout}>Sign Out</button>
       </div>}
@@ -13691,6 +14026,21 @@ return(<div style={{marginBottom:5}}>
         <button onClick={()=>{setShowOrderReview(false);genOrder()}} className="bt bp" style={{fontSize:12,flex:2,fontWeight:700}}><Ic n="clip" sz={13} c="#fff"/> Generate Order Form PDF</button>
       </div>
     </div></>}
+
+    {showExtraDiscount && isAdmin(profile,user) && (
+      <ExtraDiscountForm
+        quoteId={currentQuoteId}
+        quoteName={nm}
+        user={user}
+        profile={profile}
+        mob={mob}
+        initialPO={po}
+        initialJobName={nm}
+        initialDealerCode={dlrCode}
+        onClose={()=>setShowExtraDiscount(false)}
+        onApplied={(pct)=>{setShowExtraDiscount(false);fl(`Extra discount of ${pct}% applied`);}}
+      />
+    )}
 
   </div>);
 }
