@@ -200,7 +200,10 @@ update public.profiles
 -- ============================================================
 create table if not exists public.admin_quote_overrides (
   id uuid default gen_random_uuid() primary key,
-  quote_id uuid references public.quotes(id) on delete cascade not null,
+  -- quote_id is NULL for sample-order discounts (context='samples'); otherwise
+  -- references the parent quote. Samples flow has no quotes row to attach to.
+  quote_id uuid references public.quotes(id) on delete cascade,
+  context text not null default 'quote' check (context in ('quote','samples')),
   discount_pct numeric(5,2) not null check (discount_pct >= 0 and discount_pct <= 100),
   reason text not null,
   notes text,
@@ -209,18 +212,29 @@ create table if not exists public.admin_quote_overrides (
   updated_at timestamptz default now() not null
 );
 
+-- Back-fill safety for pre-existing deployments.
+alter table public.admin_quote_overrides alter column quote_id drop not null;
+alter table public.admin_quote_overrides add column if not exists context text
+  not null default 'quote' check (context in ('quote','samples'));
+
 create index if not exists idx_admin_quote_overrides_quote on public.admin_quote_overrides(quote_id);
+create index if not exists idx_admin_quote_overrides_context on public.admin_quote_overrides(context);
 
 alter table public.admin_quote_overrides enable row level security;
 
--- Read: admins can see every override; quote owner can see overrides on their own quote.
+-- Read: admins see everything; quote owner can see overrides on their own quote.
+-- Sample overrides (quote_id IS NULL) are admin-only.
+drop policy if exists "Admins or quote owner can view overrides" on public.admin_quote_overrides;
 create policy "Admins or quote owner can view overrides"
   on public.admin_quote_overrides
   for select using (
     public.is_admin()
-    or exists (
-      select 1 from public.quotes q
-      where q.id = admin_quote_overrides.quote_id and q.user_id = auth.uid()
+    or (
+      quote_id is not null
+      and exists (
+        select 1 from public.quotes q
+        where q.id = admin_quote_overrides.quote_id and q.user_id = auth.uid()
+      )
     )
   );
 

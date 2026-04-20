@@ -10803,6 +10803,7 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
   const [ntf, setNtf] = useState(null);
   const fl = useCallback(m => { setNtf(m); setTimeout(() => setNtf(null), 2200); }, []);
   const [activeType, setActiveType] = useState(null);
+  const [showExtraDiscount, setShowExtraDiscount] = useState(false);
 
   useEffect(() => {
     const c = () => setMob(window.innerWidth <= 768);
@@ -11298,8 +11299,35 @@ function SampleOrdering({user, profile, supabase, onLogout, onBack}) {
           <span style={{fontFamily:F.d,fontSize:mob?15:18,fontWeight:700,color:C.cream}}>Order Samples</span>
           <span style={{fontSize:9,padding:"2px 7px",borderRadius:4,background:"#b4530922",color:"#f59e0b",fontWeight:600,border:"1px solid #b4530944"}}>SAMPLES</span>
         </div>
-        <span style={{fontSize:11,color:C.stL,fontFamily:F.b}}>{profile?.business_name || ""}</span>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          {isAdmin(profile,user) && (
+            <button
+              onClick={()=>setShowExtraDiscount(true)}
+              title="Extra discount cover sheet for this sample order (admin only)"
+              style={{background:"rgba(175,164,151,.15)",border:`1px solid ${C.gold}55`,color:C.gold,padding:"4px 10px",borderRadius:6,fontSize:11,fontFamily:F.b,fontWeight:700,cursor:"pointer",letterSpacing:".02em"}}
+            >
+              Extra Disc.
+            </button>
+          )}
+          <span style={{fontSize:11,color:C.stL,fontFamily:F.b}}>{profile?.business_name || ""}</span>
+        </div>
       </div>
+
+      {showExtraDiscount && isAdmin(profile,user) && (
+        <ExtraDiscountForm
+          context="samples"
+          quoteId={null}
+          quoteName={sampleJobName || "Sample Order"}
+          user={user}
+          profile={profile}
+          mob={mob}
+          initialPO={samplePO}
+          initialJobName={sampleJobName}
+          initialDealerCode={dealerCode}
+          onClose={()=>setShowExtraDiscount(false)}
+          onApplied={(pct)=>{setShowExtraDiscount(false);fl(`Extra discount of ${pct}% recorded`);}}
+        />
+      )}
 
       {ntf && <div style={{position:"fixed",top:60,left:"50%",transform:"translateX(-50%)",zIndex:9999,background:C.ink,color:C.gold,padding:"8px 18px",borderRadius:8,fontSize:12,fontFamily:F.b,boxShadow:"0 4px 20px rgba(0,0,0,.3)"}}>{ntf}</div>}
 
@@ -12165,8 +12193,10 @@ const PCT_VAL_TO_NUM = { "0":5, "1":10, "2":15, "3":20, "4":25, "5":30, "6":40, 
 function ExtraDiscountForm({
   quoteId, quoteName, user, profile, mob,
   initialPO, initialJobName, initialDealerCode,
+  context = "quote",         // "quote" (default) or "samples" — affects DB write + UI copy
   onClose, onApplied,
 }) {
+  const isSamples = context === "samples";
   // Form state — the names mirror PDF fields where practical.
   const [pctVal, setPctVal]       = useState("");         // radio value "0".."9"
   const [salesRep, setSalesRep]   = useState(profile?.full_name || "");
@@ -12186,10 +12216,12 @@ function ExtraDiscountForm({
   const [loadingExisting, setLoadingExisting] = useState(true);
 
   // Load any existing override for this quote so admins can see prior values.
+  // Skipped in samples context — sample discounts don't have a persistent quote
+  // to attach overrides to.
   useEffect(() => {
     let alive = true;
     (async () => {
-      if (!quoteId) { setLoadingExisting(false); return; }
+      if (!quoteId || isSamples) { setLoadingExisting(false); return; }
       try {
         const { data, error } = await supabaseClient
           .from("admin_quote_overrides")
@@ -12277,7 +12309,7 @@ function ExtraDiscountForm({
 
   const handleSubmit = async () => {
     setError(null);
-    if (!quoteId) { setError("Save the quote first, then generate a discount cover sheet."); return; }
+    if (!isSamples && !quoteId) { setError("Save the quote first, then generate a discount cover sheet."); return; }
     if (!pctVal)  { setError("Select a discount percentage."); return; }
     if (!reason.trim()) { setError("Reason is required for the audit record."); return; }
     if (!dealerName.trim()) { setError("Customer / Dealer name is required."); return; }
@@ -12285,9 +12317,11 @@ function ExtraDiscountForm({
     setSaving(true);
     try {
       // 1. Audit row in Supabase — RLS rejects non-admins, giving server-side enforcement.
+      //    Sample overrides carry quote_id=null and context='samples'.
       const pctNum = PCT_VAL_TO_NUM[pctVal];
       const payload = {
-        quote_id: quoteId,
+        quote_id: isSamples ? null : quoteId,
+        context: isSamples ? "samples" : "quote",
         discount_pct: pctNum,
         reason: reason.trim(),
         notes: [
@@ -12296,6 +12330,7 @@ function ExtraDiscountForm({
           altPO || altJobName ? `Alt PO/Job: ${altPO} / ${altJobName}` : "",
           `Customer: ${dealerName}${dealerNum ? ` (#${dealerNum})` : ""}`,
           `Type: ${custType === "0" ? "New" : "Existing"}`,
+          isSamples ? `Context: Sample Order (PO: ${dealerPO}, Job: ${jobName})` : "",
         ].filter(Boolean).join(" | ") || null,
         applied_by: user.id,
       };
@@ -12326,7 +12361,7 @@ function ExtraDiscountForm({
         <div style={{padding:"14px 18px",background:C.ink,color:C.cream,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
             <Ic n="dollar" sz={15} c={C.gold}/>
-            <span style={{fontFamily:F.d,fontWeight:700,fontSize:15}}>Rep Discount Cover Sheet</span>
+            <span style={{fontFamily:F.d,fontWeight:700,fontSize:15}}>Rep Discount Cover Sheet{isSamples ? " — Samples" : ""}</span>
             <span style={{fontSize:10,fontFamily:F.m,background:"rgba(175,164,151,.22)",color:C.gold,padding:"2px 6px",borderRadius:3,border:"1px solid rgba(175,164,151,.4)"}}>ADMIN ONLY</span>
           </div>
           <button onClick={onClose} style={{background:"transparent",border:"none",color:C.cream,fontSize:22,lineHeight:1,cursor:"pointer",padding:"0 4px"}}>&times;</button>
@@ -12334,7 +12369,11 @@ function ExtraDiscountForm({
 
         <div style={{padding:"16px 18px",overflowY:"auto",flex:1}}>
           <div style={{fontSize:12,color:C.stone,marginBottom:14,lineHeight:1.5}}>
-            Fills the Eclipse Rep Discount Cover Sheet for quote <strong style={{color:C.ink}}>{quoteName || "(untitled)"}</strong>. Saves an audit record and downloads the PDF ready for signature.
+            {isSamples ? (
+              <>Fills the Eclipse Rep Discount Cover Sheet for the current <strong style={{color:C.ink}}>sample order</strong>. Saves an audit record and downloads the PDF ready for signature.</>
+            ) : (
+              <>Fills the Eclipse Rep Discount Cover Sheet for quote <strong style={{color:C.ink}}>{quoteName || "(untitled)"}</strong>. Saves an audit record and downloads the PDF ready for signature.</>
+            )}
           </div>
 
           {loadingExisting ? (
