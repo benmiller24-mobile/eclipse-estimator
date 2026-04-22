@@ -9658,12 +9658,41 @@ function AdminPanel({supabaseClient: sb, onClose}) {
 }
 
 // ── AuthWrapper Component ──
-/* ── SetPasswordForm — shown after user clicks password-reset link ── */
+
+// Reject a promise after `ms` if it hasn't settled — wrap any Supabase call
+// that must never leave the UI hung (e.g. updateUser on a dead session).
+const withTimeout = (promise, ms) =>
+  Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms))]);
+
+/* ── SetPasswordForm — shown after user clicks password-reset link ──
+   Two failure modes we specifically defend against:
+   (1) Recovery session is stale/expired/already-used. updateUser() will
+       hang or fail silently; we detect this on mount with getSession() and
+       show an "expired" state with a one-click path back to Forgot password.
+   (2) updateUser() hangs past a reasonable window. withTimeout() trips at
+       15s and surfaces the same actionable message instead of "Saving...".  */
 function SetPasswordForm({onDone}) {
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // "checking" while we verify a session exists, "ready" when form is usable,
+  // "expired" when there's no valid recovery session to update against.
+  const [sessionState, setSessionState] = useState("checking");
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const { data: { session } } = await withTimeout(supabaseClient.auth.getSession(), 5000);
+        if (!alive) return;
+        setSessionState(session ? "ready" : "expired");
+      } catch {
+        if (alive) setSessionState("expired");
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -9672,12 +9701,47 @@ function SetPasswordForm({onDone}) {
     if (pw !== pw2) { setError("Passwords do not match"); return; }
     setLoading(true);
     try {
-      const { error: upErr } = await supabaseClient.auth.updateUser({ password: pw });
+      const { error: upErr } = await withTimeout(
+        supabaseClient.auth.updateUser({ password: pw }),
+        15000
+      );
       if (upErr) throw upErr;
       onDone();
-    } catch (err) { setError(err.message); }
-    finally { setLoading(false); }
+    } catch (err) {
+      const msg = (err && err.message) || "";
+      // Timeout, missing session, or expired JWT — all mean the recovery link
+      // is no longer usable. Flip to the expired state so the user sees the
+      // get-a-new-link CTA instead of a raw error they can't act on.
+      if (msg === "timeout" || /session|jwt|token|auth/i.test(msg)) {
+        setSessionState("expired");
+      } else {
+        setError(msg || "Something went wrong. Please try again.");
+      }
+    } finally { setLoading(false); }
   };
+
+  // Expired / missing session — bail out cleanly instead of letting the user
+  // fill in a form that will hang on submit.
+  if (sessionState === "expired") {
+    return (
+      <div style={{ position:"fixed", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:`linear-gradient(135deg, ${C.ink} 0%, ${C.acc} 100%)`, padding:20 }}>
+        <div style={{ background:C.paper, borderRadius:12, padding:32, width:"100%", maxWidth:380, boxShadow:"0 20px 60px rgba(0,0,0,0.3)" }}>
+          <h1 style={{ fontFamily:F.d, fontSize:24, fontWeight:700, color:C.ink, marginBottom:8 }}>Reset link expired</h1>
+          <p style={{ fontSize:13, color:C.stone, marginBottom:24 }}>
+            Password reset links expire after a short time and can only be used once. Head back to the sign-in page and click <strong>Forgot password?</strong> to get a fresh one.
+          </p>
+          <button
+            type="button"
+            className="bt bp"
+            onClick={onDone}
+            style={{ width:"100%", minHeight:48, fontSize:15, fontWeight:700 }}
+          >
+            Back to sign in
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ position:"fixed", inset:0, display:"flex", alignItems:"center", justifyContent:"center", background:`linear-gradient(135deg, ${C.ink} 0%, ${C.acc} 100%)`, padding:20 }}>
@@ -9687,15 +9751,15 @@ function SetPasswordForm({onDone}) {
         <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:12 }}>
           <div>
             <label className="lb">New Password</label>
-            <input type="password" className="inp" value={pw} onChange={e=>setPw(e.target.value)} required style={{fontSize:16}} />
+            <input type="password" className="inp" value={pw} onChange={e=>setPw(e.target.value)} required style={{fontSize:16}} disabled={sessionState !== "ready"} />
           </div>
           <div>
             <label className="lb">Confirm Password</label>
-            <input type="password" className="inp" value={pw2} onChange={e=>setPw2(e.target.value)} required style={{fontSize:16}} />
+            <input type="password" className="inp" value={pw2} onChange={e=>setPw2(e.target.value)} required style={{fontSize:16}} disabled={sessionState !== "ready"} />
           </div>
           {error && <div style={{ fontSize:12, color:C.red, background:"#fee", padding:"8px 10px", borderRadius:6 }}>{error}</div>}
-          <button type="submit" className="bt bp" disabled={loading} style={{ width:"100%", marginTop:8, minHeight:48, fontSize:15, fontWeight:700 }}>
-            {loading ? "Saving..." : "Set Password & Continue"}
+          <button type="submit" className="bt bp" disabled={loading || sessionState !== "ready"} style={{ width:"100%", marginTop:8, minHeight:48, fontSize:15, fontWeight:700 }}>
+            {sessionState === "checking" ? "Checking link..." : loading ? "Saving..." : "Set Password & Continue"}
           </button>
         </form>
       </div>
@@ -9728,9 +9792,6 @@ function AuthWrapper() {
   useEffect(() => {
     let mounted = true;
     let authResolved = false;
-
-    const withTimeout = (promise, ms) =>
-      Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), ms))]);
 
     const checkAuth = async () => {
       try {
