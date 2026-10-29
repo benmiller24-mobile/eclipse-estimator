@@ -54,7 +54,7 @@ create policy "Admins can view all profiles" on public.profiles
 
 create policy "Users can update own profile" on public.profiles
   for update using (auth.uid() = id)
-  with check (auth.uid() = id and role = old.role);  -- prevent self-role-change
+  with check (auth.uid() = id);  -- privileged columns guarded by trigger in supabase/2026-10-29-profile-privilege-guard.sql
 
 create policy "Admins can update all profiles" on public.profiles
   for update using (
@@ -256,3 +256,6 @@ create trigger admin_quote_overrides_updated_at before update on public.admin_qu
   for each row execute procedure public.update_updated_at();
 
 grant all on public.admin_quote_overrides to authenticated;
+
+-- 12. Privilege guard: run supabase/2026-10-29-profile-privilege-guard.sql after this script.
+--     (RLS policies cannot reference OLD, so the role/discount/dealer guard is a trigger.)
